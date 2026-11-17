@@ -2,14 +2,19 @@
 
 *Added 2026-11-16.* Run once for every OOM-exp case whose status becomes `verified-OOM` or
 `verified-gap` (either conditions label), per system. It answers: **did phase 1
-(`capacity-enforcement-exp`) hold a clue to this result, and if not, why not?** It reads both
-experiments and edits neither; its outputs are one row in the system's link table and a list of
-phase-1 case files to recheck. How the experiments relate is in [`README.md`](README.md).
+(`capacity-enforcement-exp`) hold a clue to this result, and if not, why not?** Its outputs are one row in the system's link table, a list of
+phase-1 case files to recheck, and (from 2026-11-17) any new OOM-lead pattern added to the guided
+playbook. It does not edit OOM-exp, or phase-1 case files except by the rechecks it lists.
+
+**Why it exists.** The stage-3 playbooks are meant to catch OOM clues while they read each case (a
+counter that charges less than real usage, a limit whose only stop is the JVM's own error). Each
+verified OOM-exp case is a chance to learn a clue they missed and to teach it to the guided agent,
+so that phase 1 finds more OOM candidates for OOM-exp. How the experiments relate is in [`README.md`](README.md).
 
 ## Inputs
 
 - The OOM-exp case file (`OOM-exp/<system>/cases/{convergence,bypass}/...`), its row in that system's
-  `_INDEX.md`, and its **lead source** label (if-check inventory, `JIRA-KEY`, `flow:<name>`).
+  `_INDEX.md`, and its **lead source** label (capacity-enforcement inventory, formerly *if-check inventory*; `phase1:<case stem>`; `JIRA-KEY`, `flow:<name>`).
 - Phase 1's per-system data: `capacity-enforcement-exp/<system>/stage3-ai-deep-read/cases/`, its
   `_INDEX.md`, `predicted-negative.md`, `predicted-positive.md`, `undetermined.md`, and the stage-4
   results; `entry-restriction-exp/<system>/` (the phase-1 supplement).
@@ -44,11 +49,21 @@ phase-1 case files to recheck. How the experiments relate is in [`README.md`](RE
 
    Also record whether the OOM case's lead source **was** that phase-1 file (from its lead-source label
    and history).
-5. **Question.** Name the [guided playbook §3.2](capacity-enforcement-exp/stage3-ai-deep-read/playbook-guided.md#32-enforcement-properties-added-2026-11-16)
-   question (E1–E4) that would have surfaced the clue, or `none fits`. For `none fits`, propose a new
-   question in one line; the owner decides whether it joins §3.2 (dated, with this case named).
+5. **Pattern.** Name the [guided playbook §3.2](capacity-enforcement-exp/stage3-ai-deep-read/playbook-guided.md#32-enforcement-properties-oom-lead-patterns-added-2026-11-16-named-2026-11-17)
+   pattern (E1, E2, …) that would have surfaced the clue, or `none fits`.
+   - **`none fits` → update the guided agent** (rule 2026-11-17, owner): add the next row (E5, E6, …)
+     to §3.2 yourself: a short pattern name, the question, and *Shown by* this case, dated. Add the
+     same pattern and question, without *Shown by* or any OOM-exp name, to
+     [`recheck-blind.md`](capacity-enforcement-exp/stage3-ai-deep-read/recheck-blind.md), and a row
+     to the guided template's §8a. Keep a new pattern general enough to apply to other constraints;
+     if it only restates this one case, record `none fits — too specific` instead.
+   - An existing pattern that fits: add this case to its *Shown by* cell when it is a clearer example.
+   - Record what you changed in the link row's Question cell (`E5 added`).
+   - Never give the patterns to the autonomous playbook.
 6. **Write the row** in `phase-links/<system>.md` and list the phase-1 files to recheck in
-   `back-link` mode (guided playbook §5). Do not edit phase-1 files in this playbook.
+   `back-link` mode (guided playbook §5); run those rechecks, and add their OOM leads to
+   `<system>/stage3-ai-deep-read/oom-lead-list.md`. After step 5 added a pattern, the owner may ask
+   for a recheck sweep (guided §5) over the other filed cases.
 
 ## Rules
 

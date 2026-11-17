@@ -199,7 +199,7 @@ cap the replica's heap for a single row — the rejected read still allocated ~1
 the row is built (`ReadCommand.java:691-694, 709-722`; coordinator warning "1 nodes loaded over 1489193880 bytes").
 
 **Feedback filed:** one dated line in the case file's section D pointing here (uncommitted). The design section `## Stage-4 design for the recheck claim
-(2026-11-17)` was appended to the case file before the run. Not edited: `recheck-flags.md`, `_INDEX.md`, any HANDOFF (per the session's instructions).
+(2026-11-17)` was appended to the case file before the run. Not edited: `oom-lead-list.md`, `_INDEX.md`, any HANDOFF (per the session's instructions).
 For stage 3: the claim's per-item figure should name the quantity — Cassandra's `unsharedHeapSize` estimate (155–174 B/item here), the held heap
 (~150 B/item) or the allocation (~345 B/item); and a 10⁷-item read at an 8 GiB heap already drives G1 to evacuation failure and a full GC on its own
 (sequential reads; E3's 32 concurrent reads were not tested).

@@ -129,7 +129,7 @@ what one allowed object costs.
 
 ## 8a. Enforcement properties (cases filed from 2026-11-16)
 
-The four questions of `playbook-guided.md` §3.2. Cite `file:line`, or write `unknown: <what would
+The OOM-lead patterns and questions of `playbook-guided.md` §3.2 (E1–E4; add a row for each later one). Cite `file:line`, or write `unknown: <what would
 settle it>`. A case filed earlier gets these through a recheck (`playbook-guided.md` §5), appended at
 the end of the file instead.
 
@@ -139,7 +139,7 @@ the end of the file instead.
 | **E2 At the limit** | what the disallow path does: graceful (reject / block / evict / back-pressure) or not (allocates elsewhere, or nothing stops it before the JVM's own limit) |
 | **E3 Owner and multiplier** | per what the limit applies; how many owners at defaults and under a reachable load; any limit on their total |
 | **E4 Budget domain** | heap / direct / other native / page cache / container; other constraints drawing on the same domain; whether their defaults add up to more than its default budget |
-| **OOM-lead flag** | one line if any answer says real memory can exceed what this constraint governs (also add it to `recheck-flags.md`), or `none` |
+| **OOM lead** | one line if the case shows a §3.2 pattern or any answer says real memory can exceed what this constraint governs (also add it to `oom-lead-list.md`, Status `lead`), or `none`. Called *OOM-lead flag* in files filed before 2026-11-17 |
 
 ## 9. Test design (guidance for stage 4)
 

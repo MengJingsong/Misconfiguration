@@ -118,3 +118,13 @@ Every file and URL read, one per line.
 `none yet` until stage 4 reports. Then: a link to its results file, and, if the
 design audit amended anything above, which section was amended and when (dated
 amendments). Measured numbers stay in the results file.
+
+## E. OOM leads (cases filed from 2026-11-17)
+
+Clues that memory use could grow until a daemon, container or host runs out (playbook, "OOM
+leads"). One row per lead, or the single line `none found`. A recheck appends this table under
+`## Recheck — OOM leads (autonomous, YYYY-MM-DD)` at the end of the file instead.
+
+| # | What holds the memory | Why the limit does not stop it | Where (`file:line`) | Rough magnitude at defaults |
+|---|---|---|---|---|
+| 1 | | | | |

@@ -29,6 +29,11 @@ Maven build, daemons, naming of keys with hyphens/placeholders) rewritten for Ha
      target as `file:line` only (a helper unit: the helper method and its comparison line, found with
      `grep -n`). Output `cases/<stem>--autonomous.md`; stem `<constraint>-<method>-<operand>`,
      `-2` if taken. Add the `_INDEX.md` row and sha256, fill `case_file` and `estimate`.
+     **OOM leads (from 2026-11-17):** the playbook now asks the agent for OOM clues in the case
+     file's section E. Copy each row (not `none found`) into the shared
+     [`stage3-ai-deep-read/oom-lead-list.md`](stage3-ai-deep-read/oom-lead-list.md) (Mode `new`,
+     Status `lead`; append only). Cases filed before 2026-11-17 have no section E; they get one only
+     through the playbook's "Recheck mode", run when the owner asks.
      **Extension units (orders 750–1746, added 2026-11-11):** uids `E:<path>:<line>#n` (an
      enforcement place outside an `if`), `C:<path>:<line>#n` (a capacity-set place) and
      `E:verdict:<Type.method()>` (a method whose result decides). The target is the uid's

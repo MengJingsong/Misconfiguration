@@ -55,18 +55,24 @@ C2). Phase 1 is therefore never closed.
    [`phase-links/<system>.md`](phase-links/) by the [back-link playbook](backlink-playbook.md): was
    the clue in phase 1 as filed (`flagged`, `recorded-untested`, `missed`, `no-case`,
    `out-of-scope`), and which question would have surfaced it.
-2. **Guided playbook.** A question that would have surfaced a missed clue joins the guided
-   playbook's [enforcement-property questions](capacity-enforcement-exp/stage3-ai-deep-read/playbook-guided.md#32-enforcement-properties-added-2026-11-16)
-   (E1–E4 so far), dated and with the case named. The **autonomous playbook is never changed** this
-   way: it is the control that gets the target only.
-3. **Rechecks.** Phase-1 case files filed before a question existed are rechecked
+2. **Guided playbook.** When no existing pattern would have surfaced the clue, the back-link agent
+   adds one to the guided playbook's [OOM-lead patterns](capacity-enforcement-exp/stage3-ai-deep-read/playbook-guided.md#32-enforcement-properties-oom-lead-patterns-added-2026-11-16-named-2026-11-17)
+   (E1–E4 so far), dated and with the case named. The **autonomous playbook never gets these
+   patterns**: from 2026-11-17 it carries only a general request to note OOM leads, in its own words
+   (owner's decision; before that date it got the target only).
+3. **Rechecks.** Phase-1 case files filed before a pattern existed are rechecked
    ([guided playbook §5](capacity-enforcement-exp/stage3-ai-deep-read/playbook-guided.md#5-rechecking-a-filed-case-added-2026-11-16)):
    in `back-link` mode for the files a link row names, in `blind` mode (without reading OOM-exp) for
-   a batch the owner approves.
-4. **Flags back to phase 2.** Each recheck answer that says real memory can exceed what a constraint
-   governs is a flag in `capacity-enforcement-exp/<system>/stage3-ai-deep-read/recheck-flags.md`,
-   which OOM-exp reads as leads. **Only blind flags that OOM-exp later verifies show that phase 1
-   predicts phase 2**; back-link rows only explain results after the fact.
+   a batch or a **sweep** of all filed cases the owner asks for. The autonomous playbook has its own
+   "Recheck mode" (general OOM leads only).
+4. **Leads back to phase 2.** Every OOM lead phase 1 writes (a new case's guided §8a or autonomous
+   section E, or a recheck) is a row in
+   `capacity-enforcement-exp/<system>/stage3-ai-deep-read/oom-lead-list.md`, OOM-exp's candidate list
+   from phase 1. OOM-exp's queuing agent screens each lead and queues it
+   ([`OOM-exp/queuing-playbook.md`](OOM-exp/queuing-playbook.md)), writing the status back
+   (`lead` → `stage-4 measured` → `queued as <ID>` → `verified` / `negative`). **Only `blind` and `new`
+   leads that OOM-exp later verifies show that phase 1 predicts phase 2**; back-link rows only explain
+   results after the fact.
 
 Not every verified case needs a phase-1 clue. Memory that no constraint or capacity touches is
 outside phase 1's definition; its link row says `out-of-scope` rather than stretching phase 1.

@@ -191,4 +191,4 @@ the pool has `min(2 × cores, 4,096 / 16 / 6 = 42)` arenas, each keeping a 16 Mi
 on these or other direct allocations) is not tested here.
 
 **Feedback filed:** one dated line in the case file's section D pointing here; the design section and its amendment S1 in the case
-file (written in this session). Not edited: `recheck-flags.md`, `_INDEX.md`, HANDOFF (by instruction). Nothing committed.
+file (written in this session). Not edited: `oom-lead-list.md`, `_INDEX.md`, HANDOFF (by instruction). Nothing committed.

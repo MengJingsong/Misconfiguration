@@ -188,6 +188,6 @@ Jingsong may overrule any verdict at any time; record an override here with its 
 
 **Positive control:** `local_read_size_fail_threshold: 40MiB` on the same tables, queries and instruments: 4 arms of N x W 64 to 512 MiB fail with READ_SIZE on 3 of 3 repetitions after counting about 42 MB, with 64.4 to 65.2 MiB held at the abort (uncapped the same arms hold 128 to 1 241 MiB); 3 arms under the threshold pass with H_C identical to lifetime U.
 
-**Feedback filed:** one dated line in the case file's section D "Stage-4 feedback" pointing to this file (uncommitted; the orchestrator commits). No section of the case is amended; the design section is the frozen version of §1. Not edited: `recheck-flags.md`, `_INDEX.md`, HANDOFF.
+**Feedback filed:** one dated line in the case file's section D "Stage-4 feedback" pointing to this file (uncommitted; the orchestrator commits). No section of the case is amended; the design section is the frozen version of §1. Not edited: `oom-lead-list.md`, `_INDEX.md`, HANDOFF.
 
 **Leftovers on pc75:** no process (`ps -eo cmd | grep '[C]assandraDaemon'` empty, no `s4rc-*` scope, checked after lifetime C); directory `/mydata/s4/rowlim-rc/` (tree, node data 718 MB, driver, harness copy, logs 3.6 MB) kept as the run's raw evidence.
