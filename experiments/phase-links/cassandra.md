@@ -79,7 +79,7 @@ lines added, 0 removed).
 direct memory, C2 slow readers, B7 weighers, S2 stage queues, R1-V off-heap pools, N5 repair). New:
 SAI `segment_write_buffer_size` (fixed 1024 MiB, `StorageAttachedIndexOptions.java:26`) at small heaps;
 inbound compressed-stream buffers; and `cassandra-env.sh` sizing `MaxDirectMemorySize` from `free -m`
-even for a hand-set heap (`conf/cassandra-env.sh:42-50`; seen on ms0625 as `-Xmx2G` with 15872M).
+even for a hand-set heap (`conf/cassandra-env.sh:58-66`; seen on ms0625 as `-Xmx2G` with 15872M).
 
 **Caveat on blindness.** The agents read guided playbook §3.2, whose example column names OOM-exp cases
 and their mechanisms (B6, B7, C1, C2, R1-V, S1, S2). So the ledger's rediscovery of those mechanisms is
