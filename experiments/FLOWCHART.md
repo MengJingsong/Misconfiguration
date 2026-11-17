@@ -73,8 +73,9 @@ rows explain results after the fact.
 
 ## 5. Flowchart
 
-Solid arrows: the main path. Dotted arrows: feedback and status write-back. Shaded nodes
-(`newlink` class): functionality added to link the experiments (section 4).
+Step names only; what each step does is in sections 2–4. Solid arrows: the main path. Dotted arrows:
+feedback and status write-back. Shaded nodes (`newlink` class): functionality added to link the
+experiments (section 4). Cylinders: lists and tables that one step writes and another reads.
 
 ```mermaid
 flowchart TD
@@ -82,36 +83,36 @@ flowchart TD
   classDef store fill:#e3eefc,stroke:#3a6fb0,color:#222
   classDef verdict fill:#e2f4e2,stroke:#3a8a3a,color:#222
 
-  subgraph P1["Phase 1: capacity-enforcement-exp (Targets 1 and 2; Cassandra, Hadoop)"]
-    S1["Stage 1: CodeQL<br/>if statements to worklist"]
-    S2["Stage 2: AI banding by name<br/>bands A B C D, nothing ruled out"]
-    S3A["Stage 3 autonomous agent<br/>target only, isolated source<br/>case file A to D<br/>+ section E OOM leads, general request"]
-    S3G["Stage 3 guided agent<br/>rules, patterns, test design<br/>+ OOM-lead patterns E1-E4 in 8a<br/>+ real-memory estimate"]
-    ER["entry-restriction-exp<br/>paused supplement"]
-    VF[("Phase-1 verdict files<br/>_INDEX, predicted-negative and positive,<br/>undetermined")]
-    S4["Stage 4: runtime verification<br/>audit, frozen predictions, run, outcome class"]
-    RC["Rechecks of filed cases<br/>guided: blind, back-link, sweep<br/>autonomous: Recheck mode"]
-    BLG["Budget ledger<br/>defaults summed per memory domain"]
-    RS["Stage-4 rescan claims<br/>real memory vs counter, swap-0 cgroup"]
-    LL[("OOM lead list, per system<br/>status: lead, stage-4 measured,<br/>queued as ID, verified or negative")]
+  subgraph P1["Phase 1: capacity-enforcement-exp"]
+    S1["Stage 1: CodeQL"]
+    S2["Stage 2: AI banding"]
+    S3A["Stage 3: autonomous agent"]
+    S3G["Stage 3: guided agent"]
+    ER["entry-restriction-exp"]
+    VF[("Phase-1 verdict files")]
+    S4["Stage 4: runtime verification"]
+    RC["Rechecks of filed cases"]
+    BLG["Budget ledger"]
+    RS["Stage-4 rescan claims"]
+    LL[("OOM lead list")]
   end
 
-  subgraph P2["Phase 2: OOM-exp (Target 3; Cassandra)"]
-    INV["Capacity-enforcement inventory<br/>+ phase1-bypass-leads N, pattern-leads S and L"]
-    JIRA["JIRA OOM history, read only<br/>selection clues, prior art, positive controls"]
-    DF["Data-flow tracing<br/>phase-2-only source"]
-    Q["Queuing agent<br/>screen, JIRA check, held vs counted,<br/>ceiling, ID and P1-P3"]
-    CP[("Campaign queue<br/>C B U S R rows")]
-    GATE["Pre-run gate<br/>protection map, budget audit,<br/>dated design, V7 budget, node preflight"]
-    RUN["Direction playbooks<br/>convergence, combo, bypass,<br/>unprotected accumulation"]
-    VP{"Verification protocol<br/>V1-V7"}
-    VER["verified-OOM or verified-gap"]
-    OTH["reproduced, candidate or negative"]
+  subgraph P2["Phase 2: OOM-exp"]
+    INV["Capacity-enforcement inventory and lead lists"]
+    JIRA["JIRA OOM history"]
+    DF["Data-flow tracing"]
+    Q["Queuing agent"]
+    CP[("Campaign queue")]
+    GATE["Pre-run gate"]
+    RUN["Direction playbooks"]
+    VP{"Verification protocol"}
+    VER["Verified case"]
+    OTH["Other result"]
   end
 
   subgraph LK["Phase link"]
-    BL["Back-link playbook<br/>class: flagged, recorded-untested,<br/>missed, no-case, out-of-scope"]
-    PL[("phase-links per system")]
+    BL["Back-link playbook"]
+    PL[("Phase-link tables")]
   end
 
   S1 --> S2
@@ -121,17 +122,17 @@ flowchart TD
   S3G --> VF
   S3A --> S4
   S3G --> S4
-  S4 -.->|amends case, stage-4 feedback| VF
+  S4 -.->|feedback| VF
   VF --> INV
   ER --> INV
 
   S3A -->|section E| LL
-  S3G -->|8a OOM lead| LL
+  S3G -->|section 8a| LL
   VF --> RC
   RC -->|OOM leads| LL
   VF --> BLG
   BLG --> LL
-  RC -->|stage-4 claim to add| RS
+  RC -->|claim| RS
   RS -->|stage-4 measured| LL
 
   LL --> Q
@@ -143,13 +144,13 @@ flowchart TD
   CP --> GATE --> RUN --> VP
   VP --> VER
   VP --> OTH
-  OTH -.->|side results, reproduced leads| Q
+  OTH -.->|side leads| Q
 
   VER --> BL
   ER --> BL
   BL --> PL
-  BL -->|files to recheck, back-link mode| RC
-  BL -.->|new pattern E5 and up, if none fits| S3G
+  BL -->|files to recheck| RC
+  BL -.->|new pattern| S3G
   VER -.->|verified| LL
 
   class RC,BLG,RS,LL,Q,BL,PL newlink
@@ -170,3 +171,4 @@ Notes on the chart:
 | Date | Change |
 |---|---|
 | 2026-11-17 | Written: both experiments, linking functionality through the 2026-11-17 rulings (agent queues rows, autonomous OOM leads, recheck sweep, back-link updates the guided agent, lead-list status, rescan claims) |
+| 2026-11-17 | Flowchart reduced to step names; descriptions stay in sections 2–4 (owner) |
