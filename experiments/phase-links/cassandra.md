@@ -110,11 +110,11 @@ the count is the number of flagged case files):
 
 | Cluster | Flags | Already in OOM-exp? |
 |---|---|---|
-| Partial pre-login envelopes up to 16 MiB per connection, connections unlimited at defaults | 6 (pilot + 5) | New (step 3 hands it over) |
-| Read limits that count rows or tombstones, not bytes, with read-size thresholds off by default (page sizes, GROUP BY, unpaged aggregates, SAI top-K, range sub-requests, tombstone thresholds, `cached_rows`) | 12 | Partly: the "no byte limit on concurrent reads" side of C2; the per-limit forms are new |
-| Coordinator Merkle trees per (session, table), no scheduler limit | 6 | Known: N5, JIRA 19336 |
+| Partial pre-login envelopes up to 16 MiB per connection, connections unlimited at defaults | 5 (pilot + 4) | New (step 3 hands it over) |
+| Read limits that count rows or tombstones, not bytes, with read-size thresholds off by default (page sizes, GROUP BY, unpaged aggregates, SAI top-K, range sub-requests, tombstone thresholds, `cached_rows`) | 11 | Partly: the "no byte limit on concurrent reads" side of C2; the per-limit forms are new |
+| Coordinator Merkle trees per (session, table), no scheduler limit | 5 | Known: N5, JIRA 19336 |
 | Slab-region tails, ≈ 1 MiB per written table under `heap_buffers` | 4 | Known as N11; per-table term new |
-| Memtable pool overshoot (update overhead charged after merge, no-op waste lock, `isBlocking`) | 3 | Known family (B2) |
+| Memtable pool overshoot (update overhead charged after merge, no-op waste lock, `isBlocking`) | 2 | Known family (B2) |
 | Index summaries (full sampling between runs; upsampled buffers never trimmed) | 2 | Known: R5; the upsample buffer is new |
 | Denylist refresh skips the total cap | 2 | New (operator-populated, opt-in) |
 | Per-connection receive capacity charged before the reserves (v5 dispatch-anyway; 1 MiB per connection) | 2 | New (N2 is the v4 path) |
