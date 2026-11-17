@@ -99,8 +99,8 @@ the direct trigger mainly in J6, in 16071, and in "user cached too much" reports
   Reproduce), RSS growth to a kernel kill (2868 fixed; 8723, 11109 Cannot Reproduce; 20565 Not A Bug).
 - **UDF heap exhaustion** (21227, 21233) is Not A Bug because UDFs are disabled by default.
 
-Consequence for upstream reports: a report needs a **broken or misleading documented contract**, not
-only "it can OOM".
+Consequence for queuing: a by-design closure is worth a case only if it shows a **broken or misleading
+documented contract**, not only "it can OOM" (nothing is reported upstream; owner, 2026-11-17).
 
 ### 2.4 JIRA ↔ our cases
 
@@ -168,7 +168,8 @@ candidates in the source, and how to test.
   symptoms and no explanation; reproducing one at defaults would be strong evidence.
 
 ### Process rules
-1. **Data-flow tracing (F1) before new configuration pairs.** For each holder in a flow answer:
+1. **Data-flow tracing (F1)** (*2026-11-17, owner: no longer required before new configuration pairs;
+   F1 stays a queued phase-2 source*). For each holder in a flow answer:
    counted vs held unit (S1); lifetime end and whether a fault blocks it (S2, S3); owner multiplier
    (S4); budget it draws from (S6). Any "no" or "unclear" is a lead.
 2. **Realistic faults, not raised values.** Disk stall, slow replica, dead thread keep the case at

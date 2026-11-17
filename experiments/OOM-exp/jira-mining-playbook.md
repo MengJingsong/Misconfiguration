@@ -46,7 +46,8 @@ a second pass spot-checks a sample of classifications.
 
 ## Pre-pick check (rule, 2026-11-16)
 
-Every candidate is checked against JIRA before it is queued, and every verified case before an upstream report;
+Every candidate is checked against JIRA before it is queued, and every verified case for its prior art (nothing is
+posted to JIRA; owner, 2026-11-17);
 see the rule in the [Cassandra campaign plan](cassandra/campaign-plan.md#prioritized-queue). The survey CSV is the
 first place to look; a targeted JIRA search follows for mechanisms the survey does not cover.
 
@@ -72,8 +73,9 @@ issue is cited in the protection map.
 
 - `<system>/leads/jira-oom-survey.csv` and `.md` (survey, counts, shortlists).
 - Positive-control cases in `<system>/cases/` with a source label.
-- Campaign-plan rows for variants; an entry in `<system>/cases/_run-log.md` per
+- Leads for variants, queued as campaign-plan rows only through the
+  [queuing playbook](queuing-playbook.md) (screening, ceiling check); an entry in `<system>/cases/_run-log.md` per
   survey batch (query, issues read, stopping point).
 
-Before filing an upstream report from a variant, search JIRA for an existing
-issue. Commit/push only when requested.
+Nothing is filed upstream (owner, 2026-11-17); a variant's JIRA search records
+prior art only. Commit/push only when requested.

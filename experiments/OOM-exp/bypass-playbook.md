@@ -72,7 +72,7 @@ Begin the file with the protocol's short **Summary** block (conclusion and root 
    concurrency/completion, per-repeat outcomes, original error and log references.
 4. **Conclusion:** protection gap confirmed/refuted/unresolved separately from
    OOM reached/not reached, attribution limits, other controls, and whether an
-   upstream defect investigation is justified. Upstream reporting is separate.
+   upstream defect investigation is justified. Nothing is reported upstream (owner, 2026-11-17).
 
 Add closed cases to `<system>/cases/_INDEX.md` (a `verified-OOM` or `verified-gap`
 bypass goes in `<system>/cases/bypass/`, anything not meeting the protocol's

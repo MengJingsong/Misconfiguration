@@ -5,7 +5,7 @@ Master status table for every OOM-exp Cassandra case. Cases are filed in
 
 - **`convergence/`** — verified result by **convergence** (several bounded
   usages exhausting a shared budget together): `verified-OOM` or `verified-gap`.
-  *(none yet)* A case whose OOM also needs a demonstrated accounting excess
+  A case whose OOM also needs a demonstrated accounting excess
   (U > C in one domain) is tagged **mixed** in the Mechanism column.
 - **`bypass/`** — verified result by **bypass** (getting past a single
   capacity check): `verified-OOM` or `verified-gap`.
@@ -13,7 +13,7 @@ Master status table for every OOM-exp Cassandra case. Cases are filed in
   met, but only with custom constraints or a tightened budget), in progress,
   parked, unresolved, blocked before a valid arm ran, or a pre-protocol OOM
   awaiting its recheck.
-- **`negatives/`** — verified **no-OOM** within a stated range. *(none yet)*
+- **`negatives/`** — verified **no-OOM** within a stated range.
 
 **Status vocabulary (amended 2026-11-11).** A case is verified only when it meets
 the promotion rule V1–V7 of the protocol's
@@ -27,22 +27,23 @@ loss, overshoot or leak, not OOM), `reproduced-OOM` / `reproduced-gap` (V1–V5 
 but V6 or V7 not; always `diagnostic`, filed in `candidates/`), `candidate`,
 `negative`; verified and reproduced statuses also carry `deployment` or `diagnostic`. **`(pre-protocol)`** marks cases filed
 before the 2026-11-06 protocol: judged under earlier rules (one failing run
-each) and to be rechecked against V1–V5 before being cited as verified upstream.
+each) and to be rechecked against V1–V7 before being cited as verified.
 On 2026-11-11 the six pre-protocol convergence OOMs were moved from
 `convergence/` to `candidates/` as `candidate (pre-protocol)`: each had one
 failing run, one run per control and at most one intervention run (V1, V2, V4
 unmet). Their OOM readings stand; only the verification status changed. A
-rerun that meets V1–V5 moves a case back to `convergence/`. **2026-11-11 recheck:**
+rerun that meets V1–V7 moves a case back to `convergence/` (V1–V5 before the
+2026-11-11 amendment; corrected 2026-11-17). **2026-11-11 recheck:**
 R1–R4 (runs 7, 8, 1, 2) met V1–V5, but all four use raised capacities and a
 tightened budget, so under the V6–V7 amendment of the same day they are
 `reproduced-OOM · diagnostic` in `candidates/` (R3, R4 tagged mixed). R5–R6
 remain candidates.
 
 The capacity **regime** (**custom** raised values | **default** shipped values)
-is a *label* here, not a folder. So is the **lead source** (if-check inventory
+is a *label* here, not a folder. So is the **lead source** (capacity-enforcement inventory, formerly *if-check inventory*
 unless stated; otherwise `JIRA-KEY` — a reproduced fixed bug is a *positive
 control* — or `flow:<name>`), stated in the case file and in the Result phrase
-when not if-check. **Unprotected** results (no applicable control) are filed in
+when not from that inventory. **Unprotected** results (no applicable control) are filed in
 the same status folders with that label. Lead-source outputs (JIRA survey,
 data-flow holder tables) live in `cassandra/leads/`, not here.
 Chronological run narrative, infra notes and

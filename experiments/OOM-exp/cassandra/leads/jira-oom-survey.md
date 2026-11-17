@@ -4,7 +4,7 @@
 [`jira-oom-survey.csv`](jira-oom-survey.csv) (one row per issue, 604 rows). Second-pass record:
 [`jira-oom-survey-second-pass.md`](jira-oom-survey-second-pass.md). Prior-art check of the verified cases:
 [`jira-prior-art-verified-cases.md`](jira-prior-art-verified-cases.md). This replaces the title/description-only
-first pass in [`OOM-leads.md`](../../OOM-leads.md) §2 (2026-11-12) as the reference; that section is kept as history.
+first pass in [`pattern-leads.md`](../../pattern-leads.md) §2 (2026-11-12) as the reference; that section is kept as history.
 
 ID prefixes used here (README rule): **B** = bypass, **C** = convergence, **R** = recheck, **S** = stacked combo,
 **U** = unprotected-accumulation lead, **J** = JIRA task (J1 Cassandra, J2 Hadoop), **F** = data-flow tracing task.
@@ -90,7 +90,7 @@ trigger is a default sizing or an OS limit (`vm.max_map_count`, ulimit), not a u
 4. **Direct and native memory are a small share of the history (36 of 246)** but are where the recent and open issues
    cluster (21529, 21656, 19535, 17025, 18762), matching our C1, C2 and S1 results.
 5. **The project closes sizing problems as by design** (45 closed by design or invalid): a report needs a broken or
-   misleading documented contract (see `OOM-leads.md` §2.3).
+   misleading documented contract (see `pattern-leads.md` §2.3).
 
 ## 4. Positive-control shortlist (reproduce on the affected build, then the fixed one)
 

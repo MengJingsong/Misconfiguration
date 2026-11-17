@@ -48,7 +48,8 @@ Originally `custom-convergence/_batch-log.md`. Per [`../../custom-convergence-pl
 
 ## Current campaign status — 2026-11-06
 
-This dated table governs new candidate selection. Historical domain-wide statuses
+*History (2026-11-17): the campaign plan's prioritized queue governs selection
+([`../../queuing-playbook.md`](../../queuing-playbook.md) §7.2); this table no longer does.* This dated table governed new candidate selection. Historical domain-wide statuses
 below describe only the earlier standing-pool combinations/arithmetic; they do
 not exclude replicated local limits or transient overlap. No new runtime results
 are asserted. See [campaign plan](../campaign-plan.md).
@@ -308,7 +309,8 @@ Same format as the convergence/custom run entries in Part A above, plus the defa
 
 ## Current campaign status — 2026-11-06
 
-This dated table governs new candidate selection. Historical domain-wide statuses
+*History (2026-11-17): the campaign plan's prioritized queue governs selection
+([`../../queuing-playbook.md`](../../queuing-playbook.md) §7.2); this table no longer does.* This dated table governed new candidate selection. Historical domain-wide statuses
 below describe only the earlier standing-pool combinations/arithmetic; they do
 not exclude replicated local limits or transient overlap. No new runtime results
 are asserted. See [campaign plan](../campaign-plan.md).
@@ -922,3 +924,33 @@ readings (family A: L = 2 × heap, direct = heap/2; family B: heap 2 GiB, direct
 - Cleanup: no process left on the five nodes, alias IPs 10.10.1.12–.15 removed, linger disabled on all five; data
   `ms0625:/mydata/u1r2/runs/` (5.4 GB, five dumps), mirror `pc96:/mydata/u1r2/mirror/`.
 - *Status above is the agent's proposal; researcher's review pending.*
+
+## 2026-11-17 — queuing pass: phase-1 leads to campaign rows (agent, no node runs)
+
+Per the [queuing playbook](../../queuing-playbook.md) with the owner's rulings of 2026-11-17 (an agent queues; §5.2,
+§7.1 and §5.3 accepted; nothing posted to JIRA; data-flow F1 no longer blocks new pairs). IDs: B = bypass investigation,
+U = unprotected-accumulation lead, N = lead in [`phase1-bypass-leads.md`](../../phase1-bypass-leads.md).
+
+- **Considered:** N13, N14, N15, the read-limit cluster (11 blind case flags + the budget-ledger flag on
+  `read_thresholds_enabled`), and as lead-list entries only: SAI `segment_write_buffer_size`, untrimmed upsampled
+  index summaries, counter/view DOB scratch, the 512 MiB send reserve, `cassandra_latest.yaml` `offheap_objects`.
+- **Queued** ([campaign plan](../campaign-plan.md#prioritized-queue); each row carries its screening record, held ÷
+  counted from the 2026-11-17 phase-1 stage-4 rechecks, ceiling at heap 2 GiB and a JIRA block):
+  - **B10 / P1** (N13, v5 refused single-frame requests dispatched uncharged, `queueSize` drift): decoded
+    4.2–6.5 × the counted bound, 1.45–2.91 × heap/10 at stage 4; N ≈ 85 connections at W = 240 fill a 2 GiB heap;
+    JIRA new.
+  - **U2 / P1** (N14, partial pre-login 16 MiB envelopes × unlimited connections): exactly 16 MiB per connection
+    held, 0 counted; ≈ 107 connections reach a 2,048 MiB direct limit; JIRA known-open (4265 Won't Fix analogue,
+    21756 auth timeout in review).
+  - **U3 / P1** (N15, large stored collections read whole): ≈ 150 B held per item vs 8 B serialized; ≈ 11 concurrent
+    reads of 10⁶-item sets fill a 2 GiB heap; JIRA new.
+  - **U4 / P2** (read-limit cluster, workload `cql-row-limit`): 2.0–2.4 × N × W held per page; three concurrent
+    5,000-row pages of 64 KiB rows pass a 2 GiB heap; JIRA by design for client-chosen row limits (4304, 4743, 5336;
+    11745 fixed only in 6.0-alpha3, opt-in), so P2; GROUP BY member known-fixed → positive control only.
+- **Screened out:** none. Not queued (lead-list entries only, no stage-4 held ÷ counted for the OOM claim yet, or
+  producibility unchecked): N18 SAI segment budget, N19 upsampled summaries, N20 counter/view DOB stages, N21 send
+  reserve; the `cassandra_latest.yaml` point recorded as a note on R1-V.
+- **Back-propagated:** lead-list Status → `queued as B10` (3 rows), `U2` (5), `U3` (1), `U4` (12); N13–N15 and N17
+  marked queued; N5, N11 and R5 marked corroborated by the phase-1 rechecks (R5: dated line, status unchanged).
+- **Also:** survey CSV note on CASSANDRA-10930 corrected (`cassandra-env.sh` always sets `MaxDirectMemorySize`).
+- JIRA REST search reachable; queries and hit counts are in each row. Nothing posted.

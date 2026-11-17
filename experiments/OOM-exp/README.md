@@ -5,8 +5,10 @@
 > researcher owns and controls**. Deliberately driving a test node out of
 > memory is the research *method*, not the goal: the objective is to find the
 > reachable workloads and accepted configurations under which Cassandra's /
-> Hadoop's own memory-capacity protections are insufficient, so those gaps can
-> be **fixed and responsibly disclosed upstream** (Apache JIRA). Scope is
+> Hadoop's own memory-capacity protections are insufficient, and to document
+> those gaps with reproducible evidence. **Nothing is posted to Apache JIRA and no
+> upstream report is filed** (owner, 2026-11-17): JIRA is read only, to find
+> candidates and prior art. Scope is
 > bounded and defensive: researcher-owned infrastructure only, no third-party
 > or production targets, synthetic test data only, one victim node per
 > experiment, budgets deliberately tightened so a single process is contained.
@@ -32,7 +34,7 @@ and aggregate capacity controls fail to keep live memory within its budget?**
 Controlled OOM tests can establish failure conditions. Passing runs establish
 protection only within the tested range.
 The outputs are reproducible evidence, documented misconfigurations, and verified
-defects suitable for upstream reporting.
+defects.
 
 Read [verification-protocol.md](verification-protocol.md) for common evidence and
 classification rules, then the selected playbook. The next Cassandra batch is
@@ -66,11 +68,11 @@ and campaign row records its source as a label, like the capacity regime.
 
 | Source | Starts from | Finds | Method |
 |---|---|---|---|
-| **if-check inventory** | capacity checks found by `capacity-enforcement-exp` | convergence and bypass of existing checks | the direction playbooks' selection step |
+| **capacity-enforcement inventory** (*if-check inventory* before 2026-11-17) | capacity checks found by `capacity-enforcement-exp`, and its OOM lead list (`<system>/stage3-ai-deep-read/oom-lead-list.md`) | convergence and bypass of existing checks | the direction playbooks' selection step |
 | **JIRA OOM history** | the project's fixed OOM reports | **clues for selecting among phase 1's constraints** (owner's rule, 2026-11-16): which constraints and mechanisms have caused real OOMs; positive controls; unfixed variants and incomplete fixes | [`jira-mining-playbook.md`](jira-mining-playbook.md) |
 | **Data-flow tracing** | where bytes are held along core data flows | accumulation with no check or a check on the wrong unit, plus new leads for both directions. *Kept as a phase-2-only source for now (owner's decision, 2026-11-17): the only source that does not go through phase 1's constraints* | [`dataflow-tracing-playbook.md`](dataflow-tracing-playbook.md) |
 
-The if-check inventory cannot see memory that no check guards; data-flow tracing
+The capacity-enforcement inventory cannot see memory that no check guards; data-flow tracing
 covers that gap, and JIRA history points the selection at the constraints that have
 failed before. How the experiments depend on each other, and the back-link from each
 verified case to phase 1, are in [`../README.md`](../README.md). The JIRA survey also ranks flows for tracing. Lead
@@ -127,13 +129,13 @@ prefixes below and for any prefix added later; a new prefix gets a row here when
 | **U** | unprotected-accumulation lead (memory with no applicable control) | campaign plan queue |
 | **J** | JIRA lead-source task (J1 Cassandra, J2 Hadoop survey) | campaign plan, *Lead-source pilots* |
 | **F** | data-flow tracing task (F1 coordinator write) | campaign plan, *Lead-source pilots* |
-| **L** | candidate lead from the OOM-pattern/JIRA lead list | [`OOM-leads.md`](OOM-leads.md) §4 |
-| **N** | new lead from the capacity-enforcement-exp bypass notes | [`capacity-enforcement-bypass-leads.md`](capacity-enforcement-bypass-leads.md) §3 |
+| **L** | candidate lead from the OOM-pattern/JIRA lead list | [`pattern-leads.md`](pattern-leads.md) §4 |
+| **N** | new lead from the capacity-enforcement-exp bypass notes | [`phase1-bypass-leads.md`](phase1-bypass-leads.md) §3 |
 | **V1–V7** | items of the verification (promotion) rule | [verification protocol](verification-protocol.md) |
 | **P1–P3** after a slash (e.g. `C1 / P1`) | priority in the campaign queue | campaign plan |
 | condition letters inside a case (B6 **A**/**B**/**D**, C2 **S-A**/**F-B**, C1 **D**/**H**) | sub-cases (conditions) of one case | the case file's status table |
 
-**Clashing labels in [`OOM-leads.md`](OOM-leads.md):** there, **P1–P6** are patterns seen in our cases,
+**Clashing labels in [`pattern-leads.md`](pattern-leads.md):** there, **P1–P6** are patterns seen in our cases,
 **J1–J6** are JIRA cause patterns and **S1–S6** are search patterns. They are not campaign IDs (P1/P2
 priorities, J1/J2 tasks, S1/S2 combo cases). When citing them, name the file or say "pattern P2",
 "JIRA pattern J2", "search pattern S1".
@@ -202,5 +204,5 @@ runtime evidence collected by `capacity-enforcement-exp`.
 - Only researcher-controlled services participate; build/run data and full logs
   stay on local storage. Disk experiments remain skipped and disk-to-memory
   causal-chain experiments deferred until explicitly reopened.
-- Findings that look like genuine upstream defects are checked against JIRA and
-  may be reported to the Apache Cassandra project.
+- Findings that look like genuine upstream defects are checked against JIRA for prior
+  art (known, fixed, by design). Nothing is posted or reported upstream (owner, 2026-11-17).

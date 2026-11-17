@@ -3,10 +3,10 @@
 IDs used here: **B8** = campaign bypass investigation 8 (B = bypass); **N4** / **N3** = new leads 4 / 3 from
 the capacity-enforcement bypass notes (N = new lead; N3 = cached serialized copy per mutation, measured as a
 term); **B6** = bypass case 6 (internode queues), whose tiny-cell payload and client are reused; **S2** =
-combo case 2 (local-write backlog); **L7** = OOM lead 7 (L = OOM-leads list).
+combo case 2 (local-write backlog); **L7** = OOM lead 7 (L = pattern-leads list).
 
 **Direction:** bypass · accounting mismatch (+ exempt path). **Lead source:** `source: N4` (bypass leads §3;
-OOM-leads L7). **Regime:** default capacities. **Source:** Cassandra 5.0.9, the ms0625 smoke-test build
+pattern-leads L7). **Regime:** default capacities. **Source:** Cassandra 5.0.9, the ms0625 smoke-test build
 (`/mydata/oom-smoke/cassandra-run1`, from `systems/cassandra/source/` at repo `01bed5a7`) copied to
 `/mydata/b8/cassandra`, unmodified (Byteman agents only in labelled diagnostic arms). **Node:** `ms0625`
 (Utah m400, **aarch64**, 8 cores, 62 GiB, kernel 5.15, cgroup v2; victim in a `systemd-run --user` scope with
