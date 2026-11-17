@@ -4,7 +4,7 @@ One row per verified OOM-exp case, by the [back-link playbook](../backlink-playb
 (`capacity-enforcement-exp`) hold a clue to the result **as filed before the case's first run**?
 Classes: `flagged`, `recorded-untested`, `missed`, `no-case`, `out-of-scope` (defined in the
 playbook, step 4). Questions E1–E4 are the guided playbook's
-[§3.2](../capacity-enforcement-exp/stage3-ai-deep-read/playbook-guided.md#32-enforcement-properties-added-2026-11-16).
+[§3.2](../capacity-enforcement-exp/stage3-ai-deep-read/playbook-guided.md#32-enforcement-properties-oom-lead-patterns-added-2026-11-16-named-2026-11-17).
 Phase-1 paths are under `capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/` unless
 stated; `s4/` is `capacity-enforcement-exp/cassandra/stage4-runtime-verification/results/`.
 
@@ -24,6 +24,7 @@ fixes), so nothing below was written with hindsight.
 | **R1-V** off-heap memtable + chunk cache at defaults | Both pools at their default 512 MiB, each under its cap, plus the heap exceed the container | `missed` | `memtable_offheap_space-applySimpleConfig-memtable_offheap_space--autonomous.md` A4 lists the chunk cache among other native memory, "None governed by this entry"; the guided files treat the other pool as something to hold fixed. No file adds the defaults against a heap, RAM or container budget | Yes (two true positives), but the pairing came from OOM-exp's convergence design | E4 |
 | **S1** direct-memory combo | Default direct-memory pools stack; the excess comes from 32 MutationStage threads each growing DOB scratch to 15–30 MiB in `CommitLog.add` (U1); no pool is reconciled with `MaxDirectMemorySize` | `recorded-untested` (decisive holder U1); joint stacking `missed` | U1: `DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided.md` §8: the instantaneous peak is "the in-use buffers of the threads busy"; `max_mutation_size-validateSize-MAX_MUTATION_SIZE--guided.md` §8: transient "max_mutation_size × N … 512 MiB", §9 "not tested". Other holders: kept scratch D `flagged` (DOB escape hatch: "Thread count is the multiplier and is not limited here"), pool P `flagged`, receive queue R `recorded-untested`, hint slabs H `missed`. Stacking: only a generic "all of these share `-XX:MaxDirectMemorySize`" | No (`source: C1, C2, C3, R6-V, B1`; U1 from an R6-V side finding) | E4 for the case; E1 + E3 for U1 |
 | **S2** coordinator local-write backlog | The coordinator's own local write waits on MutationStage's unbounded queue; at CL=ONE a faster replica's ack releases the client slot, the in-flight charge and the request thread first | `recorded-untested` | `concurrent_writes-takeWorkPermit-workPermits--autonomous.md` A4: a waiting mutation "stops being counted after the timeout, even though it is still on the heap" (negative, "does not cap"); `maxTasksQueued-takeTaskPermit-taskPermits--autonomous.md` stage 4: the counted bytes "are not held while the mutation waits in the executor queue". Both shown only at non-default settings; at defaults the files claim a bound of ≈ 128 through blocked request threads, which the early ack removes. No file mentions the CL=ONE early ack | No (`source: B6, B7, R3/R4`; holder found from a heap dump) | E1 (counter released before memory is freed), with E2 |
+| **B8** commit-log replay (condition S, diagnostic; added 2026-11-17) | Replay bounds its queue at 64 MiB of **serialized** entry bytes / 1,024 mutations, which are counted after deserialization. Queued tiny-cell mutations hold 15× that on the heap (0.93 MiB vs 63.7 KiB; 947 MiB at the bound), and the bound is not scaled with the heap. At defaults the memtable pool caps what is left to replay (A negative 0/10). With restore emulation and a flush stall the queue fills, and a 1 GiB node OOMs in replay | `recorded-untested` | `commitlog_max_outstanding_replay_bytes-handlemutation-pendingmutationbytes--autonomous.md` A3 "Bypasses": "serialized size understates heap size for small mutations (object overhead); the check counts only the replay backlog, not the memtable the mutations are applied into". A2: "plus object overhead that is significant only for small mutations". Estimate positive. Stage 4 (`s4/commitlog_max_outstanding_replay_bytes-…`) used 64 KiB single-value rows only and measured 2× (the cached copy), filed "Confirmed — caps"; tiny cells not tested. Its amendment M3 needed `memtable_cleanup_threshold: 0.99` because default flushing discards segments: the reason B8's A is negative. No phase-1 file compares the fixed bound's real heap with a small heap. Only file in the class (no `entry-restriction-exp` file); text unchanged since 2026-11-12, before B8 run 1 (2026-11-16) | Yes (`source: N4`, which cites this file and `max_mutation_size`; the 15–20× figure came from B6, the unit question from JIRA 8639 via pattern-leads L7) | E1, with E4 (fixed bound against a small heap shared with replay-filled memtables) |
 
 ## What the first pass shows
 
@@ -34,11 +35,15 @@ fixes), so nothing below was written with hindsight.
   Real-memory estimate and §8a are for.
 - **The clues were not where OOM-exp found its leads.** Only C1 and R1-V (and C2 in part) took their
   lead from phase 1; B6, B7, S1 and S2 came from OOM-exp's own traces and heap dumps. The flags file
-  (`recheck-flags.md`) is the route meant to close that gap.
+  (`oom-lead-list.md`) is the route meant to close that gap.
 - **E1–E4 cover all seven; no new question is proposed.** E1 (B6, B7, S2), E2 (C2), E3 (C1, S1's U1)
   and E4 (R1-V, S1, C1's sum).
 - **Sums across pools are the weakest spot.** Nothing in phase 1 adds defaults against a budget
   (R1-V, S1, C1). That is a cross-case check; one case file cannot answer it alone.
+- **B8 (added 2026-11-17).** The eighth verified case fits the pattern. It is `recorded-untested` (now seven
+  of eight; one `missed`). Its lead came from phase 1 (now C1, R1-V and B8, and C2 in part). E1 covers
+  it with E4, so still no new question. The phase-1 file also held the reason B8's deployment condition
+  was negative: its stage 4 had to raise `memtable_cleanup_threshold` to keep a log to replay.
 
 ## Phase-1 files to recheck (back-link mode)
 
@@ -50,6 +55,7 @@ Guided playbook §5, `back-link` mode. 34 files; some serve several cases:
 - **R1-V:** `memtable_offheap_space-tryAllocate-limit--guided`, `file_cache_size-allocateMoreChunks-memoryUsageThreshold--guided`, `memtable_offheap_space-applySimpleConfig-memtable_offheap_space--autonomous`, `memtable-offheap-space-allocate-size--autonomous`, `file_cache_size-allocateMoreChunks-memoryUsageThreshold--autonomous`
 - **S1:** `DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided`, `max_mutation_size-validateSize-MAX_MUTATION_SIZE--guided`, `MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS--guided`, `hints-HintsBuffer-put-slabCapacity--autonomous` (plus the receive-queue and networking files above)
 - **S2:** `concurrent_writes-takeWorkPermit-workPermits--autonomous`, `maxTasksQueued-takeTaskPermit-taskPermits--autonomous`, `maxTasksQueued-addTask-taskPermits--autonomous`, `maxHintsInProgress-checkHintOverload-totalHintsInProgress--autonomous`, `sep_maximum_pool_size-takeWorkPermit-workPermits--autonomous` (plus the two in-flight files above)
+- **B8 (added 2026-11-17; not in the 34):** `commitlog_max_outstanding_replay_bytes-handlemutation-pendingmutationbytes--autonomous` (rechecked 2026-11-17, back-link), plus a short replay addendum to `CACHEABLE_MUTATION_SIZE_LIMIT-serialization-CACHEABLE_MUTATION_SIZE_LIMIT--guided` (B6's recheck did not cover the replay holder). `max_mutation_size-validateSize-MAX_MUTATION_SIZE--guided` (N4's second source, for unguarded replay of oversized entries) was not rechecked again: B8 did not exercise that path
 
 ## Blind recheck pilot (2026-11-16)
 
@@ -58,7 +64,7 @@ list (12 true positives, mostly config; 4 false negative / undetermined / weak; 
 agents with 5 cases each, plus one cross-case **budget ledger**
 ([`budget-ledger.md`](../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/budget-ledger.md)). Agents did
 not open OOM-exp, this file, the handoffs or git history. All flags are in
-[`recheck-flags.md`](../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/recheck-flags.md). The comparison
+[`oom-lead-list.md`](../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/oom-lead-list.md). The comparison
 with OOM-exp below was made afterwards by the orchestrator, which can read both.
 
 **Per-case rechecks.** 8 of 20 cases flagged (7 distinct mechanisms; the slab-region tail was flagged twice):
@@ -67,7 +73,7 @@ lines added, 0 removed).
 
 | Flag (case) | Q | Already in OOM-exp? |
 |---|---|---|
-| Slab-region tails ≈ 1 MiB per written table (`memtable_heap_space`, `max-cloned-size`) | E1/E3 | Known as N11 (bypass-leads, low); the per-table current-region term is new |
+| Slab-region tails ≈ 1 MiB per written table (`memtable_heap_space`, `max-cloned-size`) | E1/E3 | Known as N11 (phase1-bypass-leads, low); the per-table current-region term is new |
 | Refused single-frame v5 requests dispatched anyway; release drives `queueSize` negative (`native_transport_receive_queue_capacity`) | E2 | **New** (N2 is the v4 force-allocation path); source-checked: `CQLMessageHandler.java:223,245-260,509`, `AbstractMessageHandler.java:396-408,461` |
 | Coordinator Merkle trees per job, no scheduler limit (`repair_session_space`) | E3 | Known: N5, JIRA 19336 |
 | Partial pre-STARTUP envelopes up to 16 MiB per connection, connections unlimited (`…_per_ip`) | E3 | **New**; source-consistent (`Envelope.java` decoder, `PipelineConfigurator.java:265`) |
@@ -133,7 +139,7 @@ rediscovered here. The stronger test is forward: how many of the new clusters OO
 The 34 files listed above, rechecked in `back-link` mode (guided playbook §5): seven agents, one per
 verified case, each allowed to read its OOM case. Append-only (659 lines added, 0 removed); every file now
 ends with `## Recheck — enforcement properties (guided, 2026-11-17, back-link)`. 56 flag rows in
-[`recheck-flags.md`](../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/recheck-flags.md): **37 restate
+[`oom-lead-list.md`](../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/oom-lead-list.md): **37 restate
 what the OOM case showed** (now written into the phase-1 file where the clue was), **19 go beyond it**.
 
 | Case | Files | Rows | Beyond the OOM case (one line each) |
@@ -150,8 +156,9 @@ Read with the first-pass table above: the 37 restating rows are the phase-1 file
 their clue was missing, so a later reader of those files now sees the gap. Back-link rows explain results
 after the fact and do not count as prediction; the 19 "beyond" rows are new leads like any other flag.
 
-## Stage-4 runs of recheck claims, batch 1 (2026-11-17)
+## Stage-4 runs of rescan claims, batch 1 (2026-11-17)
 
+*Called "recheck claims" when run; renamed 2026-11-17 ([stage-4 README](../capacity-enforcement-exp/stage4-runtime-verification/README.md#rescan-claims-added-2026-11-17)).*
 Owner-approved: five recheck "Stage-4 claim to add" lines, run under the stage-4 protocol (design appended to the
 case file and frozen, audit, run 1, self-check, verdict), one fresh agent per case on the new x86 nodes
 `pc91`/`pc84`/`pc72`/`pc99`/`pc75`. Each was a scaled measurement inside a recorded cgroup budget (swap 0), not an
