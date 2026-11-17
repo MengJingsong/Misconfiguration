@@ -1,0 +1,30 @@
+hop 1: 229 targets -> 290 referrers, 175 to follow
+hop 2: 175 targets -> 610 referrers, 584 to follow
+hop 3: 584 targets -> 1356 referrers, 905 to follow
+hop 4: 905 targets -> 1754 referrers, 805 to follow
+hop 5: 805 targets -> 1817 referrers, 912 to follow
+hop 6: 912 targets -> 1867 referrers, 718 to follow
+DirectByteBuffer instances: 407; owners (allocateDirect) 170 = 493.7 MiB; mapped 58 = 1184.0 MiB; slices of owners 19; other 160
+Netty PlatformDependent: DIRECT_MEMORY_COUNTER=416.0 MiB (counter object present), DIRECT_MEMORY_LIMIT=603979776, USE_DIRECT_BUFFER_NO_CLEANER=1, MAX_DIRECT_MEMORY=603979776
+DirectByteBuffers without cleaner and without a known owner (Netty no-cleaner / JNI / slices of those): 160, total capacity 1042.5 MiB (upper bound; slices may overlap)
+
+Live direct memory by holder (owners = 493.7 MiB):
+  O: DataOutputBuffer scratch                             330.0 MiB   66.8 %
+  O: no strong referrer (garbage awaiting Cleaner)        120.0 MiB   24.3 %
+  O: hints buffers                                         32.2 MiB    6.5 %
+  P: BufferPool chunks, no live consumer                    8.0 MiB    1.6 %
+  O: netty / NIO buffers                                    3.4 MiB    0.7 %
+
+Example referrer chain per category (buffer <- holder <- ...):
+  O: netty / NIO buffers:
+      io.netty.channel.epoll.EpollEventArray.memory <- io.netty.channel.epoll.EpollEventLoop.events <- [Lio.netty.util.concurrent.EventExecutor;[].[] <- io.netty.channel.epoll.EpollEventLoopGroup.children <- io.netty.channel.epoll.EpollEventLoop.parent <- io.netty.util.concurrent.SingleThreadEventExecutor$4.this$0
+  O: hints buffers:
+      org.apache.cassandra.hints.HintsBuffer.slab
+  P: BufferPool chunks, no live consumer:
+      java.nio.DirectByteBuffer.att <- org.apache.cassandra.utils.memory.BufferPool$Chunk.slab
+  O: DataOutputBuffer scratch:
+      org.apache.cassandra.io.util.DataOutputBuffer$1$1.buffer
+  O: no strong referrer (garbage awaiting Cleaner):
+      
+
+Owner sizes (bytes x count, top 8): 49152 x 65, 128 x 33, 16384 x 18, 31457366 x 11, 15728683 x 8, 5176 x 5, 2664 x 5, 677 x 4

@@ -1,0 +1,33 @@
+hop 1: 234 targets -> 296 referrers, 170 to follow
+hop 2: 170 targets -> 598 referrers, 561 to follow
+hop 3: 561 targets -> 1269 referrers, 861 to follow
+hop 4: 861 targets -> 1730 referrers, 805 to follow
+hop 5: 805 targets -> 1570 referrers, 758 to follow
+hop 6: 758 targets -> 1497 referrers, 639 to follow
+DirectByteBuffer instances: 411; owners (allocateDirect) 171 = 374.7 MiB; mapped 50 = 768.0 MiB; slices of owners 19; other 171
+Netty PlatformDependent: DIRECT_MEMORY_COUNTER=516.0 MiB (counter object present), DIRECT_MEMORY_LIMIT=603979776, USE_DIRECT_BUFFER_NO_CLEANER=1, MAX_DIRECT_MEMORY=603979776
+DirectByteBuffers without cleaner and without a known owner (Netty no-cleaner / JNI / slices of those): 171, total capacity 1146.6 MiB (upper bound; slices may overlap)
+
+Live direct memory by holder (owners = 374.7 MiB):
+  O: DataOutputBuffer scratch                             330.0 MiB   88.1 %
+  O: hints buffers                                         32.2 MiB    8.6 %
+  P: BufferPool chunks, no live consumer                    8.0 MiB    2.1 %
+  O: netty / NIO buffers                                    3.4 MiB    0.9 %
+  O: storage I/O buffers                                    1.1 MiB    0.3 %
+  O: no strong referrer (garbage awaiting Cleaner)          0.0 MiB    0.0 %
+
+Example referrer chain per category (buffer <- holder <- ...):
+  O: netty / NIO buffers:
+      io.netty.buffer.UnpooledUnsafeDirectByteBuf.buffer <- io.netty.channel.unix.IovArray.memory <- io.netty.channel.epoll.EpollEventLoop.iovArray <- [Ljava.lang.Object;[].[] <- io.netty.util.internal.InternalThreadLocalMap.indexedVariables <- io.netty.util.concurrent.FastThreadLocalThread.threadLocalMap
+  O: DataOutputBuffer scratch:
+      org.apache.cassandra.io.util.DataOutputBuffer$1$1.buffer
+  O: hints buffers:
+      org.apache.cassandra.hints.HintsWriteExecutor.writeBuffer
+  O: no strong referrer (garbage awaiting Cleaner):
+      
+  P: BufferPool chunks, no live consumer:
+      java.nio.DirectByteBuffer.att <- org.apache.cassandra.utils.memory.BufferPool$Chunk.slab
+  O: storage I/O buffers:
+      org.apache.cassandra.io.compress.CompressedSequentialWriter.compressed
+
+Owner sizes (bytes x count, top 8): 49152 x 65, 128 x 33, 16384 x 20, 31457366 x 9, 5175 x 8, 262144 x 5, 2664 x 4, 0 x 2

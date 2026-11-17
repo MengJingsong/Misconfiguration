@@ -1,0 +1,15 @@
+[22:41:43] args: topo=A repl={'class':'NetworkTopologyStrategy','c':1,'r':1} V=2G R1=8G R2=off cl=LOCAL_ONE rate=none sess=8 load=90 obs=60 platform=aarch64
+[20:41:48] gen V xmx=2G dc=c extra=[]
+[20:41:49] gen R1 xmx=8G dc=r extra=[]
+[20:41:53] launched V pid=31277 unit=s2r2-V-1794886910 cgroup=/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/s2r2-V-1794886910.scope swap.max=0 memory.max=max
+[20:42:23] launched R1 pid=19698 unit=s2r2-R1-1794886940 cgroup=/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/s2r2-R1-1794886940.scope swap.max=0 memory.max=max
+[22:42:43] ring UN=2
+20:42:48 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+schema ok
+[22:43:00] load start
+[22:44:49] load end (client exited 108 s after start)
+V_ALIVE
+R1_ALIVE
+[20:46:03] stopped V (31277)
+[20:46:16] stopped R1 (19698)
+[22:46:22] A-lone-2G-r1 V: xmx=2G 0 OOMError lines | pauses=44 max_after_any=2048MiB(100.0%) full_gcs=10 max_after_full=818MiB(39.9%) ReportJavaOutOfMemory=0 | full>95%: n=0 window=0s pause=0s (0%) service_loss=not met | pauses=44 total_pause=5s max60=6% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=none | client: FINAL sent=318321 ok=316307 err=2014 WriteTimeoutException: Cassandra

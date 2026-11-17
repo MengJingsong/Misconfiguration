@@ -35,6 +35,9 @@ is a label on each run, not a folder; cases now live under status-first folders
 | 2026-11-11 | convergence / custom | R4 recheck of run 2 (apt179) | [+key_cache_size](candidates/memtable_heap_space+counter_cache_size+key_cache_size/memtable_heap_space+counter_cache_size+key_cache_size.md) | heap OOM + kill 3/3; alone 0/9; counter cache to auto removes it 3/3 → V1–V5 met; reproduced-OOM · diagnostic (mixed) |
 | 2026-11-16 | combo / default | S1 (JVM direct, pc96) | [internode_receive_queue+…--direct-combo](convergence/internode_receive_queue+hint_slabs+DOB+networking_pool--direct-combo/internode_receive_queue+hint_slabs+DOB+networking_pool--direct-combo.md) | stage 3 direct OOM 3/3 at 768 MiB; stages 1–2 negative at 2 GiB |
 | 2026-11-16 | combo / default | S2 (heap, apt140/138/149) | [coordinator-local-write-backlog--combo](convergence/coordinator-local-write-backlog--combo/coordinator-local-write-backlog--combo.md) | heap OOM 3/3 at 2 GiB via local-write backlog (verified-OOM · deployment); 8 GiB survives |
+| 2026-11-16 | combo / default | S2 run 2 (heap, Utah m400 aarch64: ms0640/0604/0611/0617) | [coordinator-local-write-backlog--combo--run2-equal-heap](convergence/coordinator-local-write-backlog--combo/coordinator-local-write-backlog--combo--run2-equal-heap.md) | equal-heap RF=3 ring: heap OOM 3/3 at 2 GiB (no faster replica needed); A reproduced on aarch64 3/3 |
+| 2026-11-16 | unprotected / default | U1 (JVM direct, pc96) | [concurrent_writes+max_mutation_size--inflight-DOB-fill](candidates/concurrent_writes+max_mutation_size--inflight-DOB-fill/concurrent_writes+max_mutation_size--inflight-DOB-fill.md) | U1 direct OOM 2/14 at 576 MiB (candidate); no failure at auto / 1 GiB |
+| 2026-11-16 | bypass | B8 (commit-log replay, ms0625 aarch64) | [commitlog_max_outstanding_replay_bytes--accounting-mismatch](bypass/commitlog_max_outstanding_replay_bytes-accounting-mismatch/commitlog_max_outstanding_replay_bytes--accounting-mismatch.md) | no replay OOM at defaults 0/10; restore + flush stall: heap OOM 3/3 at 1 GiB (proposed, review pending) |
 
 ---
 
@@ -838,3 +841,55 @@ readings (family A: L = 2 × heap, direct = heap/2; family B: heap 2 GiB, direct
 - A-768 on pc96 `verified-OOM · deployment` (V1–V7 met at the documented heap share; researcher accepted 2026-11-16); case moved back to
   `convergence/`.
 
+## 2026-11-16/17 — S2 run 2, equal-heap RF=3 follow-up, heap (Utah m400 aarch64: ms0640 victim, ms0604/ms0611 replicas, ms0617 client; 21:15–01:21 EST)
+
+- Positive control on the new platform: run 1's condition A (2 GiB victim, 8 GiB replica) heap OOM **3/3** (+1 shakedown),
+  ≈ 63 k queued local `Mutation`s, CL=LOCAL_ONE 0/3. Never pooled with run 1's x86 arms.
+- **Equal-heap RF=3 ring (G1, all 2 GiB, CL=ONE): heap OOM 3/3**, same holder (≈ 63.4 k `Mutation` = `StorageProxy$4`);
+  replicas ≤ 25 % live, ≤ 77 pending. Two 8 GiB peers (G2): 3/3. CL=ALL 0/3 (2.4× writes), rate cap 1 500/s 0/3, each.
+- Mechanism: the coordinator is the slowest replica (93 % CPU vs ≈ 50 % on replicas); its copies to peers pass bounded
+  internode queues, its own copy the unbounded MutationStage; 33–64 k expired local writes per arm re-queued as hints.
+- Equal-heap RF=2 (run 1's topology, R1 2 GiB, 300 s): heap OOM 3/3 within 92 s (run 1's x86 arm survived at 81 %):
+  platform-dependent. CL=LOCAL_ONE there 0/3.
+- G1 at 4 GiB: no OOM, GC service loss 3/6 (97–98 % live); the backlog drains after the 90 s burst (300 s observation).
+- Proposed: G1 and G2 `verified-OOM · deployment` (unprotected); A unchanged + "reproduced on aarch64"; Eeq-RF2 `candidate` (V2 missing);
+  4 GiB `candidate` (service loss 3/6).
+- Case: [`coordinator-local-write-backlog--combo--run2-equal-heap`](convergence/coordinator-local-write-backlog--combo/coordinator-local-write-backlog--combo--run2-equal-heap.md). Evidence `pc96:/mydata/s2r2-evidence/`;
+  4 dumps kept on `ms0640:/mydata/s2r2/dumps/`, the rest reduced to histograms. All four nodes cleaned at 01:21 EST (no Java, scopes or cgroups; linger disabled).
+- *Statuses above are the agent's proposals; researcher's review pending.*
+
+## 2026-11-16 — U1 standalone, in-flight DOB fill of large mutations, JVM direct (pc96, 21:23–00:33 EST)
+
+- U1 (U = unprotected-accumulation lead) as its own case: one node, defaults, heap 2 GiB, 15 MiB mutations (< 16 MiB
+  `max_mutation_size`) from 8 client writers, protocol v4, HDD commit log. Auto direct resolves to **15,872 MiB** on
+  pc96 (G1 ⇒ `heap_limit` 31,744 / 2), not 7,936.
+- U_peak 632–752 MiB at auto / 1,024 / 768: no failure at deployment-resolved budgets. 512–640 MiB: every arm touches
+  the cap; `Bits.reserveMemory`'s forced-GC-and-wait loop rescues most. **U1 direct OOM 2/14 at 576 MiB** (E 1/3, E3 1/9,
+  240 s 0/2), stack `CommitLog.add:308` → `expandToFit`; dumps: DOB scratch 180–330 MiB. 608, 640 survive.
+- Competing endpoint: Netty's own counter (native v4 request frames, 416–564 MiB) killed 4 arms first (512 ×2, 576 ×2);
+  proposed as a new lead.
+- Control 512 KiB at the same offered bytes/s 0/5 (U 127); `concurrent_writes: 8` 0/7 (U 379–439, same throughput);
+  4 / 8 MiB, 1 / 4 writers stay at 200–379 MiB; `dob.allocate_type=ONHEAP` U 51; `max_mutation_size: 4MiB` rejects all.
+- CASSANDRA-21656 WIP branch (`5a88d42`) direct-serializes only mutations < 1,000,000 B: does not cover U1.
+- Proposed **`candidate`** (V1 unmet; V2–V7 met; label would be `deployment`). Case:
+  [`concurrent_writes+max_mutation_size--inflight-DOB-fill`](candidates/concurrent_writes+max_mutation_size--inflight-DOB-fill/concurrent_writes+max_mutation_size--inflight-DOB-fill.md).
+  Data `pc96:/mydata/u1/runs/` (8.9 GB, 6 dumps). Cleanup verified.
+- *Statuses above are the agent's proposals; researcher's review pending.*
+
+## 2026-11-16 — B8 commit-log replay accounting mismatch, lead N4 (ms0625, aarch64; 19:15–22:05 MST)
+
+- Tiny-cell map writes (B6 payload, ≈ 10 / 64 / 256 KiB serialized) until the memtable pool is full, `kill -9`, restart at the
+  same heap; container 2 × heap, swap 0; constraints default. **Replay started 10/10 (512 MiB–2 GiB)**: the replayed tail is
+  one pool's worth (506–570 MiB of memtable charge at 2 GiB) and replay is reader-bound (0 Full GCs at ≥ 1 GiB).
+- The runtime load is the harder phase: heap OOM 2/2 at 512 MiB (S2 / B6 write path); replay afterwards started 2/2.
+- Ledger (Byteman queue delay, diagnostic): at the 1,024 / 64 MiB bound the queue holds ≈ 947 MiB vs ≈ 63 MiB counted
+  (15.0×, N3 copies 1.0×); blob 2.2×; count 64 → 76 MiB; 2 and 8 GiB start 4/4.
+- Restore emulation X (sstables removed, ≈ 3 GiB of charge replayed through the pool): started 4/4, 1 live `Mutation`
+  mid-replay. X + 10 s Byteman flush stall at restart (S): **heap OOM in replay 3/3 at 1 GiB**; blob 0/3, replay count 64
+  0/3; 2 GiB starts at 70 % live.
+- Proposed: A `negative · deployment`; X `negative · diagnostic`; S `verified-OOM · diagnostic` (largest failing heap 1 GiB).
+  CASSANDRA-8639's serialized-byte unit confirmed as the gap; not an OOM at defaults. Researcher decides (filed in `bypass/`
+  by the S condition; `negatives/` if S is not accepted).
+- Case: [`commitlog_max_outstanding_replay_bytes--accounting-mismatch`](bypass/commitlog_max_outstanding_replay_bytes-accounting-mismatch/commitlog_max_outstanding_replay_bytes--accounting-mismatch.md).
+  Data `ms0625:/mydata/b8/runs/` (1.6 GB incl. the first S OOM dump, 1.4 GB). Cleanup verified 22:05 (no Cassandra, client or scope left).
+- *Statuses above are the agent's proposals; researcher's review pending.*

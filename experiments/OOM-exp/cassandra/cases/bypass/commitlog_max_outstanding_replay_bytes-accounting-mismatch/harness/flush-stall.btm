@@ -1,0 +1,9 @@
+# B8 diagnostic only: stall every memtable flush of keyspace b8 for -Db8.flushdelay ms (default 30000) before it
+# writes, standing in for a data-disk stall during start-up. Only flushes run while this agent is loaded (restart).
+RULE b8 flush stall
+CLASS org.apache.cassandra.db.memtable.Flushing$FlushRunnable
+METHOD writeSortedContents
+AT ENTRY
+IF $0.toFlush.metadata().keyspace.equals("b8")
+DO Thread.sleep(Long.getLong("b8.flushdelay", 30000L).longValue())
+ENDRULE

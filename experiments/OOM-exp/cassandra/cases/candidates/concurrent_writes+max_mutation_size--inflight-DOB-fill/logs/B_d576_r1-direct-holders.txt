@@ -1,0 +1,33 @@
+hop 1: 236 targets -> 287 referrers, 173 to follow
+hop 2: 173 targets -> 632 referrers, 600 to follow
+hop 3: 600 targets -> 1511 referrers, 1076 to follow
+hop 4: 1076 targets -> 2030 referrers, 849 to follow
+hop 5: 849 targets -> 1847 referrers, 945 to follow
+hop 6: 945 targets -> 1880 referrers, 723 to follow
+DirectByteBuffer instances: 415; owners (allocateDirect) 173 = 284.7 MiB; mapped 60 = 960.0 MiB; slices of owners 19; other 163
+Netty PlatformDependent: DIRECT_MEMORY_COUNTER=520.0 MiB (counter object present), DIRECT_MEMORY_LIMIT=603979776, USE_DIRECT_BUFFER_NO_CLEANER=1, MAX_DIRECT_MEMORY=603979776
+DirectByteBuffers without cleaner and without a known owner (Netty no-cleaner / JNI / slices of those): 163, total capacity 1076.6 MiB (upper bound; slices may overlap)
+
+Live direct memory by holder (owners = 284.7 MiB):
+  O: DataOutputBuffer scratch                             180.0 MiB   63.2 %
+  O: no strong referrer (garbage awaiting Cleaner)         60.0 MiB   21.1 %
+  O: hints buffers                                         32.2 MiB   11.3 %
+  P: BufferPool chunks, no live consumer                    8.0 MiB    2.8 %
+  O: netty / NIO buffers                                    3.4 MiB    1.2 %
+  O: storage I/O buffers                                    1.1 MiB    0.4 %
+
+Example referrer chain per category (buffer <- holder <- ...):
+  O: netty / NIO buffers:
+      [Ljava.lang.Object;[].[] <- io.netty.util.internal.InternalThreadLocalMap.indexedVariables <- io.netty.util.concurrent.FastThreadLocalThread.threadLocalMap
+  O: DataOutputBuffer scratch:
+      org.apache.cassandra.io.util.DataOutputBuffer$1$1.buffer
+  O: hints buffers:
+      org.apache.cassandra.hints.HintsBuffer.slab
+  P: BufferPool chunks, no live consumer:
+      java.nio.DirectByteBuffer.att <- org.apache.cassandra.utils.memory.BufferPool$Chunk.slab
+  O: storage I/O buffers:
+      org.apache.cassandra.io.compress.CompressedSequentialWriter.compressed
+  O: no strong referrer (garbage awaiting Cleaner):
+      
+
+Owner sizes (bytes x count, top 8): 49152 x 65, 128 x 37, 16384 x 20, 15728683 x 8, 5172 x 6, 262144 x 5, 31457366 x 4, 279 x 3

@@ -1,0 +1,33 @@
+hop 1: 219 targets -> 275 referrers, 163 to follow
+hop 2: 163 targets -> 502 referrers, 471 to follow
+hop 3: 471 targets -> 1102 referrers, 778 to follow
+hop 4: 778 targets -> 1588 referrers, 761 to follow
+hop 5: 761 targets -> 1560 referrers, 748 to follow
+hop 6: 748 targets -> 1487 referrers, 616 to follow
+DirectByteBuffer instances: 366; owners (allocateDirect) 161 = 478.7 MiB; mapped 27 = 352.0 MiB; slices of owners 19; other 159
+Netty PlatformDependent: DIRECT_MEMORY_COUNTER=488.0 MiB (counter object present), DIRECT_MEMORY_LIMIT=536870912, USE_DIRECT_BUFFER_NO_CLEANER=1, MAX_DIRECT_MEMORY=536870912
+DirectByteBuffers without cleaner and without a known owner (Netty no-cleaner / JNI / slices of those): 159, total capacity 1026.5 MiB (upper bound; slices may overlap)
+
+Live direct memory by holder (owners = 478.7 MiB):
+  O: DataOutputBuffer scratch                             315.0 MiB   65.8 %
+  O: no strong referrer (garbage awaiting Cleaner)        120.0 MiB   25.1 %
+  O: hints buffers                                         32.2 MiB    6.7 %
+  P: BufferPool chunks, no live consumer                    8.0 MiB    1.7 %
+  O: netty / NIO buffers                                    3.4 MiB    0.7 %
+  O: storage I/O buffers                                    0.0 MiB    0.0 %
+
+Example referrer chain per category (buffer <- holder <- ...):
+  O: netty / NIO buffers:
+      [Ljava.lang.Object;[].[] <- io.netty.util.internal.InternalThreadLocalMap.indexedVariables <- io.netty.util.concurrent.FastThreadLocalThread.threadLocalMap
+  O: DataOutputBuffer scratch:
+      org.apache.cassandra.io.util.DataOutputBuffer$1$1.buffer
+  P: BufferPool chunks, no live consumer:
+      java.nio.DirectByteBuffer.att <- org.apache.cassandra.utils.memory.BufferPool$Chunk.slab
+  O: no strong referrer (garbage awaiting Cleaner):
+      
+  O: hints buffers:
+      org.apache.cassandra.hints.HintsWriteExecutor.writeBuffer
+  O: storage I/O buffers:
+      org.apache.cassandra.io.compress.CompressedSequentialWriter.buffer
+
+Owner sizes (bytes x count, top 8): 49152 x 65, 128 x 24, 16384 x 19, 31457366 x 12, 5172 x 6, 15728683 x 4, 675 x 3, 2662 x 3

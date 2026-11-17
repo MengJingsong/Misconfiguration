@@ -1,0 +1,10 @@
+# B8 diagnostic only: slow every commit-log replay task on the mutation stage (applied or skipped) so the
+# replayer's outstanding queue fills to its bound (64 MiB serialized / 1,024 mutations). Stands in for a
+# slow apply stage (storage stall, index maintenance). Delay in ms from -Db8.delay (default 1000).
+RULE b8 slow replay apply
+CLASS org.apache.cassandra.db.commitlog.CommitLogReplayer$MutationInitiator$1
+METHOD runMayThrow
+AT ENTRY
+IF TRUE
+DO Thread.sleep(Long.getLong("b8.delay", 1000L).longValue())
+ENDRULE
