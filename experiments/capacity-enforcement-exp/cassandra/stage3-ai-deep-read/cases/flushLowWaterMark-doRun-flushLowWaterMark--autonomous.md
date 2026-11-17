@@ -442,3 +442,16 @@ No prediction or row was changed after a reading.
 **Overlap.** The closed `internode_application_send_queue_capacity-releaseCapacity-pendingCapacityInBytes--autonomous` (Confirmed — caps) shows that the same in-flight bytes are inside `pendingBytes`: here pending reached the send-queue limit, 132 MiB = 4 MiB + 128 MiB, during every V1–V3 freeze. This pair of water marks is a sub-limit inside that cap, as this file's Ground says.
 
 **The Estimate line is left as filed (negative).**
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | `EventLoopDelivery.flushingBytes` (`OutboundConnection.java:741`): the canonical (serialized-at-current-version) size of frames handed to Netty whose write did not complete synchronously (`:851`), released in the write listener (`:866-867`), i.e. when Netty reports the write done, about when the frame buffer is released. Real memory per frame is the pool allocation `payloadAllocator.allocate(true, maxSendBytes)` (`:782`, or `messageSize` for one oversized message, `:810`), not the canonical bytes; stage 4 measured the networking pool at about 1.8 x the counted bytes (results file, cluster D). `flushLowWaterMark` itself (`OutboundConnectionSettings.java:87`, literal `1 << 15` at `:104`) counts nothing: it is only the resume threshold at `:871`. |
+| **E2 At the limit** | Graceful. The stop is the high mark: `flushingBytes >= flushHighWaterMark` sets `isWritable = false` (`:854-859`), and `doRun` then returns at once (`:759-760`); further messages stay in the application queue under `pendingBytes`. The low mark only re-enables delivery (`:871-875`). Overshoot past the high mark is at most one frame (≤ `LARGE_MESSAGE_THRESHOLD`, `OutboundConnections.java:69-70`) or one message ≤ `internode_max_message_size`. Nothing is allocated on a disallow path. |
+| **E3 Owner and multiplier** | Per event-loop outbound connection (urgent and small links; the large link uses `AsyncMessageOutputPlus` instead): two per peer, so 2 x peers x (64 KiB + one frame) counted, roughly 2 x 1.8 x 128 KiB real per peer at stock. No limit caps the in-flight total directly, but these bytes are inside `pendingBytes` (`:120-123`), which the send-queue capacity and the endpoint/global reserves cap. |
+| **E4 Budget domain** | Direct memory, networking `BufferPool` (`BufferPools.java:43-44`; default `networking_cache_size` = min(128 MiB, heap/16), `DatabaseDescriptor.java:573-574`; beyond it the pool overflows to unpooled direct). Shared with inbound frames, CQL native-transport frames and streaming. Netty's own accounting does not see these frames (`NoSizeEstimator`, `OutboundConnectionInitiator.java:197`). At stock marks the in-flight share is small next to the send-queue reserves (4 MiB/link + 128 MiB/endpoint + 512 MiB global). |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate (`negative`: the low mark is a resume threshold; the peak follows the high mark and sits inside the send-queue cap; the canonical-vs-pool gap of about 1.8 x is per 64 KiB link and belongs to the send-queue cap's case).
+**Stage-4 claim to add:** none

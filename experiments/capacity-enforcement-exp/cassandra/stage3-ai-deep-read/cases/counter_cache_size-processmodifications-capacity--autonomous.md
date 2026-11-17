@@ -90,3 +90,16 @@
 ## D. Stage-4 feedback
 
 `none yet`
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The Caffeine weight per entry, `key.unsharedHeapSize() + value.unsharedHeapSize()` (`CaffeineCache.java:61-69`): `CounterCacheKey` = shallow `EMPTY_SIZE` + the two `byte[]` (`CounterCacheKey.java:46-48, 152-156`), `ClockAndCount` = shallow `EMPTY_SIZE` (`ClockAndCount.java:28, 46-48`); `ObjectSizes.measure` is shallow (`ObjectSizes.java:251-254`). Not counted: Caffeine's own node per entry (weight, access-order links) and table slot, roughly 50-70 B against about 100-150 B counted, so real heap is about 1.3-1.6x the charged weight. Released at eviction or invalidation (maintenance on `ImmediateExecutor`, `CaffeineCache.java:54-57`); freed at the next GC. |
+| **E2 At the limit** | Graceful: Caffeine evicts to `maximumWeight` (`CaffeineCache.java:52-57`). The entry-pointer check (`CounterMutation.java:213`) and `ColumnFamilyStore.java:2499-2510` only skip the cache when capacity is 0; the disallow path reads from the table instead. No allocation without a bound. |
+| **E3 Owner and multiplier** | One node-wide cache for all tables (`CacheService.java:172-179`). Multiplier 1. |
+| **E4 Budget domain** | Heap. Auto default `min(max(1, 2.5% of heap), 50)` MiB (`DatabaseDescriptor.java:832-836`; yaml `counter_cache_size:` empty, `conf/cassandra.yaml:595`), so real counter-cache heap stays under about 65-80 MiB. Shares the heap with the key cache (auto, `conf/cassandra.yaml:525`), memtables (1/4 heap, `DatabaseDescriptor.java:586-587`) and the prepared-statement cache; their defaults together stay well inside a default heap. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (positive), with real heap about 1.3-1.6x the configured capacity because Caffeine's per-entry node is not weighed (E1 sets the factor, not the bound).
+**Stage-4 claim to add:** with the cache full at 32 MiB, the class-histogram bytes of `CounterCacheKey` + `ClockAndCount` + their `byte[]` + Caffeine nodes exceed the reported cache size by a constant per-entry factor (about 1.3-1.6x) and do not grow with further distinct counters.

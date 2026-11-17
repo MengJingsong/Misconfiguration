@@ -129,3 +129,16 @@ Bypass/overshoot: the check never rejects work. Both outcomes return results, an
 ## D. Stage-4 feedback
 
 `none yet`
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | `numRows`, the (segment row id, ordinal) pairs of one segment, against a row-count cost threshold `max(topK, 0.25 x maximum_node_connections x expectedNodesVisited)` (`VectorIndexSegmentSearcher.java:341-365`). No bytes. Not in the case file: the candidate list reaching `orderResultsBy` is capped upstream at `MAX_MATERIALIZED_KEYS` = 16,000 (`QueryController.java:96, 441-453`; `CassandraRelevantProperties.java:476`); a WHERE clause matching more returns null and the query falls back to ANN-then-post-filter (`QueryController.java:390-397`). So `numRows` ≤ 16,001. Real bytes per candidate: the shared `PrimaryKey` list (about 100-200 B a key), a `keysInRange` copy (a reference a key, `:288-291`), `int[2 x keysInRange]` (`SegmentRowIdOrdinalPairs.java:45`, 8 B a key) and, on brute force, a `NeighborQueue` of `size()` (`SegmentRowIdOrdinalPairs.java:103, 116`). All are freed when the query's iterators close. |
+| **E2 At the limit** | No limit: both outcomes run and return results. Brute force allocates O(numRows); the graph branch reuses a thread-local `SparseFixedBitSet` sized to the graph (`VectorIndexSegmentSearcher.java:81, 93, 228-232`). No failing path depends on the check. |
+| **E3 Owner and multiplier** | Per query x per on-disk segment. Segments run one after another (`QueryController.java:400-409`), but each segment's brute-force queue is kept in `intermediateResults` until the merge ends. Per query: about 2-3 MB of keys plus a few hundred KB per segment. Concurrency: `concurrent_reads: 32` (`conf/cassandra.yaml:722`), so on the order of 100-200 MB of short-lived heap at worst across the read stage. |
+| **E4 Budget domain** | Heap (query transient). Shares it with memtables (1/4 heap), caches and the resident per-segment graph/PQ data (`indexFileCacheSize`, `VectorIndexSegmentSearcher.java:99-102`), which this check does not touch. Nothing here adds up past a default heap. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (negative); the per-query candidate memory is bounded by `MAX_MATERIALIZED_KEYS` (16,000), not by this check.
+**Stage-4 claim to add:** `numRows` at line 349 never exceeds 16,001: a predicate matching more keys (B3c's 100,000 and 1,000,000-candidate arms) traces "Switching to ORDER BY then post filter" and never reaches `orderResultsBy`, so candidate arms must stay ≤ 16,000.

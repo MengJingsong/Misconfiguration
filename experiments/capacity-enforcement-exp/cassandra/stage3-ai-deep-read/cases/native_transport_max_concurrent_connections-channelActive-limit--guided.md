@@ -204,3 +204,16 @@ Made at the step-0 audit, before any run or reading; each is a dated change that
 ## 11. Notes
 
 - The earlier `predicted-negative.md` entry cites `ConnectionLimitHandler.java:93,121`; the lines still match.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Connections on channels that carry the handler (`ConnectionLimitHandler.java:85-93`, per IP `:121`), decremented at `channelInactive` (`:136`); the handler is installed only if a limit is > 0 when the channel is built (`PipelineConfigurator.java:240-244`). Not counted: what each connection holds. Idle, about 1.33 KB of heap (stage 4). In use, each connection's own `native_transport_receive_queue_capacity` (1 MiB, `Config.java:302`, passed at `PipelineConfigurator.java:306`) admits request bytes without charging the endpoint or global reserve: `AbstractMessageHandler.java:419` succeeds against the per-connection capacity before any reserve is tried (`:428`); released after processing (`:461`). |
+| **E2 At the limit** | Graceful: the channel is closed at `channelActive` (`:96-97`, per IP `:124-126`). At the default -1 (`Config.java:289-290`) there is no limit and the handler is not installed. |
+| **E3 Owner and multiplier** | Per node and per client IP. At defaults the connection count is unbounded (file descriptors only). The byte reserves cap only the excess beyond each connection's 1 MiB: global heap/10, per IP heap/40 (`DatabaseDescriptor.java:649-656`). Nothing caps connections × 1 MiB. Stage 4 saw it: with the reserves at 16 MiB, 64 × 1 MiB requests were all held with 4,736 B in the reserve. |
+| **E4 Budget domain** | Heap (decoded requests; stage-4 control: +76.3 MB of heap for 64 held 1 MiB requests), shared with memtables (heap/4), the request reserve (heap/10) and reads. At an 8 GiB heap, 2,000 connections with one 1 MiB request each = about 2 GiB, beyond the 0.8 GiB reserve, on top of the other heap/4 + heap/10 budgets. |
+| **OOM-lead flag** | E3 — each connection's 1 MiB receive-queue allowance is outside the global/per-IP reserves and the connection count is unlimited by default: ~1 MiB held heap per busy connection (2,000 connections ≈ 2 GiB at an 8 GiB heap, beyond heap/10). |
+
+**Real-memory estimate:** positive when the limit is set (it is the only cap on the connections × (1.33 KB + 1 MiB) term), but off at defaults; decided by E3.
+**Stage-4 claim to add:** with the connection limits at -1 and the reserves at default, C connections (C = 500 / 1,000 / 2,000) each holding one ~1 MiB request in flight raise live heap by about C × 1 MiB while the global reserve's `using()` stays near 0.

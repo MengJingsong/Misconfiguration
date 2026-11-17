@@ -177,3 +177,16 @@
 - **Estimate:** `negative` stands; the unit tier and the charged gauge say it does not cap. Outcome class recorded as undetermined by the protocol's wording because of the cluster row; the evidence is a true negative.
 
 
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The :273 check compares one region's offset with its capacity (≤ `MAX_REGION_SIZE` 1 MiB, `NativeAllocator.java:46`, `:168`). The pool counter is charged the requested bytes only (`offHeap().allocate(size, opGroup)`, `:141`) while whole regions are malloc'd (`:176`, oversize `:190`). Uncharged: the dead tail of each abandoned region (requests are ≤ `MAX_CLONED_SIZE` 128 KiB, `:47`, `:144-145`, and regions grow to 1 MiB, `:163-168`, so the tail is < 1/8 of a full-size region) and the static race stash (8 per size class, `:212`; up to about 16 MiB process-wide). Regions are freed at `setDiscarded` (`:200-206`), when the pool charge is also released. |
+| **E2 At the limit** | At :273, graceful: the region is retired and another allocated. At the pool limit the writer waits on `hasRoom`; a blocking op group allocates anyway (`MemtableAllocator.java:180-183`), a small overshoot. |
+| **E3 Owner and multiplier** | Per memtable allocator; regions per memtable are unbounded; all memtables' charges are capped together by `memtable_offheap_space` (heap/4, `DatabaseDescriptor.java:582-583`). |
+| **E4 Budget domain** | Native memory, but only with `memtable_allocation_type: offheap_objects` (`AbstractAllocatorMemtable.java:106-108`). The shipped default is `heap_buffers` (`Config.java:524`, `conf/cassandra.yaml:825`), which uses `SlabPool` with no off-heap limit (`AbstractAllocatorMemtable.java:100-102`), so `NativeAllocator` is not reached at defaults. |
+| **OOM-lead flag** | none — not reachable at default settings; when enabled, the uncharged part is under 1/8 per region plus a ≤ 16 MiB static stash. |
+
+**Real-memory estimate:** `same as Estimate`
+**Stage-4 claim to add:** none

@@ -93,3 +93,16 @@ Full-ring queries skip the check (MatchAllBits, graph search). A sibling check i
 ## D. Stage-4 feedback
 
 `none yet`
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | In-range memtable keys `resultKeys.size()` (rows) against `max(LIMIT, expectedNodesVisited)` (`VectorMemoryIndex.java:182, 188-190, 238-245, 275-285`). No bytes. The brute-force branch builds one `PrimaryKeyWithScore` per key (4 fields, `PrimaryKeyWithScore.java:37-41`, about 32 B) in an `ArrayList` and copies it into a `PriorityQueue` (`VectorMemoryIndex.java:248-260`): about 40 B a key. Vectors are referenced, not copied. Freed when the query ends. The fitted formula lets brute force run on a large share of the memtable: by my arithmetic of `:275-285`, up to about 24 % of a 1,000,000-node graph at LIMIT 1000 (about 40 % at 100,000 nodes), so about 10 MB a query at 1 M rows. LIMIT ≤ 1000 (`StorageAttachedIndex.java:503-504`; `CassandraRelevantProperties.java:479`). |
+| **E2 At the limit** | No limit: above the cutoff the graph search runs with a range filter (`VectorMemoryIndex.java:193, 200-201`); both branches return results. No failing path. |
+| **E3 Owner and multiplier** | Per query x per memtable vector index (live and flushing memtables). Up to `concurrent_reads: 32` (`conf/cassandra.yaml:722`) at once: about 300 MB of short-lived heap at a 1 M-row memtable, less for smaller ones. The graph size is bounded by memtable flushing. |
+| **E4 Budget domain** | Heap (query transient). The memtable it scans is charged to `memtable_heap_space` (1/4 heap, `DatabaseDescriptor.java:586-587`); the transient lists are a fraction of the memtable footprint per query. Shares the heap with caches and read-path objects. No overrun at defaults. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (negative).
+**Stage-4 claim to add:** A2's bound "below max(LIMIT, ~graphSize)" is loose: with the fitted formula the brute-force list reaches about 18-40 % of the graph at 100,000 nodes (LIMIT 10-1000) and about 9-24 % at 1,000,000 nodes; B2c's 50,000-of-100,000 cell should take the graph branch, 5,000 brute force.

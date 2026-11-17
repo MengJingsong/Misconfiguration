@@ -277,3 +277,16 @@ frozen at sha256 `86862af8…5a09` after twelve audit amendments; uncommitted).
   - Stress `no-warmup`.
   - `listpendinghints` omits the open writer and the file being dispatched (`HintsStore.java:108-125`), so it cannot show that delivery is
     complete.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Uncompressed bytes of hint entries (hint + 12 B framing) read since the page started, `position.subtract(offset)` against `PAGE_SIZE = 512 << 10` (`HintsReader.java:56, 186, 292`). Admitted object on the raw path (same messaging version, `HintsDispatcher.java:137-139`): one heap `byte[]` copy per hint of the same size (`Hint.java:239-242`), so real ≈ counted. On the decode path (version mismatch, e.g. a rolling upgrade) each hint becomes a deserialized `Mutation`, a few times its serialized size (not measured). Held by the sender only until written to the connection (callbacks keep no payload); the page is released when every callback completes or times out (`HintsDispatcher.java:144-159`). |
+| **E2 At the limit** | Graceful back-pressure: the iterator ends the page and the dispatcher waits for all responses before reading more (`HintsDispatcher.java:144-151`); failure or timeout aborts and the page is retried later. Overshoot one entry, at most one mutation of `max_mutation_size` (default half the 32 MiB commit-log segment, 16 MiB). An aborted page can still sit on the receiver's MUTATION stage while the retry is sent, until the `HINT_REQ` write timeout expires it (`Verb.java:118`). |
+| **E3 Owner and multiplier** | Per dispatcher: one task per target host (`HintsDispatchExecutor.java:102-113`) on `max_hints_delivery_threads: 2` (`conf/cassandra.yaml:93`), so a sender holds at most 2 pages. A returning node can receive from up to 2 x (nodes − 1) dispatchers at once; nothing in hints caps that total, but the internode inbound reserves do (4 MiB per connection, 128 MiB per endpoint, 512 MiB global, `Config.java:257-261`). At 100 peers: about 100 MiB of serialized hints, under the 512 MiB global reserve. |
+| **E4 Budget domain** | Heap (the `byte[]` copies, decoded mutations, MUTATION-stage work). Shares the heap with normal writes on the receiver's MUTATION stage and with memtables, which the applied hints then fill under `memtable_heap_space` (1/4 heap, `DatabaseDescriptor.java:586-587`). The hints write path (direct buffers) is a separate domain. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** positive per dispatcher (stage 4 cluster: the receiver held exactly k hints, live `[B` up ≤ 1.4 MB); the node-wide amount on a receiver is set by E3 (fan-in of 2 x (nodes − 1) pages, bounded by the internode receive reserve, not by this constant).
+**Stage-4 claim to add:** on the decode path (hints file messaging version ≠ peer's), the sender's transient heap per page stays within a small multiple of 512 KiB (one page of decoded `Mutation`s), not the backlog.

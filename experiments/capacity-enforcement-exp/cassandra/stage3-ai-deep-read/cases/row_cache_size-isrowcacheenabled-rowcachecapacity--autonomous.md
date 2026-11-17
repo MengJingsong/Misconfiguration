@@ -68,3 +68,16 @@ Literal: `0` in `> 0` (both comparisons); no named constant declaration.
 ## D. Stage-4 feedback
 
 `none yet`
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The gate counts nothing: `caching.cacheRows() && rowCache.getCapacity() > 0` (`ColumnFamilyStore.java:3262`). At default `row_cache_size: 0MiB` (`Config.java:474`) the provider is `NopCacheProvider` (`CacheService.java:146-147`), whose `capacity()` is 0 (`NopCacheProvider.java:32-35`), so the gate is false for every table. When enabled, OHC charges the serialized key and value (`OHCProvider.java:40-43`, key/value serializers) against `row_cache_size`; per-entry and hash-table overhead inside OHC: unknown (OHC library source is not in the pinned tree; `OHCacheLinkedImpl` allocation accounting would settle it). On a miss, the partition is first built on heap as a `CachedBTreePartition` (`SinglePartitionReadCommand.java:604`; whole partition when `rows_per_partition: ALL` or no clustering columns, `:547-549`), and that heap copy is not counted. |
+| **E2 At the limit** | Graceful: OHC evicts to stay within capacity (library behaviour, not verified in the pinned tree); the builder sets `throwOOME(true)` (`OHCProvider.java:43`), so (per OHC semantics, not verified in the pinned tree) a failed native allocation surfaces as an `OutOfMemoryError` rather than a silent miss. A runtime enable from 0 is impossible: `NopCache.setCapacity` throws for any nonzero value (`NopCacheProvider.java:37-43`), which settles the A3 "overshoot" question (the gate cannot flip true on a Nop cache). |
+| **E3 Owner and multiplier** | One node-wide cache shared by all tables with `rows_per_partition > 0`; the capacity caps their total. The uncounted heap copy is per concurrent cache-miss read (bounded by `ReadStage`, 32 threads at default), each up to one partition. |
+| **E4 Budget domain** | Native memory (OHC, `Unsafe` allocations, outside `-XX:MaxDirectMemorySize`), shared with memtable off-heap allocations, the chunk cache and other native users; no limit adds them up. The miss-path copy is heap, shared with all read-path allocations. At default all of this is zero because the cache is off. |
+| **OOM-lead flag** | none (at defaults the row cache is off; the uncounted heap copy of a whole partition on a miss needs a non-default `row_cache_size` and `rows_per_partition`) |
+
+**Real-memory estimate:** same as Estimate for the cache store (`positive`: the capacity bounds OHC's charged bytes); undetermined for real native bytes (E1: OHC per-entry and table overhead) and, with the cache enabled, the miss path's heap copy is outside the capacity.
+**Stage-4 claim to add:** with `row_cache_size: 64MiB` and `rows_per_partition: ALL`, process RSS growth minus OHC-reported size stays within a few percent of 64 MiB (measures OHC overhead), and reads of partitions larger than the capacity raise heap per concurrent read by about the partition size while the cache size does not change.

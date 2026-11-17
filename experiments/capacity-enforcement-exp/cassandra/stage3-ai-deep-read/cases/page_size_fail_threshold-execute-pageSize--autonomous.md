@@ -442,3 +442,16 @@ conf/cassandra.yaml
     rejected.
 - **Note for stage 3.** The heap Δ counts all allocation in the window, not only retained heap: no GC fell inside a window.
   Q3's Δ is about 6× its value bytes. The TopK and NODE_LOCAL bypasses listed in A3 were not run.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The client's fetch size in rows (`pageSize`), checked once per query at `SelectStatement.java:517`, only on the paged branch. Not counted: bytes per row, and anything on the unpaged branch. The real memory is the coordinator's materialized result (`processResults`, `:561`, one `ResultMessage.Rows`) plus the replica responses; stage 4 measured about 6× the value bytes allocated (50,000 × 2 KiB rows → 688 MiB). |
+| **E2 At the limit** | On the paged branch, graceful: `GuardrailViolatedException` before any read (`Threshold.java:128-138`). The selector at `:338` (and `:602`) sends paging-off queries, queries with LIMIT ≤ fetch size, and TopK queries to the unpaged branch, which never calls the guard and builds the whole result in one response: the disallow is skipped, the allocation still happens. At the default -1 (`Config.java:873-874`) nothing is rejected anywhere. |
+| **E3 Owner and multiplier** | Per request; exempt for superusers and internal callers (`Guardrail.java:93-96`). Concurrent requests are bounded only by `native_transport_max_threads` 128 (`Config.java:283`) and the queues behind it; no total. |
+| **E4 Budget domain** | Coordinator heap (and replica heap for each data response), shared with memtables (heap/4) and the native request reserve (heap/10). The byte-based guards on the same domain are off by default: `read_thresholds_enabled` false, `coordinator_read_size_*` / `local_read_size_*` null (`Config.java:526-530`). |
+| **OOM-lead flag** | E2 — at defaults (guardrail -1, read-size thresholds off), and even with the guardrail set, an unpaged SELECT (paging off, or LIMIT ≤ fetch size) materializes the whole result on the coordinator: stage 4 measured ~1.15 GiB allocated for one 100,000 × 2 KiB-row query (≥ 200 MB of values retained until encoded); a handful of concurrent such queries exceed an 8 GiB heap. |
+
+**Real-memory estimate:** positive on the paged branch, negative on the unpaged branch; decided by E2 (which branch a reachable query takes).
+**Stage-4 claim to add:** retained (not allocated) coordinator heap of a held unpaged read against its result bytes, and k = 1 / 4 / 8 concurrent unpaged 100,000-row reads at an 8 GiB heap with defaults: heap rises with k without a guardrail rejection.

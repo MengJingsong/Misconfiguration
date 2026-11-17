@@ -429,3 +429,16 @@ All paths below are in the source tree at `systems/cassandra/source/` in this re
   - The positive-control knob and the receive-key wiring come from `internode_application_send_queue_capacity-acquireCapacity-…--guided` (Confirmed).
   - The SIGSTOP pattern, `Jmx.java` and the daemon matcher come from `…-releaseCapacity-…--autonomous`.
   - The send-queue plateau C + endpoint reserve is observed again here (3 MiB − 311 B; 32 MiB − 837 B). It is not a new finding of this file.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | `maxSendBytes = min(pendingBytes() − flushingBytes, LARGE_MESSAGE_THRESHOLD)` (`OutboundConnection.java:766`), canonical message bytes, capped at LMT = 65536 − 21 (`CassandraRelevantProperties.java:388`, `OutboundConnections.java:69-70`); the check at `:767` only tests for zero. It sizes one frame buffer from the networking pool (`:782` → `FrameEncoder.java:64`, `getAtLeast`, rounded up to the pool unit; `finish()` returns the unused tail, `FrameEncoder.java:97-104`). The buffer lives until the write completes (synchronous: at once, `:843-848`; otherwise until the listener). Real bytes differ from the count only by rounding (< 2 KiB) and by the oversize path below. |
+| **E2 At the limit** | Graceful: packing stops at the first message that does not fit (`:805-806`) and the rest waits for the next frame. Overflow path: if the first message does not fit, a buffer of `messageSize` is allocated instead (`:808-812`), bounded only by `internode_max_message_size` (`:793-794`); normally unreachable because messages > LMT are routed to `LARGE_MESSAGES` (`OutboundConnections.java:215-229`). Above about 128 KiB of payload the encoder throws (`FrameEncoderCrc.java:71-72`). |
+| **E3 Owner and multiplier** | Per small/urgent outbound connection (two per peer); one sending frame plus frames in flight up to the 64 KiB high mark each. Per peer about 2 x (64 KiB + 2 x LMT) at default, i.e. ~0.4 MiB; 100 peers ≈ 40 MiB. No limit caps the in-flight total directly; the bytes are inside `pendingBytes` and so under the send-queue capacity and reserves (`:383-440`). |
+| **E4 Budget domain** | Direct memory, networking `BufferPool` (default min(128 MiB, heap/16), `DatabaseDescriptor.java:573-574`), overflow to unpooled direct beyond it; shared with inbound frames, the large-message link, native-transport frames and streaming. LMT-sized frames are a small share next to the send-queue reserves (4 MiB/link, 128 MiB/endpoint, 512 MiB global). |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate (`negative`: LMT sizes frames; per link the pool holds a few LMT-sized frames, stage 4 measured < 0.5 MiB per link, inside the send-queue cap).
+**Stage-4 claim to add:** none

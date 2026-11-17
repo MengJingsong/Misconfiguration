@@ -100,3 +100,16 @@ Steps: (1) trim `results` to this index's `keyBounds` (lines 210-214); (2) compu
 ## D. Stage-4 feedback
 
 `none yet`
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Keys (a count), not bytes: `resultsInRange.size()` against `max(limit, expectedNodesVisited)` (`VectorMemoryIndex.java:214-229`, `:238-246`, `:275-286`). The list is a per-index copy of the materialized keys, already capped at 16,000 by `MAX_MATERIALIZED_KEYS` (`QueryController.java:96`, `:428-456`, `CassandraRelevantProperties.java:476`). On the brute-force branch each key becomes a `PrimaryKeyWithScore` in an `ArrayList` and a `PriorityQueue` (`VectorMemoryIndex.java:248-269`), roughly tens of bytes each (about 1 to 2 MB at 16,000); held until the query's merge iterator is closed. |
+| **E2 At the limit** | Graceful: above the threshold the graph search runs over a filter view of the same list (`:232-235`); below it, brute force. Neither branch refuses or falls back to an unbounded allocation; the upstream cap switches to order-then-filter when exceeded (`QueryController.java:449-453`). |
+| **E3 Owner and multiplier** | Per query, per memtable index: `getTopKRows` calls `orderResultsBy` on every memtable index and every SSTable index in the view and holds all their iterators at once (`QueryController.java:403-409`). So per query about (memtables in view) x up to 16,000 scored keys on this path; times concurrent reads (`concurrent_reads` 32, `Config.java:179`): order of 32 x 2 x 2 MB, about 100 MB at the extreme. |
+| **E4 Budget domain** | Heap, shared with the on-heap memtable vector graph (bounded by the memtable space settings), other query state and caches. The transient lists are small next to the graph and the memtable budget. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate`
+**Stage-4 claim to add:** none

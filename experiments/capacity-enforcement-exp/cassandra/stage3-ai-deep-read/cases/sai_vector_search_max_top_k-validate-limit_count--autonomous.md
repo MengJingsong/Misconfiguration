@@ -102,3 +102,16 @@ Overshoot/bypass: the cap is on row count; row size is unbounded by it (wide row
 ## D. Stage-4 feedback
 
 `none yet`
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The ANN query's LIMIT in rows (`StorageAttachedIndex.java:503`) against `MAX_TOP_K`, 1000 by default (`CassandraRelevantProperties.java:479`, `IndexWriterConfig.java:57`). On a node, `VectorTopKProcessor` keeps at most `limit + 1` rows in its queue (`VectorTopKProcessor.java:91`, `:121-123`), but non-row unfiltereds (range-tombstone markers) are kept without that cap (`:110-114`), relying on the tombstone threshold. Row bytes are not counted. Held for the query's duration and freed when the result is returned. |
+| **E2 At the limit** | Graceful: `InvalidRequestException` before execution (`:503-504`); a query without LIMIT is rejected separately. No fallback allocation. |
+| **E3 Owner and multiplier** | Per query and per replica, not per coordinator. For top-K range reads the coordinator uses `ScanAllRangesCommandIterator` (`RangeCommands.java:81-82`): one full-range command to every contacted node at once (`ScanAllRangesCommandIterator.java:93-103`), with `readQuorum()` = all of them (`ReplicaPlan.java:181-184`), so the coordinator waits for and holds up to N_nodes × K rows (plus tombstones) per query. Concurrent queries are not capped (native transport, 128 threads). |
+| **E4 Budget domain** | Coordinator and replica heap, shared with memtables (heap/4), the native request reserve (heap/10) and other reads; byte-based read thresholds are off by default (`Config.java:526-530`). |
+| **OOM-lead flag** | E3 — the coordinator holds one response of up to K = 1000 rows from every contacted node at once: with 1536-dim float vectors (~6 KiB/row) that is ~6 MiB per node, ~600 MiB for one query on a 100-node cluster, more with wider non-vector columns; the limit caps neither the node count nor the row bytes. |
+
+**Real-memory estimate:** positive per replica; undetermined at the coordinator, decided by E3 (held heap of a top-K query as the number of contacted nodes grows).
+**Stage-4 claim to add:** coordinator held heap of one ANN query at LIMIT 1000 grows linearly with the number of nodes contacted (e.g. 1 / 3 / 6 nodes, 1536-dim rows), about K × row bytes per node.

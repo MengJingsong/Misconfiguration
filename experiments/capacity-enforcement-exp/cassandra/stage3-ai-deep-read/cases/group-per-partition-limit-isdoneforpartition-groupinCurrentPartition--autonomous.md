@@ -104,3 +104,16 @@ Stage 4, 2026-10-27 (results: `cassandra/stage4-runtime-verification/results/gro
 - **Verdict.** Unit tier **Confirmed** (B2g row 1) — does not cap: groups = min(N,R) exactly, rows pulled N+1, retained heap flat within 0.08 %, a cloning consumer moves retained heap 39.6 MB. Cluster tier **Not confirmed (no matching row)**: 1200 queries returned exactly N groups, disk unchanged, the page-size control moved the peak heap by 737 MB, but at N=absent the sampled peak was 54-55 MB against 8 MB at N=1 (frozen rule 30 MB) and the forward sweep was not strictly monotone. Outcome class: undetermined.
 - **Amendments made at the audit (all dated 2026-10-27, before any reading):** A3 line cite `:842`; B2a (one JVM, `ant testsome`); B3b (`aggregation_subpage_size_in_kb` does not exist in 5.0.9, replaced by a page-size control, `SelectStatement.java:899-911`); B3c (2 M rows x 100 B is 200 MB, not 2 GB); B3d (heap instrument); B3f (30 MB threshold); B3h.
 - **For stage 3.** (1) The case's estimate reasoning treats the page size as background; for a GROUP BY select the page size is itself a row limit of the same `DataLimits` (`SelectStatement.java:899-911`), and exploratory arms at page size 300000 show the peak heap following the page content (8 / 23 / 792 MB for N = 1 / 10000 / absent), so the limit shapes the result size of a large page. B3g has no row for this outcome. (2) A heap statistic for a long arm needs a drift correction: with Cassandra's G1 settings the post-collection floor rose 0 -> 40 MB over a 375 s arm (`diag-drift.txt`), which is what missed the 30 MB rule; the first 157 samples of that arm peak at 14.8 MB, equal to the 10000-group arm.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | GROUP BY groups closed in the current partition (`groupInCurrentPartition`, `DataLimits.java:999-1001`, compared at `:1007`), from the query's `PER PARTITION LIMIT`; default `NO_LIMIT` = `Integer.MAX_VALUE` (`:48`). Neither the rows inside a group nor the aggregate state are counted. The counter lives for one partition of one internal page. |
+| **E2 At the limit** | Graceful: `stopInPartition()` and later rows are dropped (`return null`, `:943-947`). No allocation on the refusal path. At the default the comparison never fires. |
+| **E3 Owner and multiplier** | Per query, per partition; concurrent queries are not limited by it. Rows per internal page are limited separately: `getDataLimits` passes the page size as `rowLimit` (`SelectStatement.java:899-911`), counted per live row at `DataLimits.java:986`; the page size is the client's (default 10000 when ≤ 0, `SelectStatement.java:114`) and has no cap at default (`page_size_fail_threshold` -1, `Config.java:874`). |
+| **E4 Budget domain** | Coordinator and replica heap, shared with every other read; the byte-based read thresholds are off by default (`read_thresholds_enabled` false, size thresholds null, `Config.java:526-530`). |
+| **OOM-lead flag** | none — the limit shapes result cardinality; the stage-4 heap growth at page size 300000 (792 MB at N absent) belongs to the page-size path (rows per page), not to this limit. |
+
+**Real-memory estimate:** `same as Estimate`
+**Stage-4 claim to add:** none

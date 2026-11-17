@@ -136,3 +136,16 @@ Callers: `loadPreparedStatements(onLoaded)` at :1894-1897 (page size 5000, Query
 - Not measured: whether the memtable is flushed (and the heap freed) before it matters on a real node; attribution is by the memtable gauge, not by a heap dump.
 - For stage 3: the "Ground" line is right for the cache but "only saves startup time and transient garbage" omits the system-table tombstones. Estimate left as filed.
 
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Σ `max(0, pstmntSize)` of statements re-prepared at startup (`SystemKeyspace.java:1905-1919`), with `pstmntSize` = `ObjectSizes.measureDeep(Prepared)` (`QueryProcessor.java:947-950`). A deep measure also walks objects shared with the schema, so it over-counts a statement's own heap rather than under-counting it. The counter is a local, dropped at return; the statements stay in the Caffeine cache, weighed by the same size (`QueryProcessor.java:113-117`) until evicted. Not counted: each eviction calls `SystemKeyspace.removePreparedStatement` (`QueryProcessor.java:132-139`), a delete that sits in the `system.prepared_statements` memtable until flush. |
+| **E2 At the limit** | Graceful: WARN and `break` (`SystemKeyspace.java:1919-1935`); overshoot one statement. Without the check the cache still evicts to its cap; the only extra heap is the eviction tombstones (stage 4: up to about 3 caps, 32 MB, at a 30x backlog), which go to a memtable and are freed at its flush. |
+| **E3 Owner and multiplier** | One preload per node at startup (pages of 5,000 rows, `QueryProcessor.java:104`) into one node-wide cache. Multiplier 1. |
+| **E4 Budget domain** | Heap. Cache default `max(10 MiB, heap/256)` (`DatabaseDescriptor.java:795-798`); the tombstones are charged to `memtable_heap_space` (1/4 heap, `DatabaseDescriptor.java:586-587`) and trigger a flush there. Shares the heap with the key and counter caches; defaults sum well inside a default heap. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (negative) for resident statement heap. The stage-4 bypass (eviction tombstones) is memtable heap, already bounded by `memtable_heap_space` and flushing (E4 decides), not an unbounded overshoot.
+**Stage-4 claim to add:** the extra arm-B live heap disappears after `nodetool flush system prepared_statements`, which shows it is memtable-bounded tombstones.

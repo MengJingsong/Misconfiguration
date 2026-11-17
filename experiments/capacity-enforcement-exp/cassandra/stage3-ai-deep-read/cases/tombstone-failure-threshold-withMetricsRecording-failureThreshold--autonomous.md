@@ -134,3 +134,16 @@ Bypasses and overshoot:
 - **Effect.** The threshold caps each read command's response memory at about (T+1) x one tombstone's serialized size (1.4 MB at the default with row tombstones, 145 MiB with 1 KB range markers) and bounds the scan's allocation at about 600 B x (T+1). It does not cap the node's heap under concurrent tombstone-heavy reads: eight clients at the default already hold the heap at about 1.3 GB of 2 GiB, as at T = 10000.
 
 **2026-10-26 — stage-4 audit (before run 1): Ready after amendments.** Amendments A1-A7 sit next to B2h and B3h above. A8, citation fixes (do not touch any prediction): `countTombstone` is `ReadCommand.java:588` (filed `:586`), its failure branch `:591-601` (filed `:594-601`), `onClose` starts at `:622` (filed `:620`), `applyToMarker` is `:582`; the entry pointer `:639` and the `MetricRecording` fields `:529-532` are right. Results: `cassandra/stage4-runtime-verification/results/tombstone-failure-threshold-withMetricsRecording-failureThreshold--autonomous.md`. Pre-audit sha256 of this file: `c54919847c88774a1a4ff1b0658f91dbb40d592f880729937872b4feda3f5ac7`.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Tombstones (dead cells, row deletions, range-tombstone markers) per local read command (`tombstones`, `ReadCommand.java:537`; `countTombstone` `:588-601`), not their bytes. Admitted tombstones are serialized into a heap `DataOutputBuffer` (`ReadResponse.java:197-203`) held until the response is sent or resolved. Stage 4: 11.7 B per row tombstone (1.4 MB at T = 100000), but 100,000 range markers with 1,000-character clusterings gave a 145 MiB buffer, and the scan allocates about 600 B per tombstone counted. |
+| **E2 At the limit** | Graceful: `TombstoneOverwhelmingException` aborts the read (`:601`); what was built before the abort becomes garbage. Not enforced for local system keyspaces (`:532`). |
+| **E3 Owner and multiplier** | Per read command. On a replica, up to `concurrent_reads` = 32 run at once (`Config.java:179`, `conf/cassandra.yaml:722`), each with its own budget; the coordinator also holds one response per contacted replica. No node-level total. Stage 4: eight clients at the default held the node's heap rise at about 1.3 GB of 2 GiB. |
+| **E4 Budget domain** | Heap, shared with memtables (heap/4), the native request reserve (heap/10) and other reads. The byte-based guard on the same reads, `local_read_size_*`, is off by default (`read_thresholds_enabled` false, `Config.java:526-530`). |
+| **OOM-lead flag** | E1 — the count admits up to 100,000 markers whose bytes scale with clustering size: stage 4 saw a 145 MiB response buffer for one read with 1,000-character clusterings at the default threshold; with 32 concurrent such reads (`concurrent_reads`) that is ~4.6 GiB on one replica, beyond an 8 GiB heap's free share. |
+
+**Real-memory estimate:** positive for the count per read, negative for bytes and for the node; decided by E1 (bytes per tombstone) and E3 (concurrent reads).
+**Stage-4 claim to add:** held heap with N = 8 / 16 / 32 concurrent reads of a partition holding just under 100,000 range markers with 1 KB clusterings, at defaults and an 8 GiB heap: about N × 145 MiB, or an `OutOfMemoryError`.

@@ -113,3 +113,16 @@ Where the actual memory limit sits: terms accumulate in `OnDiskIndexBuilder.term
 - **Corrections to the file:** `MAX_KEYS_SPARSE` is 5 (`OnDiskIndexBuilder.java:575`); the option governs only the compaction and index-build paths (the memtable flush uses a fixed 1 GiB, `PerSSTableIndexWriter.java:365-369`) and its default is 161,061,273 bytes (15 percent of 1 GiB); an Int32 SPARSE data block holds about 270 terms; the number of super blocks is floor((data blocks - 1) / constant) + 1; "at the default option" in B3e step 3 was read as option 64.
 - **Missed (recorded, not tuned):** (1) the live heap at the largest super-block flush differs by 13.1 percent over the 16 x range of the constant (U3 said 10 percent); the difference equals the extra tree (about 242 bytes per token), so the constant does bound the transient tree (about 1 MB at 16, 17 MB at 256 in the heap) but not the node; (2) the cluster heap reading: one post-collection peak per arm varies by 300 to 500 MiB between arms of the same option (327 to 1952 MiB at option 64), more than the step from option 8 to 64, so only the 512 MiB option separates (1941 MiB; the median in that window is 76 MiB); the rule written before the tier (constants' range under a quarter of the options' range) fails.
 - **For stage 3:** a design that needs the heap to separate a 150 MiB-class cap from the constant should read the builder's own size (for example a heap histogram at the largest segment, or the estimate printed per segment) rather than the process heap; the segment count and the index bytes are the stable observables.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Data blocks since the last super block, `dataBlocksCnt == SUPER_BLOCK_SIZE` (64) (`OnDiskIndexBuilder.java:129, 488, 497`). No bytes. The heap it indirectly bounds is one `superBlockTree`: about 64 blocks x about 270 Int32 terms x ≤ 5 keys (`MAX_KEYS_SPARSE`, `OnDiskIndexBuilder.java:575`). Stage 4: 17,408 tokens at 64, about 4 MB at about 242 B a token. Released at each super-block flush (`new DynamicTokenTreeBuilder()`, `:504`). |
+| **E2 At the limit** | Graceful: the tree is serialized, padded and reset (`OnDiskIndexBuilder.java:497-505`). No failing path. |
+| **E3 Owner and multiplier** | One tree per `OnDiskIndexBuilder` finish, per SASI SPARSE index, per segment flush. Segment flushes are submitted asynchronously (`PerSSTableIndexWriter.java:247-250`), so several builders can be live; each builder's `terms` map, the dominant heap, is bounded by a separate estimate: a fixed 1 GiB on memtable flush and 15 % of 1 GiB on compaction (`PerSSTableIndexWriter.java:365-369`; `IndexMode.java:58-60`). |
+| **E4 Budget domain** | Heap, shared with memtables and caches. SASI is disabled by default (`sasi_indexes_enabled = false`, `Config.java:606`; `conf/cassandra.yaml:1992`), so at defaults this path is unreachable. The fixed 1 GiB flush estimate does not scale with heap, but it is a different constraint and needs SASI enabled. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (negative).
+**Stage-4 claim to add:** none

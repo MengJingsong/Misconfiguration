@@ -123,3 +123,16 @@ Consequences: with ratio 0 the test never fires, so incompressible chunks are st
 ## D. Stage-4 feedback
 
 `none yet`
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | One chunk's compressor output, `compressedLength = compressed.position()` (`CompressedSequentialWriter.java:158`), against `maxCompressedLength` = ceil(chunk / ratio) (`:100`, `CompressionParams.java:187-190`); at the default ratio 0.0 this is `Integer.MAX_VALUE`, so the test at `:160` never fires. The count lives for one `flushData` call; nothing accumulates. The writer's memory (chunk buffer `:90`, `compressed` buffer from `initialCompressedBufferLength`, `:98`) is fixed per writer and independent of the ratio. |
+| **E2 At the limit** | Graceful: the raw chunk is written instead (`:160-166`), or a short final chunk is zero-padded up to `maxCompressedLength` (`:167-175`, ≤ chunk length, guarded by `CompressionParams.java:456-457`). No allocation on the "disallow" path beyond the existing buffer; disk grows with the knob rather than being capped by it. |
+| **E3 Owner and multiplier** | Per table (schema option), applied per chunk of each SSTable writer (flush or compaction). Writers in flight scale with flush writers and `concurrent_compactors`; each holds about two chunk-sized buffers (16 KiB + LZ4 bound) regardless of this option. No limit on total disk comes from it. |
+| **E4 Budget domain** | Disk (Data.db). The writer buffers are heap or direct per the compressor's preferred buffer type, tens of KiB per writer, outside any named memory budget but negligible. Shares disk with all other SSTable components, commit log, hints and snapshots; none of those is bounded by this option. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate (`negative`: a per-chunk store-raw guard on disk, inactive at default 0.0; no memory quantity depends on it).
+**Stage-4 claim to add:** none

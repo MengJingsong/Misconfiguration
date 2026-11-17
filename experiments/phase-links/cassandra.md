@@ -88,3 +88,42 @@ less affected. For the full run, blind agents should get §3.2 without the examp
 
 **Next (owner's decision):** run the remaining ~139 pool cases in blind mode (with the example column
 withheld), the 34 back-link rechecks, and/or hand the new flags to OOM-exp as leads.
+
+## Blind recheck of the remaining pool (2026-11-16/17)
+
+The other 139 pool cases, blind, with [`recheck-blind.md`](../capacity-enforcement-exp/stage3-ai-deep-read/recheck-blind.md)
+as the agents' whole instruction (§3.2's questions **without** the column naming OOM-exp results). Three
+waves, 20 agents, append-only (1,803 lines added, 0 removed). Headings are dated 2026-11-16 (wave 1) and
+2026-11-17 (waves 2–3, UTC).
+
+| Wave | Cases | Flagged | Rate |
+|---|---|---|---|
+| 1 — true positives | 53 | 18 | 34 % |
+| 2 — true negatives | 57 | 6 | 11 % |
+| 3 — false negative / weak / undetermined / not run | 29 | 9 | 31 % |
+| **Total** | **139** | **33** | **24 %** |
+
+With the pilot (8 of 20), 41 of the 159 pool cases carry a flag. Flags are leads, not results.
+
+**Mechanism clusters** (several agents often reached the same mechanism from different constraints;
+the count is the number of flagged case files):
+
+| Cluster | Flags | Already in OOM-exp? |
+|---|---|---|
+| Partial pre-login envelopes up to 16 MiB per connection, connections unlimited at defaults | 6 (pilot + 5) | New (step 3 hands it over) |
+| Read limits that count rows or tombstones, not bytes, with read-size thresholds off by default (page sizes, GROUP BY, unpaged aggregates, SAI top-K, range sub-requests, tombstone thresholds, `cached_rows`) | 12 | Partly: the "no byte limit on concurrent reads" side of C2; the per-limit forms are new |
+| Coordinator Merkle trees per (session, table), no scheduler limit | 6 | Known: N5, JIRA 19336 |
+| Slab-region tails, ≈ 1 MiB per written table under `heap_buffers` | 4 | Known as N11; per-table term new |
+| Memtable pool overshoot (update overhead charged after merge, no-op waste lock, `isBlocking`) | 3 | Known family (B2) |
+| Index summaries (full sampling between runs; upsampled buffers never trimmed) | 2 | Known: R5; the upsample buffer is new |
+| Denylist refresh skips the total cap | 2 | New (operator-populated, opt-in) |
+| Per-connection receive capacity charged before the reserves (v5 dispatch-anyway; 1 MiB per connection) | 2 | New (N2 is the v4 path) |
+| Coordinator-local write left on the unbounded MutationStage queue after the client is answered (`maximumPoolSize`) | 1 | **Verified: S2**, found blind |
+| Decode or trace copies of request values on heap (≈ 6–15× wire bytes) | 2 | Known family (L1/N2, the B6 idea) |
+| Others, one each: stored-collection read, Paxos empty-entry weight, index-build page skew, streamed chunk index, trie shard state | 5 | New |
+
+**What this says about phase 1 predicting phase 2.** With the example column withheld, one blind flag
+matches a verified case outright (S2, from `maximumPoolSize`), and the read-limit cluster matches the
+"concurrent reads, no byte limit" side of C2. That is a weak test: the pool excluded the 34 back-link
+files, which are exactly the files nearest the verified cases, so most verified mechanisms could not be
+rediscovered here. The stronger test is forward: how many of the new clusters OOM-exp verifies.

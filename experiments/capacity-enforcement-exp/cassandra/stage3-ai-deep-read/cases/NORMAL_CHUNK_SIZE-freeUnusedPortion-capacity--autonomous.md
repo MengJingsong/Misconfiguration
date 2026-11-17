@@ -424,3 +424,16 @@ The design audit came out "Ready after amendments": U1–U3 and K1–K4, each da
   - the overflow branch of `LocalPool.put` is `:813-817`;
   - the double-free assert is at `:1539`.
 - (3) A1/B1 could say that `NORMAL_CHUNK_SIZE` does shape usage through other paths. It sets the cap's granularity (`MACRO_CHUNK_SIZE = 64 ×` it) and the pooled/unpooled split (requests over 128 KiB are never pooled); only the :1521 path leaves usage alone.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | At :1521, slots: `roundUp(limit)` against `roundUp(capacity)` in 2 KiB (normal) or 32 B (tiny) units (`BufferPool.java:1517-1521`, `:128-131`). Neither side is a memory total; both branches leave `memoryAllocated` unchanged. The pool's real counter is `memoryAllocated` in whole 8 MiB+page slabs (`:383-385`, `:438-456`, `:1095-1101`), which matches the direct memory reserved (stage 4 unit: `directDelta` = k x (8 MiB + 4 KiB)). Overflow buffers are counted in `overflowMemoryUsage`, and the trim of an overflow buffer subtracts `capacity - limit` without freeing anything (`:877-886`), so that metric under-reads (stage 4: -14.7 GB at 4 MiB). |
+| **E2 At the limit** | :1521 itself never refuses. The pool's own limit is not graceful in the E2 sense: when `memoryAllocated + 8 MiB > threshold` the request falls through to an unpooled `allocateDirect` (`:904-923`, `allocate(size, OFF_HEAP)`), as does every request over 128 KiB (`:937-941`); only `-XX:MaxDirectMemorySize` stops it. That fallback belongs to `networking_cache_size`, not to this constant. |
+| **E3 Owner and multiplier** | Slots are per chunk; chunks are held per thread-local `LocalPool`; slabs per pool (two pools: networking and chunk cache, `BufferPools.java:36-45`). The networking pool's cap is per node, default min(128 MiB, heap/16) (`DatabaseDescriptor.java:573-574`). |
+| **E4 Budget domain** | Direct memory (`ByteBuffer.allocateDirect`), shared with the chunk-cache pool (`file_cache_size`), overflow buffers of both pools, Netty's allocator, off-heap memtable buffers and compression buffers, all bounded only by `MaxDirectMemorySize`. The constant decides granularity and the pooled/unpooled split (> 128 KiB never pooled), not a total. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (the unbounded overflow path is the `networking_cache_size` constraint's E2, not this check's).
+**Stage-4 claim to add:** none

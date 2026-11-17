@@ -213,3 +213,16 @@ Made at the step-0 audit, before any run or reading; each is a dated change that
 ## 11. Notes
 
 - Related thread-pool rejections written up with this file are not yet in `cases/`: `SEPExecutor.java` permit accounting, `concurrent_validations`.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Running compaction threads (`executor.getActiveTaskCount() >= executor.getMaximumPoolSize()`, `CompactionManager.java:244-249`), and only for a table that already has one (`count > 0`). The bytes a task holds are not counted: per input SSTable a scanner and its read buffers, the output writer, and for the BIG format a per-partition row-index buffer that grows with the partition being written (`BigFormatPartitionWriter.java:52-58`). The thread slot is released when the task ends, the same moment its heap becomes garbage and its inputs/outputs are settled by the transaction; count and memory are released together. |
+| **E2 At the limit** | Graceful: the submission is skipped and an empty list returned (`:245-249`); the table is rescheduled when a task ends. Tasks submitted otherwise wait in the executor queue, which is unbounded (`Integer.MAX_VALUE`, `:2024`) but holds only small `BackgroundCompactionCandidate` objects. No fallback path allocates on refusal. |
+| **E3 Owner and multiplier** | One pool per node, `min(8, max(2, min(cores, data dirs)))` (`DatabaseDescriptor.java:777-778`) = 2 threads on a one-directory node, 8 at most when derived. Validation, view build, secondary-index build and cache cleanup run on separate executors (`CompactionManager.java:160-162`, `:2095-2154`) not counted by this check; nothing caps the sum over these pools. Stage 4 showed disk in flight = `min(n, 8)` × one task's output. |
+| **E4 Budget domain** | Heap (iterators, writer and row-index buffers) plus native buffers for compressed reads/writes, plus disk. Heap is shared with memtables (`memtable_heap_space` = heap/4, `DatabaseDescriptor.java:585-586`), the native-transport reserve (heap/10, `:649-651`) and reads. Per-task heap was not measured in stage 4: unknown: a heap histogram while a compaction over a multi-GiB partition (BIG format) is held. At 2 default threads the product looks small unless per-task heap grows with partition size. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** undetermined for heap — the knob bounds tasks, and heap = tasks × per-task footprint; decided by E1 (does one task's heap grow with the widest partition or the input count?).
+**Stage-4 claim to add:** per-task held heap of one Byteman-held compaction over a partition of 1 / 4 / 16 GiB (BIG format), at 1 and 8 threads.

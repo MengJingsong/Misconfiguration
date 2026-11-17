@@ -115,3 +115,16 @@ Bypass / overshoot: with the default (`Integer.MAX_VALUE`) the check at 160 is n
 ## D. Stage-4 feedback
 
 none yet
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | No memory counter. The check compares one chunk's compressed byte length (`compressed.position()`) and its raw length (`buffer.position()`) with `maxCompressedLength` (`CompressedSequentialWriter.java:156-163`), derived as `ceil(min(chunkLength / ratio, MAX_VALUE))` (`CompressionParams.java:187-190`); default ratio 0.0 gives `Integer.MAX_VALUE` (`:49`), so the raw branch is never taken. The comparison is per chunk and transient (one flush of the 16 KiB buffer, `:48`). |
+| **E2 At the limit** | Graceful: the raw buffer is written instead of the compressed one, and a short last chunk is zero-padded to `maxCompressedLength` (`CompressedSequentialWriter.java:160-176`); readers then skip decompression (`CompressedChunkReader.java:269`, `:364`). No allocation depends on the branch; disk grows by at most chunk - compressed per chunk. |
+| **E3 Owner and multiplier** | Per table (CQL compression option), applied per chunk of each SSTable writer. Number of owners is irrelevant to memory: the writer's two buffers are sized from the chunk length and the compressor (`CompressedSequentialWriter.java:90-98`), not from the ratio. |
+| **E4 Budget domain** | Disk (SSTable `Data.db`), not memory. Writer buffers (heap or direct per the compressor's preferred type, `:91`, `:98`) and the chunk cache are sized by `chunk_length_in_kb`, independent of this option. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate`
+**Stage-4 claim to add:** none
