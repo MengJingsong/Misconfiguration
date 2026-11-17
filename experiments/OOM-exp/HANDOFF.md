@@ -246,6 +246,21 @@ none has run yet.
   all measured at phase-1 stage 4 on 2026-11-17 (each "Confirmed — does not cap"), and candidate N17+ bypass-leads
   entries; (4) the JIRA survey's CASSANDRA-10930 note is wrong about `cassandra-env.sh` (see N16).
 
+- **U1 (U = unprotected-accumulation lead) — paused by the researcher on 2026-11-17 until the rename work is done; continue
+  from here.** Status `candidate` (V1 unmet in both runs). Run 2 (2026-11-17, Utah m400 aarch64,
+  [case](cassandra/cases/candidates/concurrent_writes+max_mutation_size--inflight-DOB-fill/concurrent_writes+max_mutation_size--inflight-DOB-fill--run2-internode.md)):
+  victim `ms0625` as the only replica (`NTS {v:1}`), 8 coordinators (4 nodes × 2 instances at alias IPs, dc `c`, RF 0)
+  forwarding 16 MiB − 1 KiB mutations over internode, defaults, heap 2 GiB → U1 direct OOM **2/14 at direct 1,024 MiB**
+  (the `cassandra-env.sh` value for a 4 GiB node; `deployment` if promoted), 2/4 at 896, 0/1 at 1,152; unconstrained
+  U_peak 1,212 MiB; 15 MiB mutations 0/8 down to 640. At 1,024: 512 KiB control 0/3, `concurrent_writes: 8` 0/3,
+  `dob.allocate_type=ONHEAP` 0/3; not mixed. **Two options to reach V1 (≥ 3 failing runs), same harness
+  (`harness-run2/`, queue files `q*.txt`) and nodes:** (a) 10–15 more endpoint arms at 1,024 MiB (≈ 1–1¼ h; rate so
+  far ≈ 1/7, so 3/14+ is not assured); or (b) fix the condition at 896 MiB (2/4 so far): ≈ 4–6 more endpoint arms plus
+  its own matched control and `concurrent_writes: 8` intervention ×3 each (≈ 1 h). Both are V7-acceptable; (a) keeps
+  the deployment budget, (b) is likely `diagnostic` (below the 4 GiB-node resolution). Builds stay at
+  `ms0625:/mydata/b8/cassandra` and `ms06{40,04,11,17}:/mydata/s2r2/cassandra`; run data `ms0625:/mydata/u1r2/runs/`.
+  Enable linger for the run and disable it after (all five were `Linger=no` on 2026-11-17).
+
 - **Disk is paused by request (set 2026-11-02).** Do not retry the disk case
   or pick a new disk-group combination until this is explicitly lifted in
   `cases/_run-log.md`'s status table. When it is lifted, the

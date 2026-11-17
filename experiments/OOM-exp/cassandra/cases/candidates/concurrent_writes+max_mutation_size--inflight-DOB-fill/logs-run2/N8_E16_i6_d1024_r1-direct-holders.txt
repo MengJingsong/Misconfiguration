@@ -1,0 +1,33 @@
+hop 1: 186 targets -> 224 referrers, 75 to follow
+hop 2: 75 targets -> 166 referrers, 164 to follow
+hop 3: 164 targets -> 634 referrers, 476 to follow
+hop 4: 476 targets -> 1987 referrers, 1281 to follow
+hop 5: 1281 targets -> 3042 referrers, 1356 to follow
+hop 6: 1356 targets -> 2083 referrers, 925 to follow
+DirectByteBuffer instances: 5613; owners (allocateDirect) 132 = 939.5 MiB; mapped 49 = 800.0 MiB; slices of owners 19; other 5413
+Netty PlatformDependent: DIRECT_MEMORY_COUNTER=176.0 MiB (counter object present), DIRECT_MEMORY_LIMIT=1073741824, USE_DIRECT_BUFFER_NO_CLEANER=1, MAX_DIRECT_MEMORY=1073741824
+DirectByteBuffers without cleaner and without a known owner (Netty no-cleaner / JNI / slices of those): 5413, total capacity 1422.3 MiB (upper bound; slices may overlap)
+
+Live direct memory by holder (owners = 939.5 MiB):
+  O: DataOutputBuffer scratch                             752.0 MiB   80.0 %
+  P: BufferPool chunks, no live consumer                  136.1 MiB   14.5 %
+  O: hints buffers                                         32.2 MiB    3.4 %
+  O: other                                                 16.0 MiB    1.7 %
+  O: netty / NIO buffers                                    2.1 MiB    0.2 %
+  O: storage I/O buffers                                    1.1 MiB    0.1 %
+
+Example referrer chain per category (buffer <- holder <- ...):
+  O: netty / NIO buffers:
+      [Ljava.nio.ByteBuffer;[].[] <- sun.nio.ch.Util$BufferCache.buffers <- java.lang.ThreadLocal$ThreadLocalMap$Entry.value <- [Ljava.lang.ThreadLocal$ThreadLocalMap$Entry;[].[] <- java.lang.ThreadLocal$ThreadLocalMap.table <- io.netty.util.concurrent.FastThreadLocalThread.threadLocals
+  P: BufferPool chunks, no live consumer:
+      java.nio.DirectByteBuffer.att <- org.apache.cassandra.utils.memory.BufferPool$Chunk.slab
+  O: hints buffers:
+      org.apache.cassandra.hints.HintsWriteExecutor.writeBuffer
+  O: DataOutputBuffer scratch:
+      org.apache.cassandra.io.util.DataOutputBuffer$1$1.buffer
+  O: storage I/O buffers:
+      org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer$Block.buffer <- java.util.HashMap$Node.value <- java.util.HashMap$Node.next <- [Ljava.util.HashMap$Node;[].[] <- java.util.HashMap.table <- [Ljava.lang.Object;[].[]
+  O: other:
+      java.lang.invoke.BoundMethodHandle$Species_LL.argL1
+
+Owner sizes (bytes x count, top 8): 65536 x 33, 33552470 x 23, 8392704 x 17, 128 x 14, 8192 x 8, 262144 x 5, 16384 x 4, 5178 x 4

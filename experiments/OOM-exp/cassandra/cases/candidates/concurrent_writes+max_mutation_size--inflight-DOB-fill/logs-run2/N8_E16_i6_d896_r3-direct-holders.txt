@@ -1,0 +1,33 @@
+hop 1: 176 targets -> 197 referrers, 70 to follow
+hop 2: 70 targets -> 166 referrers, 164 to follow
+hop 3: 164 targets -> 633 referrers, 476 to follow
+hop 4: 476 targets -> 1981 referrers, 1270 to follow
+hop 5: 1270 targets -> 2938 referrers, 1377 to follow
+hop 6: 1377 targets -> 2190 referrers, 990 to follow
+DirectByteBuffer instances: 2555; owners (allocateDirect) 130 = 731.5 MiB; mapped 44 = 736.0 MiB; slices of owners 19; other 2362
+Netty PlatformDependent: DIRECT_MEMORY_COUNTER=160.0 MiB (counter object present), DIRECT_MEMORY_LIMIT=939524096, USE_DIRECT_BUFFER_NO_CLEANER=1, MAX_DIRECT_MEMORY=939524096
+DirectByteBuffers without cleaner and without a known owner (Netty no-cleaner / JNI / slices of those): 2362, total capacity 1087.2 MiB (upper bound; slices may overlap)
+
+Live direct memory by holder (owners = 731.5 MiB):
+  O: DataOutputBuffer scratch                             496.0 MiB   67.8 %
+  P: BufferPool chunks, no live consumer                  136.1 MiB   18.6 %
+  O: no strong referrer (garbage awaiting Cleaner)         64.0 MiB    8.7 %
+  O: hints buffers                                         32.2 MiB    4.4 %
+  O: netty / NIO buffers                                    2.1 MiB    0.3 %
+  O: storage I/O buffers                                    1.1 MiB    0.1 %
+
+Example referrer chain per category (buffer <- holder <- ...):
+  O: netty / NIO buffers:
+      io.netty.buffer.UnpooledUnsafeDirectByteBuf.buffer <- io.netty.channel.unix.IovArray.memory <- io.netty.channel.epoll.EpollEventLoop.iovArray <- [Ljava.lang.Object;[].[] <- io.netty.util.internal.InternalThreadLocalMap.indexedVariables <- io.netty.util.concurrent.FastThreadLocalThread.threadLocalMap
+  P: BufferPool chunks, no live consumer:
+      java.nio.DirectByteBuffer.att <- org.apache.cassandra.utils.memory.BufferPool$Chunk.slab
+  O: DataOutputBuffer scratch:
+      org.apache.cassandra.io.util.DataOutputBuffer$1$1.buffer
+  O: no strong referrer (garbage awaiting Cleaner):
+      
+  O: hints buffers:
+      org.apache.cassandra.hints.HintsWriteExecutor.writeBuffer
+  O: storage I/O buffers:
+      org.apache.cassandra.io.compress.CompressedSequentialWriter.compressed
+
+Owner sizes (bytes x count, top 8): 65536 x 33, 128 x 20, 8392704 x 17, 33552470 x 15, 8192 x 5, 262144 x 5, 16384 x 4, 341 x 3

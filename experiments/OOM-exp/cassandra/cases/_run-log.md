@@ -37,6 +37,7 @@ is a label on each run, not a folder; cases now live under status-first folders
 | 2026-11-16 | combo / default | S2 (heap, apt140/138/149) | [coordinator-local-write-backlog--combo](convergence/coordinator-local-write-backlog--combo/coordinator-local-write-backlog--combo.md) | heap OOM 3/3 at 2 GiB via local-write backlog (verified-OOM · deployment); 8 GiB survives |
 | 2026-11-16 | combo / default | S2 run 2 (heap, Utah m400 aarch64: ms0640/0604/0611/0617) | [coordinator-local-write-backlog--combo history#run-2](convergence/coordinator-local-write-backlog--combo/history.md#run-2) | equal-heap RF=3 ring: heap OOM 3/3 at 2 GiB (no faster replica needed); A reproduced on aarch64 3/3 |
 | 2026-11-16 | unprotected / default | U1 (JVM direct, pc96) | [concurrent_writes+max_mutation_size--inflight-DOB-fill](candidates/concurrent_writes+max_mutation_size--inflight-DOB-fill/concurrent_writes+max_mutation_size--inflight-DOB-fill.md) | U1 direct OOM 2/14 at 576 MiB (candidate); no failure at auto / 1 GiB |
+| 2026-11-17 | unprotected / default | U1 run 2 (JVM direct, replica over internode, Utah m400 aarch64: ms0625 + ms0640/0604/0611/0617) | [`…--inflight-DOB-fill--run2-internode`](candidates/concurrent_writes+max_mutation_size--inflight-DOB-fill/concurrent_writes+max_mutation_size--inflight-DOB-fill--run2-internode.md) | U1 direct OOM 2/14 at heap 2 GiB / direct 1,024 MiB (16 MiB − 1 KiB mutations, 8 coordinators; candidate); 15 MiB 0/8 down to 640 |
 | 2026-11-16 | bypass | B8 (commit-log replay, ms0625 aarch64) | [commitlog_max_outstanding_replay_bytes--accounting-mismatch](bypass/commitlog_max_outstanding_replay_bytes-accounting-mismatch/commitlog_max_outstanding_replay_bytes--accounting-mismatch.md) | no replay OOM at defaults 0/10; restore + flush stall: heap OOM 3/3 at 1 GiB (proposed, review pending) |
 
 ---
@@ -901,3 +902,23 @@ readings (family A: L = 2 × heap, direct = heap/2; family B: heap 2 GiB, direct
 - U1: `candidate`. New campaign row **B9** (B = bypass investigation) from U1's side result: native v4 request frames held on Netty's direct counter at ≈ 2–2.5× `native_transport_max_request_data_in_flight`; JIRA check in the row.
 - Rule: the JIRA check is for finding OOM-exp candidates; no comments or reports are posted to JIRA (researcher, 2026-11-17).
 - Utah m400 nodes reachable by full name (`msNNNN.utah.cloudlab.us`) after `setup-node.sh`; linger disabled on all five. APT nodes still refuse the deploy key.
+
+## 2026-11-17 — U1 run 2, large mutations to a replica over internode, JVM direct (Utah m400 aarch64, 12:15–16:30 EST)
+
+- U1 (U = unprotected-accumulation lead) redesigned per the researcher: victim `ms0625` is the only replica
+  (`NTS {v:1}`), 4–8 coordinators (dc `c`, RF 0) forward every client write as an internode `MUTATION_REQ`; defaults
+  everywhere, heap 2 GiB, direct 1,024 MiB (`cassandra-env.sh` for a 4 GiB node; auto on the m400 = 15,872). SATA SSD
+  ≈ 100 MB/s; aarch64, not compared with run 1's x86 arms.
+- The receive queue admits 8 large messages per coordinator: `MutationStage` active ≤ 8 / 16 / 32 at N = 1 / 2 / 4
+  (K 120 / 240 / 480 MiB). No client frame reaches V: no Netty endpoint (B9 avoided).
+- 16 MiB − 1 KiB mutations, N = 8: unconstrained U_peak **1,212 MiB** (= 50 + 136 networking pool + 32 × 2S); at
+  **1,024 MiB U1 direct OOM 2/14** (every arm at the cap, 46–105 forced GCs), 896 MiB 2/4, 1,152 0/1.
+  15 MiB mutations: U_peak 936 at auto, **0/8** at 640–1,024 MiB.
+- First error 5/5: `MutationStage`, JDK counter, `MutationVerbHandler` → `CommitLog.add:308` → `expandToFit`; dumps:
+  DOB scratch 368–752 MiB (58–80 %), networking pool 136, hints buffer 32, live receive frames ≤ 0.4. Not mixed.
+- At 1,024: 512 KiB control 0/3 (U 594–612, K full 544); `concurrent_writes: 8` 0/3 (U 800–842, same applied
+  rate); `dob.allocate_type=ONHEAP` 0/3 (direct ≤ 230, heap ≤ 1,992 MiB, no heap OOM).
+- Proposed `candidate` (V1 unmet, 2/14); `deployment` if promoted. Largest failing budget 1,024 MiB (run 1: 576).
+- Cleanup: no process left on the five nodes, alias IPs 10.10.1.12–.15 removed, linger disabled on all five; data
+  `ms0625:/mydata/u1r2/runs/` (5.4 GB, five dumps), mirror `pc96:/mydata/u1r2/mirror/`.
+- *Status above is the agent's proposal; researcher's review pending.*
