@@ -127,3 +127,25 @@ matches a verified case outright (S2, from `maximumPoolSize`), and the read-limi
 "concurrent reads, no byte limit" side of C2. That is a weak test: the pool excluded the 34 back-link
 files, which are exactly the files nearest the verified cases, so most verified mechanisms could not be
 rediscovered here. The stronger test is forward: how many of the new clusters OOM-exp verifies.
+
+## Back-link rechecks (2026-11-17)
+
+The 34 files listed above, rechecked in `back-link` mode (guided playbook §5): seven agents, one per
+verified case, each allowed to read its OOM case. Append-only (659 lines added, 0 removed); every file now
+ends with `## Recheck — enforcement properties (guided, 2026-11-17, back-link)`. 56 flag rows in
+[`recheck-flags.md`](../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/recheck-flags.md): **37 restate
+what the OOM case showed** (now written into the phase-1 file where the clue was), **19 go beyond it**.
+
+| Case | Files | Rows | Beyond the OOM case (one line each) |
+|---|---|---|---|
+| B6 | 4 | 8 | large tiny-cell mutations expand per busy stage thread (32 × 16 MiB × R); refused writes held by their callback until timeout (non-default limits); the cached serialized copy alone ≈ 2× on-wire; send + receive global reserves on one heap ≈ 17–20 GiB at B6's ratio |
+| C1 | 4 | 8 | the 512 MiB send global reserve is not heap-scaled (overlaps the budget ledger) |
+| B7 | 6 | 8 | after a runtime shrink Caffeine's table and sketch stay at the old size (+17.3 MB measured for the key cache) |
+| C2 | 6 | 9 | the v5 slow-reader path (v4 is C2); the request side itself under-counted (≈ 1.2 GiB + 2.1 × counted bytes); per-IP bound excludes a 1 MiB v5 queue per connection (overlaps N13) |
+| R1-V | 5 | 10 | the caps alone commit 7/8 of RAM under `cassandra-env.sh`; the chunk-cache pool fills even with the cache off; `cassandra_latest.yaml` ships `offheap_objects`; trie buffers charged by used position; uncapped pool overflow |
+| S1 | 4 | 7 | counter and view stages add 64 more writers filling DOB scratch (≈ 3 GiB ceiling, producibility unchecked); hint writers park holding the switch monitor while queued hints are bounded by count, not bytes |
+| S2 | 5 | 6 | a per-destination hint counter could not shed the backlog (self-hints are never counted) |
+
+Read with the first-pass table above: the 37 restating rows are the phase-1 files' answers to the questions
+their clue was missing, so a later reader of those files now sees the gap. Back-link rows explain results
+after the fact and do not count as prediction; the 19 "beyond" rows are new leads like any other flag.

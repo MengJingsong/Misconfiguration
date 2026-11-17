@@ -259,3 +259,30 @@ https://docs.oracle.com/en/java/javase/11/vm/native-memory-tracking.html
   - (4) B3d's gauge difference `Size − OverflowSize` is not atomic. On the node it exceeded the knob in 106 of 320 samples, by up to 8.55 MB, with no extra slab. It cannot decide "pooled > knob"; an exact read of `memoryAllocated` is needed.
   - (5) Gap: the pool's own direct bytes are seen only through its counter; the JVM direct total includes about 45 MB of other consumers.
 - **No section amended by the result.**
+
+## Recheck — enforcement properties (guided, 2026-11-17, back-link)
+
+Linked from: R1-V (phase-links/cassandra.md)
+
+Mode `back-link`: the OOM case was read
+([`memtable_offheap_space+file_cache_size--default.md`](../../../../OOM-exp/cassandra/cases/convergence/memtable_offheap_space+file_cache_size--default/memtable_offheap_space+file_cache_size--default.md),
+condition A-768 on pc96 `verified-OOM · deployment`). Shipped defaults: `file_cache_size` =
+`min(512, maxMemory/4)`, `networking_cache_size` = `min(128, maxMemory/16)` (`DatabaseDescriptor.java:573-577`);
+chunk cache off (`Config.java:499`, `ChunkCache.java:53`). A slab is 8 MiB, not 1 MiB as A2/A3 say
+(`BufferPool.java:128`, `:385`; stage-4 finding 1). Citations below checked against `systems/cassandra/source/`.
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Reserved 8 MiB slabs (`memoryAllocated`, CAS at `:452` before `allocateDirect(capacity + page)` at `:460`, `:1095-1101`): counter = pooled direct bytes within a page per slab. Never released (`:378`), so the pool keeps its high-water mark. Not counted: unpooled overflow (`:233-238`, `overflowMemoryUsage`, uncapped), including every buffer > 128 KiB (A3.1). |
+| **E2 At the limit** | Refuses the slab gracefully (`:443-450`), then serves the request unpooled (`LocalPool.get`, `:923` → `:238`); that stops only at `MaxDirectMemorySize`, where `allocateDirect` throws to the caller (the catch at `:462-468` covers the slab only). Under a smaller container the kernel kills first (OOM case: no `OutOfMemoryError`). |
+| **E3 Owner and multiplier** | Two pools per JVM, one per entry (`BufferPools.java:38-39`, `:44-45`), ×1 each. Overflow: per in-flight buffer × concurrent readers / connections, no total limit. |
+| **E4 Budget domain** | **Direct** (`MaxDirectMemorySize` = RAM/4 = H/2 from `conf/cassandra-env.sh:59,66`). In it: both pools, 5H/16 at H ≤ 2 GiB (fits H/2), plus both overflows and memtable buffers under `offheap_buffers` / the trie memtable. The container adds heap H and, under `offheap_objects` (shipped in `conf/cassandra_latest.yaml:836`), the off-heap memtable at `maxMemory/4` (`DatabaseDescriptor.java:583-584`, outside the direct cap): 9H/16 beyond the heap. A-768 (pc96, L 1536): 768 + 432 + idle non-heap ≈ 360–375 > 1536; B (H 2048, L 3413): 2048 + 1152 + ≈ 300 > 3413. |
+| **OOM-lead flag** | (1) **E4 (R1-V):** the chunk-cache pool (H/4) and the off-heap memtable (H/4), each under its cap, with heap, networking pool and baseline exceed a RAM = 2H container. (2) **E2 (new beyond R1-V; this file's Estimate caveat):** demand above the pool cap is served as uncapped direct overflow, multiplied by concurrent reads, bounded only by `MaxDirectMemorySize`, which `cassandra-env.sh` sizes from RAM without reserving room for the native memtable; the OOM case's load kept overflow near 0. |
+
+**Real-memory estimate:** `negative` — E2. Pooled bytes follow the limit exactly (stage 4 at 48 / 96 / 192 /
+512 MiB; OOM case: JDK direct = pool); the node's direct memory for reads is pool + uncapped overflow
+(stage 4: overflow > 0 in every capped sample).
+
+**Stage-4 claim to add:** at the default limit, a read load with more concurrent buffers than the pool holds
+raises JDK direct memory above `file_cache_size` + `networking_cache_size` by the `OverflowSize` amount,
+without bound until `MaxDirectMemorySize`.

@@ -526,3 +526,33 @@ file, per capacity value and payload arm.
 ## 11. Notes
 
 - `NativePool`/`NativeAllocator` is only reachable when `memtable_allocation_type` is `offheap_objects`; the sibling `offheap_buffers` type uses `SlabPool` (off-heap `ByteBuffer` slabs) instead — a third, not-yet-written variant if the off-heap-buffers path is wanted later.
+
+## Recheck — enforcement properties (guided, 2026-11-17, back-link)
+
+Linked from: R1-V (phase-links/cassandra.md)
+
+Mode `back-link`: the OOM case was read
+([`memtable_offheap_space+file_cache_size--default.md`](../../../../OOM-exp/cassandra/cases/convergence/memtable_offheap_space+file_cache_size--default/memtable_offheap_space+file_cache_size--default.md),
+condition A-768 on pc96 `verified-OOM · deployment`). Shipped defaults: `conf/cassandra.yaml:825` ships
+`heap_buffers`, which ignores this limit (`AbstractAllocatorMemtable.java:100-102` passes 0 off-heap);
+`conf/cassandra_latest.yaml:836` ships `offheap_objects`, which uses it (`:106-108`). Unset, the limit is
+`maxMemory/4` (`DatabaseDescriptor.java:583-584`). Citations below checked against `systems/cassandra/source/`.
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Requested clone bytes, charged at `NativeAllocator.java:141` before the size branch (`:144`); not the `Native.malloc` regions (`MemoryUtil.java:81-84`): up to a 1 MiB unfilled current region per table allocator (`:46`, `:176`), race-stashed regions (`:51`), malloc headers. Stage 4 (2026-10-13) saw regions within 0–1.6 MiB of the charge per memtable. Counter and regions are released together at discard (`:200-206`), so flushing memtables stay charged; but freed regions can stay with glibc (stage 4: `RssAnon` did not fall at discards). |
+| **E2 At the limit** | Graceful: the writer parks on `hasRoom` (`MemtableAllocator.java:185-195`); a blocking op group charges past the limit (`:180-184`). The decision looks only at this pool, never at the process's other native or direct memory. |
+| **E3 Owner and multiplier** | One node-wide pool, the static `MEMORY_POOL` (`AbstractAllocatorMemtable.java:59`), shared by every table: ×1. The uncounted region tails are per table allocator (tables × ≤ 1 MiB), with no total limit. |
+| **E4 Budget domain** | **Other native** (JNA `malloc`): outside `-XX:MaxDirectMemorySize` and NMT, bounded only by RAM / the container. Same process budget: heap H (pre-touched, `conf/jvm-server.options:128`), chunk-cache pool `min(512, H/4)` and networking pool `min(128, H/16)` (`DatabaseDescriptor.java:573-577`, direct), and the JVM's uncapped non-heap. Defaults, H ≤ 2 GiB: H/4 + H/4 + H/16 = **9H/16** off heap. At the OOM case's budgets: A-768 (pc96, L = 1536): 768 + 192 + 192 + 48 = 1200, plus idle non-heap ≈ 360–375 (idle `RssAnon` 1126–1146 − heap) ≈ 1560–1575 > 1536; B (apt149, H 2048, L 3413): 2048 + 1152 + ≈ 300 ≈ 3500 > 3413; A-2048 (L 4096): ≈ 3500 < 4096, survives, as observed. Cap level: `conf/cassandra-env.sh:58-59,65-66` sizes heap = RAM/2 and `MaxDirectMemorySize` = RAM/4; this limit (H/4 = RAM/8) sits outside the direct cap, so the three caps add to **7/8 RAM**, leaving RAM/8 (192 MiB at L 1536) for the JVM's uncapped non-heap, measured ≈ 260 (apt149) – 375 (pc96) MiB idle at heap 768. No check relates them (`DatabaseDescriptor.java:573-594` only fills defaults). |
+| **OOM-lead flag** | (1) **E4 (R1-V):** with `offheap_objects`, this pool (H/4) and the chunk-cache pool (H/4) each stay under their caps while heap + 9H/16 + JVM baseline exceed a RAM = 2H budget at small heaps. (2) **E4 (new):** the shipped sizing script's own caps (heap RAM/2 + direct RAM/4) plus this limit (RAM/8, outside the direct cap) already commit 7/8 of RAM, so at heap ≲ 1 GiB the JVM's idle non-heap alone exceeds what is left, before any load. |
+
+**Real-memory estimate:** `undetermined` — E1. The native regions follow the limit (stage 4: within
+1.6 MiB per memtable; OOM case §3.3: memtable-attributable native ≈ 500 MiB at C = 512), but freed regions
+may stay with glibc, so process memory after flushes is not bound by it (stage 4: `RssAnon` 332 MiB beyond
+the bound at the default with 192 KiB cells, cause inferred). Apart from E1, E4 shows the limit at its
+default does not keep the process inside a RAM-sized budget.
+
+**Stage-4 claim to add:** with `cassandra-env.sh` sizing (no `MAX_HEAP_SIZE` / `MAX_DIRECT_MEMORY_SIZE`
+set) and `cassandra_latest.yaml`, the JVM's idle non-heap `RssAnon` exceeds RAM/8 at RAM ≤ 2 GiB, i.e.
+heap + `MaxDirectMemorySize` + `memtable_offheap_space` + idle baseline > RAM before any load (no OOM test;
+a sizing reading).

@@ -547,3 +547,21 @@ kill -9 "$(cat <logs>/cassandra.pid)"                    # between the phases on
 - **The unit yaml is not the node's.** The unit yaml sets no `storage_compatibility_mode`; the shipped one sets `CASSANDRA_4`, so a node's `current_version` is 4.0. The harness prints it
   and reads the slot of that version, and nothing in this design depends on which it is.
 - **Nothing here was run.** No measured number appears in this file; every figure in §9 is derived from the source and is a prediction.
+
+## Recheck — enforcement properties (guided, 2026-11-17, back-link)
+
+Linked from: B6 (phase-links/cassandra.md)
+
+Mode `back-link`: this recheck read the OOM-exp case `bypass/internode_application_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch.md` (B6). Answers are for the shipped defaults (limit 1,000,000 B, `CassandraRelevantProperties.java:80`). Citations checked 2026-11-17 against `systems/cassandra/source/` (5.0.9). Everything above is left as filed.
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | **The serialized size *T* of one mutation**, and the copy kept is exactly *T* bytes plus header (`Mutation.java:451`, `:456`; receive side `:493`, `:518-519`; stage 4: Δ = *T* + 609…2,505 B). The copy follows the counted unit. Lifetime: the copy lives as long as the `Mutation` and is never cleared (`Mutation.java:75-78`). No counter is held, so there is nothing to release early. What the limit does not see is the mutation's object form beside the copy, which is 2.2× (blob) to 19.7× (1000 tiny cells) the wire size on a coordinator (B6 §3.1). |
+| **E2 At the limit** | Graceful: at *T* ≥ 1,000,000 B no copy is made, a size-only object stays in the slot, and the bytes are regenerated on each use (§6b). The mutation is neither refused nor delayed. |
+| **E3 Owner and multiplier** | **Per mutation** (one slot per messaging version in use, `Mutation.java:74,78`), no total. At defaults nearly every OLTP write is below 1,000,000 B, so each live mutation keeps one copy: queued in an outbound queue, held after flush by the coordinator's write handler (`AbstractWriteResponseHandler.java:81,107`; `Mutation.java:158-161`), or deserialized on a replica and waiting on MutationStage (`InboundMessageHandler.java:166`, `Mutation.java:519`). Their number *N* is bounded only by the internode queues in on-wire bytes and, after flush, by nothing but write rate × deadline (B6 run 4). |
+| **E4 Budget domain** | Heap for the copies. Direct memory for the thread-local scratch buffer (`DataOutputBuffer.java:55,63-82`), which is kept per thread when it is at most 1 MiB (`CassandraRelevantProperties.java:204`). The heap is shared with the mutations' own objects, the internode and native queues, memtables and caches. No constraint counts the copies. |
+| **OOM-lead flag** | **E3 (B6):** each live mutation below 1,000,000 B carries an uncounted heap copy of its serialized bytes, and the number of such mutations is not capped in heap terms. B6's queued and retained mutations include this copy. **E1 decomposition (new, inferred, not measured):** for any such mutation the copy alone makes heap at least about 2× the on-wire bytes the queues charge (object plus copy). This is consistent with B6's blob arm (11,000 B value + ≈ 10.8 KiB copy ≈ 21.5 KiB of the 23.6 KiB measured, R ≈ 2.2). In the tiny-cell arm the copy is ≈ 5% of the 212.9 KiB. |
+
+**Real-memory estimate:** `same as Estimate` (positive) for what the check governs, the size of one retained copy. The node-wide copy heap is *N* × *T*, decided by E3 and not governed by this constraint (§8 as filed).
+
+**Stage-4 claim to add:** none for this constraint's own claim. For OOM-exp, as a lead only: "In a B6-style stall, live `CachedSerialization` bytes on the coordinator ≈ Σ *T* over the mutations retained after flush (send queue at 0), and the blob arm's R ≈ 2.2 splits into value + copy." This could be read from B6's existing heap dumps without a new run. The Estimate and stage-4 feedback stand as filed.

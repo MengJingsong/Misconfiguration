@@ -149,3 +149,21 @@ audit's `pc57` + `pc50` are no longer in the experiment). No run 2.
   timeout, local apply) in A3/A4 as a memory path the limit does not cover; B3d should name which node each memory
   reading is for (the receiver holds the large-message buffers, the sender's networking pool did not move); B3f's
   "MiB to tens of MiB" was too narrow for the receiver at 16 writes in flight.
+
+## Recheck — enforcement properties (guided, 2026-11-17, back-link)
+
+Linked from: B6 (phase-links/cassandra.md)
+
+Mode `back-link`: this recheck read the OOM-exp case `bypass/internode_application_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch.md` (B6). Answers are for the shipped defaults (limit 128 MiB, derived at `DatabaseDescriptor.java:992-996`). Citations checked 2026-11-17 against `systems/cassandra/source/` (5.0.9). Everything above is left as filed.
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | **The serialized size of one message at the current messaging version**: `canonicalSize` (`OutboundConnection.java:330`, `:1045-1048`), compared at `:331-332`. The `Message` is already a heap object built by the caller; its heap size is never measured. For a 1000-tiny-cell mutation the coordinator holds 212.9 KiB per 10.8 KiB on-wire (R ≈ 19.7, B6 §3.1). Lifetime: the check keeps no counter, so nothing is released early here. The release mismatch belongs to the send queue that follows (`:335`): its charge is released at flush (`:865`, `:903`), while the write handler keeps the `Mutation` until the response or expiry (`MessagingService.java:424`, `AbstractWriteResponseHandler.java:81,107`, `Mutation.java:158-161`). |
+| **E2 At the limit** | It throws `OversizedMessageException` before `acquireCapacity`, so nothing is queued. But it is not graceful for memory: the callback, which holds the message, is registered before `send()` (`MessagingService.java:424-425`), so a refused write stays reachable until the write timeout. Stage 4 (run 1, at a 1 MiB limit) saw a 1 GiB coordinator run out of heap in 7–10 s, 3/3. At defaults this path is unreachable for writes: `max_mutation_size` is 16 MiB (`DatabaseDescriptor.java:898-899`, enforced at `Mutation.java:169-172`), below 128 MiB. |
+| **E3 Owner and multiplier** | **Per message**, no total. Accepted messages are bounded by the send queue in on-wire bytes: 4 MiB × 3 links per peer (`Config.java:250`) plus reserves of 128 MiB per peer (read from the receive key, `Config.java:259`) and 512 MiB per node (`Config.java:254`). Heap ≈ R × that. After flush, the number of retained mutations is bounded by nothing but write rate × deadline (B6 run 4). |
+| **E4 Budget domain** | Heap: the caller's `Message` and payload. Direct: frame buffers from the networking pool during delivery (small links) or 32 KiB streaming buffers (large link). Both are shared with the receive side, memtables and caches. The default heap is `min(RAM/2, 31 GiB)` under G1 (`conf/cassandra-env.sh:51-66`, `conf/jvm11-server.options:63`). |
+| **OOM-lead flag** | **E1 (B6):** the limit and the send queue count serialized bytes, while the coordinator holds ≈ 20× that for tiny-cell mutations, and keeps them after flush with no counter. B6 conditions B and D OOMed with the send queue empty. **E2 (new relative to B6, already in this file's stage-4 note; non-default only):** a write refused by this check stays on the heap through its callback until the write timeout, and the client is answered at once, so nothing slows it. At defaults it cannot fire for writes. |
+
+**Real-memory estimate:** `negative` (E1). The check bounds one message's serialized size. The heap of an accepted message is not bounded by it, and below the default limit a refused message's heap is not freed by the refusal (E2).
+
+**Stage-4 claim to add:** "Heap held per message accepted at `enqueue` is not bounded by `internode_max_message_size`." B6 already measured the coordinator side (R ≈ 19.7 queued, plus retention after flush). The new claim, only if the owner approves: at a limit below `max_mutation_size`, refused writes hold heap until the write timeout, already observed in run 1 above, and could be promoted to an OOM-exp lead under a non-default setting. The Estimate and the run-1 stage-4 feedback stand as filed.

@@ -133,3 +133,29 @@ Overshoot / bypass paths: (a) `isBlocking` branch (step 3) during flush barrier;
 **Amendments before run 1 (2026-10-26, stage-4 step 0, all from the source, none from a reading):** B2d/B3d NMT cannot see the JNA `malloc` (real resource read on `RssAnon`; the probe touches each written page); B2e/B2h extra allocator `b` and the `SlabAllocator` control loop; B2e step 6 needs `markBlocking()`; B2f region-tail waste formula (the `< 1 MiB` claim was wrong for S = 100 KiB; bound corrected again to include the current region's unfilled remainder; `RssAnon` band +4 MiB, applied at L >= 32 MiB); B3a `memtable_cleanup_threshold: 0.99`, `-XX:+AlwaysPreTouch` (already in the shipped `jvm-server.options`), `RssAnon`, tmpfs data, longer timeouts; B3c large-value workload fixed to 3000 x 256 KiB at every L, protocol 4; B3f flush near 0.99 L, RSS on `RssAnon`, 256 KiB peak <= L + 4 MiB.
 
 **Recommendations for stage 3 (not applied):** state the other-consumer allowance in B3f (about 150 MiB under 128 stress connections, measured by the heap_buffers control); require the stub cleaner to be throttled; say that `Barrier.markBlocking()` makes a group blocking; do not cite NMT for memory allocated through `MemoryUtil` (JNA `malloc`).
+
+## Recheck — enforcement properties (guided, 2026-11-17, back-link)
+
+Linked from: R1-V (phase-links/cassandra.md)
+
+Mode `back-link`: the OOM case was read
+([`memtable_offheap_space+file_cache_size--default.md`](../../../../OOM-exp/cassandra/cases/convergence/memtable_offheap_space+file_cache_size--default/memtable_offheap_space+file_cache_size--default.md),
+condition A-768 on pc96 `verified-OOM · deployment`). Shipped defaults: unset = `maxMemory/4`
+(`DatabaseDescriptor.java:583-584`); `conf/cassandra.yaml:825` ships `heap_buffers` (limit unused,
+`AbstractAllocatorMemtable.java:100-102`); `conf/cassandra_latest.yaml:836` ships `offheap_objects` with the
+trie memtable as default (`:801`). Citations below checked against `systems/cassandra/source/`.
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Skiplist (this file's path): requested bytes charged at `NativeAllocator.java:141` for every size, before the oversize branch (`:144`); real memory is `Native.malloc` regions (`MemoryUtil.java:81-84`), ≤ 1 MiB unfilled per table allocator (`:46`, `:176`) plus race stashes (`:51`); stage 4 (2026-10-26) confirmed the charge, `RssAnon` held only after subtracting ≈ 150 MiB of other consumers. Released together at discard (`:200-206`); glibc may keep freed regions. **Trie memtable (`cassandra_latest.yaml`'s default):** a second off-heap path this file's A4 set aside. Cells still go through this allocator (`TrieMemtable.java:460`, `allocator.cloner`), but each shard's trie buffers are direct `ByteBuffer`s (`InMemoryTrie.java:151`, `BufferType.java:33-35`, `TrieMemtable.java:94`) allocated **before** they are charged, and the charge is the used position (`InMemoryTrie.java:971`), applied after the put (`TrieMemtable.java:484`); the unused part of the newest buffer (sizes double up to 1 GiB, `InMemoryTrie.java:90`, `:148-151`) is not counted until filled. |
+| **E2 At the limit** | Graceful: writers park (`MemtableAllocator.java:185-195`); blocking op groups pass (`:180-184`). For the trie path the park comes after the buffer already exists. |
+| **E3 Owner and multiplier** | One static node-wide pool (`AbstractAllocatorMemtable.java:59`), ×1. Uncounted tails: per table allocator (skiplist), and per table × shard (trie; shards default to the CPU cores, `TrieMemtable.java:85`), no total. |
+| **E4 Budget domain** | Skiplist under `offheap_objects`: **other native** (JNA, outside `MaxDirectMemorySize`). Trie buffers: **direct**, sharing `MaxDirectMemorySize` (RAM/4, `conf/cassandra-env.sh:59,66`) with the chunk-cache pool and networking pool. Defaults off heap at H ≤ 2 GiB: H/4 (this) + `min(512, H/4)` + `min(128, H/16)` (`DatabaseDescriptor.java:573-577`) = 9H/16. A-768 (pc96, L 1536): 768 + 432 + idle non-heap ≈ 360–375 > 1536; B (H 2048, L 3413): 2048 + 1152 + ≈ 300 > 3413. No check relates them. |
+| **OOM-lead flag** | (1) **E4 (R1-V):** this pool and the chunk-cache pool, each under its default cap, with heap and baseline exceed a RAM = 2H container. (2) **E1 (new):** under `cassandra_latest.yaml`'s trie memtable the off-heap trie buffers are allocated before they are charged and charged by used position, so up to the newest (doubling) buffer per shard per table sits outside the limit; not exercised by the OOM case (skiplist). |
+
+**Real-memory estimate:** `undetermined` — E1. Skiplist: follows the limit within region slack (stage 4);
+release after a flush not shown. Trie: unknown — how much of the doubled buffers is uncounted at a reachable
+table and shard count would settle it.
+
+**Stage-4 claim to add:** with `cassandra_latest.yaml` (trie, `offheap_objects`), JDK direct memory minus the
+buffer pools exceeds `AllMemtablesOffHeapDataSize` by more than region slack, growing with tables × shards.

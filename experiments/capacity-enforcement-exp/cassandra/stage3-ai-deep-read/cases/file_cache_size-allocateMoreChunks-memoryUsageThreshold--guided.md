@@ -638,3 +638,32 @@ Stop when each scenario's records are taken; a run where `O` stays zero at 16 Mi
   constructor parameter. §6.1's configuration-entry rule resolves it by
   filing one case per config, which also matches how the two memtable pools
   were handled.
+
+## Recheck — enforcement properties (guided, 2026-11-17, back-link)
+
+Linked from: R1-V (phase-links/cassandra.md)
+
+Mode `back-link`: the OOM case was read
+([`memtable_offheap_space+file_cache_size--default.md`](../../../../OOM-exp/cassandra/cases/convergence/memtable_offheap_space+file_cache_size--default/memtable_offheap_space+file_cache_size--default.md),
+condition A-768 on pc96 `verified-OOM · deployment`). Shipped defaults: `file_cache_size` unset =
+`min(512, maxMemory/4)` (`DatabaseDescriptor.java:576-577`); the chunk cache itself is off
+(`Config.java:499`; `ChunkCache.java:53` builds no cache), but this pool still serves reader buffers (§10
+note). Citations below checked against `systems/cassandra/source/`.
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Reserved 8 MiB macro chunks (`BufferPool.java:128`, `:385`), CASed at `:452` before the allocation at `:460`; each is `allocateDirect(capacity + page)` (`:1095-1101`), so the counter matches the pooled bytes within one page per chunk. Never released: macro chunks "are never released" (`:378`), so the pool holds its high-water mark for the JVM's life. Not counted: unpooled overflow (`:233-238`, separate `overflowMemoryUsage`, no cap) and the cache's on-heap entries. With the cache on, its weight is buffer capacity (`ChunkCache.java:154`) up to `file_cache_size − 32 MiB` (`:49-50`). |
+| **E2 At the limit** | Graceful for the slab only: `:443-450` returns `null`, and `LocalPool.get` then allocates the buffer unpooled (`:923` → `:238`). That overflow stops only at `MaxDirectMemorySize`, where `allocateDirect` throws to the reader (no catch at `:233-238`; the catch at `:462-468` covers the slab). In a container smaller than heap + direct cap + other native, the kernel kills first (OOM case: no `OutOfMemoryError` in any arm). |
+| **E3 Owner and multiplier** | One `chunk-cache` pool per JVM (`BufferPools.java:38-39`, static); per-thread `LocalPool`s draw from it and are counted in it. Overflow is per in-flight read buffer, multiplied by concurrent reads, with no total limit. |
+| **E4 Budget domain** | **Direct** (JDK counter; `MaxDirectMemorySize` = RAM/4 from `conf/cassandra-env.sh:59,66`). Same domain: networking pool `min(128, H/16)` (`BufferPools.java:44-45`, `DatabaseDescriptor.java:573-574`), both pools' overflow, and memtable buffers under `offheap_buffers` or the trie memtable (`BufferType.java:33-35`). Defaults: 5H/16 fits the direct cap (H/2). The container also holds heap H and, under `offheap_objects` (shipped in `conf/cassandra_latest.yaml:836`), the off-heap memtable `maxMemory/4` (`DatabaseDescriptor.java:583-584`, JNA `malloc`, outside the direct cap). Sum H + 9H/16 + JVM baseline: A-768 (pc96, L 1536) ≈ 1200 + 360–375 > 1536; B (H 2048, L 3413) ≈ 3200 + ≈ 300 > 3413. Each pool under its cap at the kill (OOM case: chunk pool 128–256 of 192–256 on pc96, 376–504 of 512 on apt149). |
+| **OOM-lead flag** | (1) **E4 (R1-V):** this pool (`min(512, H/4)`) and the off-heap memtable (H/4) each stay under their caps while together with heap and JVM baseline they exceed a RAM = 2H container. (2) **E4 (new):** the shipped `file_cache_enabled: false` does not remove this pool's term: stage 4 (2026-10-14, cache off, 256 read threads) filled it to 512 MiB for a 250 MiB demand through partial recycling, and it is never returned (`:378`); so `cassandra_latest.yaml`'s `offheap_objects` alone, with a read-heavy load, may reach R1-V's sum. |
+
+**Real-memory estimate:** `negative` — E2. The pooled bytes follow the limit exactly (stage 4; OOM case:
+JDK direct = pool size), but the node's direct memory for reads is pool + overflow, and the overflow has no
+cap; above the demand the pool fills to its cap whatever the demand (stage 4), so lowering the limit below
+the demand saves nothing.
+
+**Stage-4 claim to add:** with `cassandra_latest.yaml` unchanged (chunk cache off, `offheap_objects`, trie
+memtable) and heap = 50 % of the container, a mixed write + concurrent-slice-read load drives the
+`chunk-cache` pool to its default cap and, with the memtable pool, kills the JVM (memcg) at heap
+768–1024 MiB; at default `concurrent_reads` (32) whether the pool fills is unknown.

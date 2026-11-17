@@ -142,3 +142,31 @@ conf/cassandra.yaml (790-825)
 ## D. Stage-4 feedback
 
 **Stage 4 closed 2026-10-24** ([results](../../stage4-runtime-verification/results/memtable_offheap_space-applySimpleConfig-memtable_offheap_space--autonomous.md)); Claude Opus 5.5 (claude-opus-5-5), advisor's machine; estimate `positive` held. **Unit tier: Confirmed — caps** (both off-heap types stop the writer at exactly 1 · 8 MiB after limit/1024 calls, nothing charged on-heap; at 0, `offheap_buffers` puts all 32 MiB on the heap pool and completes, `offheap_objects` blocks at the first call; controls: no limit → all calls, `heap_buffers` → off-heap 0). **Cluster tier: Confirmed — caps** (`AllMemtablesOffHeapDataSize` peaks 21.2 · 82.8 · 160.6 MiB at 64 · 256 · 512 MiB (unset), all ≤ knob and ordered; `MEMTABLE_LIMIT` flushes led by the off-heap ratio 152 · 38 · 19; `BlockedOnAllocation` 1,260 · 0 · 0; (b) `offheap_buffers`/0: off-heap gauge 0, on-heap to 166.6 MiB, line 592 logged; (c) `offheap_objects`/0: line 592 logged, startup never completed (120 s), `main` waiting in `MemtableAllocator$SubAllocator.allocate` (`:195`); control `heap_buffers`: off-heap gauge 0). Notes for stage 3, not applied: the (c) stall is not at a system-table write as B3f's parenthetical says, but in `SkipListMemtable`'s class initialiser (`SkipListMemtable.java:79`, `:215-228`, row-overhead estimate cloning a key through `MEMORY_POOL`), reached from the startup checks about 1 s after launch, before JMX listens; `NativeAllocator` memory comes from JNA `Native.malloc` (`MemoryUtil.java:81-84`), invisible to NMT, and the RSS substitute is unreliable on macOS (RSS fell below the heap size mid-run); peaks sit near knob/3 (cleanup threshold 1/3; the gauge omits flushing memtables); at 256 and 512 MiB no writer blocked. The nine amendments of 2026-10-24 (B2a, B2e, B2g, B2h, B3b, B3d, B3e, B3f, B3g) were made at the step-0 audit; the frozen hash is in `_INDEX.md` §4, and this section was added after it.
+
+## Recheck — enforcement properties (guided, 2026-11-17, back-link)
+
+Linked from: R1-V (phase-links/cassandra.md)
+
+Mode `back-link`: the OOM case was read
+([`memtable_offheap_space+file_cache_size--default.md`](../../../../OOM-exp/cassandra/cases/convergence/memtable_offheap_space+file_cache_size--default/memtable_offheap_space+file_cache_size--default.md),
+condition A-768 on pc96 `verified-OOM · deployment`). R1-V names this file's A4 ("None governed by this
+entry"): it lists the chunk cache as another native consumer but adds no defaults against a budget.
+Shipped defaults: unset = `maxMemory/4` (`DatabaseDescriptor.java:583-584`), so line 591 takes the
+"enabled" branch (`:594`); the limit acts only under `offheap_*` types (`AbstractAllocatorMemtable.java:100-108`):
+`conf/cassandra.yaml:825` ships `heap_buffers`, `conf/cassandra_latest.yaml:836` ships `offheap_objects`.
+Citations below checked against `systems/cassandra/source/`.
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Under `offheap_objects`: requested clone bytes (`NativeAllocator.java:141`), not the `Native.malloc` regions (`MemoryUtil.java:81-84`; ≤ 1 MiB unfilled region per table allocator, `NativeAllocator.java:46`, `:176`). Charge and regions are released together at discard (`:200-206`); freed regions may stay with glibc (stage 4 of the guided sibling, 2026-10-13). Under `offheap_buffers`: direct slab buffers, charged per slice. |
+| **E2 At the limit** | Graceful: writers park (`MemtableAllocator.java:185-195`, via `MemtablePool.java:156`); blocking op groups pass it (`MemtableAllocator.java:180-184`). At 0 under `offheap_objects` every write parks (stage 4: startup never completes), contrary to the line-592 message. Nothing at startup or at the limit relates the value to RAM or to the other pools. |
+| **E3 Owner and multiplier** | One static node-wide pool (`AbstractAllocatorMemtable.java:59`), ×1, all tables; region tails per table allocator, no total. |
+| **E4 Budget domain** | `offheap_objects`: **other native** (JNA `malloc`, outside `MaxDirectMemorySize` and NMT). `offheap_buffers`: **direct**. Either way the process budget also holds heap H, chunk-cache pool `min(512, H/4)` and networking pool `min(128, H/16)` (`DatabaseDescriptor.java:573-577`). Defaults at H ≤ 2 GiB add **9H/16** beyond the heap. At the OOM case's budgets: A-768 (pc96, L 1536): 768 + 192 + 192 + 48 + idle non-heap ≈ 360–375 ≈ 1560–1575 > 1536; B (H 2048, L 3413): 2048 + 1152 + ≈ 300 > 3413. `cassandra-env.sh:65-66` sizes heap RAM/2 and direct RAM/4; this limit (RAM/8) adds outside the direct cap, so the caps alone reach 7/8 RAM. Startup logs this threshold (`DatabaseDescriptor.java:594`) and the buffer-pool limits (`BufferPools.java:49-53`) on separate lines, never their sum. |
+| **OOM-lead flag** | (1) **E4 (R1-V):** at defaults this pool (H/4) plus the chunk-cache pool (H/4), each under its cap, with heap and JVM baseline exceed a RAM = 2H container. (2) **E4 (new):** R1-V's memtable-side setting is not only a "documented option": `conf/cassandra_latest.yaml:836` ships `offheap_objects` (with the trie memtable, `:801`), so a node started from 5.0.9's "latest" config has this pool active at H/4 with no edit. |
+
+**Real-memory estimate:** `undetermined` — E1 (regions follow the charge within region slack, OOM case §3.3
+≈ C at the kill; release to the OS after a flush not shown). E4 decides the process-level outcome, which
+this entry's startup branch does not check.
+
+**Stage-4 claim to add:** none for this branch beyond R1-V; the R1-V pairing should be rerun from an
+unedited `cassandra_latest.yaml` (see the `file_cache_size` guided recheck's claim).
