@@ -33,69 +33,44 @@ The running plan and findings live in two Google Docs —
 [*Meeting Summary*](https://docs.google.com/document/d/1tldFFEk28qtQD0QdsnC2Br-BisTyOUp8OCwG1SZ_6Jk/edit)
 and [*Progress Report*](https://docs.google.com/document/d/1gMRFwaTvgahSiRi10ad_Y3CLDkxyF1QTYkAhZ4be4x8/edit).
 
-## Phase links and phase-1 rechecks — state and leftover work (2026-11-17)
+## Redesign of the two experiments (2026-11-17) — start here
 
-Session of 2026-11-16/17 (owner). **Start here for anything linking phase 1 (this experiment) to phase 2
-(OOM-exp).** How the experiments relate: [`experiments/README.md`](experiments/README.md). Everything below
-is committed and pushed (last commit of the session `9bc40857`).
+Owner's redesign; map and flowchart in [`experiments/FLOWCHART.md`](experiments/FLOWCHART.md), relations in
+[`experiments/README.md`](experiments/README.md).
 
-**Done:**
-- `experiments/if-check-exp` symlink removed; harness paths repointed.
-- Guided playbook §3.2 (enforcement-property questions E1–E4) and §5 (rechecking a filed case, `blind` /
-  `back-link`); template §8a and Real-memory estimate; `stage3-ai-deep-read/recheck-blind.md` (blind agents'
-  whole instruction, no OOM-exp examples). Autonomous playbook unchanged.
-- [`experiments/backlink-playbook.md`](experiments/backlink-playbook.md) and the link table
-  [`experiments/phase-links/cassandra.md`](experiments/phase-links/cassandra.md): 7 verified cases linked (6
-  `recorded-untested`, R1-V `missed`); 34 phase-1 files rechecked in back-link mode (56 flag rows, 19 beyond the
-  OOM case).
-- Blind rechecks of all 159 remaining Cassandra memory cases (41 flagged) and a budget-domain ledger
-  (`cassandra/stage3-ai-deep-read/budget-ledger.md`). All flags: `cassandra/stage3-ai-deep-read/oom-lead-list.md`
-  (114 rows).
-- OOM-exp leads N13–N16 added to `experiments/OOM-exp/phase1-bypass-leads.md` with JIRA notes.
-- Stage 4, batch 1 of recheck claims (owner-approved), on `pc91/84/72/99/75`: N15 `items_per_collection`, N14
-  `native_transport_max_frame_size`, N13 `native_transport_receive_queue_capacity`, `cql-row-limit`, and
-  `slab-region-size` (run 1b after an owner-approved amendment): **all five Confirmed — does not cap**. Results:
-  `cassandra/stage4-runtime-verification/results/*--recheck-2026-11-17.md`; summary in the link table.
-- OOM-exp [`queuing-playbook.md`](experiments/OOM-exp/queuing-playbook.md) (lead → campaign row), merged from
-  scattered rules; data-flow tracing kept as a phase-2-only source (owner).
-- Nodes: ten available remote nodes declared below ("Nodes and access (updated 2026-11-17)").
+- **Phase 1 gains stage 5 — OOM clue find**
+  ([`stage5-oom-clue-find/README.md`](experiments/capacity-enforcement-exp/stage5-oom-clue-find/README.md)): an
+  autonomous agent (no patterns) and a guided agent (with
+  [`oom-clue-patterns.md`](experiments/capacity-enforcement-exp/stage5-oom-clue-find/oom-clue-patterns.md), 14
+  patterns CP-1…CP-14 built from the Cassandra
+  [JIRA OOM report](experiments/capacity-enforcement-exp/cassandra/stage5-oom-clue-find/jira-oom-report.md) and
+  the phase-2 true positives) read filed case files and write OOM candidates to
+  `<system>/stage5-oom-clue-find/phase1-oom-candidates.md`. Stage 3 is back to its 2026-11-12 form.
+- **Phase 2 is one OOM agent in two stages**
+  ([`OOM-exp/oom-agent-playbook.md`](experiments/OOM-exp/oom-agent-playbook.md)): stage 1 picks from the
+  candidate list and [`phase2-retry-list.md`](experiments/OOM-exp/cassandra/phase2-retry-list.md) and writes a
+  case file with a frozen design; stage 2 (a fresh session) runs it: **true positive / false positive / retry**.
+- **Retired** (in git before this change): guided §3.2/§5/§8a OOM-lead parts, autonomous section E and
+  Recheck mode, `recheck-blind.md`, the budget ledger, the OOM lead list, stage-4 rescan claims, the
+  back-link playbook and `phase-links/`, the queuing playbook, phase 2's JIRA and data-flow lead sources
+  (data-flow tracing dropped; JIRA mining moved to phase 1 stage 5), `pattern-leads.md`,
+  `phase1-bypass-leads.md`; the campaign plan is history. Recheck sections already appended to case files
+  stay as history; the stage-5 autonomous agent skips them.
+- **Migrated:** Cassandra candidate list OC-1…OC-62 (agent `legacy`: 148 old lead rows merged to 59, plus
+  B9, C5, B4): 7 true positive, 2 retry, 2 skipped, 51 open. OOM-exp's 17 cases: 7 true positive (B6, C1, C2,
+  S1, S2, B8, R1-V), 2 false positive (B1, R6-V), 8 retry (B7, C3, R2–R5, U1, the disk case) — verdict and
+  phase-1 case file per case in `OOM-exp/cassandra/cases/_INDEX.md`.
 
-**Leftover work — done 2026-11-17 (second session, owner's rulings):**
-- **Playbooks.** Autonomous (Cassandra and Hadoop copies): a general goal to note OOM leads, new template
-  section E, and a "Recheck mode" (OOM leads only); it still never gets the patterns. Guided §3.2 is now
-  "OOM-lead patterns" (E1 counter ≠ real usage, E2 direct error at the limit, E3 per-owner limit × unbounded
-  owners, E4 defaults over-commit a shared budget), with "record and queue" into the lead list; §5 gained a
-  **recheck sweep** option over all filed cases. The back-link agent now adds a new pattern to §3.2 and
-  `recheck-blind.md` itself (`backlink-playbook.md` step 5). `experiments/README.md` updated to match.
-- **Queuing playbook rulings** (§8): an agent queues rows; P1–P3, the status vocabulary and `source:` syntax
-  accepted (`source: phase1:<stem> (<mode>)`); nothing posted or reported upstream (README, campaign plan,
-  jira-mining, bypass playbook and handoffs reworded); data-flow F1 no longer blocks new pairs; C5, B2–B4,
-  C4/B5 get the JIRA check before they start. The §8.5 stale-text fixes are applied.
-- **Renames** (old names stay in dated records): `recheck-flags.md` → `oom-lead-list.md` (+ Status column;
-  Hadoop has its own, empty, in `hadoop/stage3-ai-deep-read/`); "OOM-lead flag" → "OOM lead";
-  `OOM-exp/OOM-leads.md` → `pattern-leads.md`; `OOM-exp/capacity-enforcement-bypass-leads.md` →
-  `phase1-bypass-leads.md`; stage-4 "recheck claim" → **rescan claim** (stage-4 README "Rescan claims"; batch
-  1's ten `--recheck-2026-11-17` files keep their names); "if-check inventory" → "capacity-enforcement
-  inventory". `recheck-blind.md` keeps its name ("recheck" now means only the stage-3 recheck).
-- **B8 back-link:** `recorded-untested`, lead source was phase 1, E1 (+E4), no new pattern; two files
-  rechecked; two leads added (one `lead`: a restart at a smaller heap replays more than one memtable pool).
-  U1 is still `candidate` (V1 unmet), so no other case needed a link row.
-- **Queued by agent:** B10 / P1 (N13), U2 / P1 (N14), U3 / P1 (N15), U4 / P2 (read-limit cluster; by-design
-  per JIRA, and CASSANDRA-11745's byte paging is fixed only in 6.0-alpha3). N17–N21 added to
-  `phase1-bypass-leads.md` plus an R1-V note on `cassandra_latest.yaml`; N5, N11, R5 marked corroborated.
-  Lead-list statuses: 21 `queued as …`, 1 `stage-4 measured`, 56 `lead`, 38 `verified (…, back-link)`.
-- CASSANDRA-10930 note corrected in the survey CSV.
-
-**Still open:**
-1. **Stage-4 rescan claims:** 68 left (the owner said not to start batch 2 on 2026-11-17). Suggested
-   batch 2: denylist refresh, index-summary upsampling, Paxos empty entries, per-query
-   `cached_rows_fail_threshold`, SAI segment buffer (N18–N21 need a measurement before they can be queued;
-   N20 first needs a check that near-16 MiB counter mutations can be produced).
-2. **Recheck sweeps:** none run under the new options. Guided sweep: only when §3.2 gains a pattern or the
-   owner asks. Autonomous "Recheck mode" sweep: not run (up to 304 Cassandra files; Hadoop files too).
-3. **Owner decisions for the new rows:** acceptable values for the read-size threshold and the item guardrail
-   (as for C2); U2's open question whether Netty's out-of-direct-memory error is per connection or fatal.
-4. **Hadoop:** nothing linked yet; the lead list starts with the next batch (`hadoop/PROCEDURE.md`).
+**Open for the owner** (from the migration):
+1. Verdict calls: R1 and R6 take their `-V` re-test's verdict; C3 is retry only by the mixed-status rule
+   (its ceiling test says false positive); B1 is false positive though its release defect is real (a leak
+   would make it retry); R2–R4 are already re-tested under other IDs and could be closed; the disk case
+   (`commitlog_total_space + max_hints_size_per_host`) is retry but disk is paused.
+2. Candidates: denylist (OC-42) is `skipped` by the old screening though later leads estimate ≈ 3.1 GiB;
+   the read-limit cluster is split into 6 rows and B10 into 2; CP-1 names B7 (a retry) as an example.
+3. **Next work:** stage 5 sweeps (autonomous and guided) over the ~300 Cassandra case files (none run yet;
+   `coverage.csv` is empty); phase 2 stage 1 on the open candidates and retries; Hadoop's JIRA OOM report.
+   Stage-4 rescan batch 2 is cancelled with the redesign.
 
 **Left on the nodes** (nothing running): build `/mydata/s4/cassandra-base` and run copies with logs on each pc
 node — `pc99:/mydata/s4/ipc-recheck`, `pc84:/mydata/s4/ntfs-rc`, `pc72:/mydata/s4/ntq-recheck`,

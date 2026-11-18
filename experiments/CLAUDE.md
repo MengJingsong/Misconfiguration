@@ -12,9 +12,8 @@ functionality or design**, update `FLOWCHART.md` in the same commit so it matche
   between the experiments; a lead source.
 - **Does not count:** new case files, results, run logs, queue rows, lead rows, status changes of single
   items, typo or wording fixes that leave the method the same.
-- **What to update:** the affected rows in sections 2–4, the Mermaid chart in section 5 (nodes, arrows,
-  and the `newlink` class for anything that links the two experiments; **step names only** in chart
-  nodes, descriptions go in sections 2–4), and one dated line in the change
+- **What to update:** the affected rows in sections 2–4, the Mermaid chart in section 5 (nodes and arrows;
+  **step names only** in chart nodes, descriptions go in sections 2–4), and one dated line in the change
   log (section 6). If nothing in the page needs to change, say so in the commit message.
 - After editing the chart, check that it still parses (every node ID defined once, labels quoted,
   no `<`/`>` in labels, arrows use `-->`, `-.->` or `-->|label|`).
