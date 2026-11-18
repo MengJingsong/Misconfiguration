@@ -54,7 +54,7 @@ impossible even with every pool full, under that configuration and budget.
 
 ### Unprotected results (amended 2026-11-10)
 
-New evidence: the JIRA and data-flow lead sources (README, *Lead sources*) target
+New evidence: the JIRA and data-flow lead sources (retired 2026-11-17) targeted
 memory that no capacity check guards. Such results are **in scope** and
 recorded as **unprotected**, not as a third direction, in two kinds:
 
@@ -171,6 +171,11 @@ control exists: it may be incomplete, late, or sized above available headroom.
 
 ## Verification status (amended 2026-11-11)
 
+**Stage-2 verdict (added 2026-11-17).** The [OOM agent playbook](oom-agent-playbook.md) maps the statuses
+below to three verdicts: `verified-OOM` → **true positive**; `negative` with a valid design → **false
+positive**; `verified-gap`, `reproduced-*`, `candidate`, or a `negative` whose design left the load or a
+named factor untried → **retry**. The statuses stay in the case file as detail.
+
 New evidence: B6 runs 1–2 (Cassandra) confirmed a bypass (U > C, K ≤ C) and, on a
 deployment-sized heap, sustained GC service loss with only intermittent OOM. The
 earlier rules had no explicit promotion rule and no status for a confirmed gap
@@ -222,10 +227,9 @@ criterion before its readings; record which one was used.
 Example Status cells: `verified-gap · service-loss · deployment`,
 `reproduced-OOM · diagnostic`.
 
-**Back-link (added 2026-11-16).** When a case first reaches `verified-OOM` or `verified-gap`,
-run [`../backlink-playbook.md`](../backlink-playbook.md) for it and add its row to
-`../phase-links/<system>.md`. The row records whether phase 1 (`capacity-enforcement-exp`) held a
-clue to the result; it does not change the case's status.
+**Back to phase 1 (2026-11-17, replaces the back-link of 2026-11-16).** A true positive's verdict is
+written to its row of the phase 1 OOM candidate list; if no OOM clue pattern covers its shape, a pattern is
+added ([`oom-agent-playbook.md`](oom-agent-playbook.md), stage 2 step 5).
 
 ### Defaults and acceptable budget (amended 2026-11-11)
 

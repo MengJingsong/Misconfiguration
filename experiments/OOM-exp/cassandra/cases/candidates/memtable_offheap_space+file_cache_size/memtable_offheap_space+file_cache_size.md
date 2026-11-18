@@ -1,5 +1,7 @@
 # memtable_offheap_space + file_cache_size — off-heap memtable and chunk cache converge past a 3500 MiB cgroup
 
+> **Verdict (2026-11-17 mapping):** true positive (as R1, via its re-test at defaults [R1-V](../../convergence/memtable_offheap_space+file_cache_size--default/memtable_offheap_space+file_cache_size--default.md); this custom-capacity run is superseded). **Phase-1 case file:** [`memtable_offheap_space-tryAllocate-limit--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/memtable_offheap_space-tryAllocate-limit--guided.md), [`file_cache_size-allocateMoreChunks-memoryUsageThreshold--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/file_cache_size-allocateMoreChunks-memoryUsageThreshold--guided.md).
+
 **Direction:** convergence · standing-pool. **Lead source:** if-check-exp (two true positives, see §1).
 **Regime:** custom capacities. **Source:** Cassandra 5.0.9 (source tree `b796bcfd…`). **Runs:** run 7
 (2026-11-03, `pc41`, one run per arm) and the V1–V5 recheck R1 (2026-11-11, `pc96`, ×3 per arm); full

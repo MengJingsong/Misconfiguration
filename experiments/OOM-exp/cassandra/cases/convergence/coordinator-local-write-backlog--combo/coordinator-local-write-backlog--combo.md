@@ -1,5 +1,7 @@
 # S2 — coordinator's own local writes queue without bound on `MutationStage` (heap combo)
 
+> **Verdict (2026-11-17 mapping):** true positive. **Phase-1 case file:** [`concurrent_writes-takeWorkPermit-workPermits--autonomous`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/concurrent_writes-takeWorkPermit-workPermits--autonomous.md), [`maxTasksQueued-takeTaskPermit-taskPermits--autonomous`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/maxTasksQueued-takeTaskPermit-taskPermits--autonomous.md).
+
 **Campaign row:** S2 (S = combo: convergence multiplicity → stacked layers → bypass accounting gap, per
 [`combo-playbook.md`](../../../../combo-playbook.md)). **Sources:** B6 (B = bypass: internode queue on-wire vs heap
 mismatch), B7 (bypass: cache weigher overhead), C2 (C = convergence: concurrent reads), R3/R4 (R = recheck of

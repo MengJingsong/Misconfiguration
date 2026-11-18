@@ -1,5 +1,8 @@
 # Combo playbook (convergence + bypass)
 
+> **Technique note (2026-11-17).** Phase 2 now runs through the [OOM agent playbook](oom-agent-playbook.md): this
+> file shapes a stage-1 design solution. Its own steps for picking or queuing a case are superseded by stage 1.
+
 Added 2026-11-12. Read [verification-protocol.md](verification-protocol.md),
 [default-convergence-playbook.md](default-convergence-playbook.md) and
 [bypass-playbook.md](bypass-playbook.md) first. This playbook inherits their

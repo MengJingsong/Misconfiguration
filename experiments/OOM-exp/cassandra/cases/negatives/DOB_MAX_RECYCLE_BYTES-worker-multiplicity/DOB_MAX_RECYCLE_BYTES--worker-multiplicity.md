@@ -1,5 +1,7 @@
 # DOB_MAX_RECYCLE_BYTES — scratch-buffer retention multiplied by worker threads (C3 run 1)
 
+> **Verdict (2026-11-17 mapping):** retry. **Phase-1 case file:** [`DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided.md).
+
 > **Filed 2026-11-12 in `negatives/`** as `negative · deployment` (defaults; 512 MiB direct / 2 GiB heap). The tightened 160 MiB result stays recorded here as `reproduced-OOM · diagnostic`.
 
 **Direction:** convergence · multiplicity (one per-thread retention cap × the threads that hold a buffer).

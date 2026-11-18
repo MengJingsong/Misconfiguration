@@ -1,5 +1,7 @@
 # DOB_MAX_RECYCLE_BYTES + MAX_HINT_BUFFERS at defaults, at an acceptable direct budget (R6-V)
 
+> **Verdict (2026-11-17 mapping):** false positive. **Phase-1 case file:** [`DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided.md), [`MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS--guided.md).
+
 **Direction:** convergence · standing-pool (hints slabs) × multiplicity (kept DOB scratch buffers).
 **Regime:** default capacities (`dob_max_recycle_bytes` 1 MiB, `MAX_HINT_BUFFERS` 3), no supporting
 deviation; budget `-Xmx2048M`, `-XX:MaxDirectMemorySize=512m` (standing-rule floor; V7 met without review).

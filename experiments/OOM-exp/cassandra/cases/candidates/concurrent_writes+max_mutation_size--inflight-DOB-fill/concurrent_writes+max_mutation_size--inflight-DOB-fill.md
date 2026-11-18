@@ -1,5 +1,7 @@
 # U1 — in-flight `DataOutputBuffer` fill of large mutations in `CommitLog.add` (standalone, JVM direct)
 
+> **Verdict (2026-11-17 mapping):** retry. **Phase-1 case file:** [`DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided.md), [`max_mutation_size-validateSize-MAX_MUTATION_SIZE--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/max_mutation_size-validateSize-MAX_MUTATION_SIZE--guided.md).
+
 **Campaign row:** U1 (U = unprotected-accumulation lead: memory with no applicable control). **Lead source:** side
 finding of R6-V (R = recheck of a pre-protocol convergence OOM; -V = re-test at defaults and an acceptable budget),
 corroborated by C3 run 1 (C = convergence investigation) and stage 3 of S1 (S = stacked combo case), where U1 was the

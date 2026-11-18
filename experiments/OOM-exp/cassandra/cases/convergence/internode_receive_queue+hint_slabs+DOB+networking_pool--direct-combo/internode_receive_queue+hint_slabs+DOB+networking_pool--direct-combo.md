@@ -1,5 +1,7 @@
 # S1 — JVM-direct combo: receive-queue multiplicity + hint slabs + DOB scratch + networking pool + maintenance, then large-mutation DOB fill
 
+> **Verdict (2026-11-17 mapping):** true positive. **Phase-1 case file:** [`DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided.md), [`max_mutation_size-validateSize-MAX_MUTATION_SIZE--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/max_mutation_size-validateSize-MAX_MUTATION_SIZE--guided.md), [`internode_application_receive_queue_capacity-acquireCapacity-queueCapacity--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/internode_application_receive_queue_capacity-acquireCapacity-queueCapacity--guided.md).
+
 **Campaign row:** S1 (S = stacked combo case, [combo playbook](../../../../combo-playbook.md)). **Direction:**
 convergence (stacked: multiplicity → standing pools / maintenance overlap) + **unprotected accumulation** (stage 3:
 in-flight `DataOutputBuffer` fill of large mutations, lead U1; U = unprotected-accumulation lead). Not a bypass:

@@ -1,5 +1,7 @@
 # memtable_offheap_space + file_cache_size at defaults — off-heap memtable and chunk cache converge past a container limit
 
+> **Verdict (2026-11-17 mapping):** true positive. **Phase-1 case file:** [`memtable_offheap_space-tryAllocate-limit--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/memtable_offheap_space-tryAllocate-limit--guided.md), [`file_cache_size-allocateMoreChunks-memoryUsageThreshold--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/file_cache_size-allocateMoreChunks-memoryUsageThreshold--guided.md).
+
 **Direction:** convergence · standing-pool. **Lead source:** if-check-exp (two true positives; predecessor R1,
 [`../memtable_offheap_space+file_cache_size/`](../../candidates/memtable_offheap_space+file_cache_size/memtable_offheap_space+file_cache_size.md)).
 **Regime:** **default capacities** (both constraints unset, heap-derived). **Source:** Cassandra 5.0.9 (tree
@@ -14,7 +16,7 @@ accepted for V7.
 > Condition B (heap 60 %, apt149) stays withdrawn. Filed back in `convergence/`.
 >
 > **Re-review (researcher, 2026-11-16).** Condition B goes back from `verified-OOM · deployment` to
-> **`reproduced-OOM · diagnostic`**, and the case moves from `convergence/` to `candidates/`. V7 under re-review (researcher, 2026-11-16): the failing container gives the heap 60 % of its memory, while the 5.0.9 docs (`hardware.adoc`) say the heap should be no more than 50 % of RAM and `cassandra-env.sh` follows that; at heap = 50 % (L = 2 × heap) the only failure is 1/5 at a 768 MiB heap (§3.2). The JIRA prior-art check ([`leads/jira-prior-art-verified-cases.md`](../../../leads/jira-prior-art-verified-cases.md)) found the
+> **`reproduced-OOM · diagnostic`**, and the case moves from `convergence/` to `candidates/`. V7 under re-review (researcher, 2026-11-16): the failing container gives the heap 60 % of its memory, while the 5.0.9 docs (`hardware.adoc`) say the heap should be no more than 50 % of RAM and `cassandra-env.sh` follows that; at heap = 50 % (L = 2 × heap) the only failure is 1/5 at a 768 MiB heap (§3.2). The JIRA prior-art check ([`leads/jira-prior-art-verified-cases.md`](../../../../../capacity-enforcement-exp/cassandra/stage5-oom-clue-find/jira-prior-art-verified-cases.md)) found the
 > pool-sum sizing documented, so upstream would likely answer "documented". V1–V6 are unchanged; V7's acceptance of
 > the 3,413 MiB container is withdrawn pending the re-review. The text below is the record as filed on 2026-11-12.
 

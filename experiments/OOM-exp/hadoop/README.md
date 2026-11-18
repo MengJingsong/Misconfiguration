@@ -1,28 +1,19 @@
 # OOM-exp — Hadoop (scaffold)
 
-Empty placeholder for the **Hadoop** instance of `OOM-exp` (Target 3:
-resource-exhaustion). No cases have been run yet.
+Empty placeholder for the **Hadoop** instance of `OOM-exp` (Target 3: resource exhaustion). No cases have
+been run yet.
 
-The method is system-agnostic and documented once at the experiment root:
+The method is system-agnostic and documented once at the experiment root (redesigned 2026-11-17):
 
-- [`../README.md`](../README.md) — experiment overview (convergence + bypass)
-- [`../custom-convergence-playbook.md`](../custom-convergence-playbook.md), [`../default-convergence-playbook.md`](../default-convergence-playbook.md), [`../bypass-playbook.md`](../bypass-playbook.md)
+- [`../README.md`](../README.md) — experiment overview and the two-stage pipeline
+- [`../oom-agent-playbook.md`](../oom-agent-playbook.md) — the OOM agent: stage 1 (pick and design), stage 2 (verify)
+- [`../_TEMPLATE-case.md`](../_TEMPLATE-case.md), [`../verification-protocol.md`](../verification-protocol.md)
 - [`../HANDOFF.md`](../HANDOFF.md) — start-here brief
 
-The Cassandra instance under [`../cassandra/`](../cassandra/) is the worked
-example to mirror; put Hadoop cases under `hadoop/cases/`, using the same
-status-first layout: `cases/convergence/` (verified OOM or gap by convergence),
-`cases/bypass/` (verified OOM or gap by bypass), `cases/candidates/`
-(not yet meeting the [promotion rule](../verification-protocol.md#verification-status-amended-2026-11-11))
-and `cases/negatives/` (verified no-OOM), with
-the capacity regime (custom | default) recorded as a label — not a folder. The
-master status table lives at `cases/_INDEX.md` and the chronological run log at
-`cases/_run-log.md`. Lead-source outputs (the
-[JIRA OOM survey](../jira-mining-playbook.md) and
-[data-flow holder tables](../dataflow-tracing-playbook.md)) go under
-`hadoop/leads/`; the JIRA survey can start before capacity-enforcement-exp Hadoop is done.
+**Inputs:** the Hadoop phase 1 OOM candidate list,
+[`../../capacity-enforcement-exp/hadoop/stage5-oom-clue-find/phase1-oom-candidates.md`](../../capacity-enforcement-exp/hadoop/stage5-oom-clue-find/phase1-oom-candidates.md),
+and [`phase2-retry-list.md`](phase2-retry-list.md). Put case folders under `hadoop/cases/<stem>/` with a
+`cases/_INDEX.md` carrying each case's verdict (true positive / false positive / retry), as Cassandra does.
 
-Prerequisites: this experiment consumes the constraints found by
-[`../../capacity-enforcement-exp/hadoop/`](../../capacity-enforcement-exp/hadoop/), so it depends on
-that instance being populated first, and on a runnable Hadoop test node
+Prerequisites: candidates from `capacity-enforcement-exp` Hadoop stage 5, and a runnable Hadoop test node
 (see [`../../../systems/hadoop/`](../../../systems/hadoop/)).

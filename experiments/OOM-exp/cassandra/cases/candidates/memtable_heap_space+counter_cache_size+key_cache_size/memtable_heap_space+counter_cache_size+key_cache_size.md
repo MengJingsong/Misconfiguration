@@ -1,5 +1,7 @@
 # memtable_heap_space + counter_cache_size + key_cache_size — three on-heap pools exhaust a 1 GiB heap; the two caches hold ≈ 1.7–2× their configured size
 
+> **Verdict (2026-11-17 mapping):** retry. **Phase-1 case file:** [`memtable_heap_space-tryAllocate-limit--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/memtable_heap_space-tryAllocate-limit--guided.md), [`counter_cache_size-iscountercacheenabled-capacity--autonomous`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/counter_cache_size-iscountercacheenabled-capacity--autonomous.md), [`key_cache_size-create-size--autonomous`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/key_cache_size-create-size--autonomous.md).
+
 **Direction:** mixed — convergence of three on-heap pools, with an accounting-omission excess (U > C, K ≤ C) in the counter and key caches that the OOM needs. **Regime:** custom capacities. **Source:** Cassandra 5.0.9 (git tree `b796bcfd…`), single node. **Runs:** run 2 of the 2026-11-02 custom-convergence batch (pc41, 1 failing run; [`history.md`](history.md#run-1)) and the R4 recheck (2026-11-11, apt179, this file §2–§3). **Consolidated:** 2026-11-11.
 
 | Condition | Status (protocol *Verification status*) |

@@ -1,5 +1,7 @@
 # coordinator_read_size_fail_threshold — concurrent reads each below the per-query size threshold
 
+> **Verdict (2026-11-17 mapping):** true positive. **Phase-1 case file:** [`coordinator_read_size_fail_threshold-shouldReject-thresholdBytes--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/coordinator_read_size_fail_threshold-shouldReject-thresholdBytes--guided.md), [`local_read_size_fail_threshold-addSize-failBytes--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/local_read_size_fail_threshold-addSize-failBytes--guided.md), [`networking_cache_size-allocateMoreChunks-memoryUsageThreshold--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/networking_cache_size-allocateMoreChunks-memoryUsageThreshold--guided.md).
+
 **Direction:** convergence · concurrency/surge (campaign row C2). **Lead source:** if-check inventory
 (capacity-enforcement-exp stage 4: `coordinator_read_size_fail_threshold`, `local_read_size_fail_threshold`).
 **Regime:** default capacities; read thresholds either at their shipped default (disabled, arm A = **unprotected

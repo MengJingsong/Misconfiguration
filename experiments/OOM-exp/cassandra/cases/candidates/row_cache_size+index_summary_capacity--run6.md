@@ -1,5 +1,7 @@
 # row_cache_size + index_summary_capacity — convergence case, retries A and B (run 6)
 
+> **Verdict (2026-11-17 mapping):** retry. **Phase-1 case file:** [`row_cache_size-create-serialized_size--autonomous`](../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/row_cache_size-create-serialized_size--autonomous.md), [`index_summary_capacity-distributeRemainingSpace-extraSpaceRequired--autonomous`](../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/index_summary_capacity-distributeRemainingSpace-extraSpaceRequired--autonomous.md).
+
 > **Status (2026-11-11): `candidate (pre-protocol)`.** Moved from `convergence/` to `candidates/`: filed before the 2026-11-06 protocol and does not meet the V1–V5 promotion rule ([protocol](../../../verification-protocol.md#verification-status-amended-2026-11-11)). Evidence held: schedule B 1 run; alone arms 1 run each; resize-1m arm (n=1) removed the off-heap kill but the heap OOMed; cgroup OOM-kill record in `dmesg`. The OOM recorded below stands; rerun ×3 with matched controls and an intervention ×3 to return it to `convergence/`.
 
 > **Run:** 2026-11-03, node `node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu`, same build as runs 1-5 (`~/cassandra-run1`, cassandra-5.0.9, unchanged). Runs the two retries named in [run 5](row_cache_size+index_summary_capacity--run5.md)'s conclusion.

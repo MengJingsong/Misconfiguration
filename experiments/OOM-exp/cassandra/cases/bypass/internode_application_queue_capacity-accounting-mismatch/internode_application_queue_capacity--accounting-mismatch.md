@@ -1,5 +1,7 @@
 # B6 — internode queues charge on-wire bytes; tiny-cell mutations hold ≈ 17–20× that on heap
 
+> **Verdict (2026-11-17 mapping):** true positive. **Phase-1 case file:** [`internode_max_message_size-inferMessageSize-size--autonomous`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/internode_max_message_size-inferMessageSize-size--autonomous.md), [`internode_application_send_queue_capacity-releaseCapacity-pendingCapacityInBytes--autonomous`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/internode_application_send_queue_capacity-releaseCapacity-pendingCapacityInBytes--autonomous.md).
+
 **Direction:** bypass · accounting mismatch (U > C while K ≤ C). **Lead source:** `flow:coordinator-write`
 (traced from C1). **Regime:** default capacities. **Source:** Cassandra 5.0.9 (`b5f2a54210`), local copy
 `/mydata/b6/cassandra` on `pc96`. **Runs:** 1 (2026-11-10), 2 (2026-11-10/11), 3 (2026-11-11), 4 (2026-11-11/12, coordinator with two slow replicas); full

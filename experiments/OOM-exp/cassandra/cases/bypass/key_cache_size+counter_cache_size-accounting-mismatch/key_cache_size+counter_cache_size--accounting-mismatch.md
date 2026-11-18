@@ -1,5 +1,7 @@
 # key_cache_size + counter_cache_size — Caffeine cache weight omits per-entry container memory
 
+> **Verdict (2026-11-17 mapping):** retry. **Phase-1 case file:** [`key_cache_size-create-size--autonomous`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/key_cache_size-create-size--autonomous.md), [`counter_cache_size-putcachedcounter-capacity--autonomous`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/counter_cache_size-putcachedcounter-capacity--autonomous.md).
+
 **Direction:** bypass · accounting mismatch (U > C, K ≤ C). **Regime:** default capacities, deployment budgets
 (512 MiB, 2 GiB, auto-resolved 7965 MiB heap). **Source:** Cassandra 5.0.9 (`~/cassandra-c1`, git `7cb9cc77…`,
 Caffeine 3.1.8), single node `apt149`. **Lead:** campaign-plan B7 (`source: R3/R4 recheck`). **Run:** B7 run 1,

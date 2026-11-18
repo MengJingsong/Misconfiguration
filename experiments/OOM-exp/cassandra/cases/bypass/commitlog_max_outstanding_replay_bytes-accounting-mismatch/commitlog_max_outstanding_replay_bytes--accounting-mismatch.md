@@ -1,5 +1,7 @@
 # B8 — commit-log replay bound counts serialized bytes; at defaults the replayed tail is capped by the memtable pool
 
+> **Verdict (2026-11-17 mapping):** true positive. **Phase-1 case file:** [`commitlog_max_outstanding_replay_bytes-handlemutation-pendingmutationbytes--autonomous`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/commitlog_max_outstanding_replay_bytes-handlemutation-pendingmutationbytes--autonomous.md).
+
 IDs used here: **B8** = campaign bypass investigation 8 (B = bypass); **N4** / **N3** = new leads 4 / 3 from
 the capacity-enforcement bypass notes (N = new lead; N3 = cached serialized copy per mutation, measured as a
 term); **B6** = bypass case 6 (internode queues), whose tiny-cell payload and client are reused; **S2** =

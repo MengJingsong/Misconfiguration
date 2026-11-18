@@ -1,5 +1,8 @@
 # Convergence playbook (custom capacities)
 
+> **Technique note (2026-11-17).** Phase 2 now runs through the [OOM agent playbook](oom-agent-playbook.md): this
+> file shapes a stage-1 design solution. Its own steps for picking or queuing a case are superseded by stage 1.
+
 Read [verification-protocol.md](verification-protocol.md) first. Method files
 live here; cases and logs live under `<system>/`. Cassandra is pinned to 5.0.9.
 An agent may select, design, execute, and file a batch within its assigned

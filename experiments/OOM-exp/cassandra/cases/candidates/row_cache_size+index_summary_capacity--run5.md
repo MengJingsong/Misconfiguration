@@ -1,5 +1,7 @@
 # row_cache_size + index_summary_capacity — convergence case, retry (run 5)
 
+> **Verdict (2026-11-17 mapping):** retry (as R5; this run 5 is void and superseded by [run 6](row_cache_size+index_summary_capacity--run6.md)). **Phase-1 case file:** [`row_cache_size-create-serialized_size--autonomous`](../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/row_cache_size-create-serialized_size--autonomous.md), [`index_summary_capacity-distributeRemainingSpace-extraSpaceRequired--autonomous`](../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/index_summary_capacity-distributeRemainingSpace-extraSpaceRequired--autonomous.md).
+
 > **Status (2026-11-11):** superseded by [run 6](row_cache_size+index_summary_capacity--run6.md); moved with it from `convergence/` to `candidates/` when the pre-protocol OOMs were reclassified as `candidate (pre-protocol)`.
 
 > **Run:** 2026-11-03, node `node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu` (40 cores, 251 GiB), same build as runs 1-4 (`~/cassandra-run1`, cassandra-5.0.9, unchanged). Retry of [run 4](row_cache_size+index_summary_capacity.md), using the two changes run 4's §4 named.

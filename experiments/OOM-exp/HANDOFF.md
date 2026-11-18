@@ -23,8 +23,18 @@
 > root, data under `capacity-enforcement-exp/<system>/`.
 
 Start-here brief for a session picking up `OOM-exp`. Read this, then
-[`README.md`](README.md) for the target and the two directions, then
-[`_INDEX.md`](cassandra/cases/_INDEX.md) for case status.
+[`README.md`](README.md) for the target and the pipeline, then
+[`oom-agent-playbook.md`](oom-agent-playbook.md), then
+[`_INDEX.md`](cassandra/cases/_INDEX.md) for case status and verdicts.
+
+> **Redesign 2026-11-17 (owner) — read first.** Phase 2 is now one **OOM agent** in two stages: stage 1
+> picks from the phase 1 OOM candidate list
+> ([`../capacity-enforcement-exp/cassandra/stage5-oom-clue-find/phase1-oom-candidates.md`](../capacity-enforcement-exp/cassandra/stage5-oom-clue-find/phase1-oom-candidates.md))
+> and the [retry list](cassandra/phase2-retry-list.md) and writes a case file with a frozen design; stage 2
+> (a fresh session) runs it and concludes **true positive / false positive / retry**. The campaign plan,
+> queuing playbook, lead lists (`pattern-leads.md`, `phase1-bypass-leads.md`), JIRA and data-flow lead
+> sources and the back-link are retired; existing cases got a mapped verdict in `_INDEX.md`. Text below
+> that names the retired files is history; where it conflicts with the playbook, the playbook wins.
 
 ## Status as of 2026-11-11
 
@@ -58,8 +68,8 @@ Use the [campaign plan](cassandra/campaign-plan.md) and
 for current priorities and results.
 
 **New lead sources (2026-11-10).** Besides the capacity-enforcement-exp inventory, leads now
-also come from **JIRA OOM history** ([`jira-mining-playbook.md`](jira-mining-playbook.md))
-and **data-flow tracing** ([`dataflow-tracing-playbook.md`](dataflow-tracing-playbook.md)).
+also come from **JIRA OOM history** (`jira-mining-playbook.md`, moved to phase 1 stage 5 on 2026-11-17)
+and **data-flow tracing** (`dataflow-tracing-playbook.md`, dropped 2026-11-17).
 They are lead sources, not new directions: results are still convergence,
 bypass, mixed or **unprotected** (memory no check guards is in scope; protocol
 amendment of 2026-11-10). Outputs go under `<system>/leads/`. Pilots J1, J2 and
@@ -240,14 +250,9 @@ none has run yet.
 
 ## Open follow-ups
 
-- **Phase-link leftovers done 2026-11-17** (root [`HANDOFF.md`](../../HANDOFF.md)): queuing-playbook rulings
-  (an agent queues rows; nothing posted upstream; F1 no longer blocks pairs), B8 back-link, new rows **B10, U2,
-  U3 / P1** and **U4 / P2** (B = bypass investigation, U = unprotected-accumulation lead), N17–N21 in the bypass
-  leads. **Renamed files:** `OOM-leads.md` → [`pattern-leads.md`](pattern-leads.md),
-  `capacity-enforcement-bypass-leads.md` → [`phase1-bypass-leads.md`](phase1-bypass-leads.md), phase 1's
-  `recheck-flags.md` → `capacity-enforcement-exp/cassandra/stage3-ai-deep-read/oom-lead-list.md` (OOM-exp's
-  candidate list from phase 1; write each lead's Status back, queuing playbook §7.3). Older records keep the old
-  names.
+- **Redesign 2026-11-17** (above): next work is phase 2 stage 1 on the candidate list and the retry list.
+  The old campaign rows B10, U2, U3, U4, C5, B2–B4, C4/B5 (never run) are candidates now; U1, B7 and the
+  other non-final cases are on the retry list.
 
 - **U1 (U = unprotected-accumulation lead) — paused by the researcher on 2026-11-17 until the rename work is done (done 2026-11-17: it can resume); continue
   from here.** Status `candidate` (V1 unmet in both runs). Run 2 (2026-11-17, Utah m400 aarch64,
@@ -293,17 +298,14 @@ none has run yet.
 
 ## Decisions and conventions in force
 
-- **JIRA check before queuing a candidate (2026-11-16).** Search JIRA for the mechanism and record the
-  matching issues in the campaign-plan row; known fixed bugs become regression checks or positive controls.
-  Rule text in [`cassandra/campaign-plan.md`](cassandra/campaign-plan.md#prioritized-queue); all queuing rules are merged in
-  [`queuing-playbook.md`](queuing-playbook.md) (2026-11-17).
+- **JIRA prior-art check before picking a candidate (2026-11-16; stage 1 from 2026-11-17).** Search JIRA
+  for the mechanism and record it in the case file's §1; known fixed bugs become positive controls only.
+  Nothing is posted to JIRA.
 - **Explain ID prefixes when showing items (2026-11-16).** Any list or report of items by ID
   (C, B, R, S, U, J, F, L, N, …) says what each prefix means; table and clashes in
   [`README.md`](README.md#id-prefixes-rule-2026-11-16).
-- **Each playbook run is one agent, end to end**: it picks constraints/
-  mechanisms, designs the test, runs it on a node it has access to, and
-  files the result. No separate design-then-execute split (unlike
-  `capacity-enforcement-exp` stage 3/4).
+- **Design, then verify (2026-11-17; replaces "one agent end to end").** Stage 1 writes and freezes the
+  design; a fresh OOM-agent session runs it in stage 2, like `capacity-enforcement-exp` stages 3/4.
 - **One run produces a batch of cases**, not one, tracked chronologically in
   the single `cases/_run-log.md` (regime labeled per run).
 - **Verified means V1–V7 (protocol amendments 2026-11-11).** A case moves out of
@@ -350,14 +352,13 @@ none has run yet.
 
 ## Where things live
 
-- [`README.md`](README.md) — the target, the lead sources, the two directions.
-- [`jira-mining-playbook.md`](jira-mining-playbook.md),
-  [`dataflow-tracing-playbook.md`](dataflow-tracing-playbook.md) — how to
-  produce leads from JIRA OOM reports and from tracing core data flows; their
-  outputs live in `<system>/leads/`.
+- [`README.md`](README.md) — the target, the pipeline, the directions as technique notes.
+- [`oom-agent-playbook.md`](oom-agent-playbook.md), [`_TEMPLATE-case.md`](_TEMPLATE-case.md) — the OOM
+  agent (stage 1 pick and design, stage 2 verify) and its case file; `cassandra/phase2-retry-list.md`.
+- JIRA OOM survey and report: moved to phase 1,
+  `../capacity-enforcement-exp/cassandra/stage5-oom-clue-find/` (2026-11-17).
 - [`custom-convergence-playbook.md`](custom-convergence-playbook.md),
-  [`bypass-playbook.md`](bypass-playbook.md) — the agent's whole instruction
-  for a run in each direction.
+  [`bypass-playbook.md`](bypass-playbook.md) — technique notes for a design in each direction.
 - [`default-convergence-playbook.md`](default-convergence-playbook.md) —
   the convergence playbook plus one restriction: every constraint stays at
   its default value (only the budget and the workload are dials). Own batch

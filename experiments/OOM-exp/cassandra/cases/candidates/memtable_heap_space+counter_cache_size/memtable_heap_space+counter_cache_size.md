@@ -1,5 +1,7 @@
 # memtable_heap_space + counter_cache_size — memtable pool and counter cache share a 1 GiB heap
 
+> **Verdict (2026-11-17 mapping):** retry. **Phase-1 case file:** [`memtable_heap_space-tryAllocate-limit--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/memtable_heap_space-tryAllocate-limit--guided.md), [`counter_cache_size-iscountercacheenabled-capacity--autonomous`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/counter_cache_size-iscountercacheenabled-capacity--autonomous.md).
+
 **Direction:** convergence · standing-pool, tagged **mixed** (the counter cache's physical bytes exceed its own
 `counter_cache_size` at the OOM while its counter reads ≈ 63%: U > C, K ≤ C). **Regime:** custom capacities.
 **Source:** Cassandra 5.0.9 (source tree `b796bcfd`). **Runs:** run 1 (2026-11-02, pre-protocol, 40-core node),

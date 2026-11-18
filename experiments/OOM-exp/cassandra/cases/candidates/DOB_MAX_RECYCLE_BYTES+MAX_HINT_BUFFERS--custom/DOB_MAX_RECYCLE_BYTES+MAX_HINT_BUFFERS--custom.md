@@ -1,5 +1,7 @@
 # DOB_MAX_RECYCLE_BYTES + MAX_HINT_BUFFERS (custom) — hints slabs and kept DOB scratch buffers exhaust a shared direct-memory budget
 
+> **Verdict (2026-11-17 mapping):** retry. **Phase-1 case file:** [`DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided.md), [`MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS--guided.md).
+
 **Direction:** convergence · standing-pool (hints pool) × multiplicity (per-thread DOB scratch retention).
 **Regime:** custom capacities (`dob_max_recycle_bytes` = 8 MiB, `MAX_HINT_BUFFERS` = 8), tightened
 direct-memory budget (`-XX:MaxDirectMemorySize=560m`). **Source:** Cassandra 5.0.9 (git tree

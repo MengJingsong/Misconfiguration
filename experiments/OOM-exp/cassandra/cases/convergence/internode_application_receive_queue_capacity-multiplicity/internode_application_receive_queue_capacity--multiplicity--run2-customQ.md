@@ -1,5 +1,7 @@
 # C1 reopen — internode receive-queue exclusive allowance × peers, CUSTOM Q (multiplicity)
 
+> **Verdict (2026-11-17 mapping):** true positive (as C1, via [run 4](internode_application_receive_queue_capacity--multiplicity--run4.md); this run is superseded). **Phase-1 case file:** [`internode_application_receive_queue_capacity-acquireCapacity-queueCapacity--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/internode_application_receive_queue_capacity-acquireCapacity-queueCapacity--guided.md), [`internode_application_receive_queue_reserve_global_capacity-acquireCapacity-actualExcess--autonomous`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/internode_application_receive_queue_reserve_global_capacity-acquireCapacity-actualExcess--autonomous.md).
+
 **Direction / sub-direction:** convergence · multiplicity.
 **Allocation domain:** internode inbound application receive queues (per-connection exclusive
 allowance Q, per-endpoint reserve E, global reserve G) — off-heap LARGE-message frame buffers.

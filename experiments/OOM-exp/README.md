@@ -13,7 +13,7 @@
 > or production targets, synthetic test data only, one victim node per
 > experiment, budgets deliberately tightened so a single process is contained.
 > The deliverables are reproducible evidence, documented misconfigurations,
-> and defect reports. AI assistants should use this context when designing,
+> and verified defects. AI assistants should use this context when designing,
 > running, or analyzing these resource-exhaustion experiments. See the root
 > [`README.md`](../../README.md#research-context-for-ai-assistants) for the
 > project-wide statement.
@@ -37,9 +37,8 @@ The outputs are reproducible evidence, documented misconfigurations, and verifie
 defects.
 
 Read [verification-protocol.md](verification-protocol.md) for common evidence and
-classification rules, then the selected playbook. The next Cassandra batch is
-specified in [cassandra/campaign-plan.md](cassandra/campaign-plan.md), with
-[node requirements](cassandra/node-requirements.md).
+classification rules, then the [OOM agent playbook](oom-agent-playbook.md). Node requirements:
+[cassandra/node-requirements.md](cassandra/node-requirements.md).
 
 ## Why this builds on capacity-enforcement-exp
 
@@ -49,7 +48,8 @@ set each capacity (config entries, JVM properties, per-table options,
 hard-coded constants). For each case it recorded, at stage 4, whether the
 measured usage actually follows the constraint.
 
-That inventory is the input here. We already know, per constraint:
+That inventory, read by phase 1's stage 5 (OOM clue find), yields the OOM candidates that are the
+input here. Per candidate's phase-1 case we already know:
 
 - where the capacity check lives and which code path reaches it,
 - what the constraint is and how its value is initialized (config vs. non-config),
@@ -58,28 +58,26 @@ That inventory is the input here. We already know, per constraint:
 OOM-exp uses that evidence to test whether the identified controls protect a
 shared memory budget under reachable workloads and configurations.
 
-## Lead sources
+## Pipeline (redesigned 2026-11-17)
 
-*(Added 2026-11-10.)* A **lead source** is how a candidate is found; a
-**direction** (below) is how the OOM happens. The two are independent: a lead
-from any source is run with the convergence or bypass playbook, or as an
-unprotected-accumulation case, and classified by the common protocol. Each case
-and campaign row records its source as a label, like the capacity regime.
+Phase 2 has **one agent role, the OOM agent, and two stages** ([`oom-agent-playbook.md`](oom-agent-playbook.md)):
 
-| Source | Starts from | Finds | Method |
-|---|---|---|---|
-| **capacity-enforcement inventory** (*if-check inventory* before 2026-11-17) | capacity checks found by `capacity-enforcement-exp`, and its OOM lead list (`<system>/stage3-ai-deep-read/oom-lead-list.md`) | convergence and bypass of existing checks | the direction playbooks' selection step |
-| **JIRA OOM history** | the project's fixed OOM reports | **clues for selecting among phase 1's constraints** (owner's rule, 2026-11-16): which constraints and mechanisms have caused real OOMs; positive controls; unfixed variants and incomplete fixes | [`jira-mining-playbook.md`](jira-mining-playbook.md) |
-| **Data-flow tracing** | where bytes are held along core data flows | accumulation with no check or a check on the wrong unit, plus new leads for both directions. *Kept as a phase-2-only source for now (owner's decision, 2026-11-17): the only source that does not go through phase 1's constraints* | [`dataflow-tracing-playbook.md`](dataflow-tracing-playbook.md) |
+| Stage | What the OOM agent does | Output |
+|---|---|---|
+| **Stage 1 — pick and design** | Reads (a) the **phase 1 OOM candidate list** (`../capacity-enforcement-exp/<system>/stage5-oom-clue-find/phase1-oom-candidates.md`) and (b) the **phase 2 retry list** (`<system>/phase2-retry-list.md`), picks candidates, and writes a case file for each: the corresponding phase-1 case file, a frozen design solution that should lead to OOM, and a conclusion left `pending` | a case file from [`_TEMPLATE-case.md`](_TEMPLATE-case.md) |
+| **Stage 2 — verify** | A fresh OOM-agent session follows the frozen design on real nodes, builds the harness, records the runs and adds the conclusion | the verdict: **true positive** (leads to OOM; V1–V7 met), **false positive** (does not), or **retry** (no final conclusion; back to the retry list) |
 
-The capacity-enforcement inventory cannot see memory that no check guards; data-flow tracing
-covers that gap, and JIRA history points the selection at the constraints that have
-failed before. How the experiments depend on each other, and the back-link from each
-verified case to phase 1, are in [`../README.md`](../README.md). The JIRA survey also ranks flows for tracing. Lead
-outputs live under `<system>/leads/`; cases stay in `<system>/cases/`.
-A reproduced, already-fixed JIRA bug is a **positive control**, not a new finding.
+Every picked candidate counts as estimated positive after stage 1, so the verdicts give each phase-1
+agent's true-positive rate. JIRA is read in stage 1 for prior art only; nothing is posted. The verdicts
+of cases filed before 2026-11-17 were mapped from their protocol status
+([`cassandra/cases/_INDEX.md`](cassandra/cases/_INDEX.md)). **Retired 2026-11-17:** the lead sources
+(capacity-enforcement inventory, JIRA mining — moved to phase 1's stage 5 —, data-flow tracing), the
+queuing playbook, the campaign-plan queue (kept as history) and the lead lists (migrated to the candidate
+list); the earlier design is in git before this change.
 
-## Two directions
+## Two directions (technique notes)
+
+*From 2026-11-17 the directions are labels and design techniques for stage 1, not separate pipelines.*
 
 ### Direction 1 — convergence
 
@@ -111,8 +109,8 @@ For multiplicity, vary the number of memory-holding owners. For concurrency or
 surge, vary the number of overlapping requests. A case may involve both, so
 state which variable the test isolates.
 
-Add a shape when a candidate needs one. Campaign IDs identify individual
-investigations in the [Cassandra campaign plan](cassandra/campaign-plan.md).
+Add a shape when a candidate needs one. Case IDs identify individual investigations in
+[`cassandra/cases/_INDEX.md`](cassandra/cases/_INDEX.md) (the campaign plan is history from 2026-11-17).
 
 ### ID prefixes (rule, 2026-11-16)
 
@@ -122,23 +120,19 @@ prefixes below and for any prefix added later; a new prefix gets a row here when
 
 | Prefix | Meaning | Defined in |
 |---|---|---|
-| **C** | convergence investigation | [campaign plan](cassandra/campaign-plan.md) queue |
-| **B** | bypass investigation | campaign plan queue |
-| **R** | recheck of a pre-protocol convergence OOM (R1–R6); suffix **-V** = re-test of the same mechanism at default constraints and an acceptable budget (e.g. R1-V) | campaign plan queue |
-| **S** | stacked combo case (convergence → stack → bypass), per the [combo playbook](combo-playbook.md) | campaign plan queue |
-| **U** | unprotected-accumulation lead (memory with no applicable control) | campaign plan queue |
-| **J** | JIRA lead-source task (J1 Cassandra, J2 Hadoop survey) | campaign plan, *Lead-source pilots* |
-| **F** | data-flow tracing task (F1 coordinator write) | campaign plan, *Lead-source pilots* |
-| **L** | candidate lead from the OOM-pattern/JIRA lead list | [`pattern-leads.md`](pattern-leads.md) §4 |
-| **N** | new lead from the capacity-enforcement-exp bypass notes | [`phase1-bypass-leads.md`](phase1-bypass-leads.md) §3 |
+| **C** | convergence case | stage 1 design label ([`oom-agent-playbook.md`](oom-agent-playbook.md)) |
+| **B** | bypass case | stage 1 design label |
+| **U** | unprotected-accumulation case (memory with no applicable control) | stage 1 design label |
+| **S** | stacked combo case (convergence → stack → bypass), per the [combo playbook](combo-playbook.md) | stage 1 design label |
+| **R** | a new attempt at an earlier case (R1–R6 rechecked pre-protocol convergence OOMs); suffix **-V** = re-test at default constraints and an acceptable budget (e.g. R1-V) | stage 1 design label |
+| **OC** | OOM candidate in a phase 1 OOM candidate list (`cassandra:OC-12`) | `../capacity-enforcement-exp/<system>/stage5-oom-clue-find/phase1-oom-candidates.md` |
+| **CP** | OOM clue pattern | `../capacity-enforcement-exp/stage5-oom-clue-find/oom-clue-patterns.md` |
 | **V1–V7** | items of the verification (promotion) rule | [verification protocol](verification-protocol.md) |
-| **P1–P3** after a slash (e.g. `C1 / P1`) | priority in the campaign queue | campaign plan |
 | condition letters inside a case (B6 **A**/**B**/**D**, C2 **S-A**/**F-B**, C1 **D**/**H**) | sub-cases (conditions) of one case | the case file's status table |
 
-**Clashing labels in [`pattern-leads.md`](pattern-leads.md):** there, **P1–P6** are patterns seen in our cases,
-**J1–J6** are JIRA cause patterns and **S1–S6** are search patterns. They are not campaign IDs (P1/P2
-priorities, J1/J2 tasks, S1/S2 combo cases). When citing them, name the file or say "pattern P2",
-"JIRA pattern J2", "search pattern S1".
+Retired labels, still found in records before 2026-11-17: **J** (JIRA task), **F** (data-flow task),
+**L** and **N** (lead lists, now `OC` rows with the old label in brackets), **P1–P3** after a slash
+(queue priority), and the pattern labels P1–P6 / J1–J6 / S1–S6 of the old pattern list (now `CP` rows).
 
 ### Direction 2 — bypass
 
@@ -171,31 +165,19 @@ repetitions, causal interventions, and negative/invalid results.
 
 ## Playbooks
 
-Each direction is run from its own playbook — a repeatable procedure an agent
-or a person follows to produce one case. Every closed case is tracked in that
-system's index, e.g. [`cassandra/cases/_INDEX.md`](cassandra/cases/_INDEX.md).
-
-| Direction | Playbook | What it produces |
-|---|---|---|
-| 1 — simultaneous live allocations share a budget | **`custom-convergence-playbook`** | a convergence case (constraint set, sizing, combined workload, memory outcome) |
-| 1 (variant) — same, with every constraint at its default value | **`default-convergence-playbook`** | a default-value convergence case (same as above, plus a defaults audit) |
-| 1 + 2 combined — at defaults, convergence multiplicity first, then stacked convergence sub-directions in one budget domain, then bypass accounting gaps; distance to OOM measured at each stage | **`combo-playbook`** | a combo case (ceiling sheet, per-pool ledger of counted vs real memory, headroom per stage) |
-| 2 — get past one capacity check | **`bypass-playbook`** | a bypass case (check, defeating mechanism, measured usage past capacity) |
-
-**Queuing** (how a lead becomes a campaign row, and what gates a run): [`queuing-playbook.md`](queuing-playbook.md).
-
-The lead-source playbooks run before these and feed them:
-
-| Lead source | Playbook | What it produces |
-|---|---|---|
-| JIRA OOM history | **`jira-mining-playbook`** | `<system>/leads/jira-oom-survey.csv`/`.md`, positive-control cases, variant leads |
-| Data-flow tracing | **`dataflow-tracing-playbook`** | `<system>/leads/dataflow/<flow>.md` holder tables, ranked leads, unprotected-accumulation cases |
+| File | Use |
+|---|---|
+| [`oom-agent-playbook.md`](oom-agent-playbook.md) | **The OOM agent:** stage 1 (pick and design) and stage 2 (verify); verdicts; retry list format |
+| [`_TEMPLATE-case.md`](_TEMPLATE-case.md) | The case file: candidate, design solution, runs, conclusion |
+| [`verification-protocol.md`](verification-protocol.md) | Evidence rules, measurement, budgets, V1–V7 (the bar for a true positive) |
+| [`custom-convergence-playbook.md`](custom-convergence-playbook.md), [`default-convergence-playbook.md`](default-convergence-playbook.md), [`combo-playbook.md`](combo-playbook.md), [`bypass-playbook.md`](bypass-playbook.md) | Technique notes for shaping a stage-1 design (their own pick and queue steps are superseded) |
+| `<system>/phase2-retry-list.md`, `<system>/cases/_INDEX.md` | Retry list; case index with verdicts |
 
 ## Relationship to the project targets
 
 This experiment carries out the project's **Target 3**, investigating resource
-exhaustion through convergence and bypass. It uses the capacity checks and
-runtime evidence collected by `capacity-enforcement-exp`.
+exhaustion. Its candidates come from `capacity-enforcement-exp`'s stage 5 (OOM clue find), which reads
+that experiment's case files and stage-4 evidence.
 
 ## Scope and safety
 

@@ -1,5 +1,7 @@
 # networking_cache_size — native-v5 large-request release defect (B1, run 1)
 
+> **Verdict (2026-11-17 mapping):** false positive. **Phase-1 case file:** [`networking_cache_size-allocateMoreChunks-memoryUsageThreshold--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/networking_cache_size-allocateMoreChunks-memoryUsageThreshold--guided.md).
+
 **Direction:** bypass · release-defect · `source: capacity-enforcement-exp` (networking_cache_size arm L)
 **Date:** 2026-11-11 (UTC 2026-11-12 on the nodes) · **Nodes:** victim `apt140` (10.10.1.1), client `apt138` (10.10.1.3)
 **Status:** `negative · deployment` for memory (filed 2026-11-12 in `negatives/`) (no physical overshoot of any control's contract, no OOM at heap 2 GiB / direct 512 MiB–2 GiB, 0/4); **release defect confirmed** (V1–V4 met for the defect itself: pool capacity lost and counters drifting). Upstream defect report recommended (re-run the JIRA search first).

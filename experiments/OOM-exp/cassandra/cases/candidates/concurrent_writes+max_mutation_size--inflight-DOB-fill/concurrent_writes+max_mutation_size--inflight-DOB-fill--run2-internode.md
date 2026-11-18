@@ -1,5 +1,7 @@
 # U1 run 2 — in-flight `DataOutputBuffer` fill of large mutations, delivered to a replica over internode messaging (Utah m400, aarch64)
 
+> **Verdict (2026-11-17 mapping):** retry. **Phase-1 case file:** [`DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided.md), [`max_mutation_size-validateSize-MAX_MUTATION_SIZE--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/max_mutation_size-validateSize-MAX_MUTATION_SIZE--guided.md).
+
 **Campaign row:** U1 (U = unprotected-accumulation lead: memory with no applicable control). **Run 2** of the case;
 run 1 is [`concurrent_writes+max_mutation_size--inflight-DOB-fill.md`](concurrent_writes+max_mutation_size--inflight-DOB-fill.md)
 (pc96, x86, the victim as coordinator). **Redesign (researcher's decision 2026-11-17):** the large mutations reach

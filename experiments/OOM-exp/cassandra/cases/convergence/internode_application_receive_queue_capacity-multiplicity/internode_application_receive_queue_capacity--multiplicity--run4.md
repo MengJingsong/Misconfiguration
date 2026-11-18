@@ -1,5 +1,7 @@
 # C1 run 4 — internode receive-queue multiplicity at default capacities, 2 GiB heap, 512 MiB+ direct
 
+> **Verdict (2026-11-17 mapping):** true positive. **Phase-1 case file:** [`internode_application_receive_queue_capacity-acquireCapacity-queueCapacity--guided`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/internode_application_receive_queue_capacity-acquireCapacity-queueCapacity--guided.md), [`internode_application_receive_queue_reserve_global_capacity-acquireCapacity-actualExcess--autonomous`](../../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/internode_application_receive_queue_reserve_global_capacity-acquireCapacity-actualExcess--autonomous.md).
+
 **Direction / sub-direction:** convergence · multiplicity (loaded peers × per-endpoint/per-connection
 receive allowances). **Allocation domain:** victim's inbound application receive queue (queued LARGE
 mutation frames in direct memory). **Capacity regime:** **default** (Q/E/G = 4/128/512 MiB unset in yaml;
