@@ -285,24 +285,6 @@ until a run reports. That field is the index of this relationship; keep it
 current, because a case whose §8 claim has been refuted at runtime but still
 reads as settled prose is the worst outcome this pipeline can produce.
 
-## Rescan claims (added 2026-11-17)
-
-A **rescan claim** is a claim that a stage-3 recheck names in its "Stage-4 claim to add" line (most often
-that real memory, not the counted quantity, follows or escapes the constraint; guided playbook §5). It was
-called a *recheck claim* until 2026-11-17; "recheck" now means only the stage-3 recheck. A rescan claim
-runs only when the owner approves a batch, under the protocol above, as batch 1 did (2026-11-17,
-[`../../phase-links/cassandra.md`](../../phase-links/cassandra.md)):
-
-- one fresh agent per claim and node; the design is appended to the case file as
-  `## Stage-4 design for the rescan claim (YYYY-MM-DD)` and frozen (sha256) before run 1;
-- a scaled measurement of the real resource against the counter, inside a recorded cgroup budget with
-  swap 0 (`systemd-run --user --scope -p MemorySwapMax=0`), **not an OOM test**;
-- results in `results/<case-file-stem>--rescan-<date>.md`, harness in `harness/<same>/`. Batch 1's ten
-  files keep their names (`--recheck-2026-11-17`) and their case files keep the heading "Stage-4 design
-  for the recheck claim", which their freeze commands match.
-- After the verdict, set the lead's Status in `<system>/stage3-ai-deep-read/oom-lead-list.md` to
-  `stage-4 measured`; the queue row cites the results file.
-
 ## Where to start
 
 Every filed case carries a §9 test design, so stage 4 waits only on execution. **Which cases have run, and what comes next,

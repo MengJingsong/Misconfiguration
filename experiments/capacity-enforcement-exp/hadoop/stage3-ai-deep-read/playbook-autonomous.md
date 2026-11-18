@@ -8,9 +8,8 @@
 > [`../PROCEDURE.md`](../PROCEDURE.md). Template: [`_TEMPLATE-autonomous.md`](_TEMPLATE-autonomous.md)
 > in this folder. Per-person output (`cases/`, `_INDEX.md`) lives in `jingsong/` or `yang/` here.
 
-**This is the autonomous agent's whole instruction.** It gets the target and, from
-2026-11-17, a general request to note OOM leads (goal 3); nothing else: no rules, no patterns,
-no design method, no stage-2 band or reason, none of the guided agent's enforcement-property questions.
+**This is the autonomous agent's whole instruction.** It gets the target and nothing
+else: no rules, no patterns, no design method, no stage-2 band or reason.
 **Do not access, open or read any guided playbook (`playbook-guided.md`).** The agent fills the
 template, and [stage 4](../../stage4-runtime-verification/README.md) runs whatever solution the
 case file holds.
@@ -22,11 +21,7 @@ copy. Give it this file, `_TEMPLATE-autonomous.md` (both may be copied next to i
 repository) and the target as a code location (`file:line`, relative to the source root). For a
 helper unit, the target is the comparison line inside the helper method (found with `grep -n`).
 Nothing else about the case. Tell it where to write the output file (outside the repository); the
-session that started it files the result. For a **recheck** (section "Recheck mode"), give it this
-file and a copy of one filed case file instead of a target, and copy the appended section back.
-**Filing:** the session that files the result copies each row of its section E into
-[`oom-lead-list.md`](oom-lead-list.md) in this folder (Mode `new` for a new case, `blind` for a
-recheck; Status `lead`), the list OOM-exp takes its Hadoop candidates from.
+session that started it files the result.
 
 You are helping verify a claim about **Apache Hadoop 3.4.2**.
 
@@ -46,8 +41,6 @@ you were given as the target, work out:
    Design a verification solution that a separate engineer or AI session can execute without
    re-deriving the code path. It has **two tiers**, each a complete procedure of its own (see the
    next section).
-3. **Any clue that a daemon, container or host could run out of memory**, through this
-   constraint or the code around it (section "OOM leads"). You record clues; you do not test them.
 
 If the constraint caps some other resource (vcores, a count of objects with no memory/disk
 significance, a logical scheduler share that does not translate into memory or disk, threads,
@@ -107,25 +100,6 @@ opposite claim, that usage does **not** follow the constraint, so stage 4 can co
 Include a positive control: the same workload shown to move usage where a cap is known to bind (see
 the template's B2g and B3g notes).
 
-## OOM leads (added 2026-11-17)
-
-While you trace the constraint, note anything in the code that could let memory use grow until a
-daemon, a container or the host runs out of memory: past this constraint, or past whatever else is
-supposed to bound that memory. Record each clue in the template's section E: what holds the memory,
-why the limit does not stop it, where (`file:line`), and a rough magnitude at the shipped default
-settings. Record a lead only when you can point to the code; an overshoot by one item that another
-limit already caps is not a lead. Write `none found` when there is none. Do not design or run an
-OOM test, and do not let a lead change the estimate: section B stays about the constraint.
-
-## Recheck mode (added 2026-11-17)
-
-If you are given a filed case file instead of a target, you are rechecking it for OOM leads only.
-Read that case file and every `file:line` it cites for the constraint, its check and what happens at
-the limit, in the source tree, then look for leads as in "OOM leads" above. Do not redo the case and
-do not open any other case file. Append at the end of the file a section
-`## Recheck — OOM leads (autonomous, YYYY-MM-DD)` holding section E's table, and leave everything
-above it as filed.
-
 ## What the solution must satisfy
 
 These are practical limits, not a method:
@@ -156,8 +130,7 @@ These are practical limits, not a method:
 ## Output
 
 Fill in [`_TEMPLATE-autonomous.md`](_TEMPLATE-autonomous.md). Keep its section headings. Write
-`n/a: <reason>` rather than leaving a section empty. You may add sections. Fill section E (OOM
-leads) too, if only with `none found`. Save it as
+`n/a: <reason>` rather than leaving a section empty. You may add sections. Save it as
 `<stem>--autonomous.md`, where `<stem>` is `[constraint]-[function]-[operand]`, named as follows.
 
 ### Naming

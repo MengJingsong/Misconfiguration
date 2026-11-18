@@ -6,9 +6,8 @@
 > the stage folder, `experiments/capacity-enforcement-exp/<system>/<stage>/` (for Cassandra,
 > `experiments/capacity-enforcement-exp/cassandra/`), not next to this file.
 
-**This is the autonomous agent's whole instruction.** It gets the target and, from
-2026-11-17, a general request to note OOM leads (goal 3); nothing else: no rules, no
-patterns, no design method, none of the guided agent's enforcement-property questions. The guided agent
+**This is the autonomous agent's whole instruction.** It gets the target and nothing
+else: no rules, no patterns, no design method. The guided agent
 gets the same target plus human suggestions. **Do not access, open or read the guided
 agent's playbook (`playbook-guided.md`).** Both fill a template, and
 [stage 4](../stage4-runtime-verification/README.md) runs whatever solution a case file
@@ -18,11 +17,6 @@ holds; what stage 3 is, and where results are filed, is in [`README.md`](README.
 `cassandra-5.0.9` made **outside this repository** (`rsync -a systems/cassandra/source/ ~/cassandra-5.0.9/`),
 so the session cannot read the other case and results files. Give it this file, `_TEMPLATE-autonomous.md`, and the target as a
 code location (`file:line`, relative to the source root). Nothing else about the case.
-For a **recheck** (section "Recheck mode"), give it this file and a copy of one filed case file
-instead of a target, and copy the appended section back into the repository's case file.
-**Filing:** whoever files the result copies each row of its section E into
-`<system>/stage3-ai-deep-read/oom-lead-list.md` (Mode `new` for a new case, `blind` for a recheck;
-Status `lead`), the list OOM-exp takes its candidates from.
 
 You are helping verify a claim about **Apache Cassandra 5.0.9**.
 
@@ -39,9 +33,6 @@ given as the target, work out:
    the resource usage.** Design a verification solution that a separate engineer
    or AI session can execute without re-deriving the code path. It has **two
    tiers**, each a complete procedure of its own (see the next section).
-3. **Any clue that the node could run out of memory**, through this constraint
-   or the code around it (section "OOM leads"). You record clues; you do not
-   test them.
 
 ## The two tiers
 
@@ -86,28 +77,6 @@ prediction from the source; stage 4 confirms or refutes it. Either way, design t
 solution in full: for a negative estimate, the solution tests the opposite claim, that
 usage does **not** follow the constraint, so stage 4 can confirm or refute it. Include a positive control: the same workload shown to move usage where a cap is known to bind (see the template's B2g and B3g notes).
 
-## OOM leads (added 2026-11-17)
-
-While you trace the constraint, note anything in the code that could let
-memory use grow until the node runs out of memory: past this constraint, or past
-whatever else is supposed to bound that memory. Record each clue in the template's
-section E: what holds the memory, why the limit does not stop it, where
-(`file:line`), and a rough magnitude at the shipped default settings. Record a
-lead only when you can point to the code; an overshoot by one item that another
-limit already caps is not a lead. Write `none found` when there is none. Do not
-design or run an OOM test, and do not let a lead change the estimate: section B
-stays about the constraint.
-
-## Recheck mode (added 2026-11-17)
-
-If you are given a filed case file instead of a target, you are rechecking it for
-OOM leads only. Read that case file and every `file:line` it cites for the
-constraint, its check and what happens at the limit, in the source tree, then look
-for leads as in "OOM leads" above. Do not redo the case and do not open any other
-case file. Append at the end of the file a section
-`## Recheck — OOM leads (autonomous, YYYY-MM-DD)` holding section E's table, and
-leave everything above it as filed.
-
 ## What the solution must satisfy
 
 These are practical limits, not a method:
@@ -132,6 +101,5 @@ These are practical limits, not a method:
 
 Fill in [`_TEMPLATE-autonomous.md`](_TEMPLATE-autonomous.md). Keep its section
 headings. Write `n/a: <reason>` rather than leaving a section empty. You may add
-sections. Fill section E (OOM leads) too, if only with `none found`.
-Save it as `cases/<stem>--autonomous.md`, where `<stem>` is
+sections. Save it as `cases/<stem>--autonomous.md`, where `<stem>` is
 `[constraint]-[function]-[operand]` ([`../README.md` §6.1](../README.md#61-naming)).
