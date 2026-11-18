@@ -61,6 +61,19 @@ Owner's redesign; map and flowchart in [`experiments/FLOWCHART.md`](experiments/
   S1, S2, B8, R1-V), 2 false positive (B1, R6-V), 8 retry (B7, C3, R2–R5, U1, the disk case) — verdict and
   phase-1 case file per case in `OOM-exp/cassandra/cases/_INDEX.md`.
 
+**Waves 1–3 (2026-11-17 22:55 → 2026-11-18 10:30 EST, owner-approved):**
+- Stage 5 swept all 304 Cassandra case files with both agents: 251 autonomous and 264 guided candidates
+  (OC-63…OC-577; full text in `stage5-oom-clue-find/runs/wave{1,2,3}.md`; advisory triage of OC-63…412 in
+  `runs/triage-2026-11-18.md`). Hadoop JIRA OOM report built; CP-15, CP-16 and the CP-8 rewording added.
+- Phase 2, 17 cases: **14 true positive** (B10, U2, U3, U4, R7, C5, B9, C4, C6, B12, C7, B13, C8; B15 pending the
+  owner's review of its deployment/fault assumptions), **3 retry** (R8, B11, B14). All verdicts are judged by
+  their own stage-2 agent; none is independently reviewed yet. None of the tested candidates came from the new
+  stage-5 agents (all were legacy rows or retries), so no per-agent true-positive rate exists yet.
+- The five UMass x86 nodes (`pc91`, `pc84`, `pc72`, `pc99`, `pc75`) have been unreachable since ≈ 04:04 on
+  2026-11-18 (the CloudLab experiment may have expired); their run data is only what the case folders hold.
+  Left on the ARM nodes and `pc96`: per-case `/mydata/s4/<id>-w*` folders (largest: `pc96` 102 GB incl. C4's
+  92 GB data set; `ms0611` 15 GB; `ms0625` 13 GB); nothing running.
+
 **Open for the owner** (from the migration):
 1. Verdict calls: R1 and R6 take their `-V` re-test's verdict; C3 is retry only by the mixed-status rule
    (its ceiling test says false positive); B1 is false positive though its release defect is real (a leak
