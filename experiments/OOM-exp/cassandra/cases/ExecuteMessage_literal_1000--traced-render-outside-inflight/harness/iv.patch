@@ -1,0 +1,12 @@
+--- a/src/java/org/apache/cassandra/transport/messages/ExecuteMessage.java
++++ b/src/java/org/apache/cassandra/transport/messages/ExecuteMessage.java
+@@ -227,6 +227,9 @@ public class ExecuteMessage extends Message.Request
+             ColumnSpecification cs = prepared.statement.getBindVariables().get(i);
+             String boundName = cs.name.toString();
+             ByteBuffer bytes = options.getValues().get(i);
++            // B11 intervention (diagnostic build only): render at most 1000 bytes; the 1000-char cut below stores the same value for blobs
++            if (bytes != null && bytes != ByteBufferUtil.UNSET_BYTE_BUFFER && bytes.remaining() > 1000)
++                bytes = (ByteBuffer) bytes.duplicate().limit(bytes.position() + 1000);
+             String boundValue = (bytes == ByteBufferUtil.UNSET_BYTE_BUFFER) ? "<unset>" : cs.type.asCQL3Type().toCQLLiteral(bytes);
+             if (boundValue.length() > 1000)
+                 boundValue = boundValue.substring(0, 1000) + "...'";

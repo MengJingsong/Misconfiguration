@@ -1,0 +1,53 @@
+2026-11-17T21:10:35 start: T2-1 base 2G on fixed:13 180
+2026-11-17T21:11:55 end: T2-1 2026-11-17T21:11:55 END daemon-exit oom:java.lang.OutOfMemoryError: Java heap space
+2026-11-17T21:11:55 start: T2-2 base 2G on fixed:13 180
+2026-11-17T21:13:23 end: T2-2 2026-11-17T21:13:22 END daemon-exit oom:java.lang.OutOfMemoryError: Java heap space
+2026-11-17T21:13:23 start: T2-3 base 2G on fixed:13 180
+2026-11-17T21:14:54 end: T2-3 2026-11-17T21:14:54 END daemon-exit oom:java.lang.OutOfMemoryError: Java heap space
+2026-11-17T21:14:54 start: C2-1 base 2G off fixed:13 150
+2026-11-17T21:18:40 end: C2-1 2026-11-17T21:18:40 END hold
+2026-11-17T21:18:40 start: C2-2 base 2G off fixed:13 150
+2026-11-17T21:22:21 end: C2-2 2026-11-17T21:22:21 END hold
+2026-11-17T21:22:21 start: C2-3 base 2G off fixed:13 150
+2026-11-17T21:26:01 end: C2-3 2026-11-17T21:26:00 END hold
+2026-11-17T21:26:01 start: I2-1 iv 2G on fixed:13 150
+2026-11-17T21:29:41 end: I2-1 2026-11-17T21:29:40 END hold
+2026-11-17T21:29:41 start: I2-2 iv 2G on fixed:13 150
+2026-11-17T21:33:23 end: I2-2 2026-11-17T21:33:22 END hold
+2026-11-17T21:33:23 start: I2-3 iv 2G on fixed:13 150
+2026-11-17T21:37:05 end: I2-3 2026-11-17T21:37:04 END hold
+2026-11-17T21:37:05 start: T4-1 base 4G on fixed:26 180
+2026-11-17T21:41:26 end: T4-1 2026-11-17T21:41:24 END hold
+2026-11-17T21:41:26 start: T8-1 base 8G on fixed:256 180
+2026-11-17T21:45:53 end: T8-1 2026-11-17T21:45:51 END hold
+2026-11-17T21:45:53 series done
+
+== build-base.log (head/tail)
+Tue Nov 17 20:56:34 MST 2026
+BUILD SUCCESSFUL
+Total time: 4 minutes 58 seconds
+EXIT=0
+Tue Nov 17 21:01:33 MST 2026
+== build-iv.log (tail)
+jar:
+
+BUILD SUCCESSFUL
+Total time: 35 seconds
+iv duplicate count:   0
+base duplicate count: 0
+cassandra-base: git describe cassandra-5.0.9 ; ByteBuffer.duplicate in ExecuteMessage: 0
+cassandra-iv: git describe cassandra-5.0.9 ; ByteBuffer.duplicate in ExecuteMessage: 1
+diff --git a/src/java/org/apache/cassandra/transport/messages/ExecuteMessage.java b/src/java/org/apache/cassandra/transport/messages/ExecuteMessage.java
+index 714de7d..23eaa82 100644
+--- a/src/java/org/apache/cassandra/transport/messages/ExecuteMessage.java
++++ b/src/java/org/apache/cassandra/transport/messages/ExecuteMessage.java
+@@ -227,6 +227,9 @@ public class ExecuteMessage extends Message.Request
+             ColumnSpecification cs = prepared.statement.getBindVariables().get(i);
+             String boundName = cs.name.toString();
+             ByteBuffer bytes = options.getValues().get(i);
++            // B11 intervention (diagnostic build only): render at most 1000 bytes; the 1000-char cut below stores the same value for blobs
++            if (bytes != null && bytes != ByteBufferUtil.UNSET_BYTE_BUFFER && bytes.remaining() > 1000)
++                bytes = (ByteBuffer) bytes.duplicate().limit(bytes.position() + 1000);
+             String boundValue = (bytes == ByteBufferUtil.UNSET_BYTE_BUFFER) ? "<unset>" : cs.type.asCQL3Type().toCQLLiteral(bytes);
+             if (boundValue.length() > 1000)
+                 boundValue = boundValue.substring(0, 1000) + "...'";

@@ -1,0 +1,35 @@
+# Stage-4 recheck run (2026-11-17) of native_transport_max_frame_size-decode-bytesToDiscard--autonomous.
+# Observe-only rules; output goes to the node's stdout. NTFDISCARD/NTFFAIL copied from
+# harness/native_transport_max_frame_size-decode-bytesToDiscard--autonomous/ntfs.btm; NTFMEM rebuilt for the default pooled allocator.
+
+# One line each time a decoder enters discard mode (Envelope.java:432-433), after tooLongTotalLength is written.
+RULE ntfr enter discard mode
+CLASS org.apache.cassandra.transport.Envelope$Decoder
+METHOD decode(io.netty.buffer.ByteBuf)
+AFTER WRITE tooLongTotalLength
+IF true
+DO traceln("NTFDISCARD t=" + System.currentTimeMillis() + " tooLongTotalLength=" + $0.tooLongTotalLength + " readable=" + $1.readableBytes())
+ENDRULE
+
+# One line per fail() call: the true branch of Envelope.java:349 or :436.
+RULE ntfr fail
+CLASS org.apache.cassandra.transport.Envelope$Decoder
+METHOD fail
+AT ENTRY
+IF true
+DO traceln("NTFFAIL t=" + System.currentTimeMillis() + " tooLongTotalLength=" + $0.tooLongTotalLength + " stream=" + $0.tooLongStreamId)
+ENDRULE
+
+# On every `nodetool version` (StorageService.getReleaseVersion): Netty's direct-memory counter and limit (the ones
+# OutOfDirectMemoryError is thrown from), the native-transport pooled allocator's metric (CBUtil.java:60), and what
+# Cassandra counts: bytes in flight charged to native_transport_max_request_data_in_flight, and connected native clients;
+# then the pool's chunk counts and held 16 MiB buffers from the helper ntfr.Probe (probe/ntfr/Probe.java, loaded with sys:).
+RULE ntfr memory on nodetool version
+CLASS org.apache.cassandra.service.StorageService
+METHOD getReleaseVersion
+AT ENTRY
+BIND a : io.netty.buffer.PooledByteBufAllocator = org.apache.cassandra.transport.CBUtil.allocator;
+     m : io.netty.buffer.PooledByteBufAllocatorMetric = a.metric()
+IF true
+DO traceln("NTFMEM t=" + System.currentTimeMillis() + " nettyUsed=" + io.netty.util.internal.PlatformDependent.usedDirectMemory() + " nettyMax=" + io.netty.util.internal.PlatformDependent.maxDirectMemory() + " poolDirect=" + m.usedDirectMemory() + " arenas=" + m.numDirectArenas() + " chunk=" + m.chunkSize() + " tlcaches=" + m.numThreadLocalCaches() + " allocator=" + org.apache.cassandra.transport.CBUtil.allocator.getClass().getSimpleName() + " inflight=" + org.apache.cassandra.transport.ClientResourceLimits.getCurrentGlobalUsage() + " clients=" + org.apache.cassandra.metrics.ClientMetrics.instance.countConnectedClients() + " " + ntfr.Probe.pool(org.apache.cassandra.transport.CBUtil.allocator))
+ENDRULE

@@ -1,0 +1,35 @@
+--- a/src/java/org/apache/cassandra/hints/CompressedHintsWriter.java
++++ b/src/java/org/apache/cassandra/hints/CompressedHintsWriter.java
+@@ -45,15 +45,20 @@
+         assert compressor != null;
+     }
+ 
++    // C5 diagnostic patch (arm I only): all writers share one compression buffer.
++    // HintsWriteExecutor is single-threaded; the class lock makes that explicit.
++    private static ByteBuffer sharedCompressionBuffer = null;   // guarded by CompressedHintsWriter.class
++
+     protected void writeBuffer(ByteBuffer bb) throws IOException
+     {
++        synchronized (CompressedHintsWriter.class)
++        {
+         int originalSize = bb.remaining();
+         int estimatedSize = compressor.initialCompressedBufferLength(originalSize) + METADATA_SIZE;
+ 
+-        if (compressionBuffer == null || compressionBuffer.capacity() < estimatedSize)
+-        {
+-            compressionBuffer = compressor.preferredBufferType().allocate(estimatedSize);
+-        }
++        if (sharedCompressionBuffer == null || sharedCompressionBuffer.capacity() < estimatedSize)
++            sharedCompressionBuffer = compressor.preferredBufferType().allocate(estimatedSize);
++        compressionBuffer = sharedCompressionBuffer;   // instance field kept as an alias (trace reads it)
+         compressionBuffer.clear();
+ 
+         compressionBuffer.position(METADATA_SIZE);
+@@ -66,6 +71,7 @@
+         compressionBuffer.rewind();
+         compressionBuffer.limit(compressedSize + METADATA_SIZE);
+         super.writeBuffer(compressionBuffer);
++        }
+     }
+ 
+     @VisibleForTesting

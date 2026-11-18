@@ -1,0 +1,57 @@
+[2026-11-17 23:19:06 EST] ARM T-2G-3 arm=A heap=2G direct=auto fetch=5000 steps=1:20,3:160
+[2026-11-17 23:19:12 EST] started T-2G-3 pid 37823 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/u4-T-2G-3-1794975551.scope
+[2026-11-17 23:19:24 EST] ready T-2G-3
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/u4-w1/runs/T-2G-3/cassandra-1794975551-pid37823.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-17 23:19:29 EST] GC.run T-2G-3
+1794975573,base,nmtOtherKB=73561,nmtTotalKB=2599006,rssKB=2868356,rssAnonKB=2688700,scopeCurB=2782142464,scopeOomKill=0,1794975572832,92235864,75458648,75458648,0,0,0,-1,-1,58534824,0,-1,50,95,-1
+[2026-11-17 23:19:36 EST] client pid 38333
+1794975586,t+10,nmtOtherKB=805497,nmtTotalKB=3347511,rssKB=3139556,rssAnonKB=2959200,scopeCurB=3067187200,scopeOomKill=0,1794975585836,1753136024,1316928408,75458648,0,0,34,0,0,58858873,17,-1,70,95,-1
+1794975586005,1,1,1,0,0,0.0,-1.0,-1.0,5000,
+1794975596,t+20,nmtOtherKB=1045628,nmtTotalKB=3604450,rssKB=3382684,rssAnonKB=3202076,scopeCurB=3321589760,scopeOomKill=0,1794975596839,670903760,670903760,318582224,1,0,37,1,0,58892387,17,-1,160,148,-1
+1794975596055,3,3,2,0,0,0.0,-1.0,-1.0,5000,
+1794975607,t+30,nmtOtherKB=1334893,nmtTotalKB=3898224,rssKB=3623744,rssAnonKB=3443128,scopeCurB=3573235712,scopeOomKill=0,1794975606843,1784825120,1482835232,1130513696,0,0,55,0,0,58908120,17,-1,229,334,-1
+1794975607078,3,3,6,0,0,0.0,-1.0,-1.0,5000,
+1794975617,t+41,nmtOtherKB=1334893,nmtTotalKB=3894406,rssKB=3623916,rssAnonKB=3443148,scopeCurB=3574759424,scopeOomKill=0,1794975616846,1916249104,1211606032,1211606032,0,0,58,0,0,58908120,17,-1,289,509,-1
+1794975617186,3,3,9,0,0,0.0,-1.0,-1.0,5000,
+1794975627,t+51,nmtOtherKB=1334866,nmtTotalKB=3873762,rssKB=3625032,rssAnonKB=3444072,scopeCurB=3574276096,scopeOomKill=0,1794975626847,1900612848,1430850800,1430850800,0,0,61,0,0,58890863,17,-1,365,782,-1
+1794975627202,3,3,12,0,0,0.0,-1.0,-1.0,5000,
+1794975638,t+61,nmtOtherKB=614571,nmtTotalKB=3154756,rssKB=2907152,rssAnonKB=2726128,scopeCurB=2823569408,scopeOomKill=0,1794975637849,1933232728,1497025112,1497025112,0,0,78,0,0,58888882,17,-1,447,1073,-1
+1794975637293,3,3,15,0,0,0.0,-1.0,-1.0,5000,
+/mydata/s4/u4-w1/harness/victim-ctl.sh: line 51: 37823 Killed                  CASSANDRA_CONF=$R/conf CASSANDRA_LOG_DIR=$R/logs MAX_HEAP_SIZE=$HEAP MAX_DIRECT_MEMORY_SIZE=$DENV CASSANDRA_HEAPDUMP_DIR=$R JVM_EXTRA_OPTS="-XX:NativeMemoryTracking=summary -Xlog:gc=info,safepoint=info:file=$R/gc.log:time,uptime,level,tags:filecount=20,filesize=20m" setsid nohup systemd-run --user --scope --unit="u4-$L-$(date +%s)" -p MemoryMax=${MM}M -p MemorySwapMax=0 "$BUILD/bin/cassandra" -f < /dev/null > "$R/stdout.log" 2>&1
+1794975650,t+72,nmtOtherKB=NA,nmtTotalKB=NA,rssKB=NA,rssAnonKB=NA,scopeCurB=NA,scopeOomKill=NA,1794975650792,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
+1794975650617,3,3,21,0,0,0.0,-1.0,-1.0,5000,
+[2026-11-17 23:21:00 EST] VICTIM DEAD at +84s
+04:20:57 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 8000 milliseconds
+04:21:05 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 16000 milliseconds
+04:21:21 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 32000 milliseconds
+[2026-11-17 23:21:41 EST] OOM/GC check
+CompileCommand: dontinline org/apache/cassandra/io/util/RebufferingInputStream.readPrimitiveSlowly(I)J
+CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.address()J
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.length()I
+CompileCommand: inline org/apache/cassandra/db/rows/UnfilteredSerializer.serializeRowBody(Lorg/apache/cassandra/db/rows/Row;ILorg/apache/cassandra/db/rows/SerializationHelper;Lorg/apache/cassandra/io/util/DataOutputPlus;)V
+CompileCommand: inline org/apache/cassandra/io/util/Memory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/SafeMemory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/TrackedDataInputPlus.checkCanRead(I)V
+CompileCommand: inline org/apache/cassandra/net/FrameDecoderWith8bHeader.decode(Ljava/util/Collection;Lorg/apache/cassandra/net/ShareableBytes;I)V
+CompileCommand: inline org/apache/cassandra/service/reads/repair/RowIteratorMergeListener.applyToPartition(ILjava/util/function/Consumer;)V
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.selectBoundary(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;II)I
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.strictnessOfLessThan(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;)I
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.indexes(Lorg/apache/cassandra/utils/IFilter/FilterKey;)[J
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.setIndexes(JJIJ[J)V
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare(Ljava/nio/ByteBuffer;[B)I
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare([BLjava/nio/ByteBuffer;)I
+--
+INFO  [ScheduledTasks:1] 2026-11-18T04:19:40,632 NoSpamLogger.java:104 - Some operations were slow, details available at debug level (debug.log)
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /mydata/s4/u4-w1/runs/T-2G-3/cassandra-1794975551-pid37823.hprof ...
+Heap dump file created [1478066793 bytes in 2.018 secs]
+#
+# java.lang.OutOfMemoryError: Java heap space
+# -XX:OnOutOfMemoryError="kill -9 %p"
+#   Executing /bin/sh -c "kill -9 37823"...
+-rw-------  1 jason92 misconfiguration 1478066793 Nov 17 21:20 cassandra-1794975551-pid37823.hprof
+pauses=121 full_gcs=18 total_pause=2s max60=4% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=HeapDumper@96.812s,ReportJavaOutOfMemory@98.783s
+[2026-11-17 23:21:43 EST] stopped T-2G-3
+OOM c=3 type="java.lang.OutOfMemoryError: Java heap space" at+84s
+[2026-11-17 23:21:44 EST] END T-2G-3 OOM c=3 type="java.lang.OutOfMemoryError: Java heap space" at+84s

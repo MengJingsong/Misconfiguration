@@ -1,0 +1,55 @@
+== driver.txt
+2026-11-17T21:05:15 run S0 build=base heap=2G tracing=on mode=fixed:2 hold=60
+2026-11-17T21:05:15 free 34G
+2026-11-17T21:06:07 daemon pid 86025 up
+2026-11-17T21:06:13 client start --fixed 2 --hold-s 60
+2026-11-17T21:07:15 client ended; daemon alive (hold end)
+2026-11-17T21:07:26 END hold oom:java/lang/OutOfMemoryError;)V
+2026-11-17T21:07:26 done
+== summary.txt
+endpoint: hold oom:java/lang/OutOfMemoryError;)V
+stdout: CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V
+stdout: INFO  [main] 2026-11-18T04:05:22,844 CassandraDaemon.java:619 - JVM Arguments: [-ea, -da:net.openhft..., -XX:+UseThreadPriorities, -XX:+HeapDumpOnOutOfMemoryError, -Xss256k, -XX:+AlwaysPreTouch, -XX:+
+client # start 2026-11-17T21:06:13-0700 tracing=on steps=[2] S=16000000
+client # step 0 N=2 established=2 at 247 ms
+client # end 60381 ms done=708 err=0
+client max established 2, completed 706, errors 0, max outstanding 2, max K_client 32000054
+last step N=2 started at 247 ms; ok completions after it: 710; last completion line at 60424 ms (+60.2 s)
+  step N=2: ok 710, median latency 155 ms
+threads samples 12: max NTR 2, max R(traceQuery) 2, max in hex 1, in String.<init> 1, in concat 1
+  R series: 1 1 2 1 1 1 1 2 1 1 0 0
+K_server RequestsSize max 32000054 (samples 3) series 16000027 16000027 32000054; paused max 0
+RssAnon max 2604 MiB
+heap_info used max 1337 MiB
+GCs 83; humongous after GC: max 10 regions (160 MiB), median 4; before GC max 88
+pauses 249; STW share over last 60 s of GC log: 4%; Pause Full count 0; to-space exhausted 0
+dumps: none
+== threads.txt (epoch ntr ntr_trace hex string_init concat ntr_runnable)
+1794974773.525 1 1 0 0 1 1
+1794974779.671 2 1 1 0 0 1
+1794974786.134 2 2 1 1 0 2
+1794974792.726 2 1 1 0 0 1
+1794974798.823 2 1 0 0 1 1
+1794974805.255 2 1 1 0 0 1
+1794974811.584 2 1 1 0 0 2
+1794974817.764 2 2 1 0 1 2
+1794974823.880 1 1 1 0 0 1
+1794974830.115 1 1 1 0 0 1
+1794974836.356 1 0 0 0 0 0
+1794974842.072 0 0 0 0 0 0
+== ksrv.txt
+1794974773.525 requestssize=16000027 paused=0
+1794974797.324 requestssize=16000027 paused=0
+1794974820.963 requestssize=32000054 paused=0
+== client.txt (# lines)
+# start 2026-11-17T21:06:13-0700 tracing=on steps=[2] S=16000000
+# step 0 N=2 established=2 at 247 ms
+# end 60381 ms done=708 err=0
+== stdout OOM lines
+== VM flags
+G1HeapRegionSize=16777216 MaxDirectMemorySize=16642998272 MaxHeapSize=2147483648 UseG1GC 
+Max open files            100000               100000               files     
+== trace-check
+bound_var_0_v len=1004 head=0x0001020304 tail=f1f2...'
+bound_var_0_v len=1004 head=0x0001020304 tail=f1f2...'
+bound_var_0_v len=1004 head=0x0001020304 tail=f1f2...'

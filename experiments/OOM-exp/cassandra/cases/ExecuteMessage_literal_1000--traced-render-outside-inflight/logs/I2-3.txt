@@ -1,0 +1,66 @@
+== driver.txt
+2026-11-17T21:33:23 run I2-3 build=iv heap=2G tracing=on mode=fixed:13 hold=150
+2026-11-17T21:33:23 free 27G
+2026-11-17T21:34:15 daemon pid 111461 up
+2026-11-17T21:34:21 client start --fixed 13 --hold-s 150
+2026-11-17T21:36:53 client ended; daemon alive (hold end)
+2026-11-17T21:37:04 END hold
+2026-11-17T21:37:05 done
+== summary.txt
+endpoint: hold
+client # start 2026-11-17T21:34:21-0700 tracing=on steps=[13] S=16000000
+client # step 0 N=13 established=13 at 284 ms
+client # end 150535 ms done=7114 err=0
+client max established 13, completed 7107, errors 0, max outstanding 13, max K_client 208000351
+last step N=13 started at 284 ms; ok completions after it: 7127; last completion line at 150677 ms (+150.4 s)
+  step N=13: ok 7127, median latency 260 ms
+threads samples 23: max NTR 9, max R(traceQuery) 2, max in hex 1, in String.<init> 0, in concat 0
+  R series: 1 0 2 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0
+K_server RequestsSize max 32000054 (samples 5) series 32000054 16000027 32000054 32000054 16000027; paused max 0
+RssAnon max 2915 MiB
+heap_info used max 1917 MiB
+GCs 225; humongous after GC: max 21 regions (336 MiB), median 2; before GC max 91
+pauses 635; STW share over last 60 s of GC log: 9%; Pause Full count 1; to-space exhausted 20
+dumps: none
+== threads.txt (epoch ntr ntr_trace hex string_init concat ntr_runnable)
+1794976461.325 9 1 1 0 0 4
+1794976467.625 3 0 0 0 0 0
+1794976475.186 3 2 0 0 0 2
+1794976482.453 2 0 0 0 0 1
+1794976489.487 2 0 0 0 0 0
+1794976496.283 1 0 0 0 0 0
+1794976503.550 4 1 0 0 0 2
+1794976510.581 6 0 0 0 0 0
+1794976517.872 1 0 0 0 0 0
+1794976524.943 6 0 0 0 0 0
+1794976532.355 3 0 0 0 0 1
+1794976539.540 5 0 0 0 0 0
+1794976547.161 4 1 0 0 0 1
+1794976553.987 2 0 0 0 0 0
+1794976561.291 5 0 0 0 0 0
+1794976568.632 3 0 0 0 0 1
+1794976575.851 3 0 0 0 0 0
+1794976582.707 1 0 0 0 0 0
+1794976589.710 2 0 0 0 0 0
+1794976597.159 1 0 0 0 0 0
+1794976604.638 2 0 0 0 0 1
+1794976611.925 2 0 0 0 0 0
+1794976617.707 2 0 0 0 0 0
+== ksrv.txt
+1794976461.325 requestssize=32000054 paused=0
+1794976493.098 requestssize=16000027 paused=0
+1794976522.944 requestssize=32000054 paused=0
+1794976553.558 requestssize=32000054 paused=0
+1794976585.749 requestssize=16000027 paused=0
+== client.txt (# lines)
+# start 2026-11-17T21:34:21-0700 tracing=on steps=[13] S=16000000
+# step 0 N=13 established=13 at 284 ms
+# end 150535 ms done=7114 err=0
+== stdout OOM lines
+== VM flags
+G1HeapRegionSize=16777216 MaxDirectMemorySize=16642998272 MaxHeapSize=2147483648 UseG1GC 
+Max open files            100000               100000               files     
+== trace-check
+bound_var_0_v len=1004 head=0x0001020304 tail=f1f2...'
+bound_var_0_v len=1004 head=0x0001020304 tail=f1f2...'
+bound_var_0_v len=1004 head=0x0001020304 tail=f1f2...'

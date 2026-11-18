@@ -1,0 +1,38 @@
+[2026-11-17 23:48:42.323] arm int-51 heap 4096 L none sets DCBA src /mydata/s4/c4-w1/data/pristine role helper quick '-q' extra '/mydata/s4/c4-w1/gen/int-51.sed' script 8c66a0060757
+[2026-11-17 23:48:42.352] pre: load 1.08 1.41 2.56; mem used=2547 avail=125265; disk 473G free; daemons: 0
+[2026-11-17 23:48:43.019] staged: D summary=47439532 filter=16 cinfo=3020551; C summary=94877032 filter=16 cinfo=6041055; B summary=189752032 filter=16 cinfo=12082071; A summary=379502032 filter=16 cinfo=24164103; 
+[2026-11-17 23:48:43.048] yaml diff lines: 13 (extra: s/^index_summary_capacity:$/index_summary_capacity: 51MiB/ s/^index_summary_resize_interval: 60m$/index_summary_resize_interval:/ )
+[2026-11-17 23:49:20.230] up after 37 s: pid 3820713 unit c4w1-int-51-1794977323 cg /sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/c4w1-int-51-1794977323.scope memory.max max swap.max max
+[2026-11-17 23:49:20.236] readback: -XX:+AlwaysPreTouch -XX:+UseG1GC -Xms4096M -Xmx4096M -XX:MaxDirectMemorySize=2048M -XX:ParallelGCThreads=32 -XX:ConcGCThreads=32 -Dcassandra.jmx.local.port=7199 -XX:ParallelGCThreads=8 -XX:ConcGCThreads=8 -Dcassandra.jmx.local.port=27098 
+[2026-11-17 23:49:20.242] readback log: disk_access_mode=legacy|disk_access_mode=mmap_index_only|file_cache_enabled=false|Global buffer pool limit is 512.000MiB |index_summary_capacity=51MiB|index_summary_resize_interval=null|memtable_allocation_type=heap_buffers|networking_cache_size=null|
+[2026-11-17 23:49:20.248] affinity: 17,19,21,23,25,27,29,31
+[2026-11-17 23:49:21.228] cqlsh attempts 1
+[2026-11-17 23:49:42.453] rss idle: VmHWM: 4870944 kB VmRSS: 4870944 kB RssAnon: 4691116 kB RssFile: 179828 kB  cg: cur=4837048320 anon 4808237056 file 15532032  ev: max 0 oom 0 oom_kill 0 
+[2026-11-17 23:49:43.660] tablestats idle:  SSTable count: 0| Old SSTable count: 0| Off heap memory used (total): 0| Bloom filter off heap memory used: 0| Index summary off heap memory used: 0| Compression metadata off heap memory used: 0|
+[2026-11-17 23:49:44.066] is idle: ATTRS 1794977384018 pool_size_bytes=314 capacity_mb=51 avg_interval=128.0 resize_min=-1 own_bytes=0
+[2026-11-17 23:49:44.368] nmt idle: Total: reserved=6016MB, committed=4773MB|Java Heap committed=4096MB)|Class committed=62MB)|Thread committed=36MB)|Code committed=26MB)|GC committed=203MB)|Internal committed=1MB)|Other committed=322MB)|Symbol committed=12MB)|Native Memory Tracking committed=3MB)|
+[2026-11-17 23:49:44.375] I0 (median RssAnon last 30 s) = 4691116 kB
+[2026-11-17 23:49:44.378] import start 1794977384377: nodetool import -q c4 isx /mydata/s4/c4-w1/stage_helper/D /mydata/s4/c4-w1/stage_helper/C /mydata/s4/c4-w1/stage_helper/B /mydata/s4/c4-w1/stage_helper/A
+[2026-11-17 23:49:47.103] import end 1794977387098 rc 0 dur 2 s: Doing a quick import - skipping sstable verification and row cache invalidation 
+[2026-11-17 23:49:47.105] post-import: java -cp "$CP" ISSampler invoke $JP
+[2026-11-17 23:49:47.932] post-import rc 0: BEFORE 1794977387452 pool_size_bytes=711562814 capacity_mb=51 avg_interval=128.0 resize_min=-1 own_bytes=711562500 INVOKED redistributeSummaries start=1794977387478 end=1794977387884 ms=406 AFTER 1794977387884 pool_size_bytes=44474678 capacity_mb=51 avg_interval=554.6666666666666 resize_min=-1 own_bytes=44474364 INTERVAL 2048 /mydata/s4/c4-w1/arms/int-51/data/c4/isx-6b514670e30b11f1933cb96972240728/nb-1-big-Data.db INTERVAL 2048 /mydata/s4/c4-w1/arms/int-51/data/c4/isx-6b514670e30b11f1933cb96972240728/nb-2-big-Data.db INTERVAL 2048 /mydata/s4/c4-w1/arms/int-51/data/c4/isx-6b514670e30b11f1933cb96972240728/nb-3-big-Data.db INTERVAL 2048 /mydata/s4/c4-w1/arms/int-51/data/c4/isx-6b514670e30b11f1933cb96972240728/nb-4-big-Data.db INTERVAL 128 /mydata/s4/c4-w1/arms/int-51/data/system/local-7ad54392bcdd35a684174e047860b377/nb-8-big-Data.db INTERVAL 128 /mydata/s4/c4-w1/arms/int-51/data/system_sc
+[2026-11-17 23:49:57.971] rss +10: VmHWM: 5649136 kB VmRSS: 4957052 kB RssAnon: 4777160 kB RssFile: 179892 kB  cg: cur=4971515904 anon 4896509952 file 60219392  ev: max 0 oom 0 oom_kill 0 
+[2026-11-17 23:49:59.141] tablestats +10:  SSTable count: 4| Old SSTable count: 0| Off heap memory used (total): 89782020| Bloom filter off heap memory used: 32| Index summary off heap memory used: 44474364| Compression metadata off heap memory used: 45307624|
+[2026-11-17 23:49:59.543] is +10: ATTRS 1794977399498 pool_size_bytes=44474678 capacity_mb=51 avg_interval=554.6666666666666 resize_min=-1 own_bytes=44474364
+[2026-11-17 23:49:59.731] nmt +10: Total: reserved=6017MB, committed=4775MB|Java Heap committed=4096MB)|Class committed=63MB)|Thread committed=36MB)|Code committed=27MB)|GC committed=203MB)|Internal committed=1MB)|Other committed=322MB)|Symbol committed=12MB)|Native Memory Tracking committed=3MB)|
+[2026-11-17 23:50:47.887] rss +60: VmHWM: 5649136 kB VmRSS: 4958168 kB RssAnon: 4778120 kB RssFile: 180048 kB  cg: cur=4971474944 anon 4896575488 file 60219392  ev: max 0 oom 0 oom_kill 0 
+[2026-11-17 23:50:49.056] tablestats +60:  SSTable count: 4| Old SSTable count: 0| Off heap memory used (total): 89782020| Bloom filter off heap memory used: 32| Index summary off heap memory used: 44474364| Compression metadata off heap memory used: 45307624|
+[2026-11-17 23:50:49.446] is +60: ATTRS 1794977449395 pool_size_bytes=44474678 capacity_mb=51 avg_interval=554.6666666666666 resize_min=-1 own_bytes=44474364
+[2026-11-17 23:50:49.649] nmt +60: Total: reserved=6016MB, committed=4775MB|Java Heap committed=4096MB)|Class committed=63MB)|Thread committed=35MB)|Code committed=27MB)|GC committed=203MB)|Internal committed=1MB)|Other committed=322MB)|Symbol committed=12MB)|Native Memory Tracking committed=3MB)|
+[2026-11-17 23:50:49.661] rss +10: VmHWM: 5649136 kB VmRSS: 4981120 kB RssAnon: 4801072 kB RssFile: 180048 kB  cg: cur=4994826240 anon 4919877632 file 60219392  ev: max 0 oom 0 oom_kill 0 
+[2026-11-17 23:50:50.866] tablestats +10:  SSTable count: 4| Old SSTable count: 0| Off heap memory used (total): 89782020| Bloom filter off heap memory used: 32| Index summary off heap memory used: 44474364| Compression metadata off heap memory used: 45307624|
+[2026-11-17 23:50:51.262] is +10: ATTRS 1794977451215 pool_size_bytes=44474678 capacity_mb=51 avg_interval=554.6666666666666 resize_min=-1 own_bytes=44474364
+[2026-11-17 23:50:51.459] nmt +10: Total: reserved=6018MB, committed=4777MB|Java Heap committed=4096MB)|Class committed=63MB)|Thread committed=35MB)|Code committed=27MB)|GC committed=203MB)|Internal committed=1MB)|Other committed=322MB)|Symbol committed=12MB)|Native Memory Tracking committed=3MB)|Arena Chunk committed=3MB)|
+[2026-11-17 23:50:51.463] peak RssAnon 5450964 kB; dRssAnon(peak - I0) = 742 MiB
+[2026-11-17 23:50:51.467] cgroup last rows: 1794977451194,4801200,4981248,180048,4994899968,4919943168,60219392,0,0,0 1794977451405,4801200,4981248,180048,4995022848,4919943168,60219392,0,0,0 
+[2026-11-17 23:50:51.469] alive at end: 1
+[2026-11-17 23:51:03.590] scope gone: inactive
+[2026-11-17 23:51:03.619] dmesg: 
+[2026-11-17 23:51:03.634] log: last isx open: INFO  [RMI TCP Connection(8)-127.0.0.1] 2026-11-18T04:49:47,072 SortedTableReaderLoadingBuilder.java:55 - Opening /mydata/s4/c4-w1/arms/int-51/data/c4/isx-6b514670e30b11f1933cb96972240728/nb-4-big (1.777GiB); redistributions: 1+1; errors: 0
+[2026-11-17 23:51:03.639] import order: stage_helper/C stage_helper/D stage_helper/A stage_helper/B 
+[2026-11-17 23:51:03.641] done arm int-51

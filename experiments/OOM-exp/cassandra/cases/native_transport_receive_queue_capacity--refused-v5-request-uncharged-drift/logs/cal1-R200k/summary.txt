@@ -1,0 +1,59 @@
+run cal1-R200k arm=calib heap=2G direct=2G N=4 W=1024 value=125000 M=125074 R=200000 throw=False seconds=60 per_jvm=10 calib=True
+harness md5: 2f18ec53c4d427ffdbc72d30b6a11dbd  /mydata/s4/b10-w1/harness/Jmx.java; f9d52bb5c2dfc46c0c5aadc0cea58c82  /mydata/s4/b10-w1/harness/NativeFlood.java; a5054420ac67acfbf1825cae0445007f  /mydata/s4/b10-w1/harness/b10-run.py; 4f91920358c0ca96f3851dab31e5fe14  /mydata/s4/b10-w1/harness/flood-logback.xml; 321b32a1cdea9e122779dc3374fe3ab0  /mydata/s4/b10-w1/harness/make-node-yaml.sh; 
+yaml check: yaml ok: harness adds no §2.3 key; shipped read_request_timeout=5000ms, concurrent_reads=32, slow_query_log_timeout=500ms (defaults)
+node pid 29802 scope /sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/oom-b10-cal1-R200k.scope memory.max 8589934592 (want 8589934592) memory.swap.max 0
+jvm readback: -XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -Xms2G -Xmx2G -XX:MaxDirectMemorySize=2G -javaagent:/mydata/s4/b10-w1/cassandra/bin/../lib/jamm-0.4.0.jar -XX:HeapDumpPath=/mydata/s4/b10-w1/logs/cal1-R200k/cassandra-1794974153-pid29802.hprof -XX:OnOutOfMemoryError=kill -9 %p
+resolved native_transport_max_message_size: null
+resolved native_transport_max_request_data_in_flight: null
+resolved native_transport_max_request_data_in_flight_per_ip: null
+resolved native_transport_receive_queue_capacity: 1MiB
+resolved native_transport_timeout: 12s
+resolved read_request_timeout: 5000ms
+resolved native_transport_throw_on_overload: false
+resolved native_transport_max_threads: 128
+resolved native_transport_queue_max_item_age_threshold: 1.7976931348623157E308
+resolved native_transport_max_concurrent_connections: -1
+resolved concurrent_reads: 32
+resolved allow_filtering_enabled: true
+CALIB (c): cqlsh startup 943 ms; filtering read 1239 / 903 ms; net -40 ms (accept <= 400)
+t0 = 1794974200496
+after stop, CassandraDaemon processes on pc72: none
+NativeFlood left: none
+run_id: cal1-R200k
+arm: calib
+heap_gib: 2
+N: 4
+W: 1024
+M: 125074
+R: 200000
+throw: False
+t0: 1794974200496
+endpoint: none
+oom_line: None
+endpoint_t_s: None
+dump: None
+syslog_oom: INFO  [main] 2026-11-18T03:55:56,536 CassandraDaemon.java:619 - JVM Arguments: [-ea, -da:net.openhft..., -XX:+UseThreadPriorities, -XX:+HeapDumpOnOutOfMemoryError, -Xss256k, -XX:+AlwaysPreTouch, -XX:+UseTLAB, -XX:+ResizeTLAB, -XX:+UseNUMA, -XX:+PerfDisableSharedMem, -Djava.net.preferIPv4Stack=true, 
+first_error: None
+histos: [{'t': 20.695, 'qm': 4095, 'bb': 547464352, 'top': [('[B', 547464352), ('[Ljava.lang.Object;', 17082952), ('[I', 15928160), ('[J', 9769376)], 'dur_ms': 608}, {'t': 40.912, 'qm': 4096, 'bb': 542108584, 'top': [('[B', 542108584), ('[Ljava.lang.Object;', 17068456), ('[I', 15927872), ('[J', 9769472)], 'dur_ms': 558}]
+qm_idle: 0
+bb_idle: 27602320
+U_D1: 512303104
+K_N: 57881395
+U_over_KN: 8.850911488916257
+K_max_global_in_use: 53589884.0
+ntr_pending_max: 3968.0
+read_pending_max: 128.0
+heap_used_max: 1741167072.0
+direct_used_max: 68300834.0
+discarded_max: 0.0
+timedout_before_max: 1718.0
+paused_max: 4.0
+client: {'sent': 21449, 'ok': 2169, 'warned': 533, 'ovl_bytes': 0, 'ovl_other': 1718, 'err': 17562, 'outstanding': 0}
+ok_per_s: 36.15
+load_s: 60.0
+gc_pause_frac_last60: 0.0665122
+gc_pauses_n: 531
+gc_last5: ['][118.172s][29802][29921][info ] GC(539) Pause Young (Normal) (G1 Evacuation Pause) 1638M->438M(2048M) 2.922ms', '118.365s][29802][29921][info ] GC(540) Pause Young (Normal) (GCLocker Initiated GC) 1654M->438M(2048M) 3.195ms', '118.557s][29802][29921][info ] GC(541) Pause Young (Normal) (GCLocker Initiated GC) 1643M->439M(2048M) 3.054ms', '118.744s][29802][29921][info ] GC(542) Pause Young (Normal) (GCLocker Initiated GC) 1645M->438M(2048M) 3.197ms', '][118.967s][29802][29921][info ] GC(543) Pause Young (Normal) (G1 Evacuation Pause) 1638M->438M(2048M) 4.489ms']
+scope_mem_max: 3106230272
+scope_events: {'low': '0', 'high': '0', 'max': '0', 'oom': '0', 'oom_kill': '0'}
+DONE

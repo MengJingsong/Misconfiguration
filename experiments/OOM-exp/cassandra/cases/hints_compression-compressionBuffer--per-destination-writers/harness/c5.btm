@@ -1,0 +1,63 @@
+# C5 stage 2 Byteman rules (observation only; adapted from the stage-4 hw.btm). Loaded on A with
+#   -javaagent:<byteman.jar>=boot:<byteman.jar>,script:<this file> -Dorg.jboss.byteman.transform.all=true -Dc5.trace=<file>
+# One line per event:
+#   opened w=<id> host=<destination host id> ms=..          CompressedHintsWriter constructed
+#   cbuf w=<id> in=<bytes> cap=<capacity> buf=<identity of compressionBuffer> direct=<bool> ms=.. thread=..
+#                                                          exit of CompressedHintsWriter.writeBuffer
+#   closed w=<id> class=<simple name> ms=..                 HintsWriter.close entry
+#   created n=<allocatedBuffers> size=<bufferSize> ms=..     HintsBufferPool.createBuffer exit (a new 32 MiB slab)
+#   direct size=<bytes> ms=.. thread=.. at=<stack>          ByteBuffer.allocateDirect(int) entry, >= 1 MiB
+
+RULE c5 writer opened
+CLASS org.apache.cassandra.hints.CompressedHintsWriter
+METHOD <init>
+AT EXIT
+IF true
+DO traceOpen("c5", java.lang.System.getProperty("c5.trace", "c5.trace"));
+   traceln("c5", "opened w=" + java.lang.System.identityHashCode($0) + " host=" + $0.descriptor().hostId + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE c5 writeBuffer entry
+CLASS org.apache.cassandra.hints.CompressedHintsWriter
+METHOD writeBuffer
+AT ENTRY
+IF true
+DO link("c5In", java.lang.Thread.currentThread(), java.lang.Integer.valueOf($1.remaining()))
+ENDRULE
+
+RULE c5 writeBuffer exit
+CLASS org.apache.cassandra.hints.CompressedHintsWriter
+METHOD writeBuffer
+AT EXIT
+BIND n:java.lang.Integer = unlink("c5In", java.lang.Thread.currentThread())
+IF true
+DO traceOpen("c5", java.lang.System.getProperty("c5.trace", "c5.trace"));
+   traceln("c5", "cbuf w=" + java.lang.System.identityHashCode($0) + " in=" + n + " cap=" + $0.compressionBuffer.capacity() + " buf=" + java.lang.System.identityHashCode($0.compressionBuffer) + " direct=" + $0.compressionBuffer.isDirect() + " ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+
+RULE c5 writer closed
+CLASS org.apache.cassandra.hints.HintsWriter
+METHOD close
+AT ENTRY
+IF true
+DO traceOpen("c5", java.lang.System.getProperty("c5.trace", "c5.trace"));
+   traceln("c5", "closed w=" + java.lang.System.identityHashCode($0) + " class=" + $0.getClass().getSimpleName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE c5 slab created
+CLASS org.apache.cassandra.hints.HintsBufferPool
+METHOD createBuffer
+AT EXIT
+IF true
+DO traceOpen("c5", java.lang.System.getProperty("c5.trace", "c5.trace"));
+   traceln("c5", "created n=" + $0.allocatedBuffers + " size=" + $0.bufferSize + " ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+
+RULE c5 direct allocation of 1 MiB or more
+CLASS java.nio.ByteBuffer
+METHOD allocateDirect(int)
+AT ENTRY
+IF $1 >= 1048576
+DO traceOpen("c5", java.lang.System.getProperty("c5.trace", "c5.trace"));
+   traceln("c5", "direct size=" + $1 + " ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName() + " at=" + java.util.Arrays.toString(java.lang.Thread.currentThread().getStackTrace()))
+ENDRULE

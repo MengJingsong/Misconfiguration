@@ -1,0 +1,62 @@
+[2026-11-18 00:02:44 EST] ARM REP-15872M-1 arm=A heap=15872M direct=7936M fetch=5000 steps=1:20,32:160
+[2026-11-18 00:02:49 EST] started REP-15872M-1 pid 64000 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/u4-REP-15872M-1-1794978168.scope
+[2026-11-18 00:03:04 EST] ready REP-15872M-1
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms15872M -Xmx15872M -XX:MaxDirectMemorySize=7936M -XX:HeapDumpPath=/mydata/s4/u4-w1/runs/REP-15872M-1/cassandra-1794978169-pid64000.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-18 00:03:09 EST] GC.run REP-15872M-1
+1794978193,base,nmtOtherKB=73561,nmtTotalKB=17190843,rssKB=17148596,rssAnonKB=17115436,scopeCurB=17585881088,scopeOomKill=0,1794978192570,160011368,76125288,76125288,0,0,0,-1,-1,58534824,0,-1,158,106,-1
+[2026-11-18 00:03:16 EST] client pid 64492
+1794978206,t+10,nmtOtherKB=772714,nmtTotalKB=17919835,rssKB=17403176,rssAnonKB=17369372,scopeCurB=17852833792,scopeOomKill=0,1794978205573,3465122920,2022282344,76125288,0,0,34,0,0,58843755,17,-1,158,106,-1
+1794978205928,1,1,1,0,0,0.0,-1.0,-1.0,5000,
+1794978216,t+20,nmtOtherKB=533112,nmtTotalKB=17687824,rssKB=17172932,rssAnonKB=17138572,scopeCurB=17615556608,scopeOomKill=0,1794978216575,10992793880,10606917912,76125288,31,0,35,31,0,59334566,17,-1,227,106,-1
+1794978216051,32,32,2,0,0,0.0,-1.0,-1.0,5000,
+1794978240,t+30,nmtOtherKB=7976141,nmtTotalKB=25124453,rssKB=NA,rssAnonKB=NA,scopeCurB=29892034560,scopeOomKill=0,1794978222575,8709757856,8692980640,86268832,1,0,66,0,0,59351024,17,-1,1023,1179,-1
+1794978239262,32,32,3,0,0,0.0,-1.0,-1.0,5000,
+/mydata/s4/u4-w1/harness/victim-ctl.sh: line 51: 64000 Killed                  CASSANDRA_CONF=$R/conf CASSANDRA_LOG_DIR=$R/logs MAX_HEAP_SIZE=$HEAP MAX_DIRECT_MEMORY_SIZE=$DENV CASSANDRA_HEAPDUMP_DIR=$R JVM_EXTRA_OPTS="-XX:NativeMemoryTracking=summary -Xlog:gc=info,safepoint=info:file=$R/gc.log:time,uptime,level,tags:filecount=20,filesize=20m" setsid nohup systemd-run --user --scope --unit="u4-$L-$(date +%s)" -p MemoryMax=${MM}M -p MemorySwapMax=0 "$BUILD/bin/cassandra" -f < /dev/null > "$R/stdout.log" 2>&1
+[2026-11-18 00:04:10 EST] VICTIM DEAD at +54s
+05:04:08 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 8000 milliseconds
+05:04:16 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 16000 milliseconds
+05:04:32 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 32000 milliseconds
+[2026-11-18 00:04:51 EST] OOM/GC check
+ERROR [Native-Transport-Requests-44] 2026-11-18T05:03:41,488 JVMStabilityInspector.java:70 - Exception in thread Thread[Native-Transport-Requests-44,10,SharedPool]
+org.apache.cassandra.transport.messages.ErrorMessage$WrappedException: io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 245860038 byte(s) of direct memory (used: 8108200442, max: 8321499136)
+	at org.apache.cassandra.transport.messages.ErrorMessage.wrap(ErrorMessage.java:486)
+	at org.apache.cassandra.transport.Message.encode(Message.java:423)
+	at org.apache.cassandra.transport.PreV5Handlers$LegacyDispatchHandler.toFlushItem(PreV5Handlers.java:95)
+	at org.apache.cassandra.transport.Dispatcher.processRequest(Dispatcher.java:462)
+	at org.apache.cassandra.transport.Dispatcher$RequestProcessor.run(Dispatcher.java:307)
+	at org.apache.cassandra.concurrent.FutureTask$1.call(FutureTask.java:99)
+	at org.apache.cassandra.concurrent.FutureTask.call(FutureTask.java:61)
+	at org.apache.cassandra.concurrent.FutureTask.run(FutureTask.java:71)
+	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+Caused by: io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 245860038 byte(s) of direct memory (used: 8108200442, max: 8321499136)
+	at io.netty.util.internal.PlatformDependent.incrementMemoryCounter(PlatformDependent.java:880)
+	at io.netty.util.internal.PlatformDependent.allocateDirectNoCleaner(PlatformDependent.java:809)
+	at io.netty.buffer.PoolArena$DirectArena.allocateDirect(PoolArena.java:718)
+	at io.netty.buffer.PoolArena$DirectArena.newUnpooledChunk(PoolArena.java:707)
+	at io.netty.buffer.PoolArena.allocateHuge(PoolArena.java:224)
+	at io.netty.buffer.PoolArena.allocate(PoolArena.java:142)
+	at io.netty.buffer.PoolArena.allocate(PoolArena.java:127)
+	at io.netty.buffer.PooledByteBufAllocator.newDirectBuffer(PooledByteBufAllocator.java:403)
+	at io.netty.buffer.AbstractByteBufAllocator.directBuffer(AbstractByteBufAllocator.java:188)
+	at io.netty.buffer.AbstractByteBufAllocator.directBuffer(AbstractByteBufAllocator.java:179)
+	at io.netty.buffer.AbstractByteBufAllocator.buffer(AbstractByteBufAllocator.java:116)
+	at org.apache.cassandra.transport.Message.encode(Message.java:367)
+	... 9 common frames omitted
+ERROR [Native-Transport-Requests-44] 2026-11-18T05:03:41,493 JVMStabilityInspector.java:123 - OutOfMemory error letting the JVM handle the error:
+io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 245860038 byte(s) of direct memory (used: 8108200442, max: 8321499136)
+	at io.netty.util.internal.PlatformDependent.incrementMemoryCounter(PlatformDependent.java:880)
+	at io.netty.util.internal.PlatformDependent.allocateDirectNoCleaner(PlatformDependent.java:809)
+	at io.netty.buffer.PoolArena$DirectArena.allocateDirect(PoolArena.java:718)
+	at io.netty.buffer.PoolArena$DirectArena.newUnpooledChunk(PoolArena.java:707)
+	at io.netty.buffer.PoolArena.allocateHuge(PoolArena.java:224)
+	at io.netty.buffer.PoolArena.allocate(PoolArena.java:142)
+	at io.netty.buffer.PoolArena.allocate(PoolArena.java:127)
+	at io.netty.buffer.PooledByteBufAllocator.newDirectBuffer(PooledByteBufAllocator.java:403)
+	at io.netty.buffer.AbstractByteBufAllocator.directBuffer(AbstractByteBufAllocator.java:188)
+	at io.netty.buffer.AbstractByteBufAllocator.directBuffer(AbstractByteBufAllocator.java:179)
+	at io.netty.buffer.AbstractByteBufAllocator.buffer(AbstractByteBufAllocator.java:116)
+[2026-11-18 00:04:53 EST] stopped REP-15872M-1
+OOM c=32 type="java.lang.OutOfMemoryError: Java heap space" at+54s
+[2026-11-18 00:04:53 EST] END REP-15872M-1 OOM c=32 type="java.lang.OutOfMemoryError: Java heap space" at+54s

@@ -1,0 +1,22 @@
+--- a/src/java/org/apache/cassandra/cache/CaffeineCache.java	2026-11-11 21:29:59.086602064 -0500
++++ b/src/java/org/apache/cassandra/cache/CaffeineCache.java	2026-11-11 21:29:59.098602441 -0500
+@@ -34,6 +34,7 @@
+  */
+ public class CaffeineCache<K extends IMeasurableMemory, V extends IMeasurableMemory> implements ICache<K, V>
+ {
++    private static final long B7_ENTRY_OVERHEAD = Long.getLong("b7.entry_overhead", 104L);
+     private final Cache<K, V> cache;
+     private final Eviction<K, V> policy;
+ 
+@@ -61,7 +62,10 @@
+     public static <K extends IMeasurableMemory, V extends IMeasurableMemory> CaffeineCache<K, V> create(long weightedCapacity)
+     {
+         return create(weightedCapacity, (key, value) -> {
+-            long size = key.unsharedHeapSize() + value.unsharedHeapSize();
++            // B7 diagnostic (OOM-exp 2026-11-11): also charge the per-entry container overhead that the
++            // key/value sizes omit: Caffeine node (40 B) + ConcurrentHashMap$Node (32 B) + frequency-sketch
++            // slot (8-16 B, power-of-two table) + hash-table slot (4 B x 1.33-2.67) = at most ~99 B -> 104 B.
++            long size = key.unsharedHeapSize() + value.unsharedHeapSize() + B7_ENTRY_OVERHEAD;
+             if (size > Integer.MAX_VALUE) {
+                 throw new IllegalArgumentException("Serialized size cannot be more than 2GiB/Integer.MAX_VALUE");
+             }

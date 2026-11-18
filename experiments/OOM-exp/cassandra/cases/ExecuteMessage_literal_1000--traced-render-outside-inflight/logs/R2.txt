@@ -1,0 +1,65 @@
+== driver.txt
+2026-11-17T21:07:57 run R2 build=base heap=2G tracing=on mode=ramp:8,13,16,24,32,48,64,96,128,192,256 hold=60
+2026-11-17T21:07:57 free 34G
+2026-11-17T21:08:49 daemon pid 88116 up
+2026-11-17T21:08:55 client start --ramp 8,13,16,24,32,48,64,96,128,192,256 --step-s 60
+./run.sh: line 41: 88116 Killed                  ( ulimit -n 100000; cd $T; MAX_HEAP_SIZE=$HEAP CASSANDRA_HEAPDUMP_DIR=$R exec systemd-run --user --scope -p MemorySwapMax=0 --unit=b11-$RID -- bin/cassandra -f > $R/stdout.txt 2>&1 < /dev/null )
+2026-11-17T21:10:06 daemon gone while client running
+2026-11-17T21:10:12 END daemon-exit oom:java.lang.OutOfMemoryError: Java heap space
+2026-11-17T21:10:12 done
+== summary.txt
+endpoint: daemon-exit oom:java.lang.OutOfMemoryError: Java heap space
+stdout: java.lang.OutOfMemoryError: Java heap space
+stdout: Dumping heap to /mydata/s4/b11-w1/runs/R2/cassandra-1794974877-pid88116.hprof ...
+stdout: Heap dump file created [1939654534 bytes in 6.727 secs]
+stdout: # java.lang.OutOfMemoryError: Java heap space
+stdout: #   Executing /bin/sh -c "kill -9 88116"...
+client # start 2026-11-17T21:08:55-0700 tracing=on steps=[8, 13, 16, 24, 32, 48, 64, 96, 128, 192, 256] S=16000000
+client # step 0 N=8 established=8 at 250 ms
+client # step 1 N=13 established=13 at 61121 ms
+client # all connections ended at 70641 ms
+client # end 70641 ms done=808 err=13
+client max established 13, completed 808, errors 0, max outstanding 13, max K_client 208000351
+last step N=13 started at 61121 ms; ok completions after it: 12; last completion line at 70414 ms (+9.3 s)
+  step N=8: ok 796, median latency 592 ms
+  step N=13: ok 12, median latency 1148 ms
+  error x13: io_error:[Errno
+threads samples 11: max NTR 8, max R(traceQuery) 7, max in hex 5, in String.<init> 1, in concat 3
+  R series: 4 7 5 6 3 2 6 2 4 3 0
+K_server RequestsSize max 96000162 (samples 2) series 96000162 80000135; paused max 0
+RssAnon max 2766 MiB
+heap_info used max 1831 MiB
+GCs 295; humongous after GC: max 112 regions (1792 MiB), median 82; before GC max 121
+pauses 541; STW share over last 60 s of GC log: 11%; Pause Full count 6; to-space exhausted 1
+dumps: cassandra-1794974877-pid88116.hprof (1849 MiB)
+== threads.txt (epoch ntr ntr_trace hex string_init concat ntr_runnable)
+1794974935.052 5 4 4 0 0 4
+1794974941.709 8 7 5 0 0 8
+1794974948.534 8 5 4 0 0 7
+1794974955.367 7 6 3 0 3 6
+1794974961.939 5 3 3 0 0 3
+1794974968.569 4 2 1 0 0 3
+1794974975.153 8 6 4 0 2 6
+1794974981.952 5 2 2 0 0 3
+1794974988.496 6 4 3 1 0 5
+1794974995.112 5 3 2 0 1 3
+1794975001.946 0 0 0 0 0 0
+== ksrv.txt
+1794974935.052 requestssize=96000162 paused=0
+1794974964.273 requestssize=80000135 paused=0
+1794974992.020 requestssize= paused=
+== client.txt (# lines)
+# start 2026-11-17T21:08:55-0700 tracing=on steps=[8, 13, 16, 24, 32, 48, 64, 96, 128, 192, 256] S=16000000
+# step 0 N=8 established=8 at 250 ms
+# step 1 N=13 established=13 at 61121 ms
+# all connections ended at 70641 ms
+# end 70641 ms done=808 err=13
+== stdout OOM lines
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /mydata/s4/b11-w1/runs/R2/cassandra-1794974877-pid88116.hprof ...
+--
+# java.lang.OutOfMemoryError: Java heap space
+# -XX:OnOutOfMemoryError="kill -9 %p"
+== VM flags
+G1HeapRegionSize=16777216 MaxDirectMemorySize=16642998272 MaxHeapSize=2147483648 UseG1GC 
+Max open files            100000               100000               files     

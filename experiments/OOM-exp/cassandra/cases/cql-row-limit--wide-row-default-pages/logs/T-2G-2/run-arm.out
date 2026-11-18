@@ -1,0 +1,55 @@
+[2026-11-17 23:16:41 EST] ARM T-2G-2 arm=A heap=2G direct=auto fetch=5000 steps=1:20,3:160
+[2026-11-17 23:16:47 EST] started T-2G-2 pid 36317 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/u4-T-2G-2-1794975406.scope
+[2026-11-17 23:16:59 EST] ready T-2G-2
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/u4-w1/runs/T-2G-2/cassandra-1794975406-pid36317.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-17 23:17:05 EST] GC.run T-2G-2
+1794975428,base,nmtOtherKB=73561,nmtTotalKB=2596917,rssKB=2846748,rssAnonKB=2667180,scopeCurB=2759102464,scopeOomKill=0,1794975427927,92234760,75457544,75457544,0,0,0,-1,-1,58534824,0,-1,109,73,-1
+[2026-11-17 23:17:11 EST] client pid 36823
+1794975441,t+10,nmtOtherKB=772712,nmtTotalKB=3313892,rssKB=3148420,rssAnonKB=2968152,scopeCurB=3076419584,scopeOomKill=0,1794975440929,1459652312,989890264,75457544,0,0,34,0,0,58841299,17,-1,121,73,-1
+1794975441158,1,1,1,0,0,0.0,-1.0,-1.0,5000,
+1794975451,t+20,nmtOtherKB=1252940,nmtTotalKB=3810405,rssKB=3475464,rssAnonKB=3298632,scopeCurB=3424784384,scopeOomKill=0,1794975451930,1779723264,1293184000,1284874240,1,0,37,0,0,58874813,17,-1,172,73,-1
+1794975451473,3,3,3,0,1,234.4,6880.7,6880.7,5000,
+1794975462,t+30,nmtOtherKB=1367660,nmtTotalKB=3928005,rssKB=3625900,rssAnonKB=3445372,scopeCurB=3577724928,scopeOomKill=0,1794975461932,1194540800,1077100288,1077100288,0,0,55,0,0,58907004,17,-1,245,689,-1
+1794975461489,3,3,6,0,0,0.0,-1.0,-1.0,5000,
+1794975472,t+41,nmtOtherKB=1367660,nmtTotalKB=3931812,rssKB=3629036,rssAnonKB=3448164,scopeCurB=3577348096,scopeOomKill=0,1794975471933,1184047976,1066607464,1066607464,0,0,58,0,0,58907004,17,-1,323,1095,-1
+1794975472583,3,3,9,0,0,0.0,-1.0,-1.0,5000,
+1794975482,t+51,nmtOtherKB=1367632,nmtTotalKB=3903627,rssKB=3629944,rssAnonKB=3449068,scopeCurB=3579707392,scopeOomKill=0,1794975481936,1178184280,1060743768,1060743768,0,0,61,0,0,58889491,17,-1,400,1426,-1
+1794975482600,3,3,12,0,0,0.0,-1.0,-1.0,5000,
+1794975493,t+61,nmtOtherKB=1127533,nmtTotalKB=3664812,rssKB=3392460,rssAnonKB=3211520,scopeCurB=3331248128,scopeOomKill=0,1794975492937,1447325440,1145335552,1275601152,0,0,78,0,0,58887766,17,-1,491,1602,-1
+1794975492823,3,3,15,0,0,0.0,-1.0,-1.0,5000,
+/mydata/s4/u4-w1/harness/victim-ctl.sh: line 51: 36317 Killed                  CASSANDRA_CONF=$R/conf CASSANDRA_LOG_DIR=$R/logs MAX_HEAP_SIZE=$HEAP MAX_DIRECT_MEMORY_SIZE=$DENV CASSANDRA_HEAPDUMP_DIR=$R JVM_EXTRA_OPTS="-XX:NativeMemoryTracking=summary -Xlog:gc=info,safepoint=info:file=$R/gc.log:time,uptime,level,tags:filecount=20,filesize=20m" setsid nohup systemd-run --user --scope --unit="u4-$L-$(date +%s)" -p MemoryMax=${MM}M -p MemorySwapMax=0 "$BUILD/bin/cassandra" -f < /dev/null > "$R/stdout.log" 2>&1
+[2026-11-17 23:18:23 EST] VICTIM DEAD at +72s
+04:18:24 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 8000 milliseconds
+04:18:32 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 16000 milliseconds
+04:18:48 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 32000 milliseconds
+[2026-11-17 23:19:04 EST] OOM/GC check
+CompileCommand: dontinline org/apache/cassandra/io/util/RebufferingInputStream.readPrimitiveSlowly(I)J
+CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.address()J
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.length()I
+CompileCommand: inline org/apache/cassandra/db/rows/UnfilteredSerializer.serializeRowBody(Lorg/apache/cassandra/db/rows/Row;ILorg/apache/cassandra/db/rows/SerializationHelper;Lorg/apache/cassandra/io/util/DataOutputPlus;)V
+CompileCommand: inline org/apache/cassandra/io/util/Memory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/SafeMemory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/TrackedDataInputPlus.checkCanRead(I)V
+CompileCommand: inline org/apache/cassandra/net/FrameDecoderWith8bHeader.decode(Ljava/util/Collection;Lorg/apache/cassandra/net/ShareableBytes;I)V
+CompileCommand: inline org/apache/cassandra/service/reads/repair/RowIteratorMergeListener.applyToPartition(ILjava/util/function/Consumer;)V
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.selectBoundary(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;II)I
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.strictnessOfLessThan(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;)I
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.indexes(Lorg/apache/cassandra/utils/IFilter/FilterKey;)[J
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.setIndexes(JJIJ[J)V
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare(Ljava/nio/ByteBuffer;[B)I
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare([BLjava/nio/ByteBuffer;)I
+--
+INFO  [ScheduledTasks:1] 2026-11-18T04:17:15,751 NoSpamLogger.java:104 - Some operations were slow, details available at debug level (debug.log)
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /mydata/s4/u4-w1/runs/T-2G-2/cassandra-1794975406-pid36317.hprof ...
+Heap dump file created [1154155673 bytes in 1.647 secs]
+#
+# java.lang.OutOfMemoryError: Java heap space
+# -XX:OnOutOfMemoryError="kill -9 %p"
+#   Executing /bin/sh -c "kill -9 36317"...
+-rw------- 1 jason92 misconfiguration 1154155673 Nov 17 21:18 cassandra-1794975406-pid36317.hprof
+pauses=105 full_gcs=21 total_pause=3s max60=4% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=HeapDumper@88.668s,ReportJavaOutOfMemory@90.316s
+[2026-11-17 23:19:06 EST] stopped T-2G-2
+OOM c=3 type="java.lang.OutOfMemoryError: Java heap space" at+72s
+[2026-11-17 23:19:06 EST] END T-2G-2 OOM c=3 type="java.lang.OutOfMemoryError: Java heap space" at+72s

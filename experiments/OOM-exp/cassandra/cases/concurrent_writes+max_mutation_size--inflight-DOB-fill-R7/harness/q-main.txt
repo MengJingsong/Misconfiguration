@@ -1,0 +1,23 @@
+# R7 main queue (design §2.7 order). <name> <direct> <blob> <infl/writer> [ENV=VAL]
+E_d896_r1 896 16776192 4
+G_512k_d896_r1 896 524288 124
+I_onheap_d896_r1 896 16776192 4 VJVM=-Dcassandra.dob.allocate_type=ONHEAP
+E_d896_r2 896 16776192 4
+G_512k_d896_r2 896 524288 124
+I_onheap_d896_r2 896 16776192 4 VJVM=-Dcassandra.dob.allocate_type=ONHEAP
+E_d896_r3 896 16776192 4
+G_512k_d896_r3 896 524288 124
+I_onheap_d896_r3 896 16776192 4 VJVM=-Dcassandra.dob.allocate_type=ONHEAP
+# 23:48: E2 fails the arm-validity rule (active=32 21% of send-window samples) -> re-run in the E4..E7 slot, stop at the 3rd valid endpoint
+E_d896_r4 896 16776192 4
+E_d896_r5 896 16776192 4
+# appended 23:45 after E3 (3/3 endpoints, E series stops): upward search, then optional cw8 (design §2.7 order)
+H_d1024_r1 1024 16776192 4
+H_d1024_r2 1024 16776192 4
+H_d1024_r3 1024 16776192 4
+H_d1024_r4 1024 16776192 4
+H_d1024_r5 1024 16776192 4
+H_d1152_r1 1152 16776192 4
+I_cw8_d896_r1 896 16776192 4 VEXTRA=concurrent_writes=8
+I_cw8_d896_r2 896 16776192 4 VEXTRA=concurrent_writes=8
+I_cw8_d896_r3 896 16776192 4 VEXTRA=concurrent_writes=8

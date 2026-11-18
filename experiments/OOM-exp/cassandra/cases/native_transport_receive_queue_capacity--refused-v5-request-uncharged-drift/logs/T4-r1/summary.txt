@@ -1,0 +1,64 @@
+run T4-r1 arm=T4 heap=4G direct=2G N=40 W=1024 value=125000 M=125074 R=200000 throw=False seconds=240 per_jvm=10 calib=False
+harness md5: 2f18ec53c4d427ffdbc72d30b6a11dbd  /mydata/s4/b10-w1/harness/Jmx.java; f9d52bb5c2dfc46c0c5aadc0cea58c82  /mydata/s4/b10-w1/harness/NativeFlood.java; 4d9e593e9a4495046848b0d9a04b7b8a  /mydata/s4/b10-w1/harness/b10-run.py; 4f91920358c0ca96f3851dab31e5fe14  /mydata/s4/b10-w1/harness/flood-logback.xml; 4e99f029b0d7c8372ea9154e3fae6d30  /mydata/s4/b10-w1/harness/hprof-histo.py; 321b32a1cdea9e122779dc3374fe3ab0  /mydata/s4/b10-w1/harness/make-node-yaml.sh; 58ea5a7f7fdf2744ae620604c1ea9fa2  /mydata/s4/b10-w1/harness/run-2g-set.sh; 4d712076e7fbaf492e4856470cede30f  /mydata/s4/b10-w1/harness/run-search-set.sh; 
+yaml check: yaml ok: harness adds no §2.3 key; shipped read_request_timeout=5000ms, concurrent_reads=32, slow_query_log_timeout=500ms (defaults)
+node pid 53669 scope /sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/oom-b10-T4-r1.scope memory.max 10737418240 (want 10737418240) memory.swap.max 0
+jvm readback: -XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -Xms4G -Xmx4G -XX:MaxDirectMemorySize=2G -javaagent:/mydata/s4/b10-w1/cassandra/bin/../lib/jamm-0.4.0.jar -XX:HeapDumpPath=/mydata/s4/b10-w1/logs/T4-r1/cassandra-1794976611-pid53669.hprof -XX:OnOutOfMemoryError=kill -9 %p
+resolved native_transport_max_message_size: null
+resolved native_transport_max_request_data_in_flight: null
+resolved native_transport_max_request_data_in_flight_per_ip: null
+resolved native_transport_receive_queue_capacity: 1MiB
+resolved native_transport_timeout: 12s
+resolved read_request_timeout: 5000ms
+resolved native_transport_throw_on_overload: false
+resolved native_transport_max_threads: 128
+resolved native_transport_queue_max_item_age_threshold: 1.7976931348623157E308
+resolved native_transport_max_concurrent_connections: -1
+resolved concurrent_reads: 32
+resolved allow_filtering_enabled: true
+t0 = 1794976656451
+NODE GONE at t=141.1 s
+after stop, CassandraDaemon processes on pc72: none
+NativeFlood left: none
+run_id: T4-r1
+arm: T4
+heap_gib: 4
+N: 40
+W: 1024
+M: 125074
+R: 200000
+throw: False
+t0: 1794976656451
+endpoint: OOM
+oom_line: java.lang.OutOfMemoryError: Java heap space
+endpoint_t_s: 141.075
+dump: /mydata/s4/b10-w1/logs/T4-r1/cassandra-1794976611-pid53669.hprof
+syslog_oom: None
+first_error: None
+histos: [{'t': 20.875, 'qm': 29725, 'bb': 3809520152, 'top': [('[B', 3809520152), ('[Ljava.lang.Object;', 19920736), ('[I', 15982072), ('[J', 9859672)], 'dur_ms': 960}, {'t': 50.788, 'qm': 0, 'bb': 0, 'top': [], 'dur_ms': 90287}]
+qm_idle: 0
+bb_idle: 27552704
+U_D1: 3717824650
+K_N: 149317222
+U_over_KN: 24.898833504952297
+K_max_global_in_use: 106987832.0
+ntr_pending_max: 30749.0
+read_pending_max: 119.0
+heap_used_max: 4039443592.0
+direct_used_max: 153294999.0
+discarded_max: 0.0
+timedout_before_max: 44148.0
+paused_max: 38.0
+client: {'sent': 92488, 'ok': 436, 'warned': 0, 'ovl_bytes': 0, 'ovl_other': 47899, 'err': 3193, 'outstanding': 40960}
+ok_per_s: 3.0905546695020383
+load_s: 141.075
+gc_pause_frac_last60: 0.00738805
+gc_pauses_n: 292
+gc_last5: ['810-0700][78.742s][53669][53790][info ] GC(346) Pause Full (G1 Evacuation Pause) 4046M->4046M(4096M) 163.189ms', '966-0700][78.899s][53669][53790][info ] GC(347) Pause Full (G1 Evacuation Pause) 4046M->4046M(4096M) 155.250ms', '[183.947s][53669][53790][info ] GC(348) Pause Young (Normal) (G1 Evacuation Pause) 4046M->4046M(4096M) 8.586ms', '60-0700][184.192s][53669][53790][info ] GC(349) Pause Full (G1 Evacuation Pause) 4046M->4046M(4096M) 243.454ms', '52-0700][184.385s][53669][53790][info ] GC(350) Pause Full (G1 Evacuation Pause) 4046M->4046M(4096M) 191.243ms']
+scope_mem_max: 9940598784
+scope_events: {'low': '0', 'high': '0', 'max': '0', 'oom': '0', 'oom_kill': '0'}
+dump_bytes: 4299589743
+EXPECTED P1: warned>0 (0), discarded+0 (0.0), global<=E+1MiB (106987832.0 <= 108422758)
+EXPECTED P2: ntr_pending>=0.5NW (30749.0 vs 20480.0); QM>=0.6NW (29725 vs 24576.0); U/K_N>=20 (24.9)
+EXPECTED P3: heap OOM within 180 s (OOM at 141.075); scope oom_kill 0 (0)
+EXPECTED P8: direct max < 0.5 D1 (153294999.0 vs 1858912325.0)
+DONE

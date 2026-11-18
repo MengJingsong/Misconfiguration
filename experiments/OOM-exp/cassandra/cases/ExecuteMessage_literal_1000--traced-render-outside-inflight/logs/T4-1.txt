@@ -1,0 +1,73 @@
+== driver.txt
+2026-11-17T21:37:05 run T4-1 build=base heap=4G tracing=on mode=fixed:26 hold=180
+2026-11-17T21:37:05 free 27G
+2026-11-17T21:37:57 daemon pid 115272 up
+2026-11-17T21:38:03 client start --fixed 26 --hold-s 180
+2026-11-17T21:41:05 client ended; daemon alive (hold end)
+2026-11-17T21:41:24 END hold
+2026-11-17T21:41:26 done
+== summary.txt
+endpoint: hold
+client # start 2026-11-17T21:38:03-0700 tracing=on steps=[26] S=16000000
+client # step 0 N=26 established=26 at 269 ms
+client # end 180712 ms done=3261 err=0
+client max established 26, completed 3253, errors 0, max outstanding 26, max K_client 416000702
+last step N=26 started at 269 ms; ok completions after it: 3287; last completion line at 181568 ms (+181.3 s)
+  step N=26: ok 3287, median latency 1403 ms
+threads samples 28: max NTR 23, max R(traceQuery) 20, max in hex 16, in String.<init> 8, in concat 7
+  R series: 2 14 15 18 16 19 13 18 19 20 14 15 15 14 19 17 17 18 15 20 20 14 14 18 17 0 0 0
+K_server RequestsSize max 336000567 (samples 7) series 240000405 320000540 336000567 304000513 304000513 304000513 0; paused max 0
+RssAnon max 5306 MiB
+heap_info used max 3977 MiB
+GCs 429; humongous after GC: max 189 regions (3024 MiB), median 145; before GC max 241
+pauses 837; STW share over last 60 s of GC log: 9%; Pause Full count 0; to-space exhausted 0
+dumps: none
+== threads.txt (epoch ntr ntr_trace hex string_init concat ntr_runnable)
+1794976683.264 6 2 2 0 0 6
+1794976689.989 19 14 11 2 0 14
+1794976697.052 19 15 9 6 0 15
+1794976704.173 22 18 10 6 0 19
+1794976711.199 19 16 7 8 0 16
+1794976717.854 23 19 12 4 0 20
+1794976724.998 17 13 7 5 1 14
+1794976732.361 20 18 13 5 0 19
+1794976739.784 22 19 13 4 2 21
+1794976746.715 22 20 11 6 3 20
+1794976753.950 19 14 8 2 4 16
+1794976761.168 16 15 7 6 2 15
+1794976768.364 19 15 10 2 2 15
+1794976775.470 18 14 10 3 1 15
+1794976782.558 20 19 10 5 4 19
+1794976789.848 21 17 12 4 1 17
+1794976797.056 19 17 10 2 5 17
+1794976804.150 22 18 11 5 2 18
+1794976811.507 19 15 8 2 5 15
+1794976818.802 21 20 14 3 3 20
+1794976826.315 20 20 10 2 7 20
+1794976833.994 20 14 12 1 1 14
+1794976841.230 19 14 11 1 2 15
+1794976848.590 20 18 16 0 2 18
+1794976855.899 21 17 9 5 3 17
+1794976863.457 10 0 0 0 0 0
+1794976870.086 10 0 0 0 0 0
+1794976876.364 10 0 0 0 0 0
+== ksrv.txt
+1794976683.265 requestssize=240000405 paused=0
+1794976714.857 requestssize=320000540 paused=0
+1794976746.153 requestssize=336000567 paused=0
+1794976777.261 requestssize=304000513 paused=0
+1794976808.836 requestssize=304000513 paused=0
+1794976841.533 requestssize=304000513 paused=0
+1794976873.319 requestssize=0 paused=
+== client.txt (# lines)
+# start 2026-11-17T21:38:03-0700 tracing=on steps=[26] S=16000000
+# step 0 N=26 established=26 at 269 ms
+# end 180712 ms done=3261 err=0
+== stdout OOM lines
+== VM flags
+G1HeapRegionSize=16777216 MaxDirectMemorySize=16642998272 MaxHeapSize=4294967296 UseG1GC 
+Max open files            100000               100000               files     
+== trace-check
+bound_var_0_v len=1004 head=0x0001020304 tail=f1f2...'
+bound_var_0_v len=1004 head=0x0001020304 tail=f1f2...'
+bound_var_0_v len=1004 head=0x0001020304 tail=f1f2...'

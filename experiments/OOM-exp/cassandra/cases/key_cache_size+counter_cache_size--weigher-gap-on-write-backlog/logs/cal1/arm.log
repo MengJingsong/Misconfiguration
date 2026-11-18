@@ -1,0 +1,42 @@
+[23:01:56] args: name=cal1 type=T build=orig N=65000 VX=2G sess=8 fill_small=0
+[23:01:56] gen V xmx=2G build=/mydata/s4/r8-w1/run-orig
+[23:01:56] gen R xmx=8G build=/mydata/s4/r8-w1/run-orig
+[23:01:58] launched V pid=28061 unit=r8-V-1794974516 cpus=0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30 swap.max=0 memory.max=max
+[23:02:12] launched R pid=28371 unit=r8-R-1794974530 cpus=1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31 swap.max=0 memory.max=max
+[23:02:21] ring UN=2
+V pid 28061 pid 28061's current affinity list: 0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30
+R pid 28371 pid 28371's current affinity list: 1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31
+V resolved: -XX:+UseG1GC -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M 
+V VM.flags: MaxDirectMemorySize=16642998272 MaxHeapSize=2147483648 
+V cgroup: /sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/r8-V-1794974516.scope swap.max=0 memory.max=max
+2026-11-18T04:02:00,960 CacheService.java:121 - Initializing key cache with capacity of 100 MiBs.
+2026-11-18T04:02:00,967 CacheService.java:143 - Initializing row cache with capacity of 0 MiBs
+2026-11-18T04:02:00,968 CacheService.java:174 - Initializing counter cache with capacity of 50 MiBs
+04:02:23 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+schema ok
+[23:02:30] fill: insert 1600000 kv
+DONE mode=insert table=kv keyBytes=8 first=0 count=1600000 ok=1600000 err=0 rows=0 secs=9.9 ops/s=161913
+[23:02:56] fill: read 1500000 kv
+DONE mode=read table=kv keyBytes=8 first=0 count=1500000 ok=1500000 err=0 rows=1500000 secs=13.5 ops/s=111471
+[23:03:13] fill: counter 550000 ctr
+DONE mode=counter table=ctr keyBytes=8 first=0 count=550000 ok=550000 err=0 rows=0 secs=8.2 ops/s=67017
+[23:03:29] after fill: key cache 100.00 MiB, counter cache 50.00 MiB
+== pre-burst nodetool info
+Heap Memory (MB)       : 1010.20 / 2048.00
+Off Heap Memory (MB)   : 2.95
+Key Cache              : entries 1310720, size 100 MiB, capacity 100 MiB, 107 hits, 1501175 requests, 0.000 recent hit rate, 14400 save period in seconds
+Counter Cache          : entries 468114, size 50 MiB, capacity 50 MiB, 0 hits, 550000 requests, 0.000 recent hit rate, 7200 save period in seconds
+== tablestats
+[23:03:33] pre-burst live heap (histogram total): Total      10136113      420753928
+[23:03:43] burst start N=65000 sess=8
+[23:04:06] client exited 23 s after start: FINAL sent=65000 ok=65000 err=0 firstOkMs=1794974624655 lastOkMs=1794974628453 total=65000 
+[23:07:06] end of window: V alive, last mut_pending=0
+[23:07:06] V_ALIVE
+VmSwap: VmSwap:	       0 kB
+Heap Memory (MB)       : 446.07 / 2048.00
+Off Heap Memory (MB)   : 3.36
+Key Cache              : entries 1310720, size 100 MiB, capacity 100 MiB, 124 hits, 1501232 requests, 0.000 recent hit rate, 14400 save period in seconds
+Counter Cache          : entries 468114, size 50 MiB, capacity 50 MiB, 0 hits, 550000 requests, 0.000 recent hit rate, 7200 save period in seconds
+[23:07:13] stopped V (28061)
+[23:07:21] stopped R (28371)
+[23:07:21] cal1: type=T N=65000 V xmx=2G 0 OOMError lines | pauses=69 max_after_any=2028MiB(99.0%) full_gcs=6 max_after_full=1240MiB(60.5%) ReportJavaOutOfMemory=0 | full>95%: n=0 window=0s pause=0s (0%) service_loss=not met | pauses=69 total_pause=4s max60=5% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=none | client: FINAL sent=65000 ok=65000 err=0 firstOkMs=1794974624655 lastOkMs=1794974628453 total=65000  | R: pauses=9 max_after_any=808MiB(9.9%) full_gcs=0 max_after_full=0MiB(0.0%) ReportJavaOutOfMemory=0 | full>95%: n=0 window=0s pause=0s (0%) service_loss=not met
