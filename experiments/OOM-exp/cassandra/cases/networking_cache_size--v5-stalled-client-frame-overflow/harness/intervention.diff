@@ -1,0 +1,19 @@
+diff --git a/src/java/org/apache/cassandra/transport/Dispatcher.java b/src/java/org/apache/cassandra/transport/Dispatcher.java
+index b0b5d28..de38f7e 100644
+--- a/src/java/org/apache/cassandra/transport/Dispatcher.java
++++ b/src/java/org/apache/cassandra/transport/Dispatcher.java
+@@ -303,6 +303,14 @@ public class Dispatcher implements CQLMessageHandler.MessageConsumer<Message.Req
+         @Override
+         public void run()
+         {
++            // B13 diagnostic intervention (not upstream): defer a request whose channel is above its
++            // outbound high water mark, so no response is built for a client that is not reading.
++            if (channel.isActive() && !channel.isWritable())
++            {
++                org.apache.cassandra.concurrent.ScheduledExecutors.scheduledFastTasks
++                    .schedule(() -> requestExecutor.submit(this), 100, TimeUnit.MILLISECONDS);
++                return;
++            }
+             startTimeNanos = MonotonicClock.Global.preciseTime.now();
+             processRequest(channel, request, forFlusher, flusherParam, backpressure, new RequestTime(request.createdAtNanos, startTimeNanos));
+         }

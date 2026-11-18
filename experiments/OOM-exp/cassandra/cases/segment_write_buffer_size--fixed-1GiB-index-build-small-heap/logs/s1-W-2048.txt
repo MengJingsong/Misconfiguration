@@ -1,0 +1,121 @@
+== s1-W-2048 (full logs on pc96: /mydata/s4/c8-w3/runs/s1-W-2048/)
+name=s1-W-2048
+arm=W
+heap=2048
+sai=1024
+t_start_ms=1795008826676
+builds_completed=0
+node_died_before_stop=False at arm+308s
+stopped_clean=True
+== selfcheck
+first OOM line: None
+flush lines sample: []
+ arm=W H=2048 sai=1024 endpoint=none t_end=- peakK1=-0MiB limit=[] K1cycles=0 peakK2=172MiB K2@K1peak=-0MiB peakHeapUsed=1954MiB peakPostGC=1970MiB peakPostFull=603MiB fullGCs=32 maxSTW60s=4% B0=70MiB builds=0 query=- flushLines=0 stressOps/s=23093 blocked=2405 peakKC=-0MiB/-1e hprof=0 peakhist total 433MiB PLV$Builder 0 long[] 16MiB byte[] 324MiB Region 21 KeyCacheKey 1274
+== yaml.diff
+26c26
+< cluster_name: 'Test Cluster'
+---
+> cluster_name: 'c8'
+706c706
+<       - seeds: "127.0.0.1:7000"
+---
+>       - seeds: "127.0.0.8:7008"
+960c960
+< storage_port: 7000
+---
+> storage_port: 7008
+981c981
+< listen_address: localhost
+---
+> listen_address: 127.0.0.8
+1023c1023
+< native_transport_port: 9042
+---
+> native_transport_port: 9048
+1090c1090
+< rpc_address: localhost
+---
+> rpc_address: 127.0.0.8
+2485a2486,2491
+> # ---- C8 stage-2 lines (environment; sai_options only in arm I) ----
+> data_file_directories: [/mydata/s4/c8-w3/inst/s1-W-2048/data]
+> commitlog_directory: /mydata/s4/c8-w3/inst/s1-W-2048/commitlog
+> hints_directory: /mydata/s4/c8-w3/inst/s1-W-2048/hints
+> saved_caches_directory: /mydata/s4/c8-w3/inst/s1-W-2048/saved_caches
+> cdc_raw_directory: /mydata/s4/c8-w3/inst/s1-W-2048/cdc_raw
+== JVM arguments (resolved)
+ -XX:+UseG1GC
+ -XX:G1HeapRegionSize=16m
+ -Xms2048M
+ -Xmx2048M
+ -XX:MaxDirectMemorySize=1024M
+ -XX:ParallelGCThreads=32
+ -XX:ConcGCThreads=32
+INFO  [main] 2026-11-18T13:33:48,794 DatabaseDescriptor.java:590 - Global memtable on-heap threshold is enabled at 512MiB
+INFO  [main] 2026-11-18T13:33:49,344 CassandraDaemon.java:610 - Heap size: 2.000GiB/2.000GiB
+INFO  [SSTableBatchOpen:2] 2026-11-18T13:33:51,251 CacheService.java:121 - Initializing key cache with capacity of 100 MiBs.
+== SAI build lines
+INFO  [SecondaryIndexManagement:1] 2026-11-18T13:33:51,213 SecondaryIndexManager.java:1880 - Index [PaxosUncommittedIndex] became queryable after successful build.
+== key cache StatusLogger (last 2)
+INFO  [ScheduledTasks:1] 2026-11-18T13:38:58,375 StatusLogger.java:105 - KeyCache                     146200                104857600                      all
+INFO  [ScheduledTasks:1] 2026-11-18T13:39:08,382 StatusLogger.java:105 - KeyCache                     154120                104857600                      all
+== last 8 full GCs
+[2026-11-18T08:38:07.122-0500][260.207s][4063225][4063346][info ] GC(150) Pause Full (G1 Evacuation Pause) 1951M->433M(2048M) 93.639ms
+[2026-11-18T08:38:07.213-0500][260.298s][4063225][4063346][info ] GC(151) Pause Full (Heap Inspection Initiated GC) 433M->433M(2048M) 90.669ms
+[2026-11-18T08:38:12.643-0500][265.728s][4063225][4063346][info ] GC(156) Pause Full (G1 Evacuation Pause) 1969M->482M(2048M) 116.059ms
+[2026-11-18T08:38:20.502-0500][273.586s][4063225][4063346][info ] GC(162) Pause Full (G1 Evacuation Pause) 1954M->455M(2048M) 91.989ms
+[2026-11-18T08:38:30.477-0500][283.562s][4063225][4063346][info ] GC(168) Pause Full (G1 Evacuation Pause) 1911M->596M(2048M) 130.399ms
+[2026-11-18T08:38:47.855-0500][300.940s][4063225][4063346][info ] GC(178) Pause Full (G1 Evacuation Pause) 1940M->319M(2048M) 87.099ms
+[2026-11-18T08:39:06.192-0500][319.277s][4063225][4063346][info ] GC(186) Pause Full (G1 Evacuation Pause) 1966M->540M(2048M) 105.097ms
+[2026-11-18T08:39:10.322-0500][323.407s][4063225][4063346][info ] GC(193) Pause Full (G1 Evacuation Pause) 1904M->457M(2048M) 115.345ms
+== OOM lines (launch.log)
+== hist-B0 (top 8)
+4063225:
+ num     #instances         #bytes  class name (module)
+-------------------------------------------------------
+   1:         98366       26472400  [B (java.base@11.0.33)
+   2:          4489       14312088  [I (java.base@11.0.33)
+   3:          6680       10083728  [J (java.base@11.0.33)
+   4:         23469        2685832  [Ljava.lang.Object; (java.base@11.0.33)
+   5:         91699        2200776  java.lang.String (java.base@11.0.33)
+   6:         11791        1406936  java.lang.Class (java.base@11.0.33)
+   7:         48639        1167336  javax.management.ObjectName$Property (java.management@11.0.33)
+   8:         35524        1136768  java.util.concurrent.ConcurrentHashMap$Node (java.base@11.0.33)
+Total        692352       73189776
+== hist-peak (top 15; taken on trigger in session.log)
+[2026-11-18 08:38:07] histogram hist-peak.txt (t = 240 s) rc=0 in 0.7 s at 08:38:07
+4063225:
+ num     #instances         #bytes  class name (module)
+-------------------------------------------------------
+   1:        100031      339387640  [B (java.base@11.0.33)
+   2:        383037       18385776  java.nio.HeapByteBuffer (java.base@11.0.33)
+   3:          4914       17899760  [I (java.base@11.0.33)
+   4:          7212       16795040  [J (java.base@11.0.33)
+   5:        168312       13860080  [Ljava.lang.Object; (java.base@11.0.33)
+   6:        302670       12106800  org.apache.cassandra.db.rows.BufferCell
+   7:         76169        3046760  org.apache.cassandra.db.rows.BTreeRow
+   8:         75003        2400096  org.apache.cassandra.db.rows.EncodingStats
+   9:         74878        2396096  org.apache.cassandra.db.partitions.BTreePartitionData
+  10:         74871        2395872  org.apache.cassandra.db.partitions.AtomicBTreePartition
+  11:         94823        2275752  java.lang.String (java.base@11.0.33)
+  12:         75102        1802448  org.apache.cassandra.dht.Murmur3Partitioner$LongToken
+  13:         74971        1799304  java.util.concurrent.ConcurrentSkipListMap$Node (java.base@11.0.33)
+  14:         74905        1797720  org.apache.cassandra.db.BufferDecoratedKey
+  15:         11509        1377416  java.lang.Class (java.base@11.0.33)
+Total       2084503      454321520
+== stress (every 30th interval line)
+total,                                                  5373,    5373,    5373,    5373,     3.6,     2.6,     9.5,    24.8,    39.8,    47.2,    1.0,  0.00000,      0,      0,       0,       0,       0,       0
+total,                                                731017,   33048,   33048,   33048,     3.6,     0.3,     0.6,     0.9,    26.6,  3305.1,   56.0,  0.24971,      0,      0,       0,       0,       0,       0
+total,                                               1393188,   36655,   36655,   36655,     5.1,     0.4,     0.7,     1.1,    36.4,  5389.7,  126.0,  0.32094,      0,      0,       0,       0,       0,       0
+total,                                               2121912,   33814,   33814,   33814,     3.4,     0.4,     0.8,     1.3,    66.9,  3129.0,  196.0,  0.22725,      0,      0,       0,       0,       0,       0
+total,                                               2853648,   33878,   33878,   33878,     4.5,     0.3,     0.7,     1.2,   111.9,  4362.1,  263.0,  0.21608,      0,      0,       0,       0,       0,       0
+/mydata/s4/c8-w3/runs/s1-W-2048//stress.log:Op rate                   :   10,665 op/s  [WRITE: 10,665 op/s]
+/mydata/s4/c8-w3/runs/s1-W-2048//stress.log:Total errors              :          0 [WRITE: 0]
+/mydata/s4/c8-w3/runs/s1-W-2048//stress.log:END
+/mydata/s4/c8-w3/runs/s1-W-2048//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/s1-W-2048//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/s1-W-2048//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/s1-W-2048//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/s1-W-2048//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+== oomtail
+: build_start=arm+Nones last_sample=arm+308s (build+0s) K1=-1MiB heap=1157MiB K2=92MiB blocked=2405 oldGC=32

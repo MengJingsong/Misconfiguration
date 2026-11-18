@@ -1,0 +1,40 @@
+INFO  [Service Thread] 2026-11-18T13:38:58,126 GCInspector.java:286 - G1 Old Generation GC in 795ms.  Compressed Class Space: 7906960 -> 7897736; G1 Eden Space: 637534208 -> 0; G1 Old Gen: 64822856 -> 90871536; G1 Survivor Space: 50331648 -> 0; Metaspace: 68352656 -> 68325120
+INFO  [ReadStage-20] 2026-11-18T13:38:58,130 MonitoringTask.java:95 - Scheduling monitoring task with report interval of 5000 ms, max operations 50
+INFO  [Service Thread] 2026-11-18T13:38:58,416 GCInspector.java:286 - G1 Old Generation GC in 254ms.  G1 Old Gen: 90672808 -> 90672744; 
+INFO  [Service Thread] 2026-11-18T13:38:58,806 GCInspector.java:286 - G1 Old Generation GC in 377ms.  Compressed Class Space: 7899512 -> 7898912; G1 Old Gen: 74242784 -> 86930408; G1 Survivor Space: 16777216 -> 0; Metaspace: 68329376 -> 68327816
+WARN  [epollEventLoopGroup-5-6] 2026-11-18T13:38:58,814 AbstractEventExecutor.java:168 - A task raised an exception. Task: org.apache.cassandra.transport.Flusher$ImmediateFlusher@22407c33
+java.lang.OutOfMemoryError: Direct buffer memory
+	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+	at org.apache.cassandra.utils.memory.BufferPool.allocate(BufferPool.java:238)
+	at org.apache.cassandra.utils.memory.BufferPool$LocalPool.get(BufferPool.java:923)
+	at org.apache.cassandra.utils.memory.BufferPool$LocalPool.getAtLeast(BufferPool.java:901)
+	at org.apache.cassandra.utils.memory.BufferPool.getAtLeast(BufferPool.java:219)
+	at org.apache.cassandra.net.FrameEncoder$Payload.<init>(FrameEncoder.java:64)
+	at org.apache.cassandra.net.FrameEncoderCrc.lambda$static$0(FrameEncoderCrc.java:41)
+	at org.apache.cassandra.transport.Flusher.flushLargeMessage(Flusher.java:173)
+	at org.apache.cassandra.transport.Flusher.processFramedResponse(Flusher.java:154)
+	at org.apache.cassandra.transport.Flusher.processQueue(Flusher.java:215)
+	at org.apache.cassandra.transport.Flusher$ImmediateFlusher.run(Flusher.java:369)
+	at io.netty.util.concurrent.AbstractEventExecutor.runTask(AbstractEventExecutor.java:173)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:166)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:472)
+	at io.netty.channel.epoll.EpollEventLoop.run(EpollEventLoop.java:405)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:998)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+WARN  [epollEventLoopGroup-5-5] 2026-11-18T13:38:59,065 AbstractEventExecutor.java:168 - A task raised an exception. Task: org.apache.cassandra.transport.Flusher$ImmediateFlusher@73c67cc2
+java.lang.OutOfMemoryError: Direct buffer memory
+	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+	at org.apache.cassandra.utils.memory.BufferPool.allocate(BufferPool.java:238)
+	at org.apache.cassandra.utils.memory.BufferPool$LocalPool.get(BufferPool.java:923)
+	at org.apache.cassandra.utils.memory.BufferPool$LocalPool.getAtLeast(BufferPool.java:901)
+	at org.apache.cassandra.utils.memory.BufferPool.getAtLeast(BufferPool.java:219)
+	at org.apache.cassandra.net.FrameEncoder$Payload.<init>(FrameEncoder.java:64)
+	at org.apache.cassandra.net.FrameEncoderCrc.lambda$static$0(FrameEncoderCrc.java:41)
+	at org.apache.cassandra.transport.Flusher.flushLargeMessage(Flusher.java:173)
+	at org.apache.cassandra.transport.Flusher.processFramedResponse(Flusher.java:154)

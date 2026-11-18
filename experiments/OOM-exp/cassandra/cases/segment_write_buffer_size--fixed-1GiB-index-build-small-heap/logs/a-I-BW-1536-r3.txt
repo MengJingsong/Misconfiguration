@@ -1,0 +1,185 @@
+== a-I-BW-1536-r3 (full logs on pc96: /mydata/s4/c8-w3/runs/a-I-BW-1536-r3/)
+name=a-I-BW-1536-r3
+arm=I-BW
+heap=1536
+sai=192
+t_start_ms=1795011803572
+build starts at arm+61s
+create_index rc=0 t=59s ''
+initial_build complete at 209s
+rebuild_index rc=0 in 154s alive=True ''
+builds_completed=2
+query_check count=1
+node_died_before_stop=False at arm+428s
+stopped_clean=True
+== selfcheck
+first OOM line: None
+flush lines sample: [('192.001MiB', '82920'), ('192.000MiB', '82919'), ('192.000MiB', '82920')]
+ arm=I-BW H=1536 sai=192 endpoint=none t_end=- peakK1=192MiB limit=[192] K1cycles=48 peakK2=129MiB K2@K1peak=128MiB peakHeapUsed=1440MiB peakPostGC=1496MiB peakPostFull=855MiB fullGCs=223 maxSTW60s=36% B0=70MiB builds=2 query=1 flushLines=48 stressOps/s=19432 blocked=4710 peakKC=76MiB/996112e hprof=0 peakhist total 459MiB PLV$Builder 82920 long[] 174MiB byte[] 190MiB Region 9 KeyCacheKey 83709
+== yaml.diff
+26c26
+< cluster_name: 'Test Cluster'
+---
+> cluster_name: 'c8'
+706c706
+<       - seeds: "127.0.0.1:7000"
+---
+>       - seeds: "127.0.0.8:7008"
+960c960
+< storage_port: 7000
+---
+> storage_port: 7008
+981c981
+< listen_address: localhost
+---
+> listen_address: 127.0.0.8
+1023c1023
+< native_transport_port: 9042
+---
+> native_transport_port: 9048
+1090c1090
+< rpc_address: localhost
+---
+> rpc_address: 127.0.0.8
+2485a2486,2493
+> # ---- C8 stage-2 lines (environment; sai_options only in arm I) ----
+> data_file_directories: [/mydata/s4/c8-w3/inst/a-I-BW-1536-r3/data]
+> commitlog_directory: /mydata/s4/c8-w3/inst/a-I-BW-1536-r3/commitlog
+> hints_directory: /mydata/s4/c8-w3/inst/a-I-BW-1536-r3/hints
+> saved_caches_directory: /mydata/s4/c8-w3/inst/a-I-BW-1536-r3/saved_caches
+> cdc_raw_directory: /mydata/s4/c8-w3/inst/a-I-BW-1536-r3/cdc_raw
+> sai_options:
+>   segment_write_buffer_size: 192MiB
+== JVM arguments (resolved)
+ -XX:+UseG1GC
+ -XX:G1HeapRegionSize=16m
+ -Xms1536M
+ -Xmx1536M
+ -XX:MaxDirectMemorySize=768M
+ -XX:ParallelGCThreads=32
+ -XX:ConcGCThreads=32
+INFO  [main] 2026-11-18T14:23:25,974 DatabaseDescriptor.java:590 - Global memtable on-heap threshold is enabled at 384MiB
+INFO  [main] 2026-11-18T14:23:26,563 CassandraDaemon.java:610 - Heap size: 1.500GiB/1.500GiB
+INFO  [SSTableBatchOpen:2] 2026-11-18T14:23:28,405 CacheService.java:121 - Initializing key cache with capacity of 76 MiBs.
+== SAI build lines
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:25:51,052 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.001MiB for 82920 cells. Global Usage is 192.001MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:25:56,321 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.000MiB for 82919 cells. Global Usage is 192.000MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:26:01,467 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.000MiB for 82920 cells. Global Usage is 192.000MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:26:05,058 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.001MiB for 82921 cells. Global Usage is 192.001MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:26:11,035 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.000MiB for 82922 cells. Global Usage is 192.000MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:26:17,887 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.002MiB for 82920 cells. Global Usage is 192.002MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:26:22,153 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.001MiB for 82920 cells. Global Usage is 192.001MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:26:26,530 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.002MiB for 82922 cells. Global Usage is 192.002MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:26:32,600 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.002MiB for 82921 cells. Global Usage is 192.002MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:26:37,874 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.001MiB for 82919 cells. Global Usage is 192.001MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:26:46,810 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.000MiB for 82921 cells. Global Usage is 192.000MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:26:54,321 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.002MiB for 82918 cells. Global Usage is 192.002MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:26:59,730 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.001MiB for 82920 cells. Global Usage is 192.001MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:27:05,823 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.001MiB for 82922 cells. Global Usage is 192.001MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:27:10,928 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.000MiB for 82919 cells. Global Usage is 192.000MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:27:18,686 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.002MiB for 82920 cells. Global Usage is 192.002MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:27:24,197 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.001MiB for 82922 cells. Global Usage is 192.001MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:27:31,041 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.002MiB for 82922 cells. Global Usage is 192.002MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:27:37,300 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.000MiB for 82919 cells. Global Usage is 192.000MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:27:43,658 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.002MiB for 82920 cells. Global Usage is 192.002MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:27:49,101 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.001MiB for 82919 cells. Global Usage is 192.001MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:27:53,879 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.001MiB for 82922 cells. Global Usage is 192.001MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:28:01,015 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.001MiB for 82919 cells. Global Usage is 192.001MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:28:07,714 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.002MiB for 82921 cells. Global Usage is 192.002MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:28:28,641 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.001MiB for 82920 cells. Global Usage is 192.001MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:28:32,826 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.000MiB for 82919 cells. Global Usage is 192.000MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:28:37,004 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.000MiB for 82920 cells. Global Usage is 192.000MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:28:43,259 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.001MiB for 82921 cells. Global Usage is 192.001MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:28:48,446 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.000MiB for 82922 cells. Global Usage is 192.000MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:28:52,414 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.002MiB for 82920 cells. Global Usage is 192.002MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:28:59,222 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.001MiB for 82920 cells. Global Usage is 192.001MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:29:02,385 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.002MiB for 82922 cells. Global Usage is 192.002MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:29:05,522 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.002MiB for 82921 cells. Global Usage is 192.002MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:29:10,494 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.001MiB for 82919 cells. Global Usage is 192.001MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:29:13,775 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.000MiB for 82921 cells. Global Usage is 192.000MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:29:17,569 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.002MiB for 82918 cells. Global Usage is 192.002MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:29:24,887 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.001MiB for 82920 cells. Global Usage is 192.001MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:29:30,945 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.001MiB for 82922 cells. Global Usage is 192.001MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:29:37,093 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.000MiB for 82919 cells. Global Usage is 192.000MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:29:42,934 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.002MiB for 82920 cells. Global Usage is 192.002MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:29:51,991 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.001MiB for 82922 cells. Global Usage is 192.001MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:29:59,157 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.002MiB for 82922 cells. Global Usage is 192.002MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:30:05,275 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.000MiB for 82919 cells. Global Usage is 192.000MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:30:11,968 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.002MiB for 82920 cells. Global Usage is 192.002MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:30:19,088 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.001MiB for 82919 cells. Global Usage is 192.001MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:30:25,676 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.001MiB for 82922 cells. Global Usage is 192.001MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:30:32,403 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.001MiB for 82919 cells. Global Usage is 192.001MiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:30:38,890 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 192.000MiB and minimum flush size of 192.000MiB exceeded. Current builder usage is 192.002MiB for 82921 cells. Global Usage is 192.002MiB. Flushing...
+INFO  [SecondaryIndexExecutor:1] 2026-11-18T14:25:48,713 V1OnDiskFormat.java:177 - [c8.big.v_idx] Starting a compaction index build. Global segment memory usage: 0B
+INFO  [SecondaryIndexExecutor:2] 2026-11-18T14:28:25,848 V1OnDiskFormat.java:177 - [c8.big.v_idx] Starting a compaction index build. Global segment memory usage: 0B
+INFO  [SecondaryIndexExecutor:2] 2026-11-18T14:30:44,100 SecondaryIndexManager.java:1880 - Index [v_idx] became queryable after successful build.
+INFO  [SecondaryIndexManagement:1] 2026-11-18T14:23:28,369 SecondaryIndexManager.java:1880 - Index [PaxosUncommittedIndex] became queryable after successful build.
+INFO  [SecondaryIndexManagement:1] 2026-11-18T14:25:48,702 StorageAttachedIndex.java:907 - [c8.big.v_idx] Submitting 1 parallel initial index builds over 1 total sstables...
+INFO  [SecondaryIndexManagement:1] 2026-11-18T14:28:12,441 SecondaryIndexManager.java:1880 - Index [v_idx] became queryable after successful build.
+== key cache StatusLogger (last 2)
+INFO  [ScheduledTasks:1] 2026-11-18T14:30:18,724 StatusLogger.java:105 - KeyCache                   79691720                 79691776                      all
+INFO  [ScheduledTasks:1] 2026-11-18T14:30:45,327 StatusLogger.java:105 - KeyCache                   79691776                 79691776                      all
+== last 8 full GCs
+[2026-11-18T09:30:36.799-0500][432.986s][4088330][4088449][info ] GC(611) Pause Full (G1 Evacuation Pause) 1437M->732M(1536M) 415.862ms
+[2026-11-18T09:30:37.927-0500][434.115s][4088330][4088449][info ] GC(613) Pause Full (G1 Evacuation Pause) 1452M->757M(1536M) 412.430ms
+[2026-11-18T09:30:38.762-0500][434.950s][4088330][4088449][info ] GC(615) Pause Full (G1 Evacuation Pause) 1461M->767M(1536M) 415.775ms
+[2026-11-18T09:30:39.504-0500][435.692s][4088330][4088449][info ] GC(617) Pause Full (G1 Evacuation Pause) 1439M->802M(1536M) 399.824ms
+[2026-11-18T09:30:41.193-0500][437.381s][4088330][4088449][info ] GC(619) Pause Full (G1 Evacuation Pause) 1458M->694M(1536M) 383.209ms
+[2026-11-18T09:30:45.805-0500][441.993s][4088330][4088449][info ] GC(622) Pause Full (G1 Evacuation Pause) 1430M->510M(1536M) 390.976ms
+[2026-11-18T09:30:46.708-0500][442.895s][4088330][4088449][info ] GC(625) Pause Full (G1 Evacuation Pause) 1422M->654M(1536M) 382.327ms
+[2026-11-18T09:30:48.279-0500][444.467s][4088330][4088449][info ] GC(628) Pause Full (G1 Evacuation Pause) 1438M->531M(1536M) 262.946ms
+== OOM lines (launch.log)
+== hist-B0 (top 8)
+4088330:
+ num     #instances         #bytes  class name (module)
+-------------------------------------------------------
+   1:         98373       26474896  [B (java.base@11.0.33)
+   2:          4490       14312112  [I (java.base@11.0.33)
+   3:          6682       10083776  [J (java.base@11.0.33)
+   4:         23457        2685832  [Ljava.lang.Object; (java.base@11.0.33)
+   5:         91699        2200776  java.lang.String (java.base@11.0.33)
+   6:         11794        1407272  java.lang.Class (java.base@11.0.33)
+   7:         48639        1167336  javax.management.ObjectName$Property (java.management@11.0.33)
+   8:         35552        1137664  java.util.concurrent.ConcurrentHashMap$Node (java.base@11.0.33)
+Total        690739       73127528
+== hist-peak (top 15; taken on trigger in session.log)
+[2026-11-18 09:25:52] histogram hist-peak.txt (K_D1 201327416 >= 0.95 x limit 201326592) rc=0 in 0.5 s at 09:25:52
+4088330:
+ num     #instances         #bytes  class name (module)
+-------------------------------------------------------
+   1:        185393      199000768  [B (java.base@11.0.33)
+   2:        164606      182471896  [J (java.base@11.0.33)
+   3:          4950       17825784  [I (java.base@11.0.33)
+   4:        110891       12799760  [Ljava.lang.Object; (java.base@11.0.33)
+   5:        211941       10173168  java.nio.HeapByteBuffer (java.base@11.0.33)
+   6:        166169        6646760  org.apache.cassandra.db.rows.BufferCell
+   7:         82920        6633600  [Lorg.apache.lucene.util.packed.PackedInts$Reader;
+   8:         82920        5306880  org.apache.lucene.util.packed.DeltaPackedLongValues$Builder
+   9:        121031        3872992  java.util.concurrent.ConcurrentHashMap$Node (java.base@11.0.33)
+  10:         83715        3348600  com.github.benmanes.caffeine.cache.PSMW
+  11:         83709        2678688  org.apache.cassandra.cache.KeyCacheKey
+  12:         97501        2340024  java.lang.String (java.base@11.0.33)
+  13:         83710        2009040  org.apache.cassandra.io.sstable.format.big.RowIndexEntry
+  14:         41990        1679600  org.apache.cassandra.db.rows.BTreeRow
+  15:         12132        1449960  java.lang.Class (java.base@11.0.33)
+Total       2245410      481734056
+== stress (every 30th interval line)
+total,                                                  4138,    4138,    4138,    4138,     4.0,     2.7,     9.8,    23.1,    62.6,    76.9,    1.0,  0.00000,      0,      0,       0,       0,       0,       0
+total,                                                665750,    6659,    6659,    6659,    24.1,     0.3,     0.9,     1.7,  4928.3,  4928.3,   54.0,  0.28261,      0,      0,       0,       0,       0,       0
+total,                                               1263056,      19,      19,      19,  4491.3,  4492.1,  4504.7,  4504.7,  4504.7,  4504.7,  107.0,  0.32635,      0,      0,       0,       0,       0,       0
+total,                                               1850223,   18702,   18702,   18702,     1.5,     0.4,     0.8,     1.3,   344.2,   345.0,  166.0,  0.26251,      0,      0,       0,       0,       0,       0
+total,                                               2433461,   16860,   16860,   16860,     5.3,     0.4,     0.8,     1.1,  2548.0,  2548.0,  212.0,  0.26044,      0,      0,       0,       0,       0,       0
+total,                                               3023394,   33778,   33778,   33778,     0.8,     0.4,     0.7,     1.2,    46.3,   385.6,  265.0,  0.48965,      0,      0,       0,       0,       0,       0
+total,                                               3548994,   20240,   20240,   20240,     1.5,     0.4,     0.7,     1.5,   370.9,   420.5,  322.0,  0.44084,      0,      0,       0,       0,       0,       0
+total,                                               4081272,   10876,   10876,   10876,     3.4,     0.3,     0.7,     1.1,   938.5,   977.3,  378.0,  0.36484,      0,      0,       0,       0,       0,       0
+total,                                               4674986,   20300,   20300,   20300,     1.1,     0.4,     0.7,     1.0,   424.1,   425.7,  419.0,  0.32814,      0,      0,       0,       0,       0,       0
+/mydata/s4/c8-w3/runs/a-I-BW-1536-r3//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/a-I-BW-1536-r3//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/a-I-BW-1536-r3//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/a-I-BW-1536-r3//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/a-I-BW-1536-r3//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/a-I-BW-1536-r3//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/a-I-BW-1536-r3//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/a-I-BW-1536-r3//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+== oomtail
+: build_start=arm+125.145s last_sample=arm+428s (build+303s) K1=0MiB heap=1139MiB K2=36MiB blocked=4710 oldGC=223 KC=75MiB/996084e

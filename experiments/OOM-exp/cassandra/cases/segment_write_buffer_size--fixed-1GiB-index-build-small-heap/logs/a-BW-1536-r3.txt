@@ -1,0 +1,161 @@
+== a-BW-1536-r3 (full logs on pc96: /mydata/s4/c8-w3/runs/a-BW-1536-r3/)
+name=a-BW-1536-r3
+arm=BW
+heap=1536
+sai=1024
+t_start_ms=1795010795256
+build starts at arm+61s
+create_index rc=0 t=35s ''
+node gone during initial build
+builds_completed=0
+node_died_before_stop=True at arm+331s
+stopped_clean=True
+== selfcheck
+first OOM line: OutOfMemoryError: Java heap space
+flush lines sample: [('1.000GiB', '444924')]
+ arm=BW H=1536 sai=1024 endpoint=heap-OOM t_end=245s peakK1=1024MiB limit=[1024] K1cycles=2 peakK2=128MiB K2@K1peak=127MiB peakHeapUsed=1497MiB peakPostGC=1515MiB peakPostFull=1503MiB fullGCs=399 maxSTW60s=100% B0=70MiB builds=0 query=- flushLines=1 stressOps/s=10680 blocked=1377 peakKC=66MiB/870703e hprof=0 peakhist -
+== yaml.diff
+26c26
+< cluster_name: 'Test Cluster'
+---
+> cluster_name: 'c8'
+706c706
+<       - seeds: "127.0.0.1:7000"
+---
+>       - seeds: "127.0.0.8:7008"
+960c960
+< storage_port: 7000
+---
+> storage_port: 7008
+981c981
+< listen_address: localhost
+---
+> listen_address: 127.0.0.8
+1023c1023
+< native_transport_port: 9042
+---
+> native_transport_port: 9048
+1090c1090
+< rpc_address: localhost
+---
+> rpc_address: 127.0.0.8
+2485a2486,2491
+> # ---- C8 stage-2 lines (environment; sai_options only in arm I) ----
+> data_file_directories: [/mydata/s4/c8-w3/inst/a-BW-1536-r3/data]
+> commitlog_directory: /mydata/s4/c8-w3/inst/a-BW-1536-r3/commitlog
+> hints_directory: /mydata/s4/c8-w3/inst/a-BW-1536-r3/hints
+> saved_caches_directory: /mydata/s4/c8-w3/inst/a-BW-1536-r3/saved_caches
+> cdc_raw_directory: /mydata/s4/c8-w3/inst/a-BW-1536-r3/cdc_raw
+== JVM arguments (resolved)
+ -XX:+UseG1GC
+ -XX:G1HeapRegionSize=16m
+ -Xms1536M
+ -Xmx1536M
+ -XX:MaxDirectMemorySize=768M
+ -XX:ParallelGCThreads=32
+ -XX:ConcGCThreads=32
+INFO  [main] 2026-11-18T14:06:37,706 DatabaseDescriptor.java:590 - Global memtable on-heap threshold is enabled at 384MiB
+INFO  [main] 2026-11-18T14:06:38,251 CassandraDaemon.java:610 - Heap size: 1.500GiB/1.500GiB
+INFO  [SSTableBatchOpen:2] 2026-11-18T14:06:40,141 CacheService.java:121 - Initializing key cache with capacity of 76 MiBs.
+== SAI build lines
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:09:13,883 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 1.000GiB and minimum flush size of 1.000GiB exceeded. Current builder usage is 1.000GiB for 444924 cells. Global Usage is 1.000GiB. Flushing...
+INFO  [SecondaryIndexExecutor:1] 2026-11-18T14:08:40,045 V1OnDiskFormat.java:177 - [c8.big.v_idx] Starting a compaction index build. Global segment memory usage: 0B
+INFO  [SecondaryIndexManagement:1] 2026-11-18T14:06:40,105 SecondaryIndexManager.java:1880 - Index [PaxosUncommittedIndex] became queryable after successful build.
+INFO  [SecondaryIndexManagement:1] 2026-11-18T14:08:40,035 StorageAttachedIndex.java:907 - [c8.big.v_idx] Submitting 1 parallel initial index builds over 1 total sstables...
+== key cache StatusLogger (last 2)
+INFO  [ScheduledTasks:1] 2026-11-18T14:09:46,829 StatusLogger.java:105 - KeyCache                   58266792                 79691776                      all
+INFO  [Service Thread] 2026-11-18T14:10:49,428 StatusLogger.java:105 - KeyCache                   69220664                 79691776                      all
+== last 8 full GCs
+[2026-11-18T09:12:18.370-0500][342.865s][4080125][4080258][info ] GC(913) Pause Full (G1 Evacuation Pause) 1501M->1501M(1536M) 620.257ms
+[2026-11-18T09:12:19.020-0500][343.514s][4080125][4080258][info ] GC(915) Pause Full (G1 Evacuation Pause) 1501M->1501M(1536M) 619.371ms
+[2026-11-18T09:12:19.368-0500][343.863s][4080125][4080258][info ] GC(917) Pause Full (G1 Evacuation Pause) 1501M->1501M(1536M) 348.271ms
+[2026-11-18T09:12:19.971-0500][344.466s][4080125][4080258][info ] GC(919) Pause Full (G1 Evacuation Pause) 1501M->1501M(1536M) 584.750ms
+[2026-11-18T09:12:20.583-0500][345.078s][4080125][4080258][info ] GC(920) Pause Full (G1 Evacuation Pause) 1501M->1501M(1536M) 612.336ms
+[2026-11-18T09:12:20.948-0500][345.442s][4080125][4080258][info ] GC(922) Pause Full (G1 Evacuation Pause) 1501M->1500M(1536M) 337.505ms
+[2026-11-18T09:12:21.528-0500][346.023s][4080125][4080258][info ] GC(923) Pause Full (G1 Evacuation Pause) 1500M->1500M(1536M) 579.592ms
+[2026-11-18T09:12:22.160-0500][346.655s][4080125][4080258][info ] GC(925) Pause Full (G1 Evacuation Pause) 1500M->1500M(1536M) 609.032ms
+== OOM lines (launch.log)
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /mydata/s4/c8-w3/inst/a-BW-1536-r3/dumps/cassandra-1795010795-pid4080125.hprof ...
+Heap dump file created [1753323427 bytes in 48.514 secs]
+--
+# java.lang.OutOfMemoryError: Java heap space
+# -XX:OnOutOfMemoryError="kill -9 %p"
+#   Executing /bin/sh -c "kill -9 4080125"...
+== hist-B0 (top 8)
+4080125:
+ num     #instances         #bytes  class name (module)
+-------------------------------------------------------
+   1:         98368       26473792  [B (java.base@11.0.33)
+   2:          4491       14312128  [I (java.base@11.0.33)
+   3:          6682       10083776  [J (java.base@11.0.33)
+   4:         23457        2685320  [Ljava.lang.Object; (java.base@11.0.33)
+   5:         91694        2200656  java.lang.String (java.base@11.0.33)
+   6:         11794        1407272  java.lang.Class (java.base@11.0.33)
+   7:         48639        1167336  javax.management.ObjectName$Property (java.management@11.0.33)
+   8:         35552        1137664  java.util.concurrent.ConcurrentHashMap$Node (java.base@11.0.33)
+Total        690724       73125648
+== OOM heap dump histogram (hprofhist.py, shallow)
+total shallow 1559 MiB, objects 7708989
+     919.5 MiB      857418 long[]
+     276.6 MiB      971728 byte[]
+      62.5 MiB      851143 java.util.concurrent.ConcurrentHashMap$TreeNode
+      49.8 MiB      871058 com.github.benmanes.caffeine.cache.PSMW
+      41.0 MiB        4946 int[]
+      39.9 MiB      871052 org.apache.cassandra.cache.KeyCacheKey
+      32.4 MiB      425065 [Lorg.apache.lucene.util.packed.PackedInts$Reader;[]
+      30.8 MiB      425065 org.apache.lucene.util.packed.DeltaPackedLongValues$Builder
+      19.9 MiB      871052 org.apache.cassandra.io.sstable.format.big.RowIndexEntry
+      13.6 MiB      120546 [Ljava.lang.Object;[]
+      13.6 MiB      259006 java.nio.HeapByteBuffer
+      10.9 MiB      203697 org.apache.cassandra.db.rows.BufferCell
+       8.3 MiB         424 [Ljava.util.concurrent.ConcurrentHashMap$Node;[]
+       2.7 MiB       51367 org.apache.cassandra.db.rows.BTreeRow
+       2.7 MiB       50589 org.apache.cassandra.db.partitions.BTreePartitionData
+       2.7 MiB       96435 java.lang.String
+       2.5 MiB       50574 org.apache.cassandra.db.partitions.AtomicBTreePartition
+       2.4 MiB       57552 java.util.concurrent.ConcurrentHashMap$Node
+       2.3 MiB       33028 java.util.concurrent.ConcurrentHashMap$TreeBin
+BB byte[]       <1KiB:   971045 arrays      11.6 MiB
+BB byte[]  1KiB-64KiB:      439 arrays       1.6 MiB
+BB byte[]      =64KiB:        9 arrays       0.6 MiB
+BB byte[]  64KiB-1MiB:       16 arrays       3.0 MiB
+BB byte[]      1-4MiB:      216 arrays     217.0 MiB
+BB byte[]      4-8MiB:        1 arrays       4.0 MiB
+BB byte[]      >=8MiB:        2 arrays      24.0 MiB
+U4 byte[]      >=8MiB:        2 arrays      24.0 MiB
+== OOM thread stack (from the dump)
+--- thread serial 72, 45 frames
+  java.lang.OutOfMemoryError.<init>(OutOfMemoryError.java:48)
+  org.apache.cassandra.utils.memory.SlabAllocator$Region.<init>(SlabAllocator.java:179)
+  org.apache.cassandra.utils.memory.SlabAllocator.getRegion(SlabAllocator.java:139)
+  org.apache.cassandra.utils.memory.SlabAllocator.allocate(SlabAllocator.java:104)
+  org.apache.cassandra.utils.memory.MemtableBufferAllocator$1.allocate(MemtableBufferAllocator.java:40)
+  org.apache.cassandra.utils.memory.ByteBufferCloner.clone(ByteBufferCloner.java:77)
+  org.apache.cassandra.utils.memory.ByteBufferCloner.clone(ByteBufferCloner.java:63)
+  org.apache.cassandra.utils.memory.ByteBufferCloner.clone(ByteBufferCloner.java:46)
+  org.apache.cassandra.db.memtable.SkipListMemtable.put(SkipListMemtable.java:115)
+  org.apache.cassandra.db.ColumnFamilyStore.apply(ColumnFamilyStore.java:1477)
+  org.apache.cassandra.db.CassandraTableWriteHandler.write(CassandraTableWriteHandler.java:38)
+  org.apache.cassandra.db.Keyspace.applyInternal(Keyspace.java:653)
+  org.apache.cassandra.db.Keyspace.apply(Keyspace.java:510)
+  org.apache.cassandra.db.Mutation.apply(Mutation.java:249)
+--- thread serial 73, 21 frames
+== SAI builder thread stack (from the dump)
+== stress (every 30th interval line)
+total,                                                  8957,    8957,    8957,    8957,     2.9,     2.0,     6.8,    16.1,    51.0,    59.3,    1.0,  0.00000,      0,      0,       0,       0,       0,       0
+total,                                                658818,    5875,    5875,    5875,     2.1,     0.3,     0.7,     4.5,   357.8,   369.9,   52.0,  0.24032,      0,      0,       0,       0,       0,       0
+total,                                               1240341,   23633,   23633,   23633,     1.3,     0.3,     0.6,     0.9,   332.7,   342.6,  113.0,  0.21129,      0,      0,       0,       0,       0,       0
+total,                                               1456921,   18180,   18180,   18180,     1.9,     0.4,     0.8,     1.2,   428.1,   428.6,  149.0,  0.16594,      0,      0,       0,       0,       0,       0
+total,                                               1788095,    4439,    4439,    4439,     7.7,     0.4,     0.8,   506.7,   507.2,   507.2,  189.0,  0.35333,      0,      0,       0,       0,       0,       0
+total,                                               1847589,     158,     158,     158,   157.9,     1.3,   653.3,   653.8,   654.3,   654.3,  219.0,  0.33455,      0,      0,       0,       0,       0,       0
+/mydata/s4/c8-w3/runs/a-BW-1536-r3//stress.log:java.io.IOException: Operation x10 on key(s) [4b32304e3333504e3531]: Error executing: (NoHostAvailableException): All host(s) tried for query failed (no host was tried)
+/mydata/s4/c8-w3/runs/a-BW-1536-r3//stress.log:java.io.IOException: Operation x10 on key(s) [4e304d333538354f3030]: Error executing: (NoHostAvailableException): All host(s) tried for query failed (no host was tried)
+/mydata/s4/c8-w3/runs/a-BW-1536-r3//stress.log:java.io.IOException: Operation x10 on key(s) [3632394d4c31374c3331]: Error executing: (NoHostAvailableException): All host(s) tried for query failed (no host was tried)
+/mydata/s4/c8-w3/runs/a-BW-1536-r3//stress.log:java.io.IOException: Operation x10 on key(s) [334e324e5033354d4d30]: Error executing: (NoHostAvailableException): All host(s) tried for query failed (no host was tried)
+/mydata/s4/c8-w3/runs/a-BW-1536-r3//stress.log:java.io.IOException: Operation x10 on key(s) [374c4f50363938353330]: Error executing: (NoHostAvailableException): All host(s) tried for query failed (no host was tried)
+/mydata/s4/c8-w3/runs/a-BW-1536-r3//stress.log:java.io.IOException: Operation x10 on key(s) [503550343336344c3030]: Error executing: (NoHostAvailableException): All host(s) tried for query failed (no host was tried)
+/mydata/s4/c8-w3/runs/a-BW-1536-r3//stress.log:java.io.IOException: Operation x10 on key(s) [4f30333538304b313130]: Error executing: (NoHostAvailableException): All host(s) tried for query failed (no host was tried)
+/mydata/s4/c8-w3/runs/a-BW-1536-r3//stress.log:java.io.IOException: Operation x10 on key(s) [5036394d4e4f4d4c3630]: Error executing: (NoHostAvailableException): All host(s) tried for query failed (no host was tried)
+== oomtail
+: build_start=arm+104.796s last_sample=arm+245s (build+140s) K1=977MiB heap=1493MiB K2=106MiB blocked=1377 oldGC=265 KC=66MiB/-1e

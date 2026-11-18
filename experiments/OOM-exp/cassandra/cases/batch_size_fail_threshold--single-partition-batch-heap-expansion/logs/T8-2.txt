@@ -1,0 +1,153 @@
+#### T8-2  (/mydata/s4/b14-w3/runs/T8-2)
+--- driver.txt
+2026-11-18T07:16:49-0700 run T8-2 conf=base heap=8G arm=T N=64 hold=240
+2026-11-18T07:16:49-0700 free 29G
+2026-11-18T07:17:42-0700 daemon pid 187505 up
+ddl ok
+2026-11-18T07:18:05-0700 baseline done; client start N=64
+2026-11-18T07:22:08-0700 client ended; daemon alive (hold end) 
+2026-11-18T07:23:08-0700 kill -9
+/mydata/s4/b14-w3/harness/run.sh: line 66: 187505 Killed                  ( ulimit -n 100000; cd $T; exec env $CC MAX_HEAP_SIZE=$HEAP CASSANDRA_HEAPDUMP_DIR=$R setsid nohup systemd-run --user --scope -p MemorySwapMax=0 --unit=b14-$RID -- bin/cassandra -f > $R/stdout.txt 2>&1 < /dev/null )
+2026-11-18T07:23:11-0700 END hold  oom:java.lang.OutOfMemoryError: Java heap space
+2026-11-18T07:23:17-0700 done
+--- summary.txt
+endpoint: hold  oom:java.lang.OutOfMemoryError: Java heap space
+stdout: java.lang.OutOfMemoryError: Java heap space
+stdout: Dumping heap to /mydata/s4/b14-w3/runs/T8-2/cassandra-1795011410-pid187505.hprof ...
+driver: 2026-11-18T07:18:05-0700 baseline done; client start N=64
+client processes 8, body 15785009 B, last established at 1795011485724
+completions VOID 0; latency median - ms
+client outstanding max (sum over procs, per s) 64; K_client max 1010240576
+jmx samples 11
+K_server RequestsSize max 854713114; last 854713114; series(MB) 0 0 0 0 0 855 855 855 855 855 855
+PausedConnections max 0
+memtable heap max t 0 MiB, big 0 MiB
+MutationStage pending max 0
+NTR active max 24; NTR pending max 0
+direct MemoryUsed max 921 MiB
+last jmx row: 1795011520142,854713114,0,0,0,0,,ERR,,ERR,,ERR,,ERR
+threads samples 15: max NTR 44, max held BatchMessage.execute 22, max getMutations 0, wait 0, clog 0, memt 0, decode 14
+  held series: 0 0 0 22 0 0 0 0 0 0 0 0 0 0 0 | last sample: 0 0 0 0 0 0 0
+RssAnon max 9602 MiB
+heap_info used max 8176 MiB
+GCs 48; heap after GC max 8192 MiB; last 5 after-GC: 8189 8189 8189 8185 8185
+  first-10 after-GC (baseline): 9 17 17 13 21 21 32 88 88 3103
+pauses 48; STW share over last 60 s of GC log: 108%; Pause Full 20; to-space exhausted 13
+client cpu last sample: 1795011776  190938  1.0  6752;
+dumps: cassandra-1795011410-pid187505.hprof (7615 MiB)
+--- dump.txt
+-rw------- 1 jason92 misconfiguration 7985507717 Nov 18 07:23 /mydata/s4/b14-w3/runs/T8-2/cassandra-1795011410-pid187505.hprof
+08e9ac985a02126bbd74fe4789e6112010b3df8df11aef2ad5e5c1e7f08a8628  /mydata/s4/b14-w3/runs/T8-2/cassandra-1795011410-pid187505.hprof
+deleted after analysis 2026-11-18T07:24:40
+--- resolved.txt
+batch_size_fail_threshold=50KiB;
+max_mutation_size=null;
+memtable_allocation_type=heap_buffers;
+memtable_heap_space=null;
+native_transport_max_message_size=null;
+native_transport_max_request_data_in_flight=null;
+native_transport_max_request_data_in_flight_per_ip=null;
+native_transport_receive_queue_capacity=1MiB;
+--- conf-md5.txt
+714ee9bf58b3bc1710377ac16bcbba03  /mydata/s4/b14-w3/cassandra/conf/cassandra.yaml
+fbad82a853f1b85aea0fa5ea34b6d1bf  /mydata/s4/b14-w3/cassandra/conf/jvm11-server.options
+8be0588e87c594a03360751b1dbf4fbf  /mydata/s4/b14-w3/cassandra/conf/cassandra-env.sh
+0149f45cd4eed69d0be60403bf08a055  /mydata/s4/b14-w3/conf-i/cassandra.yaml
+--- oome-thread.txt (head 25)
+OOME-initiating thread: trace serial 76, thread serial 75
+    at java.lang.OutOfMemoryError.<init>(OutOfMemoryError.java:48)
+    at java.util.Arrays.copyOf(Arrays.java:3689)
+    at org.apache.cassandra.utils.btree.BTree$Builder.add(BTree.java:1539)
+    at org.apache.cassandra.db.RegularAndStaticColumns$Builder.addAll(RegularAndStaticColumns.java:187)
+    at org.apache.cassandra.cql3.statements.BatchStatement$MultiTableColumnsBuilder.addAll(BatchStatement.java:676)
+    at org.apache.cassandra.cql3.statements.BatchStatement.<init>(BatchStatement.java:120)
+    at org.apache.cassandra.transport.messages.BatchMessage.execute(BatchMessage.java:227)
+    at org.apache.cassandra.transport.Message$Request.execute(Message.java:253)
+    at org.apache.cassandra.transport.Dispatcher.processRequest(Dispatcher.java:416)
+    at org.apache.cassandra.transport.Dispatcher.processRequest(Dispatcher.java:434)
+    at org.apache.cassandra.transport.Dispatcher.processRequest(Dispatcher.java:461)
+    at org.apache.cassandra.transport.Dispatcher$RequestProcessor.run(Dispatcher.java:307)
+    at org.apache.cassandra.concurrent.FutureTask$1.call(FutureTask.java:99)
+    at org.apache.cassandra.concurrent.FutureTask.call(FutureTask.java:61)
+    at org.apache.cassandra.concurrent.FutureTask.run(FutureTask.java:71)
+    at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+    at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+    at java.lang.Thread.run(Thread.java:829)
+--- threads.txt (epoch ntr held getmut wait clog memt decode)
+1795011465.055 1 0 0 0 0 0 0
+1795011475.875 0 0 0 0 0 0 0
+1795011486.609 44 0 0 0 0 0 1
+1795011497.872 44 22 0 0 0 0 14
+1795011519.937 0 0 0 0 0 0 0
+1795011545.302 0 0 0 0 0 0 0
+1795011570.654 0 0 0 0 0 0 0
+1795011596.045 0 0 0 0 0 0 0
+1795011621.404 0 0 0 0 0 0 0
+1795011646.768 0 0 0 0 0 0 0
+1795011672.112 0 0 0 0 0 0 0
+1795011697.453 0 0 0 0 0 0 0
+1795011722.794 0 0 0 0 0 0 0
+1795011748.136 0 0 0 0 0 0 0
+1795011773.477 0 0 0 0 0 0 0
+--- jmx.csv
+epoch_ms,requestssize,paused,mem_t,mem_big,mutstage_pending,ntr_active,ntr_pending,direct_used,heap_used
+1795011466218,0,0,0,0,,ERR,0,0,52863496,687865856
+1795011471218,0,0,0,0,0,0,0,52863752,687865856
+1795011476218,0,0,0,0,0,0,0,52863752,687865856
+1795011481218,0,0,0,0,0,0,0,52863752,704643072
+1795011486218,0,0,0,0,0,0,0,53109512,1191182336
+1795011491220,854713114,0,0,0,0,8,0,742464491,3405551616
+1795011496220,854713114,0,0,0,0,22,0,965657539,7519960840
+1795011510220,854713114,0,0,0,0,23,0,965657539,7687733000
+1795011510305,854713114,0,0,0,0,23,0,965657539,7805173512
+1795011511219,854713114,0,0,0,0,24,0,965657539,8538186000
+1795011520142,854713114,0,0,0,0,,ERR,,ERR,,ERR,,ERR
+--- gc: Full/Young pauses (all gc.log files, by uptime; first 5 and last 25)
+[2026-11-18T07:16:54.523-0700][3.997s][187505][187631][info ] GC(0) Pause Young (Concurrent Start) (Metadata GC Threshold) 120M->9M(8192M) 34.297ms
+[2026-11-18T07:16:57.193-0700][6.666s][187505][187631][info ] GC(2) Pause Young (Concurrent Start) (Metadata GC Threshold) 121M->13M(8192M) 49.392ms
+[2026-11-18T07:17:05.625-0700][15.098s][187505][187631][info ] GC(4) Pause Young (Concurrent Start) (Metadata GC Threshold) 549M->32M(8192M) 73.800ms
+[2026-11-18T07:18:12.427-0700][81.901s][187505][187631][info ] GC(6) Pause Young (Normal) (G1 Evacuation Pause) 4160M->3103M(8192M) 2580.041ms
+[2026-11-18T07:18:21.707-0700][91.180s][187505][187631][info ] GC(7) Pause Young (Normal) (G1 Evacuation Pause) 7279M->8176M(8192M) 6240.980ms
+...
+[2026-11-18T07:19:02.821-0700][132.294s][187505][187631][info ] GC(23) Pause Young (Concurrent Start) (G1 Evacuation Pause) 8157M->8157M(8192M) 96.258ms
+[2026-11-18T07:19:10.186-0700][139.659s][187505][187631][info ] GC(25) Pause Full (G1 Evacuation Pause) 8157M->8129M(8192M) 7364.355ms
+[2026-11-18T07:19:10.310-0700][139.784s][187505][187631][info ] GC(26) Pause Young (Normal) (G1 Evacuation Pause) 8161M->8161M(8192M) 86.178ms
+[2026-11-18T07:19:17.804-0700][147.278s][187505][187631][info ] GC(27) Pause Full (G1 Evacuation Pause) 8161M->8148M(8192M) 7493.693ms
+[2026-11-18T07:19:17.864-0700][147.338s][187505][187631][info ] GC(28) Pause Young (Concurrent Start) (G1 Humongous Allocation) 8164M->8164M(8192M) 23.713ms
+[2026-11-18T07:19:25.249-0700][154.723s][187505][187631][info ] GC(30) Pause Full (G1 Humongous Allocation) 8164M->8149M(8192M) 7384.568ms
+[2026-11-18T07:19:25.276-0700][154.749s][187505][187631][info ] GC(31) Pause Young (Normal) (G1 Evacuation Pause) 8165M->8165M(8192M) 13.351ms
+[2026-11-18T07:19:32.723-0700][162.196s][187505][187631][info ] GC(32) Pause Full (G1 Evacuation Pause) 8165M->8165M(8192M) 7446.562ms
+[2026-11-18T07:19:32.856-0700][162.330s][187505][187631][info ] GC(33) Pause Young (Normal) (G1 Evacuation Pause) 8181M->8181M(8192M) 69.485ms
+[2026-11-18T07:19:40.432-0700][169.905s][187505][187631][info ] GC(34) Pause Full (G1 Evacuation Pause) 8181M->8173M(8192M) 7575.324ms
+[2026-11-18T07:19:47.594-0700][177.067s][187505][187631][info ] GC(35) Pause Full (G1 Evacuation Pause) 8173M->8173M(8192M) 7161.345ms
+[2026-11-18T07:19:47.623-0700][177.096s][187505][187631][info ] GC(36) Pause Young (Concurrent Start) (G1 Humongous Allocation) 8179M->8179M(8192M) 15.964ms
+[2026-11-18T07:19:54.808-0700][184.281s][187505][187631][info ] GC(38) Pause Full (G1 Humongous Allocation) 8179M->8173M(8192M) 7184.420ms
+[2026-11-18T07:20:01.740-0700][191.214s][187505][187631][info ] GC(39) Pause Full (G1 Humongous Allocation) 8173M->8173M(8192M) 6932.109ms
+[2026-11-18T07:20:01.767-0700][191.240s][187505][187631][info ] GC(40) Pause Young (Normal) (G1 Humongous Allocation) 8179M->8179M(8192M) 13.699ms
+[2026-11-18T07:20:08.881-0700][198.354s][187505][187631][info ] GC(41) Pause Full (G1 Humongous Allocation) 8179M->8173M(8192M) 7113.563ms
+[2026-11-18T07:20:08.907-0700][198.381s][187505][187631][info ] GC(42) Pause Young (Normal) (G1 Evacuation Pause) 8189M->8189M(8192M) 13.265ms
+[2026-11-18T07:20:16.176-0700][205.650s][187505][187631][info ] GC(43) Pause Full (G1 Evacuation Pause) 8189M->8189M(8192M) 7268.909ms
+[2026-11-18T07:20:23.611-0700][213.084s][187505][187631][info ] GC(44) Pause Full (G1 Evacuation Pause) 8189M->8189M(8192M) 7433.563ms
+[2026-11-18T07:20:23.637-0700][213.110s][187505][187631][info ] GC(45) Pause Young (Normal) (G1 Evacuation Pause) 8189M->8189M(8192M) 13.236ms
+[2026-11-18T07:20:30.897-0700][220.370s][187505][187631][info ] GC(46) Pause Full (G1 Evacuation Pause) 8189M->8189M(8192M) 7260.062ms
+[2026-11-18T07:20:37.828-0700][227.302s][187505][187631][info ] GC(47) Pause Full (G1 Evacuation Pause) 8189M->8189M(8192M) 6930.943ms
+[2026-11-18T07:20:37.861-0700][227.335s][187505][187631][info ] GC(48) Pause Young (Concurrent Start) (G1 Evacuation Pause) 8189M->8189M(8192M) 18.997ms
+[2026-11-18T07:20:45.268-0700][234.741s][187505][187631][info ] GC(50) Pause Full (G1 Evacuation Pause) 8189M->8185M(8192M) 7406.367ms
+[2026-11-18T07:20:52.501-0700][241.974s][187505][187631][info ] GC(51) Pause Full (G1 Evacuation Pause) 8185M->8185M(8192M) 7232.261ms
+--- stdout OOM lines
+CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V
+INFO  [main] 2026-11-18T14:16:57,115 CassandraDaemon.java:619 - JVM Arguments: [-ea, -da:net.openhft..., -XX:+UseThreadPriorities, -XX:+HeapDumpOnOutOfMemoryError, -Xss256k, -XX:+AlwaysPreTouch, -XX:+UseTLAB, -XX:+ResizeTLAB, -XX:+UseNUMA, -XX:+PerfDisableSharedMem, -Djava.net.preferIPv4Stack=true, -Dchronicle.analytics.disable=true, -XX:-UseBiasedLocking, -XX:+UseG1GC, -XX:+ParallelRefProcEnabled, -XX:MaxTenuringThreshold=2, -XX:G1HeapRegionSize=16m, -XX:+UnlockExperimentalVMOptions, -XX:G1NewSizePercent=50, -XX:G1RSetUpdatingPauseTimePercent=5, -XX:MaxGCPauseMillis=300, -XX:InitiatingHeapOccupancyPercent=70, -Djdk.attach.allowAttachSelf=true, --add-exports=java.base/jdk.internal.misc=ALL-UNNAMED, --add-exports=java.base/jdk.internal.ref=ALL-UNNAMED, --add-exports=java.base/jdk.internal.util=ALL-UNNAMED, --add-exports=java.base/sun.nio.ch=ALL-UNNAMED, --add-exports=java.management.rmi/com.sun.jmx.remote.internal.rmi=ALL-UNNAMED, --add-exports=java.rmi/sun.rmi.registry=ALL-UNNAMED, --add-exports=java.rmi/sun.rmi.server=ALL-UNNAMED, --add-exports=java.sql/java.sql=ALL-UNNAMED, --add-opens=java.base/java.lang.module=ALL-UNNAMED, --add-opens=java.base/jdk.internal.loader=ALL-UNNAMED, --add-opens=java.base/jdk.internal.ref=ALL-UNNAMED, --add-opens=java.base/jdk.internal.reflect=ALL-UNNAMED, --add-opens=java.base/jdk.internal.math=ALL-UNNAMED, --add-opens=java.base/jdk.internal.module=ALL-UNNAMED, --add-opens=java.base/jdk.internal.util.jar=ALL-UNNAMED, --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED, -Dio.netty.tryReflectionSetAccessible=true, -Dio.netty.allocator.useCacheForAllThreads=true, -Dio.netty.allocator.maxOrder=11, -Xlog:gc=info,heap*=trace,age*=debug,safepoint=info,promotion*=trace:file=/mydata/s4/b14-w3/cassandra/bin/../logs/gc.log:time,uptime,pid,tid,level:filecount=10,filesize=10485760, -Xms8G, -Xmx8G, -XX:MaxDirectMemorySize=15872M, -XX:ParallelGCThreads=8, -XX:ConcGCThreads=8, -XX:CompileCommandFile=/mydata/s4/b14-w3/cassandra/bin/../conf/hotspot_compiler, -javaagent:/mydata/s4/b14-w3/cassandra/bin/../lib/jamm-0.4.0.jar, -XX:HeapDumpPath=/mydata/s4/b14-w3/runs/T8-2/cassandra-1795011410-pid187505.hprof, -Dcassandra.jmx.local.port=7199, -Dcom.sun.management.jmxremote.authenticate=false, -Dcom.sun.management.jmxremote.password.file=/etc/cassandra/jmxremote.password, -Djava.library.path=/mydata/s4/b14-w3/cassandra/bin/../lib/sigar-bin, -XX:OnOutOfMemoryError=kill -9 %p, -Dlogback.configurationFile=logback.xml, -Dcassandra.logdir=/mydata/s4/b14-w3/cassandra/bin/../logs, -Dcassandra.storagedir=/mydata/s4/b14-w3/cassandra/bin/../data, -Dcassandra-foreground=yes]
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /mydata/s4/b14-w3/runs/T8-2/cassandra-1795011410-pid187505.hprof ...
+--- vm flags
+-XX:G1HeapRegionSize=16777216
+-XX:InitialHeapSize=8589934592
+-XX:MaxDirectMemorySize=16642998272
+-XX:MaxHeapSize=8589934592
+-XX:+UseG1GC
+Max open files            100000               100000               files     
+--- completions: status counts
+--- client first lines
+# start 2026-11-18T07:18:05-0700 arm=T conns=0..7 pid=188146
+# established=8 body=15785009 at 1795011485625
+1795011485628 8 8 0 0 0 0

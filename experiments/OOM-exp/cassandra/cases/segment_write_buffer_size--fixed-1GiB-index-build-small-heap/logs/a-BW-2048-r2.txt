@@ -1,0 +1,124 @@
+== a-BW-2048-r2 (full logs on pc96: /mydata/s4/c8-w3/runs/a-BW-2048-r2/)
+name=a-BW-2048-r2
+arm=BW
+heap=2048
+sai=1024
+t_start_ms=1795012615723
+build starts at arm+61s
+create_index rc=0 t=57s ''
+initial_build complete at 251s
+rebuild_index rc=0 in 172s alive=True ''
+builds_completed=2
+query_check count=1
+node_died_before_stop=False at arm+489s
+stopped_clean=True
+== selfcheck
+first OOM line: None
+flush lines sample: [('1.000GiB', '444924'), ('1.000GiB', '444933'), ('1.000GiB', '444931')]
+ arm=BW H=2048 sai=1024 endpoint=none t_end=- peakK1=1024MiB limit=[1024] K1cycles=8 peakK2=195MiB K2@K1peak=174MiB peakHeapUsed=1938MiB peakPostGC=1986MiB peakPostFull=1911MiB fullGCs=426 maxSTW60s=55% B0=70MiB builds=2 query=1 flushLines=8 stressOps/s=19886 blocked=3755 peakKC=100MiB/1310594e hprof=0 peakhist -
+== yaml.diff
+26c26
+< cluster_name: 'Test Cluster'
+---
+> cluster_name: 'c8'
+706c706
+<       - seeds: "127.0.0.1:7000"
+---
+>       - seeds: "127.0.0.8:7008"
+960c960
+< storage_port: 7000
+---
+> storage_port: 7008
+981c981
+< listen_address: localhost
+---
+> listen_address: 127.0.0.8
+1023c1023
+< native_transport_port: 9042
+---
+> native_transport_port: 9048
+1090c1090
+< rpc_address: localhost
+---
+> rpc_address: 127.0.0.8
+2485a2486,2491
+> # ---- C8 stage-2 lines (environment; sai_options only in arm I) ----
+> data_file_directories: [/mydata/s4/c8-w3/inst/a-BW-2048-r2/data]
+> commitlog_directory: /mydata/s4/c8-w3/inst/a-BW-2048-r2/commitlog
+> hints_directory: /mydata/s4/c8-w3/inst/a-BW-2048-r2/hints
+> saved_caches_directory: /mydata/s4/c8-w3/inst/a-BW-2048-r2/saved_caches
+> cdc_raw_directory: /mydata/s4/c8-w3/inst/a-BW-2048-r2/cdc_raw
+== JVM arguments (resolved)
+ -XX:+UseG1GC
+ -XX:G1HeapRegionSize=16m
+ -Xms2048M
+ -Xmx2048M
+ -XX:MaxDirectMemorySize=1024M
+ -XX:ParallelGCThreads=32
+ -XX:ConcGCThreads=32
+INFO  [main] 2026-11-18T14:36:57,897 DatabaseDescriptor.java:590 - Global memtable on-heap threshold is enabled at 512MiB
+INFO  [main] 2026-11-18T14:36:58,505 CassandraDaemon.java:610 - Heap size: 2.000GiB/2.000GiB
+INFO  [SSTableBatchOpen:2] 2026-11-18T14:37:00,490 CacheService.java:121 - Initializing key cache with capacity of 100 MiBs.
+== SAI build lines
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:39:40,619 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 1.000GiB and minimum flush size of 1.000GiB exceeded. Current builder usage is 1.000GiB for 444924 cells. Global Usage is 1.000GiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:40:13,485 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 1.000GiB and minimum flush size of 1.000GiB exceeded. Current builder usage is 1.000GiB for 444933 cells. Global Usage is 1.000GiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:40:59,400 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 1.000GiB and minimum flush size of 1.000GiB exceeded. Current builder usage is 1.000GiB for 444931 cells. Global Usage is 1.000GiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:41:55,687 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 1.000GiB and minimum flush size of 1.000GiB exceeded. Current builder usage is 1.000GiB for 444921 cells. Global Usage is 1.000GiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:42:48,575 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 1.000GiB and minimum flush size of 1.000GiB exceeded. Current builder usage is 1.000GiB for 444924 cells. Global Usage is 1.000GiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:43:10,337 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 1.000GiB and minimum flush size of 1.000GiB exceeded. Current builder usage is 1.000GiB for 444933 cells. Global Usage is 1.000GiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:43:49,192 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 1.000GiB and minimum flush size of 1.000GiB exceeded. Current builder usage is 1.000GiB for 444931 cells. Global Usage is 1.000GiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:44:45,350 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 1.000GiB and minimum flush size of 1.000GiB exceeded. Current builder usage is 1.000GiB for 444921 cells. Global Usage is 1.000GiB. Flushing...
+INFO  [SecondaryIndexExecutor:1] 2026-11-18T14:39:24,560 V1OnDiskFormat.java:177 - [c8.big.v_idx] Starting a compaction index build. Global segment memory usage: 0B
+INFO  [SecondaryIndexExecutor:2] 2026-11-18T14:42:35,779 V1OnDiskFormat.java:177 - [c8.big.v_idx] Starting a compaction index build. Global segment memory usage: 0B
+INFO  [SecondaryIndexExecutor:2] 2026-11-18T14:45:14,188 SecondaryIndexManager.java:1880 - Index [v_idx] became queryable after successful build.
+INFO  [SecondaryIndexManagement:1] 2026-11-18T14:37:00,458 SecondaryIndexManager.java:1880 - Index [PaxosUncommittedIndex] became queryable after successful build.
+INFO  [SecondaryIndexManagement:1] 2026-11-18T14:39:24,549 StorageAttachedIndex.java:907 - [c8.big.v_idx] Submitting 1 parallel initial index builds over 1 total sstables...
+INFO  [SecondaryIndexManagement:1] 2026-11-18T14:42:25,538 SecondaryIndexManager.java:1880 - Index [v_idx] became queryable after successful build.
+== key cache StatusLogger (last 2)
+INFO  [ScheduledTasks:1] 2026-11-18T14:44:25,999 StatusLogger.java:105 - KeyCache                  104857536                104857600                      all
+INFO  [ScheduledTasks:1] 2026-11-18T14:45:21,589 StatusLogger.java:105 - KeyCache                  104857536                104857600                      all
+== last 8 full GCs
+[2026-11-18T09:45:10.383-0500][494.409s][4095123][4095244][info ] GC(1113) Pause Full (G1 Evacuation Pause) 1926M->1192M(2048M) 269.178ms
+[2026-11-18T09:45:10.939-0500][494.965s][4095123][4095244][info ] GC(1115) Pause Full (G1 Evacuation Pause) 1912M->1217M(2048M) 269.158ms
+[2026-11-18T09:45:11.464-0500][495.490s][4095123][4095244][info ] GC(1117) Pause Full (G1 Evacuation Pause) 1921M->1211M(2048M) 278.561ms
+[2026-11-18T09:45:12.373-0500][496.399s][4095123][4095244][info ] GC(1119) Pause Full (G1 Evacuation Pause) 1947M->1121M(2048M) 465.535ms
+[2026-11-18T09:45:13.085-0500][497.111s][4095123][4095244][info ] GC(1121) Pause Full (G1 Evacuation Pause) 1905M->979M(2048M) 286.559ms
+[2026-11-18T09:45:14.571-0500][498.597s][4095123][4095244][info ] GC(1123) Pause Full (G1 Evacuation Pause) 1875M->833M(2048M) 246.446ms
+[2026-11-18T09:45:16.115-0500][500.141s][4095123][4095244][info ] GC(1126) Pause Full (G1 Evacuation Pause) 1921M->849M(2048M) 224.867ms
+[2026-11-18T09:45:20.189-0500][504.215s][4095123][4095244][info ] GC(1130) Pause Full (G1 Evacuation Pause) 1905M->700M(2048M) 226.400ms
+== OOM lines (launch.log)
+== hist-B0 (top 8)
+4095123:
+ num     #instances         #bytes  class name (module)
+-------------------------------------------------------
+   1:         98376       26473920  [B (java.base@11.0.33)
+   2:          4492       14312144  [I (java.base@11.0.33)
+   3:          6682       10083776  [J (java.base@11.0.33)
+   4:         23470        2685896  [Ljava.lang.Object; (java.base@11.0.33)
+   5:         91702        2200848  java.lang.String (java.base@11.0.33)
+   6:         11793        1407160  java.lang.Class (java.base@11.0.33)
+   7:         48639        1167336  javax.management.ObjectName$Property (java.management@11.0.33)
+   8:         35487        1135584  java.util.concurrent.ConcurrentHashMap$Node (java.base@11.0.33)
+Total        692351       73192840
+== stress (every 30th interval line)
+total,                                                  3101,    3101,    3101,    3101,     4.3,     3.2,    11.3,    25.7,    41.1,    43.1,    1.0,  0.00000,      0,      0,       0,       0,       0,       0
+total,                                                732761,    8875,    8875,    8875,     0.4,     0.3,     0.7,     0.9,     2.0,     5.3,   42.0,  0.31212,      0,      0,       0,       0,       0,       0
+total,                                               1650281,   33730,   33730,   33730,     2.8,     0.3,     0.7,     1.0,   105.4,  2466.3,  100.0,  0.25469,      0,      0,       0,       0,       0,       0
+total,                                               2337183,   37401,   37401,   37401,     0.8,     0.4,     0.8,     1.1,    13.1,   504.1,  163.0,  0.19167,      0,      0,       0,       0,       0,       0
+total,                                               2789151,   21164,   21164,   21164,     0.9,     0.4,     0.7,     0.9,   326.6,   327.9,  203.0,  0.15289,      0,      0,       0,       0,       0,       0
+total,                                               3228861,    5211,    5211,    5211,     0.4,     0.3,     0.7,     0.9,     2.7,     3.1,  237.0,  0.12859,      0,      0,       0,       0,       0,       0
+total,                                               3822090,   16521,   16521,   16521,     1.6,     0.4,     0.8,     1.2,   295.7,   299.4,  275.0,  0.11230,      0,      0,       0,       0,       0,       0
+total,                                               4445649,   27987,   27987,   27987,     1.0,     0.4,     0.7,     1.0,   554.7,   556.8,  321.0,  0.10538,      0,      0,       0,       0,       0,       0
+total,                                               4923623,   13252,   13252,   13252,     1.3,     0.4,     0.7,     0.9,   287.0,   287.3,  374.0,  2.01380,      0,      0,       0,       0,       0,       0
+total,                                               5379481,   16435,   16435,   16435,     5.0,     0.3,     0.7,     1.5,  2288.0,  2350.9,  408.0,  1.46918,      0,      0,       0,       0,       0,       0
+total,                                               5877078,   15062,   15062,   15062,     1.7,     0.4,     0.9,     1.3,   303.6,   304.6,  446.0,  1.11906,      0,      0,       0,       0,       0,       0
+/mydata/s4/c8-w3/runs/a-BW-2048-r2//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/a-BW-2048-r2//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/a-BW-2048-r2//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/a-BW-2048-r2//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/a-BW-2048-r2//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/a-BW-2048-r2//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/a-BW-2048-r2//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/a-BW-2048-r2//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+== oomtail
+: build_start=arm+128.87s last_sample=arm+489s (build+360s) K1=0MiB heap=1612MiB K2=149MiB blocked=3755 oldGC=426 KC=99MiB/1310560e

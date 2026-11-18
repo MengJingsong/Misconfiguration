@@ -1,0 +1,122 @@
+== a-B-1536-r3 (full logs on pc96: /mydata/s4/c8-w3/runs/a-B-1536-r3/)
+name=a-B-1536-r3
+arm=B
+heap=1536
+sai=1024
+t_start_ms=1795011150670
+create_index rc=0 t=1s ''
+initial_build complete at 75s
+rebuild_index rc=0 in 68s alive=True ''
+builds_completed=2
+query_check count=1
+node_died_before_stop=False at arm+143s
+stopped_clean=True
+== selfcheck
+first OOM line: None
+flush lines sample: [('1.000GiB', '444924'), ('1.000GiB', '444933'), ('1.000GiB', '444931')]
+ arm=B H=1536 sai=1024 endpoint=none t_end=- peakK1=1024MiB limit=[1024] K1cycles=8 peakK2=1MiB K2@K1peak=1MiB peakHeapUsed=1444MiB peakPostGC=1492MiB peakPostFull=1305MiB fullGCs=118 maxSTW60s=41% B0=70MiB builds=2 query=1 flushLines=8 stressOps/s=- blocked=0 peakKC=76MiB/996148e hprof=0 peakhist total 1148MiB PLV$Builder 444924 long[] 916MiB byte[] 58MiB Region 5 KeyCacheKey 444957
+== yaml.diff
+26c26
+< cluster_name: 'Test Cluster'
+---
+> cluster_name: 'c8'
+706c706
+<       - seeds: "127.0.0.1:7000"
+---
+>       - seeds: "127.0.0.8:7008"
+960c960
+< storage_port: 7000
+---
+> storage_port: 7008
+981c981
+< listen_address: localhost
+---
+> listen_address: 127.0.0.8
+1023c1023
+< native_transport_port: 9042
+---
+> native_transport_port: 9048
+1090c1090
+< rpc_address: localhost
+---
+> rpc_address: 127.0.0.8
+2485a2486,2491
+> # ---- C8 stage-2 lines (environment; sai_options only in arm I) ----
+> data_file_directories: [/mydata/s4/c8-w3/inst/a-B-1536-r3/data]
+> commitlog_directory: /mydata/s4/c8-w3/inst/a-B-1536-r3/commitlog
+> hints_directory: /mydata/s4/c8-w3/inst/a-B-1536-r3/hints
+> saved_caches_directory: /mydata/s4/c8-w3/inst/a-B-1536-r3/saved_caches
+> cdc_raw_directory: /mydata/s4/c8-w3/inst/a-B-1536-r3/cdc_raw
+== JVM arguments (resolved)
+ -XX:+UseG1GC
+ -XX:G1HeapRegionSize=16m
+ -Xms1536M
+ -Xmx1536M
+ -XX:MaxDirectMemorySize=768M
+ -XX:ParallelGCThreads=32
+ -XX:ConcGCThreads=32
+INFO  [main] 2026-11-18T14:12:33,045 DatabaseDescriptor.java:590 - Global memtable on-heap threshold is enabled at 384MiB
+INFO  [main] 2026-11-18T14:12:33,604 CassandraDaemon.java:610 - Heap size: 1.500GiB/1.500GiB
+INFO  [SSTableBatchOpen:1] 2026-11-18T14:12:35,494 CacheService.java:121 - Initializing key cache with capacity of 76 MiBs.
+== SAI build lines
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:12:58,756 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 1.000GiB and minimum flush size of 1.000GiB exceeded. Current builder usage is 1.000GiB for 444924 cells. Global Usage is 1.000GiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:13:13,549 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 1.000GiB and minimum flush size of 1.000GiB exceeded. Current builder usage is 1.000GiB for 444933 cells. Global Usage is 1.000GiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:13:32,331 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 1.000GiB and minimum flush size of 1.000GiB exceeded. Current builder usage is 1.000GiB for 444931 cells. Global Usage is 1.000GiB. Flushing...
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T14:13:50,787 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 1.000GiB and minimum flush size of 1.000GiB exceeded. Current builder usage is 1.000GiB for 444921 cells. Global Usage is 1.000GiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:14:11,371 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 1.000GiB and minimum flush size of 1.000GiB exceeded. Current builder usage is 1.000GiB for 444924 cells. Global Usage is 1.000GiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:14:22,400 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 1.000GiB and minimum flush size of 1.000GiB exceeded. Current builder usage is 1.000GiB for 444933 cells. Global Usage is 1.000GiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:14:39,840 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 1.000GiB and minimum flush size of 1.000GiB exceeded. Current builder usage is 1.000GiB for 444931 cells. Global Usage is 1.000GiB. Flushing...
+DEBUG [SecondaryIndexExecutor:2] 2026-11-18T14:14:58,910 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 1.000GiB and minimum flush size of 1.000GiB exceeded. Current builder usage is 1.000GiB for 444921 cells. Global Usage is 1.000GiB. Flushing...
+INFO  [SecondaryIndexExecutor:1] 2026-11-18T14:12:51,557 V1OnDiskFormat.java:177 - [c8.big.v_idx] Starting a compaction index build. Global segment memory usage: 0B
+INFO  [SecondaryIndexExecutor:2] 2026-11-18T14:14:06,772 V1OnDiskFormat.java:177 - [c8.big.v_idx] Starting a compaction index build. Global segment memory usage: 0B
+INFO  [SecondaryIndexExecutor:2] 2026-11-18T14:15:13,490 SecondaryIndexManager.java:1880 - Index [v_idx] became queryable after successful build.
+INFO  [SecondaryIndexManagement:1] 2026-11-18T14:12:35,461 SecondaryIndexManager.java:1880 - Index [PaxosUncommittedIndex] became queryable after successful build.
+INFO  [SecondaryIndexManagement:1] 2026-11-18T14:12:51,545 StorageAttachedIndex.java:907 - [c8.big.v_idx] Submitting 1 parallel initial index builds over 1 total sstables...
+INFO  [SecondaryIndexManagement:1] 2026-11-18T14:14:05,048 SecondaryIndexManager.java:1880 - Index [v_idx] became queryable after successful build.
+== key cache StatusLogger (last 2)
+== last 8 full GCs
+[2026-11-18T09:15:02.449-0500][151.540s][4082638][4082756][info ] GC(293) Pause Full (G1 Evacuation Pause) 1441M->1052M(1536M) 414.068ms
+[2026-11-18T09:15:03.153-0500][152.244s][4082638][4082756][info ] GC(296) Pause Full (G1 Evacuation Pause) 1436M->969M(1536M) 441.111ms
+[2026-11-18T09:15:03.911-0500][153.002s][4082638][4082756][info ] GC(298) Pause Full (G1 Evacuation Pause) 1481M->858M(1536M) 416.618ms
+[2026-11-18T09:15:04.704-0500][153.795s][4082638][4082756][info ] GC(300) Pause Full (G1 Evacuation Pause) 1450M->730M(1536M) 392.384ms
+[2026-11-18T09:15:05.577-0500][154.668s][4082638][4082756][info ] GC(302) Pause Full (G1 Evacuation Pause) 1466M->573M(1536M) 387.662ms
+[2026-11-18T09:15:09.322-0500][158.413s][4082638][4082756][info ] GC(306) Pause Full (G1 Evacuation Pause) 1469M->553M(1536M) 372.940ms
+[2026-11-18T09:15:11.983-0500][161.074s][4082638][4082756][info ] GC(310) Pause Full (G1 Evacuation Pause) 1433M->715M(1536M) 391.514ms
+[2026-11-18T09:15:12.849-0500][161.940s][4082638][4082756][info ] GC(313) Pause Full (G1 Evacuation Pause) 1435M->559M(1536M) 374.217ms
+== OOM lines (launch.log)
+== hist-B0 (top 8)
+4082638:
+ num     #instances         #bytes  class name (module)
+-------------------------------------------------------
+   1:         98379       26473704  [B (java.base@11.0.33)
+   2:          4491       14312128  [I (java.base@11.0.33)
+   3:          6682       10083776  [J (java.base@11.0.33)
+   4:         23456        2685272  [Ljava.lang.Object; (java.base@11.0.33)
+   5:         91705        2200920  java.lang.String (java.base@11.0.33)
+   6:         11793        1407160  java.lang.Class (java.base@11.0.33)
+   7:         48639        1167336  javax.management.ObjectName$Property (java.management@11.0.33)
+   8:         35494        1135808  java.util.concurrent.ConcurrentHashMap$Node (java.base@11.0.33)
+Total        690488       73116112
+== hist-peak (top 15; taken on trigger in session.log)
+[2026-11-18 09:12:59] histogram hist-peak.txt (K_D1 1031519212 >= 0.95 x limit 1073741824) rc=0 in 0.9 s at 09:12:59
+4082638:
+ num     #instances         #bytes  class name (module)
+-------------------------------------------------------
+   1:        880901      960237184  [J (java.base@11.0.33)
+   2:        550115       60686880  [B (java.base@11.0.33)
+   3:        444925       35593944  [Lorg.apache.lucene.util.packed.PackedInts$Reader;
+   4:        444924       28475136  org.apache.lucene.util.packed.DeltaPackedLongValues$Builder
+   5:          4983       22742984  [I (java.base@11.0.33)
+   6:        400058       19202784  java.util.concurrent.ConcurrentHashMap$TreeNode (java.base@11.0.33)
+   7:        444961       17798440  com.github.benmanes.caffeine.cache.PSMW
+   8:        444957       14238624  org.apache.cassandra.cache.KeyCacheKey
+   9:        444957       10678968  org.apache.cassandra.io.sstable.format.big.RowIndexEntry
+  10:         28345        6166696  [Ljava.lang.Object; (java.base@11.0.33)
+  11:           428        4535968  [Ljava.util.concurrent.ConcurrentHashMap$Node; (java.base@11.0.33)
+  12:         81949        2622368  java.util.concurrent.ConcurrentHashMap$Node (java.base@11.0.33)
+  13:         98162        2355888  java.lang.String (java.base@11.0.33)
+  14:         12639        1506240  java.lang.Class (java.base@11.0.33)
+  15:         27310        1310880  java.util.concurrent.ConcurrentHashMap$TreeBin (java.base@11.0.33)
+Total       4763396     1203777256
+== oomtail
+: build_start=arm+0.856s last_sample=arm+143s (build+142s) K1=0MiB heap=801MiB K2=0MiB blocked=0 oldGC=118 KC=75MiB/996147e

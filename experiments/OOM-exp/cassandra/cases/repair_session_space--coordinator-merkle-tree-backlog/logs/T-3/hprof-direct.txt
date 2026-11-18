@@ -1,0 +1,24 @@
+DirectByteBuffer instances: 3429; owners (allocateDirect) 1397 = 2047.2 MiB; mapped 192 = 1237.7 MiB; slices of owners 6; other 1834
+Netty PlatformDependent: DIRECT_MEMORY_COUNTER=16.0 MiB (counter object present), DIRECT_MEMORY_LIMIT=2147483648, USE_DIRECT_BUFFER_NO_CLEANER=1, MAX_DIRECT_MEMORY=2147483648
+DirectByteBuffers without cleaner and without a known owner (Netty no-cleaner / JNI / slices of those): 1834, total capacity 395.0 MiB (upper bound; slices may overlap)
+
+Live direct memory by holder (owners = 2047.2 MiB):
+  T: off-heap merkle trees                               1964.8 MiB   96.0 %
+  P: BufferPool chunks, no live consumer                   48.0 MiB    2.3 %
+  O: hints buffers                                         32.2 MiB    1.6 %
+  O: netty / NIO buffers                                    2.1 MiB    0.1 %
+  O: DataOutputBuffer scratch                               0.0 MiB    0.0 %
+
+Example referrer chain per category (buffer <- holder <- ...):
+  O: DataOutputBuffer scratch:
+      org.apache.cassandra.io.util.DataOutputBuffer$1$1.buffer
+  O: netty / NIO buffers:
+      [Ljava.lang.Object;[].[] <- io.netty.util.internal.InternalThreadLocalMap.indexedVariables <- io.netty.util.concurrent.FastThreadLocalThread.threadLocalMap
+  P: BufferPool chunks, no live consumer:
+      java.nio.DirectByteBuffer.att <- org.apache.cassandra.utils.memory.BufferPool$Chunk.slab
+  O: hints buffers:
+      org.apache.cassandra.hints.HintsBuffer.slab
+  T: off-heap merkle trees:
+      org.apache.cassandra.utils.MerkleTree$OffHeapInner.buffer
+
+Owner sizes (bytes x count, top 8): 1343520 x 1051, 2687008 x 226, 671776 x 61, 65536 x 33, 8392704 x 6, 128 x 4, 598 x 3, 301 x 3

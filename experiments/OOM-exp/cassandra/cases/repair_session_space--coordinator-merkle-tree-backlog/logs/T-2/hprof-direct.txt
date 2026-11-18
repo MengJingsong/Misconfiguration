@@ -1,0 +1,27 @@
+DirectByteBuffer instances: 3834; owners (allocateDirect) 1395 = 2047.8 MiB; mapped 192 = 1237.7 MiB; slices of owners 6; other 2241
+Netty PlatformDependent: DIRECT_MEMORY_COUNTER=16.0 MiB (counter object present), DIRECT_MEMORY_LIMIT=2147483648, USE_DIRECT_BUFFER_NO_CLEANER=1, MAX_DIRECT_MEMORY=2147483648
+DirectByteBuffers without cleaner and without a known owner (Netty no-cleaner / JNI / slices of those): 2241, total capacity 435.5 MiB (upper bound; slices may overlap)
+
+Live direct memory by holder (owners = 2047.8 MiB):
+  T: off-heap merkle trees                               1965.5 MiB   96.0 %
+  P: BufferPool chunks, no live consumer                   48.0 MiB    2.3 %
+  O: hints buffers                                         32.2 MiB    1.6 %
+  O: netty / NIO buffers                                    2.0 MiB    0.1 %
+  R: receive queue, queued LARGE frames                     0.1 MiB    0.0 %
+  O: DataOutputBuffer scratch                               0.0 MiB    0.0 %
+
+Example referrer chain per category (buffer <- holder <- ...):
+  O: netty / NIO buffers:
+      io.netty.channel.epoll.EpollEventArray.memory <- io.netty.channel.epoll.EpollEventLoop.events <- io.netty.util.internal.ThreadExecutorMap$2.val$eventExecutor <- io.netty.util.concurrent.FastThreadLocalRunnable.runnable
+  R: receive queue, queued LARGE frames:
+      io.netty.channel.epoll.EpollEventArray.memory <- io.netty.channel.epoll.EpollEventLoop.events <- org.apache.cassandra.net.OutboundConnection.eventLoop <- org.apache.cassandra.net.OutboundConnections.large <- java.util.concurrent.ConcurrentHashMap$Node.val
+  P: BufferPool chunks, no live consumer:
+      java.nio.DirectByteBuffer.att <- org.apache.cassandra.utils.memory.BufferPool$Chunk.slab
+  O: hints buffers:
+      org.apache.cassandra.hints.HintsWriteExecutor.writeBuffer
+  O: DataOutputBuffer scratch:
+      org.apache.cassandra.io.util.DataOutputBuffer$1$1.buffer
+  T: off-heap merkle trees:
+      org.apache.cassandra.utils.MerkleTree$OffHeapInner.buffer
+
+Owner sizes (bytes x count, top 8): 1343520 x 1048, 2687008 x 228, 671776 x 60, 65536 x 33, 8392704 x 6, 128 x 4, 301 x 3, 0 x 2

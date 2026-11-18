@@ -1,0 +1,182 @@
+== b-BW-1536 (full logs on pc96: /mydata/s4/c8-w3/runs/b-BW-1536/)
+name=b-BW-1536
+arm=BW
+heap=1536
+sai=1024
+t_start_ms=1795009351268
+build starts at arm+61s
+create_index rc=0 t=47s ''
+node gone during initial build
+builds_completed=0
+node_died_before_stop=True at arm+315s
+stopped_clean=True
+== selfcheck
+first OOM line: OutOfMemoryError: Java heap space
+flush lines sample: [('1.000GiB', '444924')]
+ arm=BW H=1536 sai=1024 endpoint=heap-OOM t_end=273s peakK1=1024MiB limit=[1024] K1cycles=2 peakK2=142MiB K2@K1peak=128MiB peakHeapUsed=1499MiB peakPostGC=1516MiB peakPostFull=1504MiB fullGCs=398 maxSTW60s=99% B0=70MiB builds=0 query=- flushLines=1 stressOps/s=11266 blocked=1486 peakKC=-0MiB/-1e hprof=1 peakhist -
+== yaml.diff
+26c26
+< cluster_name: 'Test Cluster'
+---
+> cluster_name: 'c8'
+706c706
+<       - seeds: "127.0.0.1:7000"
+---
+>       - seeds: "127.0.0.8:7008"
+960c960
+< storage_port: 7000
+---
+> storage_port: 7008
+981c981
+< listen_address: localhost
+---
+> listen_address: 127.0.0.8
+1023c1023
+< native_transport_port: 9042
+---
+> native_transport_port: 9048
+1090c1090
+< rpc_address: localhost
+---
+> rpc_address: 127.0.0.8
+2485a2486,2491
+> # ---- C8 stage-2 lines (environment; sai_options only in arm I) ----
+> data_file_directories: [/mydata/s4/c8-w3/inst/b-BW-1536/data]
+> commitlog_directory: /mydata/s4/c8-w3/inst/b-BW-1536/commitlog
+> hints_directory: /mydata/s4/c8-w3/inst/b-BW-1536/hints
+> saved_caches_directory: /mydata/s4/c8-w3/inst/b-BW-1536/saved_caches
+> cdc_raw_directory: /mydata/s4/c8-w3/inst/b-BW-1536/cdc_raw
+== JVM arguments (resolved)
+ -XX:+UseG1GC
+ -XX:G1HeapRegionSize=16m
+ -Xms1536M
+ -Xmx1536M
+ -XX:MaxDirectMemorySize=768M
+ -XX:ParallelGCThreads=32
+ -XX:ConcGCThreads=32
+INFO  [main] 2026-11-18T13:42:33,658 DatabaseDescriptor.java:590 - Global memtable on-heap threshold is enabled at 384MiB
+INFO  [main] 2026-11-18T13:42:34,292 CassandraDaemon.java:610 - Heap size: 1.500GiB/1.500GiB
+INFO  [SSTableBatchOpen:2] 2026-11-18T13:42:36,205 CacheService.java:121 - Initializing key cache with capacity of 76 MiBs.
+== SAI build lines
+DEBUG [SecondaryIndexExecutor:1] 2026-11-18T13:45:30,034 SSTableIndexWriter.java:252 - [c8.big.v_idx] Global limit of 1.000GiB and minimum flush size of 1.000GiB exceeded. Current builder usage is 1.000GiB for 444924 cells. Global Usage is 1.000GiB. Flushing...
+INFO  [SecondaryIndexExecutor:1] 2026-11-18T13:44:41,490 V1OnDiskFormat.java:177 - [c8.big.v_idx] Starting a compaction index build. Global segment memory usage: 0B
+INFO  [SecondaryIndexManagement:1] 2026-11-18T13:42:36,173 SecondaryIndexManager.java:1880 - Index [PaxosUncommittedIndex] became queryable after successful build.
+INFO  [SecondaryIndexManagement:1] 2026-11-18T13:44:41,477 StorageAttachedIndex.java:907 - [c8.big.v_idx] Submitting 1 parallel initial index builds over 1 total sstables...
+== key cache StatusLogger (last 2)
+INFO  [Service Thread] 2026-11-18T13:47:23,423 StatusLogger.java:105 - KeyCache                   69726528                 79691776                      all
+INFO  [Service Thread] 2026-11-18T13:47:24,662 StatusLogger.java:105 - KeyCache                   69743888                 79691776                      all
+== last 8 full GCs
+[2026-11-18T08:47:55.083-0500][323.562s][4067936][4068054][info ] GC(980) Pause Full (G1 Evacuation Pause) 1504M->1504M(1536M) 564.736ms
+[2026-11-18T08:47:55.646-0500][324.125s][4067936][4068054][info ] GC(981) Pause Full (G1 Evacuation Pause) 1504M->1504M(1536M) 562.578ms
+[2026-11-18T08:48:00.389-0500][328.867s][4067936][4068054][info ] GC(983) Pause Full (G1 Evacuation Pause) 1504M->1504M(1536M) 569.281ms
+[2026-11-18T08:48:00.718-0500][329.197s][4067936][4068054][info ] GC(984) Pause Full (G1 Evacuation Pause) 1504M->1504M(1536M) 328.727ms
+[2026-11-18T08:48:01.305-0500][329.784s][4067936][4068054][info ] GC(986) Pause Full (G1 Evacuation Pause) 1504M->1504M(1536M) 570.996ms
+[2026-11-18T08:48:01.646-0500][330.125s][4067936][4068054][info ] GC(987) Pause Full (G1 Evacuation Pause) 1504M->1504M(1536M) 340.132ms
+[2026-11-18T08:48:02.255-0500][330.734s][4067936][4068054][info ] GC(989) Pause Full (G1 Evacuation Pause) 1504M->1504M(1536M) 595.241ms
+[2026-11-18T08:48:02.834-0500][331.313s][4067936][4068054][info ] GC(990) Pause Full (G1 Evacuation Pause) 1504M->1504M(1536M) 577.951ms
+== OOM lines (launch.log)
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /mydata/s4/c8-w3/inst/b-BW-1536/dumps/cassandra-1795009351-pid4067936.hprof ...
+Heap dump file created [1755413353 bytes in 31.928 secs]
+--
+# java.lang.OutOfMemoryError: Java heap space
+# -XX:OnOutOfMemoryError="kill -9 %p"
+#   Executing /bin/sh -c "kill -9 4067936"...
+== hist-B0 (top 8)
+4067936:
+ num     #instances         #bytes  class name (module)
+-------------------------------------------------------
+   1:         98346       26471488  [B (java.base@11.0.33)
+   2:          4491       14312120  [I (java.base@11.0.33)
+   3:          6680       10083728  [J (java.base@11.0.33)
+   4:         23454        2685672  [Ljava.lang.Object; (java.base@11.0.33)
+   5:         91681        2200344  java.lang.String (java.base@11.0.33)
+   6:         11792        1407048  java.lang.Class (java.base@11.0.33)
+   7:         48639        1167336  javax.management.ObjectName$Property (java.management@11.0.33)
+   8:         35524        1136768  java.util.concurrent.ConcurrentHashMap$Node (java.base@11.0.33)
+Total        690385       73109296
+== OOM heap dump histogram (hprofhist.py, shallow)
+total shallow 1560 MiB, objects 7744910
+     920.6 MiB      858591 long[]
+     275.5 MiB      973127 byte[]
+      62.5 MiB      851698 java.util.concurrent.ConcurrentHashMap$TreeNode
+      49.9 MiB      872103 com.github.benmanes.caffeine.cache.PSMW
+      41.0 MiB        4980 int[]
+      39.9 MiB      872097 org.apache.cassandra.cache.KeyCacheKey
+      32.5 MiB      425578 [Lorg.apache.lucene.util.packed.PackedInts$Reader;[]
+      30.8 MiB      425578 org.apache.lucene.util.packed.DeltaPackedLongValues$Builder
+      20.0 MiB      872097 org.apache.cassandra.io.sstable.format.big.RowIndexEntry
+      13.9 MiB      264693 java.nio.HeapByteBuffer
+      13.7 MiB      122855 [Ljava.lang.Object;[]
+      11.1 MiB      208208 org.apache.cassandra.db.rows.BufferCell
+       8.3 MiB         425 [Ljava.util.concurrent.ConcurrentHashMap$Node;[]
+       2.8 MiB       52497 org.apache.cassandra.db.rows.BTreeRow
+       2.8 MiB       51728 org.apache.cassandra.db.partitions.BTreePartitionData
+       2.7 MiB       96796 java.lang.String
+       2.6 MiB       51722 org.apache.cassandra.db.partitions.AtomicBTreePartition
+       2.4 MiB       58309 java.util.concurrent.ConcurrentHashMap$Node
+       2.3 MiB       33033 java.util.concurrent.ConcurrentHashMap$TreeBin
+BB byte[]       <1KiB:   972551 arrays      11.6 MiB
+BB byte[]  1KiB-64KiB:      333 arrays       1.5 MiB
+BB byte[]      =64KiB:        9 arrays       0.6 MiB
+BB byte[]  64KiB-1MiB:       16 arrays       3.0 MiB
+BB byte[]      1-4MiB:      215 arrays     216.0 MiB
+BB byte[]      4-8MiB:        1 arrays       4.0 MiB
+BB byte[]      >=8MiB:        2 arrays      24.0 MiB
+U4 byte[]      >=8MiB:        2 arrays      24.0 MiB
+== OOM thread stack (from the dump)
+--- thread serial 62, 8 frames
+  java.lang.OutOfMemoryError.<init>(OutOfMemoryError.java:48)
+  java.util.concurrent.ConcurrentSkipListMap.unlinkNode(ConcurrentSkipListMap.java:421)
+  java.util.concurrent.ConcurrentSkipListMap.doRemove(ConcurrentSkipListMap.java:781)
+  java.util.concurrent.ConcurrentSkipListMap.remove(ConcurrentSkipListMap.java:1799)
+  org.apache.cassandra.concurrent.SEPWorker.doWaitSpin(SEPWorker.java:307)
+  org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:107)
+  io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+  java.lang.Thread.run(Thread.java:829)
+--- thread serial 63, 5 frames
+  jdk.internal.misc.Unsafe.park(Unsafe.java:-3)
+  java.util.concurrent.locks.LockSupport.park(LockSupport.java:323)
+  org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:118)
+  io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+  java.lang.Thread.run(Thread.java:829)
+--- thread serial 64, 17 frames
+== SAI builder thread stack (from the dump)
+  java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+  java.lang.Thread.run(Thread.java:829)
+--- thread serial 128, 18 frames
+  org.apache.cassandra.io.util.FileHandle.createReader(FileHandle.java:156)
+  org.apache.cassandra.io.util.FileHandle.createReader(FileHandle.java:151)
+  org.apache.cassandra.io.util.FileHandle.createReader(FileHandle.java:134)
+  org.apache.cassandra.io.util.FileHandle.createReader(FileHandle.java:161)
+  org.apache.cassandra.io.sstable.format.big.BigTableReader.getRowIndexEntry(BigTableReader.java:291)
+  org.apache.cassandra.io.sstable.format.big.BigTableReader.getPosition(BigTableReader.java:375)
+  org.apache.cassandra.io.sstable.format.SSTableReader.getPosition(SSTableReader.java:889)
+  org.apache.cassandra.io.sstable.format.SSTableReader.getPosition(SSTableReader.java:884)
+  org.apache.cassandra.index.sai.StorageAttachedIndexBuilder.indexSSTable(StorageAttachedIndexBuilder.java:177)
+  org.apache.cassandra.index.sai.StorageAttachedIndexBuilder.build(StorageAttachedIndexBuilder.java:118)
+  org.apache.cassandra.db.compaction.CompactionManager$13.run(CompactionManager.java:1908)
+  org.apache.cassandra.concurrent.FutureTask$3.call(FutureTask.java:141)
+  org.apache.cassandra.concurrent.FutureTask.call(FutureTask.java:61)
+  org.apache.cassandra.concurrent.FutureTask.run(FutureTask.java:71)
+== stress (every 30th interval line)
+total,                                                  8713,    8713,    8713,    8713,     3.0,     2.0,     6.8,    16.3,    53.4,    62.0,    1.0,  0.00000,      0,      0,       0,       0,       0,       0
+total,                                                770809,   27379,   27379,   27379,     3.0,     0.4,     0.7,     1.1,  2166.4,  2195.7,   53.0,  0.83906,      0,      0,       0,       0,       0,       0
+total,                                               1487922,   22118,   22118,   22118,     0.6,     0.4,     0.7,     1.1,   144.0,   148.2,  107.0,  0.90574,      0,      0,       0,       0,       0,       0
+total,                                               1729005,    1485,    1485,    1485,    16.5,     0.6,     3.2,   453.8,   454.8,   455.1,  140.0,  0.82036,      0,      0,       0,       0,       0,       0
+total,                                               1826470,    3473,    3473,    3473,     7.1,     0.4,     1.1,   284.2,   429.7,   434.4,  170.0,  0.67629,      0,      0,       0,       0,       0,       0
+total,                                               2288875,    8502,    8502,    8502,     3.6,     0.4,     0.9,     7.3,   480.0,   480.2,  206.0,  0.51308,      0,      0,       0,       0,       0,       0
+total,                                               2371783,     255,     255,     255,   129.8,     1.2,   541.1,   541.6,   544.2,   544.2,  236.0,  0.46237,      0,      0,       0,       0,       0,       0
+total,                                               2421200,     744,     744,     744,    52.4,     0.6,   556.3,   650.6,   652.7,   652.7,  266.0,  0.44131,      0,      0,       0,       0,       0,       0
+/mydata/s4/c8-w3/runs/b-BW-1536//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/b-BW-1536//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/b-BW-1536//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/b-BW-1536//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/b-BW-1536//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/b-BW-1536//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/b-BW-1536//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+/mydata/s4/c8-w3/runs/b-BW-1536//stress.out:com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+== oomtail
+: build_start=arm+110.199s last_sample=arm+273s (build+163s) K1=978MiB heap=1499MiB K2=111MiB blocked=1486 oldGC=333

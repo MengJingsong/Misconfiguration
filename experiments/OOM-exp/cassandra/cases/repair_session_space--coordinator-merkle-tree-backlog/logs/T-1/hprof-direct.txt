@@ -1,0 +1,27 @@
+DirectByteBuffer instances: 3430; owners (allocateDirect) 1399 = 2046.5 MiB; mapped 192 = 1237.7 MiB; slices of owners 6; other 1833
+Netty PlatformDependent: DIRECT_MEMORY_COUNTER=16.0 MiB (counter object present), DIRECT_MEMORY_LIMIT=2147483648, USE_DIRECT_BUFFER_NO_CLEANER=1, MAX_DIRECT_MEMORY=2147483648
+DirectByteBuffers without cleaner and without a known owner (Netty no-cleaner / JNI / slices of those): 1833, total capacity 397.9 MiB (upper bound; slices may overlap)
+
+Live direct memory by holder (owners = 2046.5 MiB):
+  T: off-heap merkle trees                               1964.2 MiB   96.0 %
+  P: BufferPool chunks, no live consumer                   48.0 MiB    2.3 %
+  O: hints buffers                                         32.2 MiB    1.6 %
+  O: netty / NIO buffers                                    2.0 MiB    0.1 %
+  R: receive queue, queued LARGE frames                     0.1 MiB    0.0 %
+  O: DataOutputBuffer scratch                               0.0 MiB    0.0 %
+
+Example referrer chain per category (buffer <- holder <- ...):
+  P: BufferPool chunks, no live consumer:
+      java.nio.DirectByteBuffer.att <- org.apache.cassandra.utils.memory.BufferPool$Chunk.slab
+  O: netty / NIO buffers:
+      io.netty.channel.epoll.EpollEventArray.memory <- io.netty.channel.epoll.EpollEventLoop.events <- [Lio.netty.util.concurrent.EventExecutor;[].[] <- io.netty.channel.epoll.EpollEventLoopGroup.children <- io.netty.channel.epoll.EpollEventLoop.parent <- io.netty.util.concurrent.SingleThreadEventExecutor$4.this$0
+  O: DataOutputBuffer scratch:
+      org.apache.cassandra.io.util.DataOutputBuffer$1$1.buffer
+  O: hints buffers:
+      org.apache.cassandra.hints.HintsBuffer.slab
+  R: receive queue, queued LARGE frames:
+      io.netty.channel.epoll.EpollEventArray.memory <- io.netty.channel.epoll.EpollEventLoop.events <- org.apache.cassandra.net.OutboundConnection.eventLoop <- org.apache.cassandra.net.OutboundConnections.large <- java.util.concurrent.ConcurrentHashMap$Node.val
+  T: off-heap merkle trees:
+      org.apache.cassandra.utils.MerkleTree$OffHeapInner.buffer
+
+Owner sizes (bytes x count, top 8): 1343520 x 1054, 2687008 x 224, 671776 x 62, 65536 x 33, 8392704 x 6, 301 x 5, 128 x 4, 0 x 2
