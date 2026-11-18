@@ -67,7 +67,7 @@ dated); that is the guided agent's only indirect view of phase 2.
 - **Patterns:** guided rows give the pattern IDs (`CP-1, CP-3`); autonomous rows `—`.
 - **Status** (written by phase 2, forward only): `open` → `picked: <phase-2 case ID>` → `true positive` /
   `false positive` / `retry` (each with the case ID); or `skipped: <reason>` (the OOM agent looked and
-  passed, e.g. disk-only, needs corrupt input), or `duplicate of OC-<n>`.
+  passed, e.g. disk-only, needs corrupt input), `duplicate of OC-<n>`, or `closed: covered by <case ID> (<verdict>)` (the mechanism is already a phase-2 case; added 2026-11-18).
 
 A candidate is a clue, not a result: name the holder, why the limit does not stop it, `file:line`, and a
 rough size at the shipped defaults. An overshoot by one item that another limit caps is not a

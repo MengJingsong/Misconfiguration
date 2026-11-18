@@ -65,9 +65,10 @@ Owner's redesign; map and flowchart in [`experiments/FLOWCHART.md`](experiments/
 - Stage 5 swept all 304 Cassandra case files with both agents: 251 autonomous and 264 guided candidates
   (OC-63…OC-577; full text in `stage5-oom-clue-find/runs/wave{1,2,3}.md`; advisory triage of OC-63…412 in
   `runs/triage-2026-11-18.md`). Hadoop JIRA OOM report built; CP-15, CP-16 and the CP-8 rewording added.
-- Phase 2, 17 cases: **14 true positive** (B10, U2, U3, U4, R7, C5, B9, C4, C6, B12, C7, B13, C8; B15 pending the
-  owner's review of its deployment/fault assumptions), **3 retry** (R8, B11, B14). All verdicts are judged by
-  their own stage-2 agent; none is independently reviewed yet. None of the tested candidates came from the new
+- Phase 2, 17 cases: **14 true positive** (B10, U2, U3, U4, R7, C5, B9, C4, C6, B12, C7, B13, C8; B15 accepted by the owner
+  on 2026-11-18), **3 retry** (R8, B11, B14). All verdicts are judged by
+  their own stage-2 agent; the owner decided no independent review is needed (2026-11-18). 128 open stage-5
+  candidates that repeat an existing case were closed as `covered by <case>` (owner, from the triage). None of the tested candidates came from the new
   stage-5 agents (all were legacy rows or retries), so no per-agent true-positive rate exists yet.
 - The five UMass x86 nodes (`pc91`, `pc84`, `pc72`, `pc99`, `pc75`) have been unreachable since ≈ 04:04 on
   2026-11-18 (the CloudLab experiment may have expired); their run data is only what the case folders hold.
@@ -328,7 +329,7 @@ Protocol: `stage4-runtime-verification/README.md` ("The run protocol").
 - **`undetermined.md` §2 re-audit** (rejections made under the old pattern-(a)-only scope) and
   **band D** (4,387 units, one filed case already came from it).
 
-## Nodes and access (updated 2026-11-17)
+## Nodes and access (updated 2026-11-18)
 
 **Available remote nodes (owner's list, 2026-11-17):** the ten below, all reached from the local node
 `pc96` with plain `ssh <name>` (`setup-node.sh --peers` blocks in `~/.ssh/config`, shared deploy key,
@@ -338,17 +339,18 @@ available.
 
 | Node | Host (experiment) | Arch / cores / RAM | Local disk | LAN | State 2026-11-17 |
 |---|---|---|---|---|---|
-| `pc91` | node0.jason92-326528 (UMass) | x86_64 / 32 / 125 GiB | `/mydata` 715 GiB | `10.10.1.1` | JDK 11 + Ant, `/mydata/s4/cassandra-base` built (phase-1 stage-4 rechecks) |
-| `pc84` | node1.jason92-326528 | x86_64 / 32 / 125 GiB | 715 GiB | `10.10.1.2` | same |
-| `pc72` | node2.jason92-326528 | x86_64 / 40 / 125 GiB | 715 GiB | `10.10.1.3` | same |
-| `pc99` | node3.jason92-326528 | x86_64 / 32 / 125 GiB | 715 GiB | `10.10.1.4` | same |
-| `pc75` | node4.jason92-326528 | x86_64 / 40 / 125 GiB | 715 GiB | `10.10.1.5` | same |
+| `pc91` | node0.jason92-326665 (UMass) | x86_64 / 32 / 125 GiB | `/mydata` 715 GiB | `10.10.1.1` | new allocation 2026-11-18: JDK 11.0.33 + Ant, `/mydata/s4/cassandra-base` copied from `pc96`, smoke-tested |
+| `pc82` | node1.jason92-326665 | x86_64 / 40 / 125 GiB | 715 GiB | `10.10.1.2` | same (replaces `pc84`) |
+| `pc72` | node2.jason92-326665 | x86_64 / 40 / 125 GiB | 715 GiB | `10.10.1.3` | same |
+| `pc99` | node4.jason92-326665 | x86_64 / 32 / 125 GiB | 715 GiB | `10.10.1.5` | same |
+| `pc75` | node3.jason92-326665 | x86_64 / 40 / 125 GiB | 715 GiB | `10.10.1.4` | same |
 | `ms0625` | node0.jason92-326377 (Utah m400) | **aarch64** / 8 / 62 GiB | 35 GiB | `10.10.1.1` | JDK 11 + Ant; **a Cassandra node was running** (OOM-exp) |
 | `ms0640` | node1.jason92-326377 | aarch64 / 8 / 62 GiB | 19 GiB | `10.10.1.2` | JDK 11 + Ant |
 | `ms0604` | node2.jason92-326377 | aarch64 / 8 / 62 GiB | 30 GiB | `10.10.1.3` | JDK 11 + Ant |
 | `ms0611` | node3.jason92-326377 | aarch64 / 8 / 62 GiB | 35 GiB | `10.10.1.4` | JDK 11 + Ant |
 | `ms0617` | node4.jason92-326377 | aarch64 / 8 / 62 GiB | 37 GiB | `10.10.1.5` | JDK 11 + Ant |
 
+- **2026-11-18:** the UMass experiment `jason92-326528` (`pc91/84/72/99/75`) went unreachable at ≈ 04:04 and its data is gone; the owner's new allocation `jason92-326665` is `pc91`, `pc82`, `pc72`, `pc75`, `pc99` (table above). All ten nodes and `pc96` had their run data deleted on 2026-11-18 (owner); only the Cassandra builds remain.
 - The two sets are on different sites (UMass, Utah; ≈ 50 ms apart) with separate `10.10.1.0/24` LANs:
   run a cluster within one set. The m400s are **ARM**: never mix them with x86 nodes in one case's
   matched arms, and record `aarch64` (smoke test: `experiments/OOM-exp/cassandra/node-smoke/2026-11-16-ms0625/`).

@@ -484,6 +484,10 @@ not touched.
 
 ## 4. Conclusion (stage 2)
 
+> **Owner review (2026-11-18): accepted.** The owner accepted both §2.3 assumptions: (a) a heap change between
+> the writing and the replaying JVM is a deployment event, and (b) the dm-delay storage stall is an acceptable
+> external fault. The verdict is final: **true positive**, `verified-OOM · deployment`.
+
 **Verdict: true positive.** Protocol status **`verified-OOM · deployment`** as proposed in §2.8, **pending the
 researcher's review** of §2.3 (a) the heap change between writer and replayer as a deployment event and (b) the
 dm-delay storage stall as an external fault (B6 condition A precedent); if either is not accepted the label is
