@@ -1,10 +1,10 @@
 # CASSANDRA JIRA OOM survey (task J1)
 
-*Done 2026-11-16* per [`jira-mining-playbook.md`](../../jira-mining-playbook.md). Data:
+*Done 2026-11-16* per `jira-mining-playbook.md` (now [`jira-mining.md`](../../stage5-oom-clue-find/jira-mining.md)). Data:
 [`jira-oom-survey.csv`](jira-oom-survey.csv) (one row per issue, 604 rows). Second-pass record:
 [`jira-oom-survey-second-pass.md`](jira-oom-survey-second-pass.md). Prior-art check of the verified cases:
 [`jira-prior-art-verified-cases.md`](jira-prior-art-verified-cases.md). This replaces the title/description-only
-first pass in [`pattern-leads.md`](../../pattern-leads.md) §2 (2026-11-12) as the reference; that section is kept as history.
+first pass in `OOM-leads.md` §2 (2026-11-12; later `pattern-leads.md`, retired 2026-11-17 into the [JIRA OOM report](jira-oom-report.md)) as the reference; that section is kept as history.
 
 ID prefixes used here (README rule): **B** = bypass, **C** = convergence, **R** = recheck, **S** = stacked combo,
 **U** = unprotected-accumulation lead, **J** = JIRA task (J1 Cassandra, J2 Hadoop), **F** = data-flow tracing task.

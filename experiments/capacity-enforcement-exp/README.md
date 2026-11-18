@@ -61,7 +61,8 @@ The two numberings do not correspond. In particular:
 - **There is no stage matching Target 3.** Bypass analysis is out of scope
   for this folder (§4). Bypass-relevant observations noticed during stage 3
   are noted in the case file for later Target-3 use, but are not pursued
-  here, and no stage number implies otherwise.
+  here. **Stage 5 (2026-11-17)** collects such clues into OOM candidates for
+  `OOM-exp`, which carries out Target 3; stage 5 itself tests nothing.
 
 So: three targets, project-wide, answering *what*; three stages, this folder
 only, answering *how well evidenced*. A case is the point where they meet.
@@ -531,6 +532,7 @@ nothing to do with the Target numbers.
 | **2** | Lexical — operand, class, method and package *names* | **no** | no | [`stage2-ai-preprocessing/`](stage2-ai-preprocessing/README.md) |
 | **3** | Semantic — the code itself, against the three rules | yes | **yes** | [`stage3-ai-deep-read/`](stage3-ai-deep-read/README.md) |
 | **4** | Behavioral — a measured run on a real node | yes (the nodes) | **yes**, for the design it runs | [`stage4-runtime-verification/`](stage4-runtime-verification/README.md) |
+| **5** | OOM clue find (added 2026-11-17) — filed case files and stage-4 results read for clues that could lead to OOM; an autonomous and a guided agent (the guided one with the [OOM clue patterns](stage5-oom-clue-find/oom-clue-patterns.md)) | yes | no: it writes **OOM candidates** for phase 2 (`OOM-exp`) to `<system>/stage5-oom-clue-find/phase1-oom-candidates.md` | [`stage5-oom-clue-find/`](stage5-oom-clue-find/README.md) |
 
 **Stage 3 is the only stage that decides whether something is a real case.**
 Stage 2 only orders what stage 3 must read, and produces no findings of its

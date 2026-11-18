@@ -20,9 +20,7 @@ says which one wrote it: `<stem>--autonomous.md` or `<stem>--guided.md`
 
 | | Autonomous agent | Guided agent |
 |---|---|---|
-| Playbook | [`playbook-autonomous.md`](playbook-autonomous.md): the target only, plus (from 2026-11-17) a general request to note OOM leads | [`playbook-guided.md`](playbook-guided.md): the target plus human suggestions (the three rules, the enforcement patterns, the test-design method, and the OOM-lead patterns of §3.2) |
-| OOM leads | section E: any clue, in the agent's own words | §8a: answers to §3.2's patterns E1–E4 (more as OOM-exp verifies cases) |
-| Recheck of filed cases | "Recheck mode": OOM leads only | §5: §3.2's patterns, `blind` or `back-link` |
+| Playbook | [`playbook-autonomous.md`](playbook-autonomous.md): the target only | [`playbook-guided.md`](playbook-guided.md): the target plus human suggestions (the three rules, the enforcement patterns, the test-design method) |
 | Template | [`_TEMPLATE-autonomous.md`](_TEMPLATE-autonomous.md) | [`_TEMPLATE-guided.md`](_TEMPLATE-guided.md) |
 | Estimates the line | yes (`positive`, `negative`, `undetermined`) | yes (`positive`, `negative`, `undetermined`) |
 | Judged after stage 4 | true positive / false positive / true negative / false negative / undetermined, by comparing the estimate with the stage-4 effect ([`../stage4-runtime-verification/README.md`](../stage4-runtime-verification/README.md#outcome-class)) | same |
@@ -45,10 +43,10 @@ There is no comparison step and no scoring across agents.
 | File | Holds |
 |---|---|
 | [`playbook-autonomous.md`](playbook-autonomous.md) | The autonomous agent's whole instruction. |
-| [`playbook-guided.md`](playbook-guided.md) | The guided agent's instruction: how a feed is worked, the seven steps, the pitfalls, the enforcement-property questions (§3.2) and how a filed case is rechecked (§5), both added 2026-11-16. |
-| [`_TEMPLATE-autonomous.md`](_TEMPLATE-autonomous.md) | A. constraint trace, B. verification solution (B1 claim, B2 unit tier, B3 cluster tier, B4 risks), C. sources read, D. stage-4 feedback, E. OOM leads (from 2026-11-17). |
-| [`_TEMPLATE-guided.md`](_TEMPLATE-guided.md) | The eleven-section case file; §8a (from 2026-11-16) holds the enforcement properties; §9 is the test design; §10 holds provenance, estimate, real-memory estimate and stage-4 feedback. |
-| [`../cassandra/stage3-ai-deep-read/oom-lead-list.md`](../cassandra/stage3-ai-deep-read/oom-lead-list.md) | OOM leads (until 2026-11-17 *OOM-lead flags*, file `recheck-flags.md`) from guided §8a, autonomous section E and rechecks, with a Status column; OOM-exp's candidate list from phase 1. Hadoop's is `../hadoop/stage3-ai-deep-read/oom-lead-list.md`. |
+| [`playbook-guided.md`](playbook-guided.md) | The guided agent's instruction: how a feed is worked, the seven steps, the pitfalls. |
+| [`_TEMPLATE-autonomous.md`](_TEMPLATE-autonomous.md) | A. constraint trace, B. verification solution (B1 claim, B2 unit tier, B3 cluster tier, B4 risks), C. sources read, D. stage-4 feedback. |
+| [`_TEMPLATE-guided.md`](_TEMPLATE-guided.md) | The eleven-section case file; §9 is the test design; §10 holds provenance, estimate and stage-4 feedback. |
+| [`../stage5-oom-clue-find/`](../stage5-oom-clue-find/README.md) | Stage 5 (2026-11-17) reads these case files for OOM clues. Sections headed `## Recheck` and guided `§8a` in some case files were written 2026-11-16/17 by a retired method; they are history. |
 | [`../cassandra/stage3-ai-deep-read/cases/`](../cassandra/stage3-ai-deep-read/cases/) | The case files of both agents. Flat; the module is a field, not a folder. |
 | [`_INDEX.md`](../cassandra/stage3-ai-deep-read/_INDEX.md) | One row per case file, with an Agent column. |
 | [`predicted-negative.md`](../cassandra/stage3-ai-deep-read/predicted-negative.md) | Lines read with the source open and refused, each citing the rule it failed. Existing entries have **no case file yet**; each leaves this file when its case file is written (section 4). |

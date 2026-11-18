@@ -29,11 +29,6 @@ Maven build, daemons, naming of keys with hyphens/placeholders) rewritten for Ha
      target as `file:line` only (a helper unit: the helper method and its comparison line, found with
      `grep -n`). Output `cases/<stem>--autonomous.md`; stem `<constraint>-<method>-<operand>`,
      `-2` if taken. Add the `_INDEX.md` row and sha256, fill `case_file` and `estimate`.
-     **OOM leads (from 2026-11-17):** the playbook now asks the agent for OOM clues in the case
-     file's section E. Copy each row (not `none found`) into the shared
-     [`stage3-ai-deep-read/oom-lead-list.md`](stage3-ai-deep-read/oom-lead-list.md) (Mode `new`,
-     Status `lead`; append only). Cases filed before 2026-11-17 have no section E; they get one only
-     through the playbook's "Recheck mode", run when the owner asks.
      **Extension units (orders 750–1746, added 2026-11-11):** uids `E:<path>:<line>#n` (an
      enforcement place outside an `if`), `C:<path>:<line>#n` (a capacity-set place) and
      `E:verdict:<Type.method()>` (a method whose result decides). The target is the uid's
@@ -53,7 +48,16 @@ Maven build, daemons, naming of keys with hyphens/placeholders) rewritten for Ha
    person's `stage4-runtime-verification/<name>/environment.md`; it writes only that person's folders,
    keeps run data on local disk and leaves no Hadoop process running. **Needs that person's
    environment** (see below): if it is not there, stop after stage 3 and say stage 4 is waiting.
-6. Report: units processed, case files created, promotions (Yang), stage 4 status, what is next.
+5b. **Stage 5 — OOM clue find** (added 2026-11-17) for each case file written in this batch, after its
+   stage 4 (or on the case file alone if stage 4 is waiting), per
+   [`../stage5-oom-clue-find/README.md`](../stage5-oom-clue-find/README.md): one fresh **autonomous** agent
+   (in the source copy outside the repo, given its playbook, a copy of the case file and of its results
+   file) and one fresh **guided** agent (with [`../stage5-oom-clue-find/oom-clue-patterns.md`](../stage5-oom-clue-find/oom-clue-patterns.md)).
+   Their candidates go to the shared [`stage5-oom-clue-find/phase1-oom-candidates.md`](stage5-oom-clue-find/phase1-oom-candidates.md)
+   with the next `OC-<n>` (append only; `git pull --rebase` first, since both people append), and one
+   line per case and agent to `stage5-oom-clue-find/coverage.csv`. These two shared files are the only
+   files outside your own folders you write.
+6. Report: units processed, case files created, promotions (Yang), stage 4 status, stage-5 candidates, what is next.
    Then **commit and push to `main` automatically** (only this work's files; `git pull --rebase
    --autostash origin main` first) and report the commit hash.
 

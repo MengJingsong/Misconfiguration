@@ -8,7 +8,7 @@ investigation, **C** = convergence investigation, **R** = recheck of a pre-proto
 re-test at default constraints and an acceptable budget), **S** = stacked combo case, **U** = unprotected-accumulation
 lead (S1's layer U1). Condition letters (B6 **A**/**B**, C2 **S-A**) are sub-cases inside one case file.
 
-**Method.** Case summaries/root-cause sections read from `cases/` (links in [`../cases/_INDEX.md`](../cases/_INDEX.md)).
+**Method.** Case summaries/root-cause sections read from `cases/` (links in [`../cases/_INDEX.md`](../../../OOM-exp/cassandra/cases/_INDEX.md)).
 JIRA searched through the REST API (`/rest/api/2/search`, sequential, ≈ 1 s apart): 83 JQL queries, every one listed
 below with its hit count (counts as of 2026-11-16). Closest issues read in full
 (`/rest/api/2/issue/<KEY>?fields=summary,description,comment,resolution,fixVersions,issuelinks`). Fix commits read in
@@ -43,7 +43,7 @@ line but no NEWS.txt entry.
 
 ## B1 — native-v5 large-request release defect (negative · release defect)
 
-**Case:** [`negatives/networking_cache_size-release-defect/`](../cases/negatives/networking_cache_size-release-defect/networking_cache_size--release-defect.md).
+**Case:** [`negatives/networking_cache_size-release-defect/`](../../../OOM-exp/cassandra/cases/negatives/networking_cache_size-release-defect/networking_cache_size--release-defect.md).
 `CQLMessageHandler.LargeMessage.onComplete()` (5.0.9 `CQLMessageHandler.java:821-835`) never calls
 `releaseBuffers()`; pooled slots pinned until the networking pool sits at its cap, `OverflowSize` grows without bound.
 
@@ -70,7 +70,7 @@ same one-line release fixes it on 5.0.
 
 ## B6 — internode queues charge on-wire bytes; tiny-cell mutations ≈ 17–20× on heap (verified-gap · service-loss)
 
-**Case:** [`bypass/internode_application_queue_capacity-accounting-mismatch/`](../cases/bypass/internode_application_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch.md).
+**Case:** [`bypass/internode_application_queue_capacity-accounting-mismatch/`](../../../OOM-exp/cassandra/cases/bypass/internode_application_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch.md).
 
 **Verdict: new.** The unit is documented (`cassandra.yaml` 5.0.9 l. 1370–1372: "These limits are applied to the
 on-wire size of the message"), so the counter behaves as specified; no issue or doc says that a receive queue within
@@ -121,7 +121,7 @@ charging the larger of serialized and estimated heap size for messages that are 
 
 ## B7 — key/counter cache weigher omits per-entry overhead (verified-gap · overshoot)
 
-**Case:** [`bypass/key_cache_size+counter_cache_size-accounting-mismatch/`](../cases/bypass/key_cache_size+counter_cache_size-accounting-mismatch/key_cache_size+counter_cache_size--accounting-mismatch.md).
+**Case:** [`bypass/key_cache_size+counter_cache_size-accounting-mismatch/`](../../../OOM-exp/cassandra/cases/bypass/key_cache_size+counter_cache_size-accounting-mismatch/key_cache_size+counter_cache_size--accounting-mismatch.md).
 
 **Verdict: new — not a regression.** The question was whether per-entry overhead accounting was lost in the move to
 Caffeine. History of the weigher (bare clone):
@@ -183,7 +183,7 @@ close the gap.
 
 ## R1-V — off-heap memtable + chunk cache at defaults exceed a container limit (verified-OOM · deployment)
 
-**Case:** [`convergence/memtable_offheap_space+file_cache_size--default/`](../cases/convergence/memtable_offheap_space+file_cache_size--default/memtable_offheap_space+file_cache_size--default.md).
+**Case:** [`convergence/memtable_offheap_space+file_cache_size--default/`](../../../OOM-exp/cassandra/cases/convergence/memtable_offheap_space+file_cache_size--default/memtable_offheap_space+file_cache_size--default.md).
 
 **Verdict: documented** (plus general **known-open** issues). The 5.0.9 docs state the pieces an operator needs:
 
@@ -222,7 +222,7 @@ it). No draft bug report.
 
 ## C1 — internode receive-queue reserves × peers vs `MaxDirectMemorySize` (verified-OOM · diagnostic, run 4)
 
-**Case:** [`convergence/internode_application_receive_queue_capacity-multiplicity/…run4.md`](../cases/convergence/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run4.md).
+**Case:** [`convergence/internode_application_receive_queue_capacity-multiplicity/…run4.md`](../../../OOM-exp/cassandra/cases/convergence/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run4.md).
 
 **Verdict: new** (low priority). The multiplicity is partly documented — `cassandra.yaml` l. 1374–1378: "any given
 node may have a maximum of N*3*(send+receive capacity) … queued without any coordination" — but nothing says that
@@ -266,7 +266,7 @@ size `MaxDirectMemorySize` accordingly.
 
 ## C2 — concurrent reads × slow clients: no outbound backpressure (verified-OOM · deployment, condition S-A)
 
-**Case:** [`convergence/coordinator_read_size_fail_threshold-concurrent-reads/`](../cases/convergence/coordinator_read_size_fail_threshold-concurrent-reads/coordinator_read_size_fail_threshold--concurrent-reads.md).
+**Case:** [`convergence/coordinator_read_size_fail_threshold-concurrent-reads/`](../../../OOM-exp/cassandra/cases/convergence/coordinator_read_size_fail_threshold-concurrent-reads/coordinator_read_size_fail_threshold--concurrent-reads.md).
 
 **Verdict: known-open — CASSANDRA-11082.**
 
@@ -314,7 +314,7 @@ entries in ≈ 245 × 16 MiB pool chunks.
 
 ## S1 — stacked JVM-direct combo with in-flight DOB fill for large mutations (verified-OOM · deployment)
 
-**Case:** [`convergence/internode_receive_queue+hint_slabs+DOB+networking_pool--direct-combo/`](../cases/convergence/internode_receive_queue+hint_slabs+DOB+networking_pool--direct-combo/internode_receive_queue+hint_slabs+DOB+networking_pool--direct-combo.md).
+**Case:** [`convergence/internode_receive_queue+hint_slabs+DOB+networking_pool--direct-combo/`](../../../OOM-exp/cassandra/cases/convergence/internode_receive_queue+hint_slabs+DOB+networking_pool--direct-combo/internode_receive_queue+hint_slabs+DOB+networking_pool--direct-combo.md).
 
 **Verdict: known-open for the decisive layer (U1), new for the stacked framing.** And one historical finding: the
 direct exposure of U1 is a **5.0 design change**, not a regression of a fix.
@@ -358,7 +358,7 @@ limit.
 
 ## S2 — coordinator's own CL=ONE local-write backlog on `MutationStage` (verified-OOM · deployment)
 
-**Case:** [`convergence/coordinator-local-write-backlog--combo/`](../cases/convergence/coordinator-local-write-backlog--combo/coordinator-local-write-backlog--combo.md).
+**Case:** [`convergence/coordinator-local-write-backlog--combo/`](../../../OOM-exp/cassandra/cases/convergence/coordinator-local-write-backlog--combo/coordinator-local-write-backlog--combo.md).
 
 **Verdict: known-open (core) + new (trigger).** The unbounded `MutationStage` queue with local mutations and local
 hints, and its pile-up under load, are reported and have a pending patch; the specific trigger — CL=ONE answered by a
