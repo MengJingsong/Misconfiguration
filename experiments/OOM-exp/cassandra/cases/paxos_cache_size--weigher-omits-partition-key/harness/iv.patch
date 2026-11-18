@@ -1,0 +1,13 @@
+diff --git a/src/java/org/apache/cassandra/service/paxos/PaxosState.java b/src/java/org/apache/cassandra/service/paxos/PaxosState.java
+index a3f019e..3e96006 100644
+--- a/src/java/org/apache/cassandra/service/paxos/PaxosState.java
++++ b/src/java/org/apache/cassandra/service/paxos/PaxosState.java
+@@ -71,7 +71,7 @@ public class PaxosState implements PaxosOperationLock
+     public static final ConcurrentHashMap<Key, PaxosState> ACTIVE = new ConcurrentHashMap<>();
+     public static final Map<Key, Snapshot> RECENT = Caffeine.newBuilder()
+                                                             .maximumWeight(DatabaseDescriptor.getPaxosCacheSizeInMiB() << 20)
+-                                                            .<Key, Snapshot>weigher((k, v) -> Ints.saturatedCast((v.accepted != null ? v.accepted.update.unsharedHeapSize() : 0L) + v.committed.update.unsharedHeapSize()))
++                                                            .<Key, Snapshot>weigher((k, v) -> Ints.saturatedCast((v.accepted != null ? v.accepted.update.unsharedHeapSize() : 0L) + v.committed.update.unsharedHeapSize() + k.partitionKey.getKey().remaining()))
+                                                             .executor(ImmediateExecutor.INSTANCE)
+                                                             .build().asMap();
+ 

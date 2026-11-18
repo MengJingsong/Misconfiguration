@@ -1,0 +1,340 @@
+run SH | cond B mode partial k 256 yaml_extra - btm on arm_test 1
+resolved: -Xmx ['4096M'] MaxDirectMemorySize(args) ['2048M'] | flags: -XX:MaxDirectMemorySize=2147483648 -XX:MaxHeapSize=4294967296
+config: client_error_reporting_exclusions=SubnetGroups{subnets=[]} native_transport_idle_timeout=0ms native_transport_max_concurrent_connections=-1 native_transport_max_concurrent_connections_per_ip=-1 native_transport_max_frame_size=16MiB
+first OOM line (system.log): io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 2147483648, max: 2147483648) | t_oom_ms 1794974122807
+OutOfDirectMemoryError lines: system.log 3 stdout 3
+first OODME: io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 2147483648, max: 2147483648)
+escalation counts: letting_jvm=2 force_heap=2 java_heap_space=2 dumping_heap=1 heap_dump_done=1 kill9=4 limit_exceeded=0
+exit: rc 137 t_exit 1794974124 t_exit - t_oom (s): 2 | end: node exit + 10 s | node_alive_at_end 0
+client: attempted 129 ok 106 err 23 ok before t_oom 106 | stop: node gone at 128 holding 106 of 129 after 12.8 s
+client first err: conn 106 1794974122810 err=ConnectionResetError(104, 'Connection reset by peer')
+first NTFMEM: nettyMax 2147483648 arenas 21 chunk 16777216 nettyUsed 16777216
+last NTFMEM before t_oom: t 1794974117340 nettyUsed 1241513984 nettyMax 2147483648 held16 52 chunks 73 inflight 0 clients 1 headroom_MiB 864
+max held16 52 max nettyUsed MiB 1184 max inflight 0 max clients 1 NTFMEM lines 10
+NTFDISCARD 0 NTFFAIL 0
+peak memory.current GiB 6.55 | peak RssAnon GiB 6.50 | max established 9042 105 | memory.events max 0 oom_kill 0
+NMT Other committed delta max MiB 496
+probe P ok/err 62 / 23 N ok/err 6 / 3 | last P ok before t_oom 1794974122684 first P err after t_oom 1794974123184
+longest consecutive err span while alive after t_oom (ms): P 792 N 0
+first probe err: P 1794974123184 err ConnectionResetError(104, 'Connection reset by peer')
+kernel oom lines: 0
+OUTCOME SH E1 OODME after 106 stalled connections, node exited rc=137
+
+run AT1 | cond A mode partial k 1120 yaml_extra - btm on arm_test 1
+resolved: -Xmx ['31744M'] MaxDirectMemorySize(args) ['15872M'] | flags: -XX:MaxDirectMemorySize=16642998272 -XX:MaxHeapSize=33285996544
+config: client_error_reporting_exclusions=SubnetGroups{subnets=[]} native_transport_idle_timeout=0ms native_transport_max_concurrent_connections=-1 native_transport_max_concurrent_connections_per_ip=-1 native_transport_max_frame_size=16MiB
+first OOM line (system.log): io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 16642998272, max: 16642998272) | t_oom_ms 1794974357750
+OutOfDirectMemoryError lines: system.log 9 stdout 9
+first OODME: io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 16642998272, max: 16642998272)
+escalation counts: letting_jvm=6 force_heap=6 java_heap_space=2 dumping_heap=1 heap_dump_done=1 kill9=4 limit_exceeded=0
+exit: rc 137 t_exit 1794974397 t_exit - t_oom (s): 40 | end: node exit + 10 s | node_alive_at_end 0
+client: attempted 952 ok 927 err 25 ok before t_oom 927 | stop: node gone at 951 holding 927 of 952 after 131.6 s
+client first err: conn 927 1794974357753 err=ConnectionResetError(104, 'Connection reset by peer')
+first NTFMEM: nettyMax 16642998272 arenas 64 chunk 16777216 nettyUsed 16777216
+last NTFMEM before t_oom: t 1794974354764 nettyUsed 16156459008 nettyMax 16642998272 held16 898 chunks 962 inflight 0 clients 1 headroom_MiB 464
+max held16 898 max nettyUsed MiB 15408 max inflight 0 max clients 1 NTFMEM lines 24
+NTFDISCARD 0 NTFFAIL 0
+peak memory.current GiB 56.02 | peak RssAnon GiB 47.69 | max established 9042 929 | memory.events max 0 oom_kill 0
+NMT Other committed delta max MiB 15856
+probe P ok/err 226 / 100 N ok/err 23 / 10 | last P ok before t_oom 1794974357530 first P err after t_oom 1794974358030
+longest consecutive err span while alive after t_oom (ms): P 38622 N 33995
+first probe err: P 1794974358030 err TimeoutError('timed out')
+kernel oom lines: 0
+OUTCOME AT1 E1 OODME after 927 stalled connections, node exited rc=137
+
+run AT2 | cond A mode partial k 1120 yaml_extra - btm on arm_test 1
+resolved: -Xmx ['31744M'] MaxDirectMemorySize(args) ['15872M'] | flags: -XX:MaxDirectMemorySize=16642998272 -XX:MaxHeapSize=33285996544
+config: client_error_reporting_exclusions=SubnetGroups{subnets=[]} native_transport_idle_timeout=0ms native_transport_max_concurrent_connections=-1 native_transport_max_concurrent_connections_per_ip=-1 native_transport_max_frame_size=16MiB
+first OOM line (system.log): io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 16642998272, max: 16642998272) | t_oom_ms 1794974934324
+OutOfDirectMemoryError lines: system.log 9 stdout 9
+first OODME: io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 16642998272, max: 16642998272)
+escalation counts: letting_jvm=6 force_heap=6 java_heap_space=2 dumping_heap=1 heap_dump_done=1 kill9=4 limit_exceeded=0
+exit: rc 137 t_exit 1794974974 t_exit - t_oom (s): 40 | end: node exit + 10 s | node_alive_at_end 0
+client: attempted 952 ok 927 err 25 ok before t_oom 927 | stop: node gone at 951 holding 927 of 952 after 132.0 s
+client first err: conn 927 1794974934327 err=ConnectionResetError(104, 'Connection reset by peer')
+first NTFMEM: nettyMax 16642998272 arenas 64 chunk 16777216 nettyUsed 16777216
+last NTFMEM before t_oom: t 1794974931322 nettyUsed 16156459008 nettyMax 16642998272 held16 898 chunks 962 inflight 0 clients 1 headroom_MiB 464
+max held16 898 max nettyUsed MiB 15408 max inflight 0 max clients 1 NTFMEM lines 24
+NTFDISCARD 0 NTFFAIL 0
+peak memory.current GiB 56.03 | peak RssAnon GiB 47.71 | max established 9042 929 | memory.events max 0 oom_kill 0
+NMT Other committed delta max MiB 15856
+probe P ok/err 226 / 100 N ok/err 23 / 10 | last P ok before t_oom 1794974934101 first P err after t_oom 1794974934601
+longest consecutive err span while alive after t_oom (ms): P 38999 N 33996
+first probe err: P 1794974934601 err TimeoutError('timed out')
+kernel oom lines: 0
+OUTCOME AT2 E1 OODME after 927 stalled connections, node exited rc=137
+
+run AT3 | cond A mode partial k 1120 yaml_extra - btm on arm_test 1
+resolved: -Xmx ['31744M'] MaxDirectMemorySize(args) ['15872M'] | flags: -XX:MaxDirectMemorySize=16642998272 -XX:MaxHeapSize=33285996544
+config: client_error_reporting_exclusions=SubnetGroups{subnets=[]} native_transport_idle_timeout=0ms native_transport_max_concurrent_connections=-1 native_transport_max_concurrent_connections_per_ip=-1 native_transport_max_frame_size=16MiB
+first OOM line (system.log): io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 16642998272, max: 16642998272) | t_oom_ms 1794976491626
+OutOfDirectMemoryError lines: system.log 9 stdout 9
+first OODME: io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 16642998272, max: 16642998272)
+escalation counts: letting_jvm=6 force_heap=6 java_heap_space=2 dumping_heap=1 heap_dump_done=1 kill9=4 limit_exceeded=0
+exit: rc 137 t_exit 1794976531 t_exit - t_oom (s): 40 | end: node exit + 10 s | node_alive_at_end 0
+client: attempted 952 ok 927 err 25 ok before t_oom 927 | stop: node gone at 951 holding 927 of 952 after 131.9 s
+client first err: conn 927 1794976491629 err=ConnectionResetError(104, 'Connection reset by peer')
+first NTFMEM: nettyMax 16642998272 arenas 64 chunk 16777216 nettyUsed 16777216
+last NTFMEM before t_oom: t 1794976488533 nettyUsed 16139681792 nettyMax 16642998272 held16 897 chunks 961 inflight 0 clients 1 headroom_MiB 480
+max held16 897 max nettyUsed MiB 15392 max inflight 0 max clients 1 NTFMEM lines 24
+NTFDISCARD 0 NTFFAIL 0
+peak memory.current GiB 55.99 | peak RssAnon GiB 47.69 | max established 9042 929 | memory.events max 0 oom_kill 0
+NMT Other committed delta max MiB 15856
+probe P ok/err 226 / 100 N ok/err 23 / 10 | last P ok before t_oom 1794976491403 first P err after t_oom 1794976491903
+longest consecutive err span while alive after t_oom (ms): P 38999 N 33995
+first probe err: P 1794976491903 err TimeoutError('timed out')
+kernel oom lines: 0
+OUTCOME AT3 E1 OODME after 927 stalled connections, node exited rc=137
+
+run AC1 | cond A mode partial k 448 yaml_extra - btm on arm_test 0
+resolved: -Xmx ['31744M'] MaxDirectMemorySize(args) ['15872M'] | flags: -XX:MaxDirectMemorySize=16642998272 -XX:MaxHeapSize=33285996544
+config: client_error_reporting_exclusions=SubnetGroups{subnets=[]} native_transport_idle_timeout=0ms native_transport_max_concurrent_connections=-1 native_transport_max_concurrent_connections_per_ip=-1 native_transport_max_frame_size=16MiB
+first OOM line (system.log): none | t_oom_ms None
+OutOfDirectMemoryError lines: system.log 0 stdout 0
+escalation counts: letting_jvm=0 force_heap=0 java_heap_space=0 dumping_heap=0 heap_dump_done=0 kill9=2 limit_exceeded=0
+exit: rc none t_exit none t_exit - t_oom (s): NA | end: client exited (control/intervention) | node_alive_at_end 1
+client: attempted 448 ok 448 err 0 ok before t_oom 448 | holding 448 of 448 after 44.7 s alive 448 closed 0 unexpected 0 done 1794974726153
+first NTFMEM: nettyMax 16642998272 arenas 64 chunk 16777216 nettyUsed 16777216
+last NTFMEM before t_oom: t 1794974729021 nettyUsed 1090519040 nettyMax 16642998272 held16 0 chunks 64 inflight 0 clients 0 headroom_MiB 14832
+max held16 448 max nettyUsed MiB 8208 max inflight 0 max clients 1 NTFMEM lines 47
+NTFDISCARD 0 NTFFAIL 0
+peak memory.current GiB 40.31 | peak RssAnon GiB 40.19 | max established 9042 449 | memory.events max 0 oom_kill 0
+NMT Other committed delta max MiB 8193
+probe P ok/err 494 / 0 N ok/err 50 / 0 | last P ok before t_oom 1794974727857 first P err after t_oom none
+longest consecutive err span while alive after t_oom (ms): P 0 N 0
+longest consecutive err span whole run (ms): P 0 N 0
+kernel oom lines: 0
+OUTCOME AC1 CONTROL-SURVIVED no OOM line, node alive; held16 max 448; client ok 448 err 0; limit-exceeded 0
+
+run AC2 | cond A mode partial k 448 yaml_extra - btm on arm_test 0
+resolved: -Xmx ['31744M'] MaxDirectMemorySize(args) ['15872M'] | flags: -XX:MaxDirectMemorySize=16642998272 -XX:MaxHeapSize=33285996544
+config: client_error_reporting_exclusions=SubnetGroups{subnets=[]} native_transport_idle_timeout=0ms native_transport_max_concurrent_connections=-1 native_transport_max_concurrent_connections_per_ip=-1 native_transport_max_frame_size=16MiB
+first OOM line (system.log): none | t_oom_ms None
+OutOfDirectMemoryError lines: system.log 0 stdout 0
+escalation counts: letting_jvm=0 force_heap=0 java_heap_space=0 dumping_heap=0 heap_dump_done=0 kill9=2 limit_exceeded=0
+exit: rc none t_exit none t_exit - t_oom (s): NA | end: client exited (control/intervention) | node_alive_at_end 1
+client: attempted 448 ok 448 err 0 ok before t_oom 448 | holding 448 of 448 after 44.7 s alive 448 closed 0 unexpected 0 done 1794976012670
+first NTFMEM: nettyMax 16642998272 arenas 64 chunk 16777216 nettyUsed 16777216
+last NTFMEM before t_oom: t 1794976015598 nettyUsed 1090519040 nettyMax 16642998272 held16 0 chunks 64 inflight 0 clients 0 headroom_MiB 14832
+max held16 448 max nettyUsed MiB 8208 max inflight 0 max clients 1 NTFMEM lines 47
+NTFDISCARD 0 NTFFAIL 0
+peak memory.current GiB 40.30 | peak RssAnon GiB 40.18 | max established 9042 449 | memory.events max 0 oom_kill 0
+NMT Other committed delta max MiB 8193
+probe P ok/err 494 / 0 N ok/err 50 / 0 | last P ok before t_oom 1794976014334 first P err after t_oom none
+longest consecutive err span while alive after t_oom (ms): P 0 N 0
+longest consecutive err span whole run (ms): P 0 N 0
+kernel oom lines: 0
+OUTCOME AC2 CONTROL-SURVIVED no OOM line, node alive; held16 max 448; client ok 448 err 0; limit-exceeded 0
+
+run AC3 | cond A mode partial k 448 yaml_extra - btm on arm_test 0
+resolved: -Xmx ['31744M'] MaxDirectMemorySize(args) ['15872M'] | flags: -XX:MaxDirectMemorySize=16642998272 -XX:MaxHeapSize=33285996544
+config: client_error_reporting_exclusions=SubnetGroups{subnets=[]} native_transport_idle_timeout=0ms native_transport_max_concurrent_connections=-1 native_transport_max_concurrent_connections_per_ip=-1 native_transport_max_frame_size=16MiB
+first OOM line (system.log): none | t_oom_ms None
+OutOfDirectMemoryError lines: system.log 0 stdout 0
+escalation counts: letting_jvm=0 force_heap=0 java_heap_space=0 dumping_heap=0 heap_dump_done=0 kill9=2 limit_exceeded=0
+exit: rc none t_exit none t_exit - t_oom (s): NA | end: client exited (control/intervention) | node_alive_at_end 1
+client: attempted 448 ok 448 err 0 ok before t_oom 448 | holding 448 of 448 after 44.7 s alive 448 closed 0 unexpected 0 done 1794976860258
+first NTFMEM: nettyMax 16642998272 arenas 64 chunk 16777216 nettyUsed 16777216
+last NTFMEM before t_oom: t 1794976862927 nettyUsed 1090519040 nettyMax 16642998272 held16 0 chunks 64 inflight 0 clients 1 headroom_MiB 14832
+max held16 448 max nettyUsed MiB 8208 max inflight 0 max clients 1 NTFMEM lines 47
+NTFDISCARD 0 NTFFAIL 0
+peak memory.current GiB 40.30 | peak RssAnon GiB 40.18 | max established 9042 449 | memory.events max 0 oom_kill 0
+NMT Other committed delta max MiB 8193
+probe P ok/err 498 / 0 N ok/err 50 / 0 | last P ok before t_oom 1794976863919 first P err after t_oom none
+longest consecutive err span while alive after t_oom (ms): P 0 N 0
+longest consecutive err span whole run (ms): P 0 N 0
+kernel oom lines: 0
+OUTCOME AC3 CONTROL-SURVIVED no OOM line, node alive; held16 max 448; client ok 448 err 0; limit-exceeded 0
+
+run AI1 | cond A mode partial k 1120 yaml_extra native_transport_max_concurrent_connections: 512 btm on arm_test 0
+resolved: -Xmx ['31744M'] MaxDirectMemorySize(args) ['15872M'] | flags: -XX:MaxDirectMemorySize=16642998272 -XX:MaxHeapSize=33285996544
+config: client_error_reporting_exclusions=SubnetGroups{subnets=[]} native_transport_idle_timeout=0ms native_transport_max_concurrent_connections=512 native_transport_max_concurrent_connections_per_ip=-1 native_transport_max_frame_size=16MiB
+first OOM line (system.log): none | t_oom_ms None
+OutOfDirectMemoryError lines: system.log 0 stdout 0
+escalation counts: letting_jvm=0 force_heap=0 java_heap_space=0 dumping_heap=0 heap_dump_done=0 kill9=2 limit_exceeded=4
+exit: rc none t_exit none t_exit - t_oom (s): NA | end: client exited (control/intervention) | node_alive_at_end 1
+client: attempted 1120 ok 511 err 609 ok before t_oom 511 | holding 511 of 1120 after 111.9 s alive 511 closed 0 unexpected 0 done 1794975680404
+client first err: conn 510 1794975559441 err=ConnectionResetError(104, 'Connection reset by peer')
+first NTFMEM: nettyMax 16642998272 arenas 64 chunk 16777216 nettyUsed 16777216
+last NTFMEM before t_oom: t 1794975682220 nettyUsed 1090519040 nettyMax 16642998272 held16 0 chunks 64 inflight 0 clients 1 headroom_MiB 14832
+max held16 511 max nettyUsed MiB 9216 max inflight 0 max clients 1 NTFMEM lines 38
+NTFDISCARD 0 NTFFAIL 0
+peak memory.current GiB 41.29 | peak RssAnon GiB 41.17 | max established 9042 512 | memory.events max 0 oom_kill 0
+NMT Other committed delta max MiB 9200
+probe P ok/err 390 / 0 N ok/err 15 / 24 | last P ok before t_oom 1794975682923 first P err after t_oom none
+longest consecutive err span while alive after t_oom (ms): P 0 N 115000
+longest consecutive err span whole run (ms): P 0 N 115000
+first probe err: N 1794975564425 err ConnectionResetError(104, 'Connection reset by peer')
+kernel oom lines: 0
+OUTCOME AI1 CONTROL-SURVIVED no OOM line, node alive; held16 max 511; client ok 511 err 609; limit-exceeded 4
+
+run AI2 | cond A mode partial k 1120 yaml_extra native_transport_max_concurrent_connections: 512 btm on arm_test 0
+resolved: -Xmx ['31744M'] MaxDirectMemorySize(args) ['15872M'] | flags: -XX:MaxDirectMemorySize=16642998272 -XX:MaxHeapSize=33285996544
+config: client_error_reporting_exclusions=SubnetGroups{subnets=[]} native_transport_idle_timeout=0ms native_transport_max_concurrent_connections=512 native_transport_max_concurrent_connections_per_ip=-1 native_transport_max_frame_size=16MiB
+first OOM line (system.log): none | t_oom_ms None
+OutOfDirectMemoryError lines: system.log 0 stdout 0
+escalation counts: letting_jvm=0 force_heap=0 java_heap_space=0 dumping_heap=0 heap_dump_done=0 kill9=2 limit_exceeded=4
+exit: rc none t_exit none t_exit - t_oom (s): NA | end: client exited (control/intervention) | node_alive_at_end 1
+client: attempted 1120 ok 511 err 609 ok before t_oom 511 | holding 511 of 1120 after 111.9 s alive 511 closed 0 unexpected 0 done 1794976291390
+client first err: conn 510 1794976170465 err=ConnectionResetError(104, 'Connection reset by peer')
+first NTFMEM: nettyMax 16642998272 arenas 64 chunk 16777216 nettyUsed 16777216
+last NTFMEM before t_oom: t 1794976293014 nettyUsed 1090519040 nettyMax 16642998272 held16 0 chunks 64 inflight 0 clients 1 headroom_MiB 14832
+max held16 511 max nettyUsed MiB 9216 max inflight 0 max clients 1 NTFMEM lines 38
+NTFDISCARD 0 NTFFAIL 0
+peak memory.current GiB 41.29 | peak RssAnon GiB 41.17 | max established 9042 512 | memory.events max 0 oom_kill 0
+NMT Other committed delta max MiB 9200
+probe P ok/err 390 / 0 N ok/err 15 / 24 | last P ok before t_oom 1794976293947 first P err after t_oom none
+longest consecutive err span while alive after t_oom (ms): P 0 N 115004
+longest consecutive err span whole run (ms): P 0 N 115004
+first probe err: N 1794976175450 err ConnectionResetError(104, 'Connection reset by peer')
+kernel oom lines: 0
+OUTCOME AI2 CONTROL-SURVIVED no OOM line, node alive; held16 max 511; client ok 511 err 609; limit-exceeded 4
+
+run AI3 | cond A mode partial k 1120 yaml_extra native_transport_max_concurrent_connections: 512 btm on arm_test 0
+resolved: -Xmx ['31744M'] MaxDirectMemorySize(args) ['15872M'] | flags: -XX:MaxDirectMemorySize=16642998272 -XX:MaxHeapSize=33285996544
+config: client_error_reporting_exclusions=SubnetGroups{subnets=[]} native_transport_idle_timeout=0ms native_transport_max_concurrent_connections=512 native_transport_max_concurrent_connections_per_ip=-1 native_transport_max_frame_size=16MiB
+first OOM line (system.log): none | t_oom_ms None
+OutOfDirectMemoryError lines: system.log 0 stdout 0
+escalation counts: letting_jvm=0 force_heap=0 java_heap_space=0 dumping_heap=0 heap_dump_done=0 kill9=2 limit_exceeded=4
+exit: rc none t_exit none t_exit - t_oom (s): NA | end: client exited (control/intervention) | node_alive_at_end 1
+client: attempted 1120 ok 511 err 609 ok before t_oom 511 | holding 511 of 1120 after 111.9 s alive 511 closed 0 unexpected 0 done 1794977141004
+client first err: conn 510 1794977020043 err=ConnectionResetError(104, 'Connection reset by peer')
+first NTFMEM: nettyMax 16642998272 arenas 64 chunk 16777216 nettyUsed 16777216
+last NTFMEM before t_oom: t 1794977142799 nettyUsed 1090519040 nettyMax 16642998272 held16 0 chunks 64 inflight 0 clients 1 headroom_MiB 14832
+max held16 511 max nettyUsed MiB 9216 max inflight 47 max clients 1 NTFMEM lines 38
+NTFDISCARD 0 NTFFAIL 0
+peak memory.current GiB 41.29 | peak RssAnon GiB 41.17 | max established 9042 513 | memory.events max 0 oom_kill 0
+NMT Other committed delta max MiB 9200
+probe P ok/err 390 / 0 N ok/err 15 / 24 | last P ok before t_oom 1794977143524 first P err after t_oom none
+longest consecutive err span while alive after t_oom (ms): P 0 N 114998
+longest consecutive err span whole run (ms): P 0 N 114998
+first probe err: N 1794977025028 err ConnectionResetError(104, 'Connection reset by peer')
+kernel oom lines: 0
+OUTCOME AI3 CONTROL-SURVIVED no OOM line, node alive; held16 max 511; client ok 511 err 609; limit-exceeded 4
+
+run BT1 | cond B mode partial k 256 yaml_extra - btm on arm_test 1
+resolved: -Xmx ['4096M'] MaxDirectMemorySize(args) ['2048M'] | flags: -XX:MaxDirectMemorySize=2147483648 -XX:MaxHeapSize=4294967296
+config: client_error_reporting_exclusions=SubnetGroups{subnets=[]} native_transport_idle_timeout=0ms native_transport_max_concurrent_connections=-1 native_transport_max_concurrent_connections_per_ip=-1 native_transport_max_frame_size=16MiB
+first OOM line (system.log): io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 2147483648, max: 2147483648) | t_oom_ms 1794977264808
+OutOfDirectMemoryError lines: system.log 3 stdout 3
+first OODME: io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 2147483648, max: 2147483648)
+escalation counts: letting_jvm=2 force_heap=2 java_heap_space=2 dumping_heap=1 heap_dump_done=1 kill9=4 limit_exceeded=0
+exit: rc 137 t_exit 1794977266 t_exit - t_oom (s): 2 | end: node exit + 10 s | node_alive_at_end 0
+client: attempted 129 ok 106 err 23 ok before t_oom 106 | stop: node gone at 128 holding 106 of 129 after 12.8 s
+client first err: conn 106 1794977264811 err=ConnectionResetError(104, 'Connection reset by peer')
+first NTFMEM: nettyMax 2147483648 arenas 21 chunk 16777216 nettyUsed 16777216
+last NTFMEM before t_oom: t 1794977259288 nettyUsed 1224736768 nettyMax 2147483648 held16 51 chunks 72 inflight 0 clients 1 headroom_MiB 880
+max held16 51 max nettyUsed MiB 1168 max inflight 0 max clients 1 NTFMEM lines 10
+NTFDISCARD 0 NTFFAIL 0
+peak memory.current GiB 6.55 | peak RssAnon GiB 6.51 | max established 9042 105 | memory.events max 0 oom_kill 0
+NMT Other committed delta max MiB 480
+probe P ok/err 62 / 23 N ok/err 6 / 3 | last P ok before t_oom 1794977264687 first P err after t_oom 1794977265187
+longest consecutive err span while alive after t_oom (ms): P 0 N 0
+first probe err: P 1794977265187 err ConnectionResetError(104, 'Connection reset by peer')
+kernel oom lines: 0
+OUTCOME BT1 E1 OODME after 106 stalled connections, node exited rc=137
+
+run BT2 | cond B mode partial k 256 yaml_extra - btm on arm_test 1
+resolved: -Xmx ['4096M'] MaxDirectMemorySize(args) ['2048M'] | flags: -XX:MaxDirectMemorySize=2147483648 -XX:MaxHeapSize=4294967296
+config: client_error_reporting_exclusions=SubnetGroups{subnets=[]} native_transport_idle_timeout=0ms native_transport_max_concurrent_connections=-1 native_transport_max_concurrent_connections_per_ip=-1 native_transport_max_frame_size=16MiB
+first OOM line (system.log): io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 2147483648, max: 2147483648) | t_oom_ms 1794977377384
+OutOfDirectMemoryError lines: system.log 3 stdout 3
+first OODME: io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 2147483648, max: 2147483648)
+escalation counts: letting_jvm=2 force_heap=2 java_heap_space=2 dumping_heap=1 heap_dump_done=1 kill9=4 limit_exceeded=0
+exit: rc 137 t_exit 1794977378 t_exit - t_oom (s): 1 | end: node exit + 10 s | node_alive_at_end 0
+client: attempted 129 ok 106 err 23 ok before t_oom 106 | stop: node gone at 128 holding 106 of 129 after 12.8 s
+client first err: conn 106 1794977377388 err=ConnectionResetError(104, 'Connection reset by peer')
+first NTFMEM: nettyMax 2147483648 arenas 21 chunk 16777216 nettyUsed 16777216
+last NTFMEM before t_oom: t 1794977371988 nettyUsed 1258291200 nettyMax 2147483648 held16 53 chunks 74 inflight 0 clients 1 headroom_MiB 848
+max held16 53 max nettyUsed MiB 1200 max inflight 0 max clients 1 NTFMEM lines 10
+NTFDISCARD 0 NTFFAIL 0
+peak memory.current GiB 6.55 | peak RssAnon GiB 6.51 | max established 9042 105 | memory.events max 0 oom_kill 0
+NMT Other committed delta max MiB 480
+probe P ok/err 62 / 23 N ok/err 6 / 3 | last P ok before t_oom 1794977377259 first P err after t_oom 1794977377759
+longest consecutive err span while alive after t_oom (ms): P 0 N 0
+first probe err: P 1794977377759 err ConnectionResetError(104, 'Connection reset by peer')
+kernel oom lines: 0
+OUTCOME BT2 E1 OODME after 106 stalled connections, node exited rc=137
+
+run BT3 | cond B mode partial k 256 yaml_extra - btm on arm_test 1
+resolved: -Xmx ['4096M'] MaxDirectMemorySize(args) ['2048M'] | flags: -XX:MaxDirectMemorySize=2147483648 -XX:MaxHeapSize=4294967296
+config: client_error_reporting_exclusions=SubnetGroups{subnets=[]} native_transport_idle_timeout=0ms native_transport_max_concurrent_connections=-1 native_transport_max_concurrent_connections_per_ip=-1 native_transport_max_frame_size=16MiB
+first OOM line (system.log): io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 2147483648, max: 2147483648) | t_oom_ms 1794977489887
+OutOfDirectMemoryError lines: system.log 3 stdout 3
+first OODME: io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 2147483648, max: 2147483648)
+escalation counts: letting_jvm=2 force_heap=2 java_heap_space=2 dumping_heap=1 heap_dump_done=1 kill9=4 limit_exceeded=0
+exit: rc 137 t_exit 1794977491 t_exit - t_oom (s): 2 | end: node exit + 10 s | node_alive_at_end 0
+client: attempted 129 ok 106 err 23 ok before t_oom 106 | stop: node gone at 128 holding 106 of 129 after 12.8 s
+client first err: conn 106 1794977489890 err=ConnectionResetError(104, 'Connection reset by peer')
+first NTFMEM: nettyMax 2147483648 arenas 21 chunk 16777216 nettyUsed 16777216
+last NTFMEM before t_oom: t 1794977484473 nettyUsed 1241513984 nettyMax 2147483648 held16 52 chunks 73 inflight 0 clients 1 headroom_MiB 864
+max held16 52 max nettyUsed MiB 1184 max inflight 0 max clients 1 NTFMEM lines 10
+NTFDISCARD 0 NTFFAIL 0
+peak memory.current GiB 6.54 | peak RssAnon GiB 6.50 | max established 9042 105 | memory.events max 0 oom_kill 0
+NMT Other committed delta max MiB 480
+probe P ok/err 62 / 23 N ok/err 6 / 3 | last P ok before t_oom 1794977489762 first P err after t_oom 1794977490262
+longest consecutive err span while alive after t_oom (ms): P 0 N 0
+first probe err: P 1794977490262 err ConnectionResetError(104, 'Connection reset by peer')
+kernel oom lines: 0
+OUTCOME BT3 E1 OODME after 106 stalled connections, node exited rc=137
+
+run AU1 | cond A mode partial k 1120 yaml_extra - btm off arm_test 1
+resolved: -Xmx ['31744M'] MaxDirectMemorySize(args) ['15872M'] | flags: -XX:MaxDirectMemorySize=16642998272 -XX:MaxHeapSize=33285996544
+config: client_error_reporting_exclusions=SubnetGroups{subnets=[]} native_transport_idle_timeout=0ms native_transport_max_concurrent_connections=-1 native_transport_max_concurrent_connections_per_ip=-1 native_transport_max_frame_size=16MiB
+first OOM line (system.log): io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 16642998272, max: 16642998272) | t_oom_ms 1794977685891
+OutOfDirectMemoryError lines: system.log 9 stdout 9
+first OODME: io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 16642998272, max: 16642998272)
+escalation counts: letting_jvm=6 force_heap=6 java_heap_space=2 dumping_heap=1 heap_dump_done=1 kill9=4 limit_exceeded=0
+exit: rc 137 t_exit 1794977727 t_exit - t_oom (s): 42 | end: node exit + 10 s | node_alive_at_end 0
+client: attempted 952 ok 927 err 25 ok before t_oom 927 | stop: node gone at 951 holding 927 of 952 after 132.8 s
+client first err: conn 927 1794977685898 err=ConnectionResetError(104, 'Connection reset by peer')
+NTFDISCARD 0 NTFFAIL 0
+peak memory.current GiB 56.17 | peak RssAnon GiB 47.69 | max established 9042 929 | memory.events max 0 oom_kill 0
+probe P ok/err 226 / 103 N ok/err 23 / 10 | last P ok before t_oom 1794977685641 first P err after t_oom 1794977686141
+longest consecutive err span while alive after t_oom (ms): P 40500 N 33994
+first probe err: P 1794977686141 err TimeoutError('timed out')
+kernel oom lines: 0
+OUTCOME AU1 E1 OODME after 927 stalled connections, node exited rc=137
+
+run AX1 | cond A mode complete k 1120 yaml_extra - btm on arm_test 0
+resolved: -Xmx ['31744M'] MaxDirectMemorySize(args) ['15872M'] | flags: -XX:MaxDirectMemorySize=16642998272 -XX:MaxHeapSize=33285996544
+config: client_error_reporting_exclusions=SubnetGroups{subnets=[]} native_transport_idle_timeout=0ms native_transport_max_concurrent_connections=-1 native_transport_max_concurrent_connections_per_ip=-1 native_transport_max_frame_size=16MiB
+first OOM line (system.log): none | t_oom_ms None
+OutOfDirectMemoryError lines: system.log 0 stdout 0
+escalation counts: letting_jvm=0 force_heap=0 java_heap_space=0 dumping_heap=0 heap_dump_done=0 kill9=2 limit_exceeded=0
+exit: rc none t_exit none t_exit - t_oom (s): NA | end: client exited (control/intervention) | node_alive_at_end 1
+client: attempted 1120 ok 1120 err 0 ok before t_oom 1120 | holding 1120 of 1120 after 111.9 s alive 1120 closed 0 unexpected 0 done 1794978063241
+first NTFMEM: nettyMax 16642998272 arenas 64 chunk 16777216 nettyUsed 16777216
+last NTFMEM before t_oom: t 1794978065056 nettyUsed 1090519040 nettyMax 16642998272 held16 0 chunks 64 inflight 0 clients 1 headroom_MiB 14832
+max held16 0 max nettyUsed MiB 1040 max inflight 47 max clients 1 NTFMEM lines 48
+NTFDISCARD 0 NTFFAIL 0
+peak memory.current GiB 32.55 | peak RssAnon GiB 32.46 | max established 9042 1121 | memory.events max 0 oom_kill 0
+NMT Other committed delta max MiB 1025
+probe P ok/err 510 / 0 N ok/err 51 / 0 | last P ok before t_oom 1794978065788 first P err after t_oom none
+longest consecutive err span while alive after t_oom (ms): P 0 N 0
+longest consecutive err span whole run (ms): P 0 N 0
+kernel oom lines: 0
+OUTCOME AX1 CONTROL-SURVIVED no OOM line, node alive; held16 max 0; client ok 1120 err 0; limit-exceeded 0
+
+run M1 | cond M mode partial k 1120 yaml_extra - btm on arm_test 1
+resolved: -Xmx ['16384M'] MaxDirectMemorySize(args) ['8192M'] | flags: -XX:MaxDirectMemorySize=8589934592 -XX:MaxHeapSize=17179869184
+config: client_error_reporting_exclusions=SubnetGroups{subnets=[]} native_transport_idle_timeout=0ms native_transport_max_concurrent_connections=-1 native_transport_max_concurrent_connections_per_ip=-1 native_transport_max_frame_size=16MiB
+first OOM line (system.log): io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 8589934592, max: 8589934592) | t_oom_ms 1794978213652
+OutOfDirectMemoryError lines: system.log 6 stdout 6
+first OODME: io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 8589934592, max: 8589934592)
+escalation counts: letting_jvm=4 force_heap=4 java_heap_space=2 dumping_heap=1 heap_dump_done=1 kill9=4 limit_exceeded=0
+exit: rc 137 t_exit 1794978223 t_exit - t_oom (s): 10 | end: node exit + 10 s | node_alive_at_end 0
+client: attempted 471 ok 447 err 24 ok before t_oom 447 | stop: node gone at 470 holding 447 of 471 after 52.7 s
+client first err: conn 447 1794978213656 err=ConnectionResetError(104, 'Connection reset by peer')
+first NTFMEM: nettyMax 8589934592 arenas 64 chunk 16777216 nettyUsed 16777216
+last NTFMEM before t_oom: t 1794978210331 nettyUsed 8036286464 nettyMax 8589934592 held16 414 chunks 478 inflight 0 clients 1 headroom_MiB 528
+max held16 414 max nettyUsed MiB 7664 max inflight 0 max clients 1 NTFMEM lines 16
+NTFDISCARD 0 NTFFAIL 0
+peak memory.current GiB 28.42 | peak RssAnon GiB 24.63 | max established 9042 449 | memory.events max 0 oom_kill 0
+NMT Other committed delta max MiB 7728
+probe P ok/err 130 / 39 N ok/err 13 / 4 | last P ok before t_oom 1794978213419 first P err after t_oom 1794978213919
+longest consecutive err span while alive after t_oom (ms): P 9000 N 2002
+first probe err: P 1794978213919 err TimeoutError('timed out')
+kernel oom lines: 0
+OUTCOME M1 E1 OODME after 447 stalled connections, node exited rc=137
+

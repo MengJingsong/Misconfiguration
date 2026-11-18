@@ -1,0 +1,64 @@
+run T4-r2 arm=T4 heap=4G direct=2G N=40 W=1024 value=125000 M=125074 R=200000 throw=False seconds=240 per_jvm=10 calib=False
+harness md5: 2f18ec53c4d427ffdbc72d30b6a11dbd  /mydata/s4/b10-w1/harness/Jmx.java; f9d52bb5c2dfc46c0c5aadc0cea58c82  /mydata/s4/b10-w1/harness/NativeFlood.java; 4d9e593e9a4495046848b0d9a04b7b8a  /mydata/s4/b10-w1/harness/b10-run.py; 4f91920358c0ca96f3851dab31e5fe14  /mydata/s4/b10-w1/harness/flood-logback.xml; 4e99f029b0d7c8372ea9154e3fae6d30  /mydata/s4/b10-w1/harness/hprof-histo.py; 321b32a1cdea9e122779dc3374fe3ab0  /mydata/s4/b10-w1/harness/make-node-yaml.sh; 58ea5a7f7fdf2744ae620604c1ea9fa2  /mydata/s4/b10-w1/harness/run-2g-set.sh; 4d712076e7fbaf492e4856470cede30f  /mydata/s4/b10-w1/harness/run-search-set.sh; 
+yaml check: yaml ok: harness adds no §2.3 key; shipped read_request_timeout=5000ms, concurrent_reads=32, slow_query_log_timeout=500ms (defaults)
+node pid 58617 scope /sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/oom-b10-T4-r2.scope memory.max 10737418240 (want 10737418240) memory.swap.max 0
+jvm readback: -XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -Xms4G -Xmx4G -XX:MaxDirectMemorySize=2G -javaagent:/mydata/s4/b10-w1/cassandra/bin/../lib/jamm-0.4.0.jar -XX:HeapDumpPath=/mydata/s4/b10-w1/logs/T4-r2/cassandra-1794977132-pid58617.hprof -XX:OnOutOfMemoryError=kill -9 %p
+resolved native_transport_max_message_size: null
+resolved native_transport_max_request_data_in_flight: null
+resolved native_transport_max_request_data_in_flight_per_ip: null
+resolved native_transport_receive_queue_capacity: 1MiB
+resolved native_transport_timeout: 12s
+resolved read_request_timeout: 5000ms
+resolved native_transport_throw_on_overload: false
+resolved native_transport_max_threads: 128
+resolved native_transport_queue_max_item_age_threshold: 1.7976931348623157E308
+resolved native_transport_max_concurrent_connections: -1
+resolved concurrent_reads: 32
+resolved allow_filtering_enabled: true
+t0 = 1794977181993
+NODE GONE at t=160.5 s
+after stop, CassandraDaemon processes on pc72: none
+NativeFlood left: none
+run_id: T4-r2
+arm: T4
+heap_gib: 4
+N: 40
+W: 1024
+M: 125074
+R: 200000
+throw: False
+t0: 1794977181993
+endpoint: OOM
+oom_line: java.lang.OutOfMemoryError: Java heap space
+endpoint_t_s: 160.495
+dump: /mydata/s4/b10-w1/logs/T4-r2/cassandra-1794977132-pid58617.hprof
+syslog_oom: WARN  [epollEventLoopGroup-5-23] 2026-11-18T04:47:20,470 AbstractChannelHandlerContext.java:355 - An exception 'java.lang.OutOfMemoryError: Java heap space' [enable DEBUG level for full stacktrace] was thrown by a user handler's exceptionCaught() method while handling the following exception:
+first_error: ERROR [BatchlogTasks:1] 2026-11-18T04:48:57,540 ExecutionFailure.java:72 - Unexpected error while handling unexpected error
+histos: [{'t': 20.706, 'qm': 32286, 'bb': 4123254808, 'top': [('[B', 4123254808), ('[Ljava.lang.Object;', 20012488), ('[I', 15964104), ('[J', 9826064)], 'dur_ms': 678}, {'t': 50.174, 'qm': 32513, 'bb': 4133961440, 'top': [('[B', 4133961440), ('[Ljava.lang.Object;', 19960032), ('[I', 15956616), ('[J', 9804192)], 'dur_ms': 108690}]
+qm_idle: 0
+bb_idle: 27554160
+U_D1: 4066530962
+K_N: 149317222
+U_over_KN: 27.234172371623682
+K_max_global_in_use: 107270242.0
+ntr_pending_max: 31873.0
+read_pending_max: 96.0
+heap_used_max: 4143011320.0
+direct_used_max: 178006985.0
+discarded_max: 0.0
+timedout_before_max: 22805.0
+paused_max: 40.0
+client: {'sent': 66409, 'ok': 321, 'warned': 0, 'ovl_bytes': 0, 'ovl_other': 23478, 'err': 1650, 'outstanding': 40960}
+ok_per_s: 2.0000623072369854
+load_s: 160.495
+gc_pause_frac_last60: 0.004022316666666667
+gc_pauses_n: 527
+gc_last5: ['62-0700][107.014s][58617][58738][info ] GC(567) Pause Full (G1 Evacuation Pause) 4048M->4048M(4096M) 185.556ms', '[107.021s][58617][58738][info ] GC(568) Pause Young (Normal) (G1 Evacuation Pause) 4048M->4048M(4096M) 3.709ms', '01-0700][107.153s][58617][58738][info ] GC(569) Pause Full (G1 Evacuation Pause) 4048M->4048M(4096M) 131.671ms', '69-0700][107.321s][58617][58738][info ] GC(570) Pause Full (G1 Evacuation Pause) 4048M->4048M(4096M) 167.407ms', '204.314s][58617][58738][info ] GC(571) Pause Full (Heap Inspection Initiated GC) 4060M->4028M(4096M) 241.339ms']
+scope_mem_max: 9998254080
+scope_events: {'low': '0', 'high': '0', 'max': '0', 'oom': '0', 'oom_kill': '0'}
+dump_bytes: 4312085027
+EXPECTED P1: warned>0 (0), discarded+0 (0.0), global<=E+1MiB (107270242.0 <= 108422758)
+EXPECTED P2: ntr_pending>=0.5NW (31873.0 vs 20480.0); QM>=0.6NW (32513 vs 24576.0); U/K_N>=20 (27.2)
+EXPECTED P3: heap OOM within 180 s (OOM at 160.495); scope oom_kill 0 (0)
+EXPECTED P8: direct max < 0.5 D1 (178006985.0 vs 2033265481.0)
+DONE

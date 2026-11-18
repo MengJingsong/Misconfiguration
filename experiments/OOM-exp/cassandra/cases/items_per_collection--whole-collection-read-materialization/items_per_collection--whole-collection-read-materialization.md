@@ -7,17 +7,25 @@
 | Phase-1 case file | [`capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/items_per_collection-doAdd-elements_size--autonomous.md`](../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/items_per_collection-doAdd-elements_size--autonomous.md) |
 | System / pinned source | Cassandra 5.0.9 (`systems/cassandra/source/`, `git describe` = `cassandra-5.0.9`; node build `pc99:/mydata/s4/cassandra-base`, release string `5.0.9-SNAPSHOT`) |
 | Stage 1 (design) | OOM agent, phase 2 stage 1, Claude Opus 5.5 (`claude-opus-5-5`), 2026-11-17 (22:40–22:50 EST; frozen 22:50) |
-| Stage 2 (verify) | pending (a fresh session) |
-| Verdict | `pending` |
+| Stage 2 (verify) | OOM agent, phase 2 stage 2, Claude Opus 5.5 (`claude-opus-5-5`), fresh sessions: 2026-11-17 22:50 – 2026-11-18 ≈ 00:05 EST (cut off by an API usage limit), resumed 2026-11-18 02:54–03:45 EST |
+| Verdict | **true positive** — `verified-OOM · deployment` (unprotected configuration + unprotected accumulation); largest failing heap 8 GiB (3/3) |
 
 ## Summary
 
-- **Conclusion:** pending (stage 1 wrote the design only; nothing has run for this case).
-- **Root cause (claimed, to be tested):** no capacity control bounds the heap a read spends on one stored collection. The only
-  collection control, `items_per_collection_fail_threshold`, is off by default (−1) and when on counts only the fragment being
-  written, so appends grow a non-frozen `set<int>` without limit; a read builds the whole collection as one row on the heap
-  (≈ 150 B held per item, measured), twice per read (replica row, then coordinator row), and the read-size thresholds are off by
-  default. Concurrent reads multiply it; `concurrent_reads` and `native_transport_max_threads` bound reads by count, not bytes.
+- **Conclusion:** **true positive.** At shipped defaults and a 2 GiB heap, 16 clients each reading one of 8 appended `set<int>`s of
+  10⁶ items drove Cassandra 5.0.9 to `java.lang.OutOfMemoryError: Java heap space` in **3/3** runs (10–14 s after the clients
+  started; the shipped `kill -9` handler then killed the daemon), while the same bytes as one blob (3/3), the same items as a paged
+  clustering table at the same c (3/3, same useful throughput as c = 8) and c = 8 (3/3) survived. The OOM repeats at 4 GiB (1/1) and
+  **8 GiB (3/3, largest failing heap)** with M scaled to the heap; at 15872 MiB no OOM came within the 180 s window (0/3) but the node
+  was in GC service loss (≥ 90 % STW) for the whole window. Enabling the 64 MiB read-size fail threshold (diagnostic) did not stop it
+  (3/3 OOM). Conditional on an application that grows collections to 10⁶+ items and reads them concurrently — which the docs
+  discourage but allow (limit 2·10⁹ items).
+- **Root cause (measured):** no enabled control bounds the heap a read spends on one stored collection. `items_per_collection_fail_threshold`
+  is off by default and counts only the written fragment, so appends grow a set without limit; every read deserializes the whole
+  collection into one row on the replica (≈ 150 B per item: one `ArrayCell`, `CellPath`, `HeapByteBuffer` and `byte[]` per item —
+  the dumps hold ≈ 15 such rows at the OOM), with no byte bound across reads: `concurrent_reads` (32) and the native-transport
+  limits count reads or request bytes, and timed-out reads keep building (`ReadStage` Active up to 28–31 > c). The read-size
+  threshold, off by default, is checked only after a row is built, too late for this memory.
 
 ## 1. Candidate
 
@@ -288,14 +296,16 @@ running. `/mydata/s4/ipc-recheck/` and `/mydata/s4/cassandra-base/` are not touc
 
 ## 3. Runs (stage 2)
 
-Stage 2 by a fresh OOM-agent session (Claude Opus 5.5, `claude-opus-5-5`), 2026-11-17 22:50 – 2026-11-18 EST. Freeze hash checked
-before anything ran: `db9d4ba2…adcf3` recomputed with the command in §2.10, **match**.
+Stage 2 by a fresh OOM-agent session (Claude Opus 5.5, `claude-opus-5-5`), 2026-11-17 22:50 – 2026-11-18 ≈ 00:05 EST (cut off by an
+API usage limit), **resumed** by a second fresh stage-2 session 2026-11-18 02:54–03:45 EST (see the resume note in §3.4). Freeze hash
+checked before anything ran, and again at resume: `db9d4ba2…adcf3` recomputed with the command in §2.10, **match** both times.
 
 **Harness:** [`harness/`](harness/) — `lib.sh` (node start in its guard scope, samplers, stop), `golden.sh` (golden load lifetime and
 shakedown), `run.sh` (one measured run per §2.5), `seq.sh` (runs a list; calibration stops at the first OOM, heap search at the first
 survivor; refuses to start a run after 02:05 EST), `chain.sh` (heap search → fill to 3 → P after the main batch), `u3client.py`
 (clients per §2.5), `analyze.py` (O1, O5, O7 and the endpoint rule), `hprof_histo.py` (O3, pure Python per §2.6), `arm-P.yaml`, the
-`spec-*.txt` run lists. **Logs:** full logs, GC logs and hprof files on `pc99:/mydata/s4/u3-w1/runs/<run>/logs/`; excerpts
+`spec-*.txt` run lists; added at resume: `resume-lib.sh` + `run-r.sh` (D7), `a2.py` (A2 endpoint rule), `seq-r.sh`, `chain-r.sh`,
+`chain-r2.sh` (A3, A4). **Logs:** full logs, GC logs and hprof files on `pc99:/mydata/s4/u3-w1/runs/<run>/logs/`; excerpts
 (per-run `analysis.txt`, `summary-raw.txt`, `hprof-histo.txt` of parsed dumps, OOM lines of `node.out`, StatusLogger lines) in [`logs/`](logs/).
 
 ### 3.1 Environment (as run)
@@ -331,7 +341,44 @@ pauses after the clients start (`gc-pauses.log`), p50 / max; *pause frac* = max 
 | I2 | S6 intervention I | 16 | 464 ok, 4.64·10⁸ items (2.61 M items/s) | **none** | post-GC 112 / 185 MB; 1 Full; pause frac 0.01; histo 107 MB |
 | I3 | S6 intervention I | 16 | 448 ok, 4.48·10⁸ items (2.50 M items/s) | **none** | post-GC 112 / 264 MB; 1 Full; pause frac 0.01; histo 106 MB |
 | B1 | S7 control B (c_s) | 8 | 462 ok, 4.62·10⁸ items (2.56 M items/s), 0 errors; p50 3.09 s | **none** | post-GC 1873 / 2028 MB; 154 Full; pause frac 0.80; histo 723 MB with 4.0 M `ArrayCell` |
-<!-- RUNS-CONTINUE -->
+| B2 | S7 control B | 8 | 487 ok, 4.87·10⁸ items (2.70 M items/s), 0 errors; p50 2.93 s, max 5.22 s; in flight max 8, mean 7.9 | **none** | peak post-GC 2028 MB; 161 Full, 308 `To-space exhausted`; pause frac 0.78; max `RssAnon` 2.79 GB; histo 96 MB (taken after the clients stopped) |
+| B3 | S7 control B | 8 | 452 ok, 4.52·10⁸ items (2.51 M items/s), 0 errors; p50 3.12 s, max 4.99 s; in flight max 8, mean 7.9 | **none** | peak post-GC 2028 MB; 153 Full, 291 `To-space exhausted`; pause frac 0.79; histo 96 MB |
+| HS4G | S8 heap search, 4 GiB, `s2m` (M = 2·10⁶) | 16 | 0 completed; 55 reads issued (36 client `OperationTimedOut`, 19 `ReadTimeout`, retried at once); in flight max 16, mean 13.0 | **heap OOM** `Java heap space` at **38.1 s** (hprof creation); dump 6.14 GB complete at 158.0 s; the shipped `kill -9` ran ≈ 190 s (just after the window end, as T2; counted by amendment A2 — the harness analyzer printed `survived` by the literal rule, see A3) | post-GC 4076 MB peak of 4096, last pauses `Pause Full 4061->4061(4096)M` ≈ 0.78 s each back to back; 195 Full; pause frac 1.00; max `RssAnon` 4.80 GB, `memory.current` 10.77 GB (incl. dump page cache); StatusLogger `ReadStage` Active 16; `oom_kill` 0 |
+| P1 | S9 diagnostic P (`read_thresholds_enabled: true`, `local_read_size_fail_threshold: 64MiB`) | 16 | 0 completed (ReadTimeout / OperationTimedOut, then `NoHostAvailable` at death); in flight mean 15.7 | **heap OOM** at 11.3 s; dump 3.07 GB done 49.0 s; daemon died (shipped `kill -9`) at 61.7 s | post-GC 2028 MB peak; 60 Full; pause frac 0.61; StatusLogger `ReadStage` Active 16, NTR 13; **no read-size rejection logged** before the OOM (no `local_read_size` warning/abort line in `system.log`): the 64 MiB check runs per row after the row is built, and no 10⁶-item row finished |
+| P2 | S9 diagnostic P | 16 | 0 completed; in flight mean 15.6 | **heap OOM** at 12.6 s; dump done 44.6 s; died 88.8 s | post-GC 2028 MB; 106 Full; pause frac 0.71; StatusLogger `ReadStage` 16, NTR 14 |
+| P3 | S9 diagnostic P | 16 | 0 completed; in flight mean 15.8 | **heap OOM** at 11.9 s; dump done 78.6 s; died 95.8 s | post-GC 2028 MB; 116 Full; pause frac 0.91 |
+
+*Runs below: the resumed session (2026-11-18 02:56–03:32 EST), harness `run-r.sh` / `seq-r.sh` / `chain-r.sh` / `chain-r2.sh`,
+endpoint by `a2.py` (A2 rule, A3). Same build, golden data, yaml (directories only), client and window as above.*
+
+| Run | Arm | c | Load reached (client) | Endpoint | Key reading (U; K: none) |
+|---|---|---|---|---|---|
+| HS8G | S8 heap search, 8 GiB, `s4m` (M = 4·10⁶), guard 22G | 16 | 0 completed; 57 reads issued (25 `ReadTimeout`, 32 `OperationTimedOut`, retried at once); in flight max 16, mean 12.4 | **heap OOM** `Java heap space` at **138.5 s**; dump 12.07 GB in 240 s (D7 waited 186 s after the window); shipped `kill -9` ran after the dump | post-GC peak 8172 of 8192 MB, `Pause Full 8156->8156(8192)M` ≈ 1.2 s back to back; 258 Full, 115 `To-space exhausted`; pause frac 1.00; max `RssAnon` 8.99 GB, `memory.current` 20.70 GB (incl. dump page cache), `oom_kill` 0; StatusLogger `ReadStage` 16, NTR 16; dump: **61,736,109 `ArrayCell`**, 61,736,171 `SingleItemCellPath`, 61,740,234 `HeapByteBuffer` (≈ 15.4 rows of 4·10⁶), 30 threads in replica row builds |
+| HS16G | S8 heap search, `MAX_HEAP_SIZE` unset, `s8m`, guard 30G | 16 | none (no client started) | **invalid**: cgroup OOM-kill during JVM start (journal, 2 s after start; unset heap resolves to 31744M with G1 > guard; A4) | — |
+| HS8Gr2 | S8 fill to 3 at 8 GiB | 16 | 0 completed; 53 issued; in flight mean 11.8 | **heap OOM** at **111.3 s**; dump 12.07 GB in 110 s | post-GC peak 8172 MB; 179 Full; pause frac 1.00; `RssAnon` 8.97 GB; `oom_kill` 0; StatusLogger `ReadStage` 16, NTR 16 |
+| HS8Gr3 | S8 fill to 3 at 8 GiB | 16 | 0 completed; 56 issued; in flight mean 13.0 | **heap OOM** at **143.6 s**; dump 11.60 GB in 242 s; shipped `kill -9` after it | post-GC peak 8172 MB; 242 Full; pause frac 1.00; `oom_kill` 0; StatusLogger `ReadStage` **Active 28** (> c = 16: timed-out reads still building their rows, §2.1 item 4), NTR 16 |
+| HS16Gx | S8 heap search, `MAX_HEAP_SIZE=15872M` (A4), `s8m` (M = 8·10⁶), guard 30G | 16 | 0 completed; 64 issued (29 `ReadTimeout`, 31 `OperationTimedOut`, 4 `NoHostAvailable`); in flight mean 12.7 | **no OOM** in the window (no `OutOfMemoryError` up to the stop at ≈ 290 s; `stopdaemon` failed, killed by the harness after 90 s); **service loss** | post-GC peak 15852 of 15872 MB, then `Pause Full 15842->15826(15872)M` ≈ 2.1 s back to back; 135 Full; first Full at 11.7 s; every 60 s window ending from 61.9 s to 292.4 s ≥ 90 % STW (pause frac 1.00); `RssAnon` 16.63 GB; `oom_kill` 0; StatusLogger `ReadStage` 16, NTR 16 |
+| HS16Gxr2 | S8 boundary, 2 more runs | 16 | 0 completed; 58 issued; in flight mean 13.1 | **no OOM**; service loss | post-GC peak 15852 MB, Full GCs recovering ≈ 16 MB each; 147 Full; ≥ 90 % STW windows ending 60.5–314.5 s; StatusLogger `ReadStage` **Active 31**; `oom_kill` 0 |
+| HS16Gxr3 | S8 boundary | 16 | 0 completed; 59 issued; in flight mean 12.2 | **no OOM**; service loss | post-GC peak 15852 MB; 135 Full; ≥ 90 % STW windows ending 60.9–291.5 s; `oom_kill` 0 |
+
+### 3.2.1 Heap search result (S8)
+
+| Heap (budget) | Table (M per read) | Runs | OOM | First OOME after clients start | Notes |
+|---|---|---|---|---|---|
+| 2 GiB | `s1m` (10⁶) | T1–T3 (+ cal-c16) | **3/3** (+1) | 7.3–13.5 s | main condition |
+| 4 GiB | `s2m` (2·10⁶) | HS4G | 1/1 | 38.1 s | dump: 30,376,873 `ArrayCell` ≈ 15.2 rows of 2·10⁶; 26 replica-row-build threads (> 16) |
+| **8 GiB** | `s4m` (4·10⁶) | HS8G, HS8Gr2, HS8Gr3 | **3/3** | 111.3 / 138.5 / 143.6 s | **largest failing budget** |
+| 15872 MiB (set) | `s8m` (8·10⁶) | HS16Gx, r2, r3 | **0/3** within the window | — | boundary: no OOME in 180 s (to the stop at ≈ 290–315 s), but service loss 3/3 (heap pinned at 15.83 of 15.87 GB, ≥ 90 % STW from ≈ 1 min on) |
+| 31744 MiB (unset, automatic) | — | not run | — | — | climbing stopped at the first survivor (§2.7); HS16G with this heap was invalid (A4) |
+
+The time to the first OOME grows with H (≈ 10 s at 2G, 38 s at 4G, 111–144 s at 8G) because each read's row is M ∝ H items and
+takes ∝ M to build; at 15872M it would come after the 180 s window, if at all — the window, not the heap, sets the boundary there.
+That is a limit of the design (fixed window), recorded, not an extension: no run was lengthened (protocol rule 8).
+
+All processes stopped: after HS16Gxr3 `pgrep` for `CassandraDaemon`, `u3client`, `seq-r`, `chain-r`, `run-r` on pc99 is empty
+(03:32 EST); every run's `summary-raw.txt` ends with `END … daemons_left=0`. The two dumps parsed at resume (HS4G, HS8G) were copied
+to the controller's local disk (`/mydata/jason92-u3-parse/`, not NFS), parsed with `harness/hprof_histo.py`, and the copies deleted;
+the parser output is in `logs/HS4G/` and `logs/HS8G/` (the controller directory was removed afterwards).
 
 ### 3.3 Calibration result and conditions fixed by the §2.7 rules
 
@@ -371,7 +418,109 @@ at c = 16, control B at c = 8.
   end, so at the window end the daemon was alive but in back-to-back Full GCs at 2015 MB of 2048 MB (pause frac 1.00). §2.7 counts
   OOM as "daemon death with `OutOfMemoryError` … and `oom_kill` = 0", which T2 meets, with the death 10 s late. T2 is counted as an
   OOM run; without it T would be 2/2 + the calibration OOM.
+- **Resume note (2026-11-18 02:54 EST).** The first stage-2 session was cut off by an API usage limit (not by the design) after
+  writing §3 up to B1. A fresh stage-2 session resumed: freeze hash recomputed, **match** (`db9d4ba2…adcf3`); pc99 idle (no
+  Cassandra daemon, no harness process, ports free, load 0.00); no `STOP` file. On the node the interrupted session's chain had
+  **finished** every queued run before the cut-off (last run P3 ended 00:01 EST): cal-c8, cal-c16, T1–T3, A1–A3, I1–I3, B1–B3,
+  HS4G, P1–P3, each with a complete `summary-raw.txt` (`END … daemons_left=0`), `analysis.txt`, GC and client logs. **Reused as
+  is:** the build `/mydata/s4/u3-w1/cassandra`, the golden data `/mydata/s4/u3-w1/golden`, and all 18 completed runs (logs clean;
+  none redone). The harness on the node was byte-identical to `harness/` (checked with `cmp`), plus `spec-P.txt`, now copied
+  here. The excerpts directory [`logs/`](logs/) had not been written; it was filled from the node at resume (per run
+  `analysis.txt`, `summary-raw.txt` cut to 600 chars per line, `oom-lines.txt` = OOM lines of `node.out` + first StatusLogger
+  `ReadStage`/NTR lines, and the existing `hprof-histo.txt` of cal-c16/T1–T3). **Not done before the cut-off:** the heap search
+  stopped after HS4G (see A3), so 8 GiB and 15872M had not run; that is what the resumed session ran (runs below).
+- **Amendment A3 (2026-11-18 02:56 EST, before any new reading; heap-search climbing rule and time limits).** (a) The interrupted
+  chain's `seq.sh` stopped climbing after HS4G because `analyze.py` applies the literal endpoint rule (daemon death inside the
+  window) and printed `survived`; HS4G's first `OutOfMemoryError: Java heap space` came at 38.1 s and its dump completed at 158 s,
+  inside the window, with the shipped `kill -9` just after it — exactly T2's case, which A2 already counts as OOM. Applying A2
+  consistently, HS4G is an OOM and the heap search continues per §2.7 (climb to 8 GiB `s4m`, then 15872M `s8m`, stop at the first
+  survivor; then fill the largest failing step to 3). The A2 rule is now coded in `harness/a2.py` (OOM = death with OOME in the
+  window, or first OOME — hprof creation — inside the window with `oom_kill` 0) and used by `harness/seq-r.sh` / `chain-r.sh`.
+  (b) §2.7's "no new run after 02:05 EST" and §2.9's plan belonged to the interrupted session's time budget; the resumed session's
+  deadline is 07:30 EST (all runs stopped, §3–§4 written), so `seq-r.sh` starts no run after 06:30 EST. Window, arms, counts,
+  data and configuration are unchanged.
+- **D7 (dump preservation, resumed runs only).** `harness/resume-lib.sh` wraps `stop_node`: if a `HeapDumpOnOutOfMemoryError`
+  dump is still being written when the window ends, it waits for `Heap dump file created` (≤ 900 s) before `stopdaemon`/kill, so
+  the 8–16 GB dumps of the larger heaps are not truncated by the 90 s kill. It acts only after the window and after the first
+  OOME, so it cannot change the endpoint. `harness/run-r.sh` = `run.sh` sourcing `resume-lib.sh` (one-line diff).
+- **Amendment A4 (2026-11-18 03:08 EST, after HS8G; design fault in the top heap step).** The spec line `HS16G unset 30G s8m`
+  (§2.3/§2.7: "15872M, MAX_HEAP_SIZE unset") was cgroup-OOM-killed **during JVM start** (journal: `u3w1-HS16G.scope: A process of
+  this unit has been killed by the OOM killer` 2 s after start, `-XX:+AlwaysPreTouch`; no client ran) → **invalid**, not a
+  reading. Cause: in `cassandra-env.sh:51-56` the cap is 15872M only when CMS is used (`USING_CMS` = 0); with the shipped G1 it is
+  **31744M**, so on pc99 an unset heap resolves to `-Xmx31744M` and `MaxDirectMemorySize` = 15872M (heap_limit/2 — the same
+  15872M seen as D2), above the 30G guard. §2.3's "cassandra-env resolves min(½ RAM, 15872 MiB)" was wrong for G1. The two
+  intentions of that step are now separate steps, climbing in order: **HS16Gx** = `MAX_HEAP_SIZE=15872M` set explicitly, `s8m`
+  (keeps §2.4's arithmetic, 1.2 GB per read ≈ 7.5 % of H), guard 30G; then, only if it OOMs, **HS31G** = `MAX_HEAP_SIZE` unset
+  (the fully automatic budget, `-Xmx31744M`), `s8m` (no `s16m` table; the per-read share halves to ≈ 3.8 % of H, so it is a
+  harder step), guard 48G (≥ heap + resolved direct limit, as §2.3 requires). Then the largest failing step is filled to 3 and a
+  surviving step gets 2 more runs if time allows (`harness/chain-r2.sh`, `spec-hs-r2.txt`). The interrupted chain's tail (two more
+  `HS16G unset 30G` runs, which would have been killed the same way) was stopped by killing `chain-r.sh` (PID) while the HS8G
+  fill was running; the fill itself continued.
 
 ## 4. Conclusion (stage 2)
 
-pending
+Written 2026-11-18 ≈ 03:45 EST by the resumed stage-2 session.
+
+**Verdict: true positive.** Protocol status: **`verified-OOM · deployment`**, endpoint Java heap OOM, classification
+**unprotected** (unprotected configuration: the collection guardrail and the read-size thresholds are off by default; unprotected
+accumulation: with them on, neither bounds the heap of concurrent whole-collection reads). Interpretation: a configuration-sizing /
+validation gap (guardrail counts the written fragment and ships off; the read-size check runs after the row is built), on behaviour
+the project documents (collections are read whole, not paged; meant for small data; limit 2·10⁹ items). Not an implementation defect
+in the narrow sense, and not a known-fixed bug (JIRA verdict `new`, §1).
+
+### 4.1 Per-condition status
+
+| Condition | Runs | Result | Status |
+|---|---|---|---|
+| **2 GiB heap, `s1m` (10⁶ items), c = 16, defaults** (main) | T1–T3 (+ cal-c16) | heap OOM 3/3 (+1), first OOME 10.4–13.5 s | **verified-OOM · deployment** |
+| 4 GiB, `s2m`, c = 16 | HS4G | heap OOM 1/1 at 38.1 s | heap-search step (1 run) |
+| **8 GiB, `s4m`, c = 16** | HS8G, r2, r3 | heap OOM **3/3** at 111–144 s | **largest failing budget, 3/3** |
+| 15872 MiB, `s8m`, c = 16 | HS16Gx, r2, r3 | no OOME within the 180 s window 0/3; GC service loss 3/3 (heap 15.83/15.87 GB, ≥ 90 % STW from ≈ 60 s to the stop) | boundary within the window (`verified-gap · service-loss`-shaped, not counted as OOM) |
+| 31744 MiB (unset heap, automatic for G1 on pc99) | — | not run (climbing stopped at the first survivor; the first attempt was invalid, A4) | untested |
+| diagnostic P: `local_read_size_fail_threshold` 64 MiB | P1–P3 | heap OOM 3/3; no read-size rejection logged first | `reproduced-OOM · diagnostic` (custom constraint): the shipped read-size bound, when enabled, does not prevent it |
+
+### 4.2 V1–V7 (main condition: build `5.0.9-SNAPSHOT`, shipped yaml + directories, 2 GiB heap, `s1m`, c = 16)
+
+| | Requirement | Evidence | Met |
+|---|---|---|---|
+| V1 | ≥ 3 runs reach the endpoint | T1, T2, T3: `OutOfMemoryError: Java heap space` at 12.2 / 13.5 / 10.4 s, `oom_kill` 0, 3/3 (cal-c16 a 4th, not counted). T2's death by the shipped `kill -9` came ≈ 10 s after the window (A2) | yes (A1, A2 noted) |
+| V2 | nearest surviving control ≥ 3 runs, same budget/build | control B (c = 8): B1–B3 survive 3/3, 452–487 reads each, 2.51–2.70 M items/s, 0 errors (heavy GC, pause frac 0.78–0.80, below the 0.90 service-loss line); control A (same 8,000,004 B per read as one blob, c = 16): A1–A3 survive 3/3, 15.9–17.4 k reads, pause frac 0.13–0.14 | yes |
+| V3 | U measured independently of K | K: none (no counter at defaults). U: post-GC heap pinned at 2014–2017 of 2048 MB; dumps (cal-c16, T1–T3) 15.20–15.22 M `ArrayCell`, the same number of `CellPath$SingleItemCellPath`, `HeapByteBuffer`, `byte[]` ≈ **15.2 rows of 10⁶ items** (≈ 150 MB each) ; 13–16 threads in `UnfilteredSerializer.deserializeRowBody`/`readComplexColumn`. HS4G: 30.38 M cells ≈ 15.2 rows of 2·10⁶, 26 builder threads; HS8G: 61.74 M ≈ 15.4 rows of 4·10⁶, 30 builder threads | yes |
+| V4 | intervention removes the endpoint ≥ 3 runs at recorded load | I (same 10⁶ ints per partition as clustering rows, native paging 5,000 rows, same c = 16, same heap): survive 3/3, **4.48–4.64·10⁸ items delivered (2.50–2.61 M items/s)** — the same useful throughput as control B, vs 0 items in T — peak post-GC ≤ 271 MB. Bounding c (control B) also removes it. Enabling the shipped read-size bound (P) does **not** | yes |
+| V5 | initiating failure + holder at failure | first OOME thread stack in the dumps: `OutOfMemoryError.<init> ← ByteBuffer.wrap ← ByteBufferUtil.read ← CollectionType$CollectionPathSerializer.deserialize ← Cell$Serializer.deserialize ← UnfilteredSerializer.readComplexColumn` (replica row build); StatusLogger at the OOM `ReadStage` Active 16, NTR Active 16; histograms above (`logs/*/hprof-histo.txt`) | yes |
+| V6 | constraints at shipped defaults | every protection-map row at default in T, A, B, I and heap search (guardrails off, read thresholds off, `concurrent_reads` 32, NTR 128, timeouts 5 s / 12 s, in-flight request limits heap-derived: heap/10); only P changes a constraint (diagnostic arm) | yes |
+| V7 | acceptable budget | 2 GiB heap = the ideal budget of the standing rule (≥ 512 MiB, no review needed); repeated at 8 GiB 3/3. Direct limit resolved 15872M (not binding; no direct OOM). The cgroup scope was a guard only (`oom_kill` 0 in every valid run), not the budget | yes |
+
+### 4.3 Reason (deciding numbers)
+
+At a 2 GiB heap and shipped defaults, each read of a 10⁶-item appended set builds a ≈ 150 MB row on the replica; 16 concurrent
+readers put ≈ 15 such rows on the heap at once (dumps: 15.2 M cells each of `ArrayCell`, `CellPath`, `HeapByteBuffer`, `byte[]`)
+and the JVM threw `OutOfMemoryError: Java heap space` 10–14 s after the clients started in 3/3 runs, with no byte counter (K: none)
+and the 32-permit `concurrent_reads` bound not binding (16 builders; up to 28–31 when timed-out reads were retried). The same bytes
+as one blob (3/3), the same items as a paged clustering table at the same concurrency with 2.5 M items/s delivered (3/3), and half
+the concurrency (3/3) survived. Scaling M with the heap, the OOM repeats at 4 GiB (1/1) and 8 GiB (3/3, OOME at 111–144 s); at
+15872 MiB no OOME came within the 180 s window (0/3) although the node spent ≥ 90 % of wall time in Full GCs with the heap pinned at
+15.83 of 15.87 GB. The read-size fail threshold, when enabled at 64 MiB, did not prevent the OOM (3/3), because it is checked after
+the row is built.
+
+### 4.4 Limits of attribution and caveats
+
+- **Workload validity (A1).** At c = 16 no read completes before the OOM, so the literal "≥ 1 completed read per client" rule could
+  not hold for any OOM run; validity was taken from every client having issued reads and the server executing 16 of them
+  (StatusLogger, dump stacks). A reviewer who rejects A1 would have no valid OOM run at c ≥ 16; the survivors at c = 8 completed
+  452–487 reads each.
+- **Death after the window (A2/A3).** T2, HS4G and HS8G/r3 threw their first OOME inside the window but were killed by the shipped
+  `-XX:OnOutOfMemoryError=kill -9 %p` after it; the first OOME (hprof creation, D5) is the endpoint instant.
+- **Top of the heap search.** The 180 s window, not the heap, bounded the search at 15872 MiB (time to OOME grows ∝ M); the shipped
+  automatic heap for G1 on pc99 (31744M, A4) was not tested. "Largest failing budget = 8 GiB" is under this window.
+- **Coordinator copy not observed.** §2.1 predicted a second (coordinator) row per read; at the OOM no row had finished, so all
+  measured holder memory is replica-side row builds. The coordinator copy remains a prediction.
+- **Control B margin.** c = 8 survives but with 78–80 % STW in the worst 60 s and post-GC peaks at the heap limit: the survivable
+  region is narrow (§2.7's 30 % margin target is not met in heap terms; it is met in multiplicity, c 8 vs 16).
+- **By-design reading.** The CQL docs say collections are read whole and are for small data; the workload (sets of 10⁶–4·10⁶ ints
+  built by accepted appends, 16 concurrent readers, client retries without back-off) stays within the documented 2·10⁹-item limit
+  and every shipped default. A deployment following the docs' advice (clustering table) is protected (arm I).
+- **What stays on the nodes.** `pc99:/mydata/s4/u3-w1/` (62 GB: build `cassandra/`, `golden/` data 519 MB, `runs/<run>/logs/` with
+  GC/system/client logs and 11 hprof files — cal-c16, T1–T3, P1–P3 ≈ 3.1 GB each, HS4G 6.1 GB, HS8G/r2/r3 11.6–12.1 GB), node data
+  directories removed per run; no process running (checked 03:32 EST). `/mydata/s4/cassandra-base` and `/mydata/s4/ipc-recheck`
+  untouched.

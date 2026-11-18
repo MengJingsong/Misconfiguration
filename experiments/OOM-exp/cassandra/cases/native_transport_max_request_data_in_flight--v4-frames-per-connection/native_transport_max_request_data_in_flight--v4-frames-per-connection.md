@@ -7,13 +7,21 @@
 | Phase-1 case file | [`native_transport_max_request_data_in_flight-releaseItem-globalInFlightBytesBelowLimit--autonomous`](../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/native_transport_max_request_data_in_flight-releaseItem-globalInFlightBytesBelowLimit--autonomous.md) |
 | System / pinned source | Cassandra 5.0.9 (`systems/cassandra/source/`, unpatched) |
 | Stage 1 (design) | OOM agent stage 1 (Claude Opus 5.5, workflow subagent), 2026-11-17 22:45–23:30 EST |
-| Stage 2 (verify) | pending (a fresh OOM-agent session) |
-| Verdict | `pending` |
+| Stage 2 (verify) | fresh OOM-agent sessions (Claude Opus 5.5, workflow subagents): runs 2026-11-17 23:02–23:48 EST; interrupted by an API usage limit; resumed 2026-11-18 02:54 EST (no new arms, §3.1) |
+| Verdict | **`true positive`** — `verified-OOM · deployment` (bypass, accounting omission × unlimited connections) |
 
 ## Summary
 
-- **Conclusion:** pending (stage 2).
-- **Root cause (hypothesis under test):** on protocol v4 connections a whole request frame is buffered in Netty's
+- **Conclusion:** true positive. At shipped defaults, heap 4 GiB and direct 1,280 MiB, a 128-request burst of
+  15 MiB v4 writes over 128 connections killed Cassandra 3/3 (Netty `OutOfDirectMemoryError` in the request
+  decoder ≈ 2.3 s into the burst, then a forced heap OOM). The same frames over 32 connections (control) and the same
+  128 requests over 8 connections (intervention) survived 3/3 each. `verified-OOM · deployment`; 2 GiB direct untested.
+- **Root cause (measured):** Netty's direct counter reached 1,280 MiB, mostly request frames still being read
+  (3.0 × the contract C = 424.6 MiB), while the in-flight counter held only 75–180 MiB and no connection was paused: frames are held in
+  pooled direct memory *before* `native_transport_max_request_data_in_flight` is checked, and connections are
+  unlimited, so the limit never gets a chance to act. The force-admit overshoot below (the design's hypothesis) is
+  real at large budgets but did not drive these failures (§3.5).
+- **Root cause (hypothesis under test, stage 1):** on protocol v4 connections a whole request frame is buffered in Netty's
   pooled direct memory (one 16 MiB chunk per 15 MiB frame) and decoded before
   `native_transport_max_request_data_in_flight` is consulted; a request that fails the reservation is still
   admitted (force-allocated) and only the connection is paused, so each connection holds at least one frame
@@ -416,8 +424,218 @@ Calibration readings (auto direct, resolved 15,872 MiB): ΔU_peak(`cal128`) = 1,
 Step-3 queue (interleaved): T_r1 (dump=1), Ctl_r1, Int_r1, T_r2, Ctl_r2, Int_r2, T_r3, Ctl_r3, Int_r3, all heap
 4,096 MiB, direct 1,280 MiB.
 
-(Full §3 follows below once the runs end.)
+### 3.1 Interruption and resumption (note dated 2026-11-18 02:54 EST)
+
+The first stage-2 session ran every arm of the frozen design (shakedown, 3 calibration arms, 9 V arms) between
+23:09 and 23:47 EST on 2026-11-17, analysed `T_r1`'s heap dump at 23:48 EST, and was then cut off by an API usage
+limit (not by the design) before it wrote §3 and §4. A fresh stage-2 session resumed at **02:54 EST on
+2026-11-18**. It re-checked the freeze hash (`1d9e8695…151d0bec`, unchanged), found ms0617 idle (no Java process,
+no user scope or service of this case; `Linger=yes` from the first session), and checked every arm on the node for
+complete logs: each arm folder has `samples.csv`, `nmt.csv`, `cg.csv`, `load.log` with its `FINAL` line,
+`V-logs/{system,debug,gc,launch}.log`, `V-flags.txt`, `V-yaml.diff`, `outcome.txt`, `readings.json` and
+`stop.log`, and the queue logs `q0.log`–`q2.log` end with `QUEUE DONE`. The harness on the node
+(`/mydata/s4/b9-w1/h/`) is byte-identical (md5) to this folder's `harness/`.
+
+**Reused:** the build (`/mydata/s4/cassandra-base`, [`logs/build-identity.txt`](logs/build-identity.txt)), the
+compiled harness (`/mydata/s4/b9-w1/cls`), all 13 arms and their raw logs, and the `T_r1` dump analysis
+(`runs/T_r1/hprof_direct.txt`). **Redone:** nothing. No arm was incomplete, so no arm was re-run and no new
+readings were taken; the resumed session only re-read the raw files, re-derived the numbers below from them
+(including two that `b9peaks.py` did not produce, see 3.6), copied excerpts into `logs/`, and wrote §3–§4.
+
+### 3.2 Environment and configuration (as run)
+
+| Item | Value |
+|---|---|
+| Node | ms0617 (node4.jason92-326377, Utah m400), **aarch64**, 8 cores, 62.7 GiB RAM, kernel 5.15.0-191-generic, cgroup v2; client and server colocated over loopback |
+| JDK / GC | OpenJDK 11.0.33, G1 |
+| Build | `cassandra-5.0.9` (tag), `apache-cassandra-5.0.9-SNAPSHOT.jar` md5 `1becab414e5f4a4ce6ad3d25c63bf1ab`, `ant jar` BUILD SUCCESSFUL in 4 min 57 s, unpatched; driver 3.12.1 shaded, Netty epoll 4.1.130 aarch_64 |
+| Work dir | `/mydata/s4/b9-w1/` (node `node/`, harness `h/`, classes `cls/`, arms `runs/<arm>/`), not `/mydata/b9` (environment only) |
+| yaml diff | environment keys only (cluster name `b9`, 127.0.0.81 addresses and seed, directories under the work dir); [`runs/*/V-yaml.diff`] identical in all arms; **no capacity setting changed in any arm** |
+| Heap | `-Xms4096M -Xmx4096M` (MaxHeapSize 4,294,967,296) in every arm |
+| `MaxDirectMemorySize` (resolved, `VM.flags`) | calibration: auto → **16,642,998,272 B = 15,872 MiB**; V arms: **1,342,177,280 B = 1,280 MiB** via `MAX_DIRECT_MEMORY_SIZE` |
+| Netty | `io.netty.allocator.maxOrder=11`, `useCacheForAllThreads=true` (shipped options); `io.netty.maxDirectMemory` unset, so Netty's counter limit = `MaxDirectMemorySize` (confirmed by the error text `max: 1342177280` and by the dump's `DIRECT_MEMORY_LIMIT`) |
+| Resolved in-flight limits at 4 GiB | L = 409.6 MiB global, 102.4 MiB per IP; contract C = L + S = 424.6 MiB (Netty equivalent ≈ 448 MiB) |
+| Process scope | `systemd-run --user --scope -p MemoryMax=48G -p MemorySwapMax=0` (non-binding safety net); Cassandra `taskset -c 0-5`, client / samplers on 6–7 |
+| Instruments | JMX every 500 ms; NMT summary via `jcmd` (nominally 2 s, **actually every 3–4 s** on the m400, see 3.6); RssAnon / `memory.current` / `oom_kill` every 1 s |
+| Clocks | queue logs in EST, node shell in MST, Cassandra logs in UTC, samples in epoch ms (one host clock) |
+
+### 3.3 Calibration (heap 4,096 MiB, direct auto = 15,872 MiB)
+
+Full lines: [`logs/summary.txt`](logs/summary.txt). ΔU = NMT Other − JDK direct − X0 (X0 = 208 MiB, idle).
+
+| Arm | Conns × k | Outcome | Burst done | K_peak (frames) | Paused peak | ΔU_peak | JDK direct peak | Client ok / timeouts |
+|---|---|---|---|---|---|---|---|---|
+| `shake` | 8 × 1 | NONE | 0.8 s | 30 MiB (2) | 0 | 61 MiB | 117 MiB | 129 / 0 (20-s window, not a reading) |
+| `cal128` | 128 × 1 | NONE | 12.0 s | 735 MiB (49) | 49 | **1,775 MiB** (at +3.0 s) | 1,047 MiB | 130 / 274 |
+| `cal64` | 64 × 1 | NONE | 4.3 s | 495 MiB (33) | 27 | 1,420 MiB | 1,002 MiB | 162 / 176 |
+| `calI8` | 8 × 16 | NONE | 15.4 s | 210 MiB (14) | 8 | 707 MiB | 808 MiB | 225 / 170 |
+
+The D\* decision (3.0, written before step 3) follows from these: D\* = 1,280 MiB, control 32 connections,
+intervention margin met, no upward search (rule 5: N_held(`cal128`) 111 by ΔU or 49 by K, both < 115).
+
+### 3.4 V arms (heap 4,096 MiB, direct 1,280 MiB; interleaved T, Ctl, Int × 3; 23:21–23:47 EST)
+
+**Test `T` (128 connections × 1 request, 128-request burst of 15 MiB writes).** All three died of the claimed
+endpoint. Per arm (raw: `/mydata/s4/b9-w1/runs/T_r{1,2,3}/`; excerpts
+[`logs/T_r1-first-oom.txt`](logs/T_r1-first-oom.txt), [`T_r2`](logs/T_r2-first-oom.txt),
+[`T_r3`](logs/T_r3-first-oom.txt), [`logs/T-oom-histograms.txt`](logs/T-oom-histograms.txt),
+[`logs/T-samples-around-failure.txt`](logs/T-samples-around-failure.txt)):
+
+| | T_r1 (dump=1) | T_r2 | T_r3 |
+|---|---|---|---|
+| First OOM (system.log) | `ERROR [epollEventLoopGroup-5-4] 04:23:31,016 UTC` | `[epollEventLoopGroup-5-7] 04:32:14,277` | `[epollEventLoopGroup-5-5] 04:40:54,995` |
+| Error | `io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 1342177280, max: 1342177280)` in all three | same | same |
+| Stack | `PoolArena.newChunk` ← `PoolArena.reallocate` ← `AbstractByteBuf.ensureWritable` ← `ByteToMessageDecoder$1.cumulate` ← `ByteToMessageDecoder.channelRead` ← `EpollStreamUnsafe.epollInReady` | same | same |
+| Time after `BURST_START` | **+2.40 s** | **+2.35 s** | **+2.26 s** |
+| Netty OOM errors logged | 31 | 49 | 31 |
+| **U_fail** (Netty counter at failure) | **1,280 MiB** | **1,280 MiB** | **1,280 MiB** |
+| NMT Other just before failure (+1.9 s) | 1,358 MiB (ΔU 1,033) | 1,855 MiB (ΔU 1,500) | 1,802 MiB (ΔU 1,552) |
+| **K** at the last sample before failure | **165 MiB (11 frames)** at +2.22 s | **75 MiB (5)** at +1.89 s | **180 MiB (12)** at +2.25 s |
+| `ConnectionPaused` count / `PausedConnections` at that sample | **0 / 0** | **0 / 0** | **0 / 0** |
+| JDK direct at that sample | 312 MiB | 147 MiB | 357 MiB |
+| Heap used at that sample | 961 MiB | 816 MiB | 945 MiB |
+| OOM-time histogram (HeapUtils, ms after first error) | +66 ms: `PoolChunk` 34, `Envelope` 18, `Envelope$Decoder` 127, `ExecuteMessage` 8, `[B` 664.5 MiB | +27 ms: 44, 21, 108, 17, 648.5 MiB | +114 ms: 57, 24, 121, 18, 768.5 MiB |
+| Forced heap OOM (`JVMStabilityInspector`, then `kill -9`) | +7.5 s | +6.6 s | +6.4 s |
+| K_peak / paused peak (whole arm, includes the dying seconds) | 390 MiB / 5 | 675 MiB / 31 | 405 MiB / 15 |
+| Kernel / cgroup OOM kill | 0 | 0 | 0 |
+| Client | ok 111, `NoHostAvailable` 205, `Transport` 90 | ok 90, 233, 83 | ok 90, 231, 85 |
+
+`T_r1` heap dump (`runs/T_r1/cassandra-1794975704-pid102884.hprof`, 933 MiB, written at the forced heap OOM,
+≈ 5 s after the first Netty error; [`logs/T_r1-hprof_direct.txt`](logs/T_r1-hprof_direct.txt)): Netty
+`DIRECT_MEMORY_COUNTER` = 512 MiB with `DIRECT_MEMORY_LIMIT` = `MAX_DIRECT_MEMORY` = 1,342,177,280; 167
+no-cleaner `DirectByteBuffer`s ≤ 954.5 MiB; JDK owner buffers 267 MiB (`DataOutputBuffer` scratch 195 MiB, hints
+32 MiB). The counter had already fallen from 1,280 to 512 MiB because the 31 failing channels were closed and their
+cumulations released before the dump, so the dump confirms the counter and its limit but is not the at-failure
+holder picture; the at-failure picture is U_fail plus the histogram taken 27–114 ms after the first error.
+
+**Matched control `Ctl` (32 connections × 1 request, 32-request burst).** 0/3 endpoints.
+
+| | Ctl_r1 | Ctl_r2 | Ctl_r3 |
+|---|---|---|---|
+| Outcome | NONE (alive, no ERROR in system.log) | NONE | NONE |
+| Burst done | 2.5 s, 32/32 ok | 2.6 s, 32/32 ok | 2.7 s, 32/32 ok |
+| K_peak (frames) / paused peak | 315 MiB (21) / 2 | 435 MiB (29) / 6 | 285 MiB (19) / 1 |
+| ΔU_peak (NMT) | 61 MiB | 62 MiB | 78 MiB |
+| JDK direct peak / ΔRssAnon peak | 597 / 981 MiB | 612 / 1,258 MiB | 582 / 1,178 MiB |
+| Client (45-s window) | ok 306, 0 errors | ok 305, 0 errors | ok 305, 0 errors |
+
+The NMT ΔU of the control missed its 2.5-s burst (NMT every 3–4 s; see 3.6), so the control's Netty peak is bounded
+by arithmetic instead: the client never has more than W·Q = 32 requests outstanding, so at most 32 frames are
+buffered (≤ 32 × 16 MiB = 512 MiB) plus at most one reallocation transient per event loop (≤ 12 × 12 MiB =
+144 MiB): **≤ 656 MiB < 0.7 × 1,280 = 896 MiB**, the 30 % margin. `cal64` (64 connections, 15.9 GiB budget) is
+the measured upper reference: ΔU_peak 1,420 MiB for twice the connections.
+
+**Intervention `Int` (the same 128-request burst over 8 connections × 16).** 0/3 endpoints.
+
+| | Int_r1 | Int_r2 | Int_r3 |
+|---|---|---|---|
+| Outcome | NONE (alive, no ERROR) | NONE | NONE |
+| Burst done | 19.2 s, 128/128 | 15.1 s, 128/128 | 18.0 s, 128/128 |
+| K_peak (frames) / paused peak / pause events | 210 MiB (14) / 8 / 283 | 210 MiB (14) / 8 / 281 | 210 MiB (14) / 8 / 287 |
+| ΔU_peak (NMT, burst covered by 4–5 samples) | 707 MiB | 658 MiB | 400 MiB (all ≤ 0.55 × D\*) |
+| JDK direct peak | 792 MiB | 852 MiB | 552 MiB |
+| Client (≈ 56-s window) | ok 226, write timeouts 170 | ok 216, 180 | ok 207, 188 |
+
+Load reached and throughput ([`logs/load-excerpts.txt`](logs/load-excerpts.txt)): the intervention delivered the
+same 128 burst requests (128/128 completed, ok or write timeout) and kept 128 requests outstanding through the
+sustain phase. Its ok writes (207–226, 3.5–3.9/s) exceed those of the same 128-request load over 128 connections
+at the 15.9 GiB budget (`cal128`: ok 130, 2.6/s, 274 timeouts; burst done 12.0 s), so bounding the connections did
+not cost useful work. The design's stated throughput check (burst completion rate within 25 % of the control's)
+is **not met as worded**: 128 requests in 15.1–19.2 s (6.7–8.5/s) against the control's 32 in 2.5–2.7 s
+(12–13/s); the control carries a quarter of the outstanding bytes, so its per-request rate is not a matched
+reference, and `cal128` is the matched-load one. The write timeouts in `Int` (and `cal128`) come from 128
+outstanding 15 MiB writes on one SATA-SSD node with 2-s `write_request_timeout`; the control (32 outstanding) had
+none.
+
+### 3.5 Classification by measurement (domain N)
+
+- **C** = L + S = 424.6 MiB (Netty ≈ 448 MiB); **U** = 1,280 MiB at failure (Netty's own counter, independent of
+  K) = **3.0 × C**; **K** at the last sample before failure 75–180 MiB, **below L**, with zero connection pauses.
+- So the row is **U > C, K ≤ C → bypass, accounting omission**: the bytes are request frames that the in-flight
+  control is meant to cover, but they are held in Netty cumulation buffers **before** `checkLimits` charges them,
+  and with 128 connections reading frames at once ≈ 80 chunks (128 cumulations, growing by reallocation copies)
+  fill Netty's counter while only 5–12 frames have been decoded and charged.
+- The design's predicted sub-mechanism (force-admitted frames after a failed reservation, K > C) **did not
+  occur before the endpoint**: `ConnectionPaused` was 0 at failure in 3/3 arms. K passed C only afterwards in
+  T_r2 (675 MiB while the JVM was dying) and in the surviving calibration arm `cal128` (735 MiB, 49 paused). The
+  force-admit overshoot is real at a large budget but is not what exhausts the counter at 1,280 MiB.
+- The intervention isolates the factor: with 8 connections only 8 frames can be in reading at once, the limit
+  pauses all 8 after their crossing frames (K_peak 210 MiB < L), and the endpoint disappears 3/3.
+
+### 3.6 Deviations from the frozen design
+
+1. **Work directory** `/mydata/s4/b9-w1/` instead of `/mydata/b9/` (environment; same disk).
+2. **NMT cadence** ≈ 3–4 s, not 2 s (`jcmd` per sample is slow on the m400). Consequences: in `T` only one NMT
+   sample falls between `BURST_START` and the failure; in `Ctl` no sample caught the 2.5-s burst (ΔU 61–78 MiB is
+   an under-reading, bounded by arithmetic in 3.4). U for the claimed endpoint rests on U_fail (Netty's counter in
+   the error text), not on NMT.
+3. **`b9peaks.py` reported `first_oom_thread=None`** (parser miss); the thread and stack were read directly from
+   `first-oom.txt` (above). The classifier's `NETTY-REQ` class matches the raw stacks in 3/3.
+4. **K at failure** was read by the resumed session from `samples.csv` (last sample before the first error's
+   timestamp); `b9peaks.py`'s `K_last` (−0) is the last sample of the dead JVM and is not used.
+5. **Interruption** (3.1): stage 2 stopped after the runs and the dump analysis (23:48 EST) and resumed at 02:54
+   EST without new arms. All arms ran inside the design's window (before the 01:50 EST cutoff).
+6. **Upward boundary search** not run: rule 5's condition was not met (3.0). No other arm was added.
+
+No capacity setting was changed in any arm; no patch, Byteman or injected delay was used.
+
+### 3.7 Left on the node and cleanup
+
+No process of this case runs on ms0617 (checked 02:58 EST: only the user's `systemd --user` manager; no Java,
+no scope). Left on disk (`/mydata`, 36 GiB free): `/mydata/s4/cassandra-base` (build, 469 MiB),
+`/mydata/s4/build-b9.log`, `/mydata/s4/b9-w1/` (963 MiB: harness, classes, node config/logs, `runs/` with all
+13 arms' raw logs and the 933 MiB `T_r1` hprof). `Linger=yes` for `jason92` (enabled by the first session) is
+**still on**: the resumed session's `loginctl disable-linger` was refused by the session's permission check, so it
+must be turned off by hand (`sudo loginctl disable-linger jason92` on ms0617). `/mydata/s2r2` and `/mydata/u1r2`
+(other cases) were not touched.
 
 ## 4. Conclusion (stage 2)
 
-pending
+**Verdict: `true positive`.** Protocol status: **`verified-OOM · deployment`** (bypass, accounting omission,
+under unlimited connection multiplicity), endpoint a Netty direct-memory OOM (`OutOfDirectMemoryError` on the
+request-decode path), followed by Cassandra's forced heap OOM and `kill -9` of the JVM.
+
+**Reason.** At shipped defaults (in-flight limit L = heap/10 = 409.6 MiB, connections unlimited, frame size
+16 MiB) and a 4 GiB heap with a 1,280 MiB direct budget, a burst of 128 v4 EXECUTEs of 15 MiB over 128
+connections killed Cassandra in **3/3** runs, 2.26–2.40 s after the burst started, with
+`OutOfDirectMemoryError … (used: 1342177280, max: 1342177280)` on an epoll event loop in
+`ByteToMessageDecoder.cumulate` → `PoolArena.reallocate` → `newChunk`. Netty held **U = 1,280 MiB = 3.0 × the
+contract C = 424.6 MiB** while the control's own counter K stood at **75–180 MiB (5–12 frames, below L)** and
+**no connection had been paused**: the request frames sit in pooled direct cumulation buffers before
+`LegacyDispatchHandler.checkLimits` sees them, so the limit cannot stop memory it has not yet been asked about,
+and nothing bounds how many connections read a frame at once. The matched control (the same frames over 32
+connections, ≤ 656 MiB by construction) survived **0/3** with all writes ok, and the intervention (the same
+128-request burst over 8 connections, so the limit's pause works) reached the endpoint in **0/3** runs with K_peak 210 MiB,
+ΔU ≤ 707 MiB and more useful writes than the same load over 128 connections at a 15.9 GiB budget.
+
+**V1–V7.**
+
+| | Evidence | Met |
+|---|---|---|
+| V1 Repetition | T_r1–r3: `NETTY-REQ` 3/3 from clean regenerated nodes | yes |
+| V2 Matched control | Ctl_r1–r3 (32 connections, same build, heap, D\*, frames, instruments): NONE 3/3 | yes (peak bounded by arithmetic, not NMT; 3.4) |
+| V3 Measurement | U_fail from Netty's own counter (1,280 MiB) and NMT Other (1,358–1,855 MiB just before failure) vs K (`RequestsSize`, 75–180 MiB) | yes |
+| V4 Intervention | Int_r1–r3 (8 connections, matched 128-request burst): NONE 3/3, 128/128 delivered, ok 207–226 | yes (throughput check as worded not met; matched-load comparison with `cal128` given in 3.4) |
+| V5 Initiating failure | first error, thread and stack in 3/3 (`logs/T_r*-first-oom.txt`); OOM-time histograms 27–114 ms after it (`PoolChunk` 34–57, `Envelope` 18–24, `Envelope$Decoder` 108–127); `T_r1` dump (counter and limit) | yes |
+| V6 Default constraints | every capacity setting at its shipped default, resolved at 4 GiB (L 409.6 MiB, per-IP 102.4 MiB, connections −1, frame 16 MiB, 128 NTR threads) | yes |
+| V7 Acceptable budget | heap 4,096 MiB, direct 1,280 MiB (≥ 512 MiB standing rule); the 15,872 MiB auto budget survived (`cal128`, 1 run) | yes |
+
+**Largest failing budget.** 1,280 MiB fails 3/3; 15,872 MiB (auto for this 62.7 GiB node) survived the same
+burst once with ΔU_peak 1,775 MiB. The design's upward search was not triggered (rule 5), so the boundary between
+1,280 MiB and ≈ 2 GiB, in particular the ideal 2,048 MiB (what `cassandra-env.sh` resolves on an 8 GiB node), is
+**untested**. More connections should move the boundary up roughly 16 MiB per concurrently reading connection
+(≈ 128 connections reached ≈ 1.8–2 GiB of Netty memory here), but that is a prediction, not a reading.
+
+**Interpretation.** A suspected implementation / design gap rather than an intentional exception: the code
+comment's documented overshoot is "one request per connection after the limit" (`PreV5Handlers.java:84-85`), but
+the memory that fails is taken **before** any request is counted. Clue patterns: **CP-11** (enforcement after the
+allocation: frames are buffered, then checked) combined with **CP-7** (a per-connection natural size, one frame
+of ≤ 16 MiB, × unlimited connections). The phase-1 row's CP-6 (force-admit) is real at large budgets (`cal128`:
+K 735 MiB, 49 paused) but did not drive these failures.
+
+**Limits of attribution.** Platform aarch64 m400 only, client colocated on loopback. The control's Netty peak is
+an arithmetic bound (NMT too slow for a 2.5-s burst). The dump was taken 5 s after the first error, after
+channel closures had freed part of the counter, so it does not show the at-failure holders; the histogram and
+U_fail do. Whether a real client population opens 128 connections and sends 15 MiB writes simultaneously is a
+workload question: each request is within `native_transport_max_frame_size` and `max_mutation_size`, and the
+connection count is unlimited by default.

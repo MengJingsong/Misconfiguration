@@ -7,13 +7,23 @@
 | Phase-1 case file | [`native_transport_max_concurrent_connections-channelActive-limit--autonomous`](../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/native_transport_max_concurrent_connections-channelActive-limit--autonomous.md); stage-4 evidence from the sibling case [`native_transport_max_frame_size-decode-bytesToDiscard--autonomous` recheck 2026-11-17](../../../../capacity-enforcement-exp/cassandra/stage4-runtime-verification/results/native_transport_max_frame_size-decode-bytesToDiscard--autonomous--recheck-2026-11-17.md) |
 | System / pinned source | Cassandra 5.0.9 (`systems/cassandra/source/`, `build.xml` `base.version` 5.0.9), Netty 4.1.130.Final, OpenJDK 11.0.33 |
 | Stage 1 (design) | OOM-agent stage-1 session (workflow wave 1), 2026-11-17 ~22:45 America/New_York |
-| Stage 2 (verify) | pending (a fresh session) |
-| Verdict | `pending` |
+| Stage 2 (verify) | OOM-agent stage-2 session, runs 2026-11-17 22:53 – 2026-11-18 00:04 America/New_York on pc84; cut off by an API usage limit before writing §3–§4; resumed by a fresh stage-2 session 2026-11-18 02:54 (§3 "Resume note") |
+| Verdict | **true positive** — `verified-OOM · deployment` (unprotected configuration) |
 
 ## Summary
 
-- **Conclusion:** pending (stage 2).
-- **Hypothesis under test:** at shipped defaults no connection limit and no idle timeout apply, so each unauthenticated v4
+- **Conclusion:** true positive. At shipped defaults and the budget `cassandra-env.sh` resolves by itself for a ≥ 64 GiB host
+  (heap 31,744 MiB, `MaxDirectMemorySize` 15,872 MiB), 927 unauthenticated v4 connections each holding a stalled 16 MiB − 1 B
+  pre-login frame exhaust Netty's direct limit (`OutOfDirectMemoryError`, used = max = 16,642,998,272 B); Cassandra turns the
+  error into a forced "Java heap space" OOM and the shipped `OnOutOfMemoryError="kill -9 %p"` kills the node (exit 137) 40 s
+  later, 4/4 runs (3 instrumented + 1 uninstrumented). The 2 GiB-direct budget fails the same way at 106 connections (3/3), an
+  8 GiB one at 447 (1/1). Controls (448 stalled frames; 1,120 idle complete connections) survive 3/3 and 1/1; the intervention
+  `native_transport_max_concurrent_connections: 512` removes the endpoint 3/3.
+- **Root cause:** the per-connection bound (`native_transport_max_frame_size` 16 MiB) holds, but the only per-node bound on the
+  number of such connections (`native_transport_max_concurrent_connections`) ships disabled (−1), there is no idle/auth timeout,
+  and the pre-STARTUP cumulation buffer is charged by no Cassandra counter; nothing refuses before Netty's own direct limit, and
+  5.0.9 escalates that limit's error to node death (`PreV5Handlers$ExceptionHandler` → `JVMStabilityInspector`).
+- **Hypothesis tested:** at shipped defaults no connection limit and no idle timeout apply, so each unauthenticated v4
   connection that sends a 9-byte header declaring a 16 MiB − 9 B body and all but the last byte pins one 16 MiB chunk of
   Netty pooled direct memory that no Cassandra counter charges; about (MaxDirectMemorySize − per-arena chunks) / 16 MiB such
   connections reach Netty's direct limit. The open question this design settles by measurement: does the resulting
@@ -345,8 +355,125 @@ is not complete by 01:40, drop priorities 2–3 and finish priority 1; an incomp
 
 ## 3. Runs (stage 2)
 
-pending
+**Resume note (2026-11-18 02:54–03:10 America/New_York, fresh stage-2 session).** The first stage-2 session ran the whole
+run matrix on pc84 (2026-11-17 20:53–22:03 node time MST = 22:53–00:03 America/New_York) and was then cut off by an API usage
+limit before it wrote §3–§4. Nothing was running when this session started (no `CassandraDaemon`, no client/probe/matrix
+process, no listener on 7000/7199/9042, no `u2-w1-*` scope; checked 00:54 node time). The freeze hash of §1–§2 was re-checked:
+`5376be17…ad35`, unchanged. Every run directory `pc84:/mydata/s4/u2-w1/logs/<run>/` was inspected: all 16 runs (SH, AT1–3,
+AC1–3, AI1–3, BT1–3, AU1, AX1, M1) have their complete file set, a `final: daemon=0 client=0 probe=0 9042=0 scopes=0` line
+and a `summary.txt`; `selfcheck.py` (sha256 `071da824…`, the one the runs used) was re-run over all 16 and reproduces every
+OUTCOME row (`logs/selfcheck-resume-2026-11-18.txt`). **Reused: everything** (build copy, harness, all 16 runs); **nothing was
+redone and no new run was started**, because no arm had an incomplete log. The node harness files are byte-identical to
+`harness/` here (sha256 compared).
+
+**Environment.** pc84 (node1.jason92-326528, UMass), x86_64, 32 cores, 125 GiB RAM, 8 GiB swap, Ubuntu 22.04, kernel
+5.15.0-203-generic, cgroup v2, OpenJDK 11.0.33, Python 3.10.12. Build: run copy `pc84:/mydata/s4/u2-w1` (a `cp -a` of
+`/mydata/s4/cassandra-base`, Cassandra 5.0.9, Netty 4.1.130.Final, Byteman 4.0.20; never rebuilt). Node, stall client and
+service probe on pc84 over loopback 127.0.0.1. Each run in `systemd-run --user --scope -p MemoryMax=64G -p MemorySwapMax=0`
+(guard only), `nofile` 100,000. `cassandra.yaml`: shipped, plus addresses/directories only (`logs/AT1-commands-ntfmem-samples.txt`
+has the diff); AI arms add `native_transport_max_concurrent_connections: 512`. `config.txt` of every run read back the §2.3
+settings at default (`native_transport_max_concurrent_connections=-1`, `…_per_ip=-1`, `idle_timeout=0ms`, `max_frame_size=16MiB`,
+`client_error_reporting_exclusions` empty, `AllowAllAuthenticator`). JVM flags as shipped (G1, `AlwaysPreTouch`,
+`HeapDumpOnOutOfMemoryError`, `OnOutOfMemoryError="kill -9 %p"`, `io.netty.allocator.maxOrder=11`).
+**Resolved budgets:** A (automatic, `MAX_HEAP_SIZE`/`MAX_DIRECT_MEMORY_SIZE` unset): `-Xms/-Xmx31744M`,
+`-XX:MaxDirectMemorySize=15872M` = 16,642,998,272 B = Netty `maxDirectMemory`, 64 arenas; B: `-Xmx4096M`,
+`MaxDirectMemorySize` 2,147,483,648 B, 21 arenas; M (optional 32 GiB-host resolution): `-Xmx16384M`, `MaxDirectMemorySize`
+8,589,934,592 B, 64 arenas. Logs (all runs) at `pc84:/mydata/s4/u2-w1/logs/` (`<run>/`, `<run>.console`, `matrix-*.log`);
+heap dumps listed in `hprof.txt` then deleted; node directories removed.
+
+| Run | Arm | Budget (heap / direct) | Load reached | Endpoint | Key reading (U vs K) |
+|---|---|---|---|---|---|
+| SH | shakedown (not a reading) | B 4 / 2 GiB | 106 stalled (129 attempted) | OODME → forced heap OOM → `kill -9`, rc 137 | harness check passed; first summary printed "after 0" (selfcheck read log times as local; fixed to UTC before AT1; the re-run gives 106) |
+| AT1 | test | A 31 / 15.5 GiB | **927** stalled ok, 952 attempted | OODME (used = max = 16,642,998,272) on `epollEventLoopGroup-5-57` → "letting the JVM handle" → "Force heap space" → `Java heap space` → 8.8 GB dump (32 s) → `kill -9`; **rc 137, t_exit − t_oom 40 s** | last NTFMEM 3 s before: `nettyUsed` 15,408 MiB, `held16` 898, chunks 962 (= held16 + 64), headroom 464 MiB; NMT Other Δ max 15,856 MiB (= 991 chunks); RssAnon peak 47.7 GiB; K: `inflight` 0, `clients` ≤ 1 (the probe); O4 max 929 |
+| AT2 | test | A | 927 / 952 | same, rc 137, 40 s | held16 898, `nettyUsed` 15,408 MiB, NMT Δ 15,856 MiB, RssAnon 47.7 GiB, inflight 0 |
+| AT3 | test | A | 927 / 952 | same, rc 137, 40 s | held16 897, 15,392 MiB, NMT Δ 15,856 MiB, RssAnon 47.7 GiB, inflight 0 |
+| AU1 | test, uninstrumented (no Byteman, no NMT) | A | 927 / 952 | same OODME message, same escalation, rc 137, 42 s | RssAnon 47.7 GiB, O4 929 (no NTFMEM by design) |
+| AC1 | control (448 frames, 180 s hold) | A | 448 / 448 held, all alive | **none**, node alive | held16 448, `nettyUsed` max 8,208 MiB (= 448 + 64 chunks + 16 MiB), NMT Δ 8,193 MiB; probe P 494/0, N 50/0 |
+| AC2 | control | A | 448 / 448 | none, alive | same readings; probe P 494/0, N 50/0 |
+| AC3 | control | A | 448 / 448 | none, alive | same readings; probe P 498/0, N 50/0 |
+| AI1 | intervention (`max_concurrent_connections: 512`) | A | 511 held, **609 refused** of 1,120 | none, alive | held16 max 511, `nettyUsed` max 9,216 MiB, O4 max 512; "Exceeded maximum native connection limit of 512" (NoSpamLogger, 1/min: 2 lines in system.log); probe P 390/0; N 15 ok / 24 err (refused while the limit was full, longest 115 s) |
+| AI2 | intervention | A | 511 / 1,120 | none, alive | same; N err span 115 s |
+| AI3 | intervention | A | 511 / 1,120 | none, alive | same; O4 max 513; N err span 115 s |
+| BT1 | test | B 4 / 2 GiB | **106** / 129 | OODME (used = max = 2,147,483,648) → forced heap OOM → dump → `kill -9`, rc 137, 2 s | last NTFMEM 5 s before: held16 51, chunks 72 (= 51 + 21); peak RssAnon 6.5 GiB; inflight 0 |
+| BT2 | test | B | 106 / 129 | same, rc 137, 1 s | held16 53 at last sample, inflight 0 |
+| BT3 | test | B | 106 / 129 | same, rc 137, 2 s | held16 52 at last sample, inflight 0 |
+| AX1 | connection-count control (complete OPTIONS, idle, 120 s) | A | 1,120 / 1,120 held | none, alive | held16 0, `nettyUsed` max 1,040 MiB (64 arena chunks); probe P 510/0, N 51/0 |
+| M1 | optional budget run | M 16 / 8 GiB | **447** / 471 | OODME (used = max = 8,589,934,592) → same escalation, rc 137, 10 s | held16 414 at last sample, chunks 478 (= 414 + 64); RssAnon 24.6 GiB |
+
+Readings common to every run: `memory.events` `max` 0 and `oom_kill` 0 (the guard never bound; peak `memory.current` 56.2 GiB
+in A test arms, including page cache from writing the dump), `kernel.txt` 0 OOM lines (the death is the JVM's own `kill -9`,
+not a kernel/cgroup kill), NTFDISCARD 0 and NTFFAIL 0 (the frame-size check never fired: each frame was legal). Growth is exact:
+between two AT1 samples `held16` rose 544 and `nettyUsed` 9,126,805,504 B = 544 × 16 MiB (slope 1.00); the first OODME falls
+at k* = D/16 MiB − arenas − 1 in every budget (A: 992 − 64 − 1 = 927; B: 128 − 21 − 1 = 106; M: 512 − 64 − 1 = 447; the one
+extra 16 MiB is Netty usage outside the pool present from start). Service while alive: in A test arms the persistent probe was
+`ok` up to t_oom and then timed out for 38.6–40.5 s (heap dump) until the kill; in B ≤ 0.8 s. The OODME arrives through
+`ByteToMessageDecoder.cumulate` → `PooledByteBuf.capacity` reallocation → `PoolArena.newChunk` → `PlatformDependent.incrementMemoryCounter`
+on an epoll event-loop thread; it is logged by `ExceptionHandlers.java:181` ("Unknown exception in client networking") and passed
+to `JVMStabilityInspector.inspectThrowable` (`PreV5Handlers.java:367-368`); three event-loop threads (5-57/58/59) each hit
+it within 190 ms (`logs/AT1-initiating-failure.txt`, `logs/BT1-initiating-failure.txt`).
+
+Predictions vs readings: P-A held (k* 927 ∈ [900, 930]; SIGKILL within 10 min, 40 s); P-B held (106 ∈ [90, 110]); P-C held
+(no OOM, probe 100 %); P-I held (limit message, 609 ≥ 600 refused, held16 ≤ 511, ≤ 9.0 GiB, probe P 100 %; N refused while
+saturated = the intervention's cost); P-X held. Outcome row **E1** in 3/3 AT, 1/1 AU, 3/3 BT, 1/1 M.
+
+**Deviations from the design (all from the first stage-2 session's logs; none changes a constraint, budget or workload):**
+- Run copy `/mydata/s4/u2-w1` (scope names `u2-w1-*`) instead of `/mydata/s4/u2-oc21`; same `cp -a` of `cassandra-base`.
+- Orchestration helpers `harness/matrix.sh` (runs a list in order; refuses to start a run after 02:00 America/New_York or when
+  a `STOP` file exists) and `harness/chain-p23.sh` (starts priorities 2–3 after priority 1) were added; the order became SH,
+  AT1, AC1, [AI1 invalid], AT2, then (after a STOP to fix AI) AI1, AC2, AI2, AT3, AC3, AI3, BT1–3, AU1, AX1, M1, so AI1 ran
+  after AT2 rather than before it. Matched sets are unaffected.
+- **AI1 first attempt invalid** (row I): `matrix.sh` turned the `_` used as a space placeholder into spaces inside the key, the
+  yaml line read `native transport max concurrent connections: 512`, and Cassandra refused to start ("Invalid yaml"). No node
+  ran; the placeholder was changed to `@` and AI1 repeated from a clean start (`logs/AI1-invalid-harness/`).
+- **A duplicate launch of the p1b list** at 21:16:36 (node time) aborted in every run's pre-check ("a Cassandra daemon is already
+  running": the `ps | grep '[C]assandraDaemon'` check matched some other process command line; the user journal shows no Cassandra
+  scope started between AT2's end, 21:09:33, and the real p1b AI1 start, 21:16:56). No node started; its files are kept under
+  `logs/aborted-race/`. No two measured runs overlapped (each valid run's pre-check found 0 daemons, and the matrix runs serially).
+- The ssh keeper and the stopping-time plan of §2.7 were overtaken by the interruption; all runs ended by 00:04 America/New_York,
+  inside the 02:00 rule. The optional M run (16 / 8 GiB) was run once (1/1).
+- `kill9` counts of 2 in control arms are the `OnOutOfMemoryError` flag text in the logged JVM arguments, not kills.
+
+**Excerpts in `logs/`:** `summaries-all-runs.txt` (every run's `summary.txt`), `selfcheck-resume-2026-11-18.txt`,
+`matrix-logs.txt` (matrix, aborted and invalid launches), `AT1-initiating-failure.txt`, `BT1-initiating-failure.txt`,
+`AT1-commands-ntfmem-samples.txt` (commands.log, every NTFMEM line, sampler tail), `AI-AC-excerpts.txt`.
+
+**Left on the node:** `pc84:/mydata/s4/u2-w1` (run copy with build, harness, full logs of all runs; 478 MiB on
+`/mydata`); no heap dumps, no node data directories, no process, no scope. `/mydata/s4/cassandra-base`, `src-5.0.9`, `ntfs-rc`
+predate this case and were not touched.
 
 ## 4. Conclusion (stage 2)
 
-pending
+- **Verdict:** **`true positive`** ([`oom-agent-playbook.md`](../../../oom-agent-playbook.md)).
+- **Protocol status (detail):** `verified-OOM · deployment`, **unprotected configuration** (`native_transport_max_concurrent_connections`
+  disabled at its default −1; no idle/auth timeout) with unprotected accumulation of pre-login frames; endpoint a JVM
+  direct-buffer OOM (Netty `OutOfDirectMemoryError`) escalated by Cassandra to a forced heap OOM and the shipped `kill -9`.
+
+| | Requirement | Evidence |
+|---|---|---|
+| V1 | ≥ 3 runs reach the endpoint | AT1–AT3 3/3 (k* = 927 each), plus AU1 1/1, BT1–BT3 3/3, M1 1/1 |
+| V2 | matched control survives ≥ 3 | AC1–AC3 3/3 (same frames, 448 = 51.6 % of D, 180 s, probe 100 %); AX1 1/1 (1,120 connections without frames) |
+| V3 | U measured independently of K | U: Netty `usedDirectMemory` (1.00 × 16 MiB per stalled connection), NMT Other Δ (991 chunks at failure), RssAnon 47.7 GiB, `held16`; K: Cassandra in-flight 0, connected clients ≤ 1 |
+| V4 | intervention removes the endpoint ≥ 3 | AI1–AI3 3/3 at the same 1,120-attempt load: 609 refused, held16 ≤ 511, ≤ 9,216 MiB, node alive; cost: new legitimate connections refused while the limit is full |
+| V5 | initiating failure + holder near failure | first OODME with thread and full stack (cumulation reallocation on an epoll event loop), "letting the JVM handle" → "Force heap space" → `Java heap space` → dump → `kill -9 %p`, rc 137; last NTFMEM 3 s before: held16 898 of 962 chunks, 464 MiB headroom; OODME message used = max |
+| V6 | constraints at shipped defaults | `config.txt` of every test run: frame size 16 MiB, both connection limits −1, idle timeout 0, exclusions empty |
+| V7 | acceptable budget | A = the budget `cassandra-env.sh` resolves itself for pc84 and any ≥ 64 GiB host (heap 31,744 MiB, direct 15,872 MiB, the largest the script produces); ≥ 512 MiB standing rule; also 2 GiB direct (3/3) and 8 GiB direct (1/1). No container limit is part of the endpoint (guard never bound) |
+
+Conditions label `deployment`: every setting shipped or environment-only (addresses, directories, `nofile` 100,000); AU1 without
+Byteman/NMT reaches the same endpoint at the same k*; the only fault is an external client behaviour (stall after sending all
+but one byte of a legal frame).
+
+- **Reason:** At shipped defaults and the automatically resolved budget (heap 31,744 MiB, `MaxDirectMemorySize` 15,872 MiB =
+  16,642,998,272 B), each unauthenticated v4 connection holding a legal 16 MiB frame minus one byte pinned exactly one 16 MiB
+  Netty pool chunk that no Cassandra counter charged (in-flight 0), and the 927th such connection raised `OutOfDirectMemoryError`
+  (used = max) in 3/3 runs (and 1/1 uninstrumented); `PreV5Handlers$ExceptionHandler` passed it to `JVMStabilityInspector`, which
+  forced a heap OOM, and the shipped `-XX:OnOutOfMemoryError="kill -9 %p"` killed the node 40 s later (rc 137, no kernel/cgroup
+  event). The failure point is exact arithmetic, k* = D/16 MiB − arenas − 1 (927 at 15.5 GiB, 106 at 2 GiB 3/3, 447 at 8 GiB 1/1),
+  so every budget the shipped script can resolve fails, at about 14.5 GiB of client-sent bytes for the largest. 448 held frames
+  (51.6 % of the limit, 3/3) and 1,120 frameless connections (1/1) left the node healthy, and setting the disabled control
+  `native_transport_max_concurrent_connections: 512` removed the endpoint 3/3 (511 held, 609 refused, ≤ 9.0 GiB). Limits of
+  attribution: one source IP over loopback; `AllowAllAuthenticator` (the frames are sent before STARTUP, so a password
+  authenticator should not change the path, but it was not run); with a 2 GiB direct budget the 512 limit would not be enough
+  (k* = 106), so the intervention shows causality, not a safe default value.
+- **For retry:** not applicable.
+- **Pattern:** covered by CP-7 (per-connection frame cap × unbounded connections) with CP-6 (nothing refuses before the
+  direct limit; the JVM error is the enforcement) and CP-8 (the node-level limit ships off); no new pattern needed.

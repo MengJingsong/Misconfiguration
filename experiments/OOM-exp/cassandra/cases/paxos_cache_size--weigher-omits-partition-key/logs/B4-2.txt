@@ -1,0 +1,119 @@
+### B4-2 (ms0611, aarch64). Full logs on the node: /mydata/s4/b12-w2/runs/B4-2
+endpoint: daemon-exit oom:java.lang.OutOfMemoryError: Java heap space
+stdout: java.lang.OutOfMemoryError: Java heap space
+stdout: Dumping heap to /dev/shm/b12-w2/B4-2/cassandra-1794996067-pid293695.hprof ...
+stdout: Heap dump file created [4270816076 bytes in 5.719 secs]
+stdout: # java.lang.OutOfMemoryError: Java heap space
+stdout: # -XX:OnOutOfMemoryError="kill -9 %p"
+stdout: #   Executing /bin/sh -c "kill -9 293695"...
+client # start 2026-11-18T03:02:23-0700 cl=SERIAL K=61440 nmax=90000 m=8000 conns=32
+client # milestone 1 drained=8000 ok=8000 err=0 out=0 at 21635 ms
+client # milestone 1 done=True at 45682 ms
+client # milestone 2 drained=16000 ok=15744 err=256 out=0 at 82523 ms
+client # milestone 2 done=True at 104060 ms
+client # milestone 3 drained=24000 ok=23488 err=512 out=0 at 139969 ms
+client # milestone 3 done=True at 162512 ms
+client # milestone 4 drained=32000 ok=31488 err=512 out=0 at 180905 ms
+client # milestone 4 done=True at 202460 ms
+client # milestone 5 drained=40000 ok=39264 err=736 out=0 at 238043 ms
+client # milestone 5 done=True at 260087 ms
+client # end all-threads-ended at 317019 ms (load 205 s) issued=47211 ok=46127 err=1084 out=0
+client last: t=318176 ms issued 47211 ok 46127 err 1084 out 0 alive 0
+rate first ~30 s: 260 done/s
+errcounts: 1052 err:0x1200:Operation timed out - received only 0 responses. | 32 io:ConnectionResetError:[Errno 104] Connection reset by peer
+ms   drained Snapshot      Key ACTIVE   DecKey      [B MB      HBB   Total MB  memtOn MB  allMem MB  KCent
+0          -        0        0      0        7       14.7      633       46.3        0.0        0.0      8
+1       8000     8000     8000      0     8007     1498.8    56715     1559.5      274.8      274.8     14
+2      16000    16000    16000      0    16027     1539.7    42661     1597.8      176.0      176.0     65
+3      24000    24000    24000      0    24040     1936.4    45852     1997.8       76.2       76.2    147
+4      32000    32000    32000      0    32053     3064.7    84520     3139.6      351.8      351.8    195
+5      40000    40000    40000      0    40052     3105.0    70403     3176.8      252.7      252.7    293
+slope (Total - allMemtablesOnHeap) per Snapshot, first->last milestone: 51228 B
+metrics last: 1794996409.708 casread=45415 read=46620 casprepare=46624 caspropose=45918
+RssAnon max 4755 MiB
+heap_info used max 4025 MiB
+GC pauses 243; heap after GC: max 4059 MiB, last 4014 MiB
+STW share over last 60 s of GC log: 44%; Pause Full count 95
+dumps: /dev/shm/b12-w2/B4-2/cassandra-1794996067-pid293695.hprof (4072 MiB)
+### driver
+2026-11-18T03:01:06 run B4-2 build=base heap=4G K=61440 cl=SERIAL nmax=90000 m=8000 cap0= arch=aarch64
+2026-11-18T03:01:07 free /mydata 25G /dev/shm 26G
+714ee9bf58b3bc1710377ac16bcbba03  /mydata/s4/b12-w2/cassandra-base/conf/cassandra.yaml
+2026-11-18T03:01:59 daemon pid 293695 up
+ddl ok
+2026-11-18T03:02:22 client start
+2026-11-18T03:02:45 milestone 1 drained=8000
+2026-11-18T03:03:46 milestone 2 drained=16000
+2026-11-18T03:04:43 milestone 3 drained=24000
+2026-11-18T03:05:24 milestone 4 drained=32000
+2026-11-18T03:06:21 milestone 5 drained=40000
+/mydata/s4/b12-w2/harness/run.sh: line 77: 293695 Killed                  ( ulimit -n 100000; cd $T; MAX_HEAP_SIZE=$HEAP JVM_EXTRA_OPTS="$YAML_OPT" CASSANDRA_HEAPDUMP_DIR=$D exec systemd-run --user --scope -p MemorySwapMax=0 --unit=b12-$RID -- bin/cassandra -f > $R/stdout.txt 2>&1 < /dev/null )
+2026-11-18T03:07:41 daemon gone while client running
+2026-11-18T03:07:45 END daemon-exit oom:java.lang.OutOfMemoryError: Java heap space
+2026-11-18T03:07:51 done
+sandra-base/data
+total 4170720
+drwxr-xr-x  2 jason92 misconfiguration         60 Nov 18 03:07 .
+drwxr-xr-x 16 jason92 misconfiguration        320 Nov 18 03:01 ..
+-rw-------  1 jason92 misconfiguration 4270816076 Nov 18 03:07 cassandra-1794996067-pid293695.hprof
+### first errors
+63963 err:0x1200:Operation timed out - received only 0 responses.
+63963 err:0x1200:Operation timed out - received only 0 responses.
+63973 err:0x1200:Operation timed out - received only 0 responses.
+64017 err:0x1200:Operation timed out - received only 0 responses.
+64017 err:0x1200:Operation timed out - received only 0 responses.
+### metrics.txt (last 3)
+1794996346.694 casread=35248 read=37816 casprepare=37827 caspropose=37332
+1794996380.123 casread=40000 read=40002 casprepare=40000 caspropose=39307
+1794996409.708 casread=45415 read=46620 casprepare=46624 caspropose=45918
+### milestone memtable/keycache lines
+== 2026-11-18T03:02:06 0
+system.paxos MemtableOnHeapDataSize 0
+system.paxos AllMemtablesOnHeapDataSize 0
+Heap Memory (MB)       : 172.19 / 4096.00
+Off Heap Memory (MB)   : 0.00
+Key Cache              : entries 8, size 640 bytes, capacity 100 MiB, 78 hits, 85 requests, 0.918 recent hit rate, 14400 save period in seconds
+== 2026-11-18T03:02:47 1
+system.paxos MemtableOnHeapDataSize 274757239
+system.paxos AllMemtablesOnHeapDataSize 274757239
+Heap Memory (MB)       : 1935.28 / 4096.00
+Off Heap Memory (MB)   : 3.72
+Key Cache              : entries 14, size 361.05 KiB, capacity 100 MiB, 79 hits, 92 requests, 0.859 recent hit rate, 14400 save period in seconds
+== 2026-11-18T03:03:48 2
+system.paxos MemtableOnHeapDataSize 176040200
+system.paxos AllMemtablesOnHeapDataSize 176040200
+Heap Memory (MB)       : 2659.78 / 4096.00
+Off Heap Memory (MB)   : 8.39
+Key Cache              : entries 65, size 3.34 MiB, capacity 100 MiB, 80 hits, 266 requests, 0.301 recent hit rate, 14400 save period in seconds
+== 2026-11-18T03:04:45 3
+system.paxos MemtableOnHeapDataSize 76240205
+system.paxos AllMemtablesOnHeapDataSize 76240205
+Heap Memory (MB)       : 3841.28 / 4096.00
+Off Heap Memory (MB)   : 14.76
+Key Cache              : entries 147, size 8.15 MiB, capacity 100 MiB, 81 hits, 573 requests, 0.141 recent hit rate, 14400 save period in seconds
+== 2026-11-18T03:05:26 4
+system.paxos MemtableOnHeapDataSize 351774021
+system.paxos AllMemtablesOnHeapDataSize 351774021
+Heap Memory (MB)       : 3858.20 / 4096.00
+Off Heap Memory (MB)   : 19.07
+Key Cache              : entries 195, size 10.97 MiB, capacity 100 MiB, 82 hits, 960 requests, 0.085 recent hit rate, 14400 save period in seconds
+== 2026-11-18T03:06:22 5
+system.paxos MemtableOnHeapDataSize 252739912
+system.paxos AllMemtablesOnHeapDataSize 252739912
+Heap Memory (MB)       : 3708.99 / 4096.00
+Off Heap Memory (MB)   : 21.18
+Key Cache              : entries 293, size 16.72 MiB, capacity 100 MiB, 83 hits, 1548 requests, 0.054 recent hit rate, 14400 save period in seconds
+### OOM lines (stdout/system.log)
+12:CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V
+608:java.lang.OutOfMemoryError: Java heap space
+609:Dumping heap to /dev/shm/b12-w2/B4-2/cassandra-1794996067-pid293695.hprof ...
+610:Heap dump file created [4270816076 bytes in 5.719 secs]
+612:# java.lang.OutOfMemoryError: Java heap space
+613:# -XX:OnOutOfMemoryError="kill -9 %p"
+614:#   Executing /bin/sh -c "kill -9 293695"...
+### last heap_info
+1794996451.397 rssanon_kb= memcur= 293695:|
+### resolved flags
+MaxDirectMemorySize=16642998272
+MaxHeapSize=4294967296
+UseG1GC

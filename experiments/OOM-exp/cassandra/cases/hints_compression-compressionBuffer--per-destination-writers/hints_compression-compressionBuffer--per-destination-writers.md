@@ -7,19 +7,23 @@
 | Phase-1 case file | [`hints-CompressedHintsWriter-compressionBuffer-capacity--autonomous`](../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/hints-CompressedHintsWriter-compressionBuffer-capacity--autonomous.md) |
 | System / pinned source | Cassandra 5.0.9 (`systems/cassandra/source/`) |
 | Stage 1 (design) | OOM-agent session (Claude Opus 5.5, workflow subagent), 2026-11-17 22:44–23:30 EST |
-| Stage 2 (verify) | pending (a fresh session) |
-| Verdict | `pending` |
+| Stage 2 (verify) | OOM-agent sessions (Claude Opus 5.5, workflow subagents): runs 2026-11-17 23:01 – 2026-11-18 00:12 EST; interrupted by an API usage limit; resumed 2026-11-18 02:54 EST by a fresh session (analysis, §3–§4, cleanup) |
+| Verdict | **true positive** (`verified-OOM · deployment`, convergence · multiplicity; claim limited to deployments that enable `hints_compression`) |
 
-**Summary** (stage 1; the conclusion is filled by stage 2)
+**Summary**
 
-- **Conclusion:** pending. Estimated positive: a direct-buffer OOM of the coordinator at heap 2 GiB and
-  `MaxDirectMemorySize` up to 1,024 MiB (the value `cassandra-env.sh` resolves for a 4 GiB node) when
-  hints with LZ4 hint compression pile up for 64 unreachable nodes of a remote DC.
-- **Root cause (hypothesis):** every open `CompressedHintsWriter` keeps its own grow-only direct
-  `compressionBuffer`, sized to the largest hint it ever compressed (≤ 16.06 MiB). One writer is open per
-  unreachable destination, and nothing bounds the sum: no hints setting, no `BufferPool` and no reservation
-  covers it. Only `MaxDirectMemorySize` does. The executor's own comment says this buffer was meant to be
-  shared (`HintsWriteExecutor.java:43-44`).
+- **Conclusion:** true positive. With LZ4 hint compression on (a documented, non-default feature switch)
+  and every capacity setting at its default, a coordinator at heap 2 GiB died with
+  `OutOfMemoryError: Direct buffer memory` in `HintsWriteExecutor` (then forced heap OOM and `kill -9`)
+  when 62 legal 15 MiB writes were hinted to 64 unreachable remote-DC nodes: 3/3 at
+  `MaxDirectMemorySize` 896 MiB, 1/1 without Byteman, 1/1 at 1,024 MiB (what `cassandra-env.sh` resolves
+  for a 4 GiB node). The low-multiplicity control (29 destinations) survived 3/3, and a one-shared-buffer
+  patch survived 3/3 with the same work done.
+- **Root cause:** every open `CompressedHintsWriter` keeps its own grow-only direct `compressionBuffer`
+  (15,790,416 B here, at most 16.06 MiB). One writer stays open per unreachable destination, and no
+  setting, pool or reservation bounds their sum, so only `MaxDirectMemorySize` does. At the failure the
+  dump holds 51 such buffers = 768.0 MiB (87 % of the 896 MiB limit). Per-owner within its implicit
+  bound, sum unbounded: convergence by multiplicity (CP-7 with CP-14).
 
 ## 1. Candidate
 
@@ -523,8 +527,194 @@ From Cal (§3.3): B0 = 50.3 MiB, U_plateau = 1,048.1 MiB, U_cbuf = 963.77 MiB (6
 - **Bd** = D* + 128 = **1,024 MiB**; U_plateau(Cal) + 30 = 1,078 > 1,024, so Bd predicts OOM.
 - Run order: T1–T3, L1–L3, I1–I3, T0, Bd, then the optional uncompressed arm U0 if time remains.
 
-(pending: the rest of §3)
+### 3.1 Resumed after an interruption (2026-11-18 02:54 EST)
+
+The first stage-2 session was cut off by an API usage limit (not by the design) after its run queue had
+finished. A fresh stage-2 session resumed at 02:54 EST and found:
+
+- **Nothing running** on `ms0604` (no `CassandraDaemon`, sampler, client or queue process; no `c5-A-*`
+  scope). Linger was still on (it was switched on for the run, per §2.5).
+- **Every planned run complete:** `/mydata/s4/c5-w1/queue.log` shows Shake and Cal (23:25–23:31 EST), then
+  the queue `harness/queue-main.txt` from T1 at 23:31:44 to `QUEUE DONE` at 00:12:28 EST (T1–T3, L1–L3,
+  I1–I3, T0, Bd and the optional U0). Each run directory has `.done`, `outcome.txt` and a `DONE` line in
+  `run.log`; every OOM run's `launch.log` shows `Executing /bin/sh -c "kill -9 <pid>"`. No run was
+  invalid, overrun or incomplete, so **no arm was redone**.
+- **Reused as is:** the build `/mydata/s4/cassandra-base` (`ant jar`, EXIT=0, 5 min 7 s,
+  `/mydata/s4/build-base.log`), the 64-node ring and its template (`ring.log`, `RING DONE` 23:23:40), the
+  keys, the patched class tree, and all 14 runs with their logs, samples, traces and dumps. The node copy of
+  the harness (`/mydata/s4/c5-w1/h/`) is byte-identical to `harness/` here.
+- **Not done before the cut, done by the resumed session:** the dump attributions (`hprof_direct.py`,
+  maxHops 3, on the node, 02:55–03:03 EST, plus `--detail` on T1 and Cal), the log excerpts in `logs/`, the
+  cleanup (§3.7), and this §3 and §4.
+- The Summary and header above were rewritten after the freeze; §1–§2 are unchanged
+  (`sed -n '28,511p' | sha256sum` = `713e4e4f…aa18b49`, the frozen hash; the range moved by four lines).
+
+### 3.2 Environment and configuration (as run)
+
+| Item | Reading |
+|---|---|
+| Node | `ms0604` (Utah m400, aarch64, 8 cores, 64,249 MiB, 8 GiB swap), kernel `5.15.0-191-generic`, OpenJDK 11.0.33+9 (Ubuntu), Ant 1.10.12 |
+| Build | `/mydata/s4/cassandra-base`, 5.0.9 from the repository's `systems/cassandra/source/` (`apache-cassandra-5.0.9-SNAPSHOT.jar`), unpatched; arm I adds the patched `CompressedHintsWriter` class tree in its own conf dir (`harness/intervention.diff`, `logs/runs/I1/javap-patch.txt` shows `private static java.nio.ByteBuffer sharedCompressionBuffer`) |
+| Work directory | `/mydata/s4/c5-w1/` (`h/`, `inst/`, `template/`, `runs/<run>/`) instead of the design's `/mydata/c5/` — path only |
+| Victim A | `-Xms2048M -Xmx2048M`, G1; resolved `MaxDirectMemorySize` = 939,524,096 B (896 MiB) in T/L/I/T0/U0, 1,073,741,824 B in Bd, 2,147,483,648 B in Shake/Cal (`jcmd VM.flags`, `logs/runs/*/A-flags.txt`); `systemd-run --user --scope -p MemorySwapMax=0` (`memory.swap.max` = 0, `memory.max` = max) |
+| yaml diff vs shipped | topology/directory lines (cluster name, `num_tokens: 1`, `initial_token: 1`, addresses, seeds, `GossipingPropertyFileSnitch`, directories) plus `hints_compression: [{class_name: LZ4Compressor}]` (absent in U0); no capacity, timeout, cache or hints limit changed (`logs/runs/*/A-yaml.diff`) — V6 |
+| Ring | 64 `dc2` nodes joined in batches of 8 (each `UN` in ≤ 108 s), `kill -9`, all `DN`; schema `c5` (`dc1:1, dc2:3`) created with all 64 down; A drained, template 1.1 MiB. Every run's M0 shows 64 `DN` in `dc2` |
+| Placement | `nodetool getendpoints` in every surviving run: range 0 key 23 → `.100 .101 .102` + A; range 1 key 117 → `.101 .102 .103` + A; range 31 key 135 → `.131 .132 .133` + A, as predicted |
+
+### 3.3 Runs
+
+All runs: 62 writes × 15,728,640 B incompressible blobs, one in flight, `LOCAL_ONE`, protocol v4. Write
+timeouts (1–4 per run, default 2 s write timeout on a 15 MiB local write) occur in every arm, surviving
+ones included; the client goes on, and the hints are submitted either way (surviving runs end at
+`TotalHints` = 186 = 3 × 62). B0 = 52,772,355 B (50.3 MiB, 45 buffers) in every run.
+Per-writer buffer `cap` = **15,790,416 B** in every compressed run (= 15,728,707 + ⌊15,728,707/255⌋ + 28,
+the hint record S = 15,728,707 B), ≤ the 16,843,037 B per-hint bound.
+
+| Run | D (MiB) | N | Arm | Outcome | Writers opened / buffers held at end or failure | U_cbuf (trace) | Direct used: peak / M1 plateau (MiB) | Hints (TotalHints) | Log time (EST) |
+|---|---|---|---|---|---|---|---|---|---|
+| Shake | 2,048 | 3 | shakedown | survive; checks pass | 3 opened, 3 distinct `buf` (closed at the end) | — | 95.5 / 95.5 | 6 | 23:25 |
+| Cal | 2,048 | 64 | calibration | survive | 64 / 64 distinct | **963.77** (64 × 15,790,416 B) | 1,092.1 / **1,048.1** | 186 | 23:29 |
+| T1 | 896 | 64 | test | **direct OOM**, A killed | 52 opened, 51 grown + the 52nd failing | 768.00 | 882.4 (last sample) | 144 | 23:33 |
+| T2 | 896 | 64 | test | **direct OOM**, A killed | 52 / 51 | 768.00 | 882.4 | 156 | 23:36 |
+| T3 | 896 | 64 | test | **direct OOM**, A killed | 52 / 51 | 768.00 | 882.4 | 144 | 23:40 |
+| L1 | 896 | 29 | low multiplicity | survive | 29 opened, 6 closed by file roll, 23 open | 346.36 | 552.1 / 460.8 | 186 | 23:43 |
+| L2 | 896 | 29 | low multiplicity | survive | 29 / 23 open | 346.36 | 551.1 / 490.9 | 186 | 23:47 |
+| L3 | 896 | 29 | low multiplicity | survive | 29 / 23 open | 346.36 | 552.1 / 475.8 | 186 | 23:50 |
+| I1 | 896 | 64 | shared-buffer patch | survive | 64 opened, **1** distinct `buf` | 15.06 | 189.5 / 129.5 | 186 | 23:54 |
+| I2 | 896 | 64 | shared-buffer patch | survive | 64 / 1 | 15.06 | 174.5 / 129.5 | 186 | 23:57 |
+| I3 | 896 | 64 | shared-buffer patch | survive | 64 / 1 | 15.06 | 160.5 / 129.5 | 186 | 00:01 |
+| T0 | 896 | 64 | test, no Byteman | **direct OOM**, A killed | (no trace) dump: 51 buffers | — | 882.4 | 144 | 00:04 |
+| Bd | 1,024 | 64 | upward boundary | **direct OOM**, A killed | 61 opened / 60 grown | 903.53 | 1,017.9 | 168 | 00:07 |
+| U0 | 896 | 64 | uncompressed (optional) | survive | 0 compressed writers | 0 | 160.4 / 114.4 | 186 | 00:11 |
+
+**Failure (T1, T2, T3, T0, Bd, identical):** the first error is
+`ERROR [HintsWriteExecutor:1] JVMStabilityInspector.java:70 - Exception in thread Thread[HintsWriteExecutor:1,…]`
+`java.lang.OutOfMemoryError: Direct buffer memory` at `Bits.reserveMemory` ← `ByteBuffer.allocateDirect`
+← `BufferType$2.allocate` ← **`CompressedHintsWriter.writeBuffer(CompressedHintsWriter.java:55)`** ←
+`HintsWriter$Session.append:220` ← `HintsWriteExecutor.flushInternal:245` ← `flush:228` ←
+`FlushBufferPoolTask.run:172`; then "OutOfMemory error letting the JVM handle the error", "Force heap space
+OutOfMemoryError", heap dump, `-XX:OnOutOfMemoryError` `kill -9`. No heap OOM before it, no Netty
+`OutOfDirectMemoryError`, no `FSWriteError` (`logs/runs/T1/first-oom.txt`, `T0/`, `Bd/`). The OOM came
+16–21 s after the last write was acked (T1 16.1, T2 18.2, T3 17.7, T0 16.6, Bd 20.6 s), while the write
+executor flushed the hint backlog into the destination writers. At D = 896 MiB the last sample before the
+failure reads 882.4 MiB used; the 52nd writer's 15.06 MiB buffer did not fit (882.4 + 15.06 > 896) — the
+same writer count in all four runs, as expected of a standing sum.
+
+**Dump attribution** (`hprof_direct.py`, maxHops 3; `logs/runs/*/hprof-direct*.txt`):
+
+| Dump | Direct owners | `CompressedHintsWriter.compressionBuffer` | `HintsBuffer.slab` | other |
+|---|---|---|---|---|
+| T1 (OOM, D 896) | 882.4 MiB | **768.0 MiB** (51 × 15,790,416 B) | 96.0 MiB (3 × 32 MiB) | BufferPool chunks 16.0, write buffer 0.25, Netty/NIO 2.1 |
+| T2, T3, T0 (OOM) | 882.4 MiB each | 51 × 15,790,416 B each (owner-size table) | 96.0 | as T1 |
+| Bd (OOM, D 1,024) | 1,017.9 MiB | 60 × 15,790,416 B = 903.5 MiB | 96.0 | as T1 |
+| Cal (plateau, D 2,048) | 1,078.2 MiB | **963.8 MiB** (64 buffers) | 96.0 | as T1 |
+| L1 (plateau) | 460.8 MiB | 23 × 15,790,416 B = 346.4 MiB | 96.0 | as T1 |
+| I1 (plateau) | 129.5 MiB | 1 × 15,790,416 B (shared) | 96.0 | as T1 |
+
+The trace, the dumps and the JMX pool agree to the byte on the holder (T1: trace 768.00 MiB = dump
+768.0 MiB; Cal: trace 963.77 = dump 963.8).
+
+### 3.4 Checks against the predictions of §2.6
+
+| Prediction | Reading | Holds? |
+|---|---|---|
+| Shake: 64 `DN`; `TotalHints` +6; 3 `opened`, 3 distinct `buf`; `getendpoints` as predicted | 64 `DN`; 6; 3 and 3; as predicted | yes |
+| Cal: no OOM, 64 writers, 64 buffers of one `cap` ≈ 15,790,4xx B, U_cbuf ≈ 964 MiB; U_plateau − B0 = U_cbuf + slabs (≤ 96) + ≤ 4 | no OOM; 64 / 64; 15,790,416 B; 963.77 MiB; 997.7 = 963.77 + 33.9 (B0 already holds the first slab and the 16 MiB BufferPool chunks) | yes |
+| T: OOM 3/3 at write index in [40, 62] (w_pred 46); buffer sum at failure ≥ D* − B0 − 96 − 64 = 685.7 MiB; dump ≥ 0.8 × (D* − B0 − 96) = 599.8 MiB | OOM 3/3; all 62 writes were acked first and the OOM struck during the backlog flush, at the 52nd destination writer (≈ write 50 in range order); 768.0 MiB; 768.0 MiB | yes (write-index window read as the destination index, see deviations) |
+| L: survive 3/3, all writes acked, U_plateau ≤ 0.7 · D* = 627.2 MiB, open writers = N_low | 3/3; yes; 460.8 / 490.9 / 475.8 (peaks ≤ 552.1); **23** open, not 29 (6 rolled at 128 MiB) | yes, except the open-writer count |
+| I: survive 3/3, all writes acked, `TotalHints` 186, one distinct `buf`, U_plateau − B0 ≤ 116 MiB | 3/3; yes; 186; 1; 79.1 MiB | yes |
+| T0: OOM as T | OOM, 51 buffers in the dump, same stack | yes |
+| Bd (1,024): OOM since U_plateau(Cal) + 30 = 1,078 > 1,024 | OOM, at the 61st writer | yes |
+| U0 (optional): U_plateau − B0 ≤ 100 MiB, 0 `opened` | 64.1 MiB; 0 | yes |
+
+### 3.5 Deviations from the design
+
+1. **Paths:** `/mydata/s4/c5-w1/` instead of `/mydata/c5/`. No effect on the mechanism.
+2. **D\*** is 896 MiB, not the expected 1,024, by the pre-registered rule (§3.0). Bd ran at 1,024 MiB and
+   also reached the endpoint (1/1).
+3. **L open writers:** 23 open at the plateau, not 29. Ranges 0…26 cycled over 62 writes give some
+   destinations up to 9 hints (> 128 MiB with LZ4 framing), so 6 writers rolled their file and dropped their
+   buffers. The control still did the same bytes and hints (186) at a lower standing multiplicity; its
+   peak, 552 MiB, is under the 627 MiB margin line.
+4. **Failure timing:** the design expected the OOM during the writes; it came 16–21 s after the last
+   ack, in the executor's flush of the slab backlog. The endpoint (direct OOM + A ends) is as defined.
+5. **Write timeouts** (1–4 per run, every arm) — the design anticipated them (client goes on).
+6. **`A=alive`** in the T1/T2 `outcome.txt` lines is an artefact: the check ran while the JVM was still
+   writing its heap dump. Their `launch.log` shows the `kill -9`, and `ctl.sh stop` found no process.
+7. **Dumps:** analysed after the interruption (§3.1). T1 and Cal dumps kept; T2, T3, T0, Bd, L1 and I1
+   dumps deleted after their attribution was recorded (as §2.5 allows).
+
+### 3.6 Logs
+
+Full logs on `ms0604:/mydata/s4/c5-w1/runs/<run>/` (`run.log`, `A-logs/{system,debug,gc,launch}.log`,
+`samples.csv`, `rss.csv`, `client.csv`, `c5.trace`, `first-oom.txt`, `summary.txt`, `hprof-direct*.txt`),
+the queue log `/mydata/s4/c5-w1/queue.log`, the ring log `/mydata/s4/c5-w1/ring.log`. Excerpts in
+[`logs/`](logs/): `queue.log`, `ring.log`, `ring-status-final.txt`, `keys.txt`, `runs/summary-all.txt`, and per
+run `outcome.txt`, `summary.txt`, `marks.txt`, `A-flags.txt`, `A-yaml.diff`, `argline`, `getendpoints.txt`,
+`hints-files.txt`, `client.log`, `hprof-direct*.txt`; plus `T1/`, `T0/`, `Bd/first-oom.txt`,
+`T1/samples.csv`, `cal/samples.csv`, `T1/client.csv`, `I1/javap-patch.txt`.
+
+### 3.7 Cleanup (2026-11-18 03:04 EST)
+
+No process of this case runs (no `CassandraDaemon`, `C5Sample`, `C5Load`, `hprof_direct.py`, no `c5-A-*`
+scope); the analysis processes the resumed session started finished on their own. `loginctl
+disable-linger jason92` done (Linger=no). A's data, commit-log, hints and saved-caches directories and all
+64 `dc2` instance directories are deleted. **Left on the node until the owner accepts the results:**
+`/mydata/s4/cassandra-base` (469 MiB build), `/mydata/s4/c5-w1/` (≈ 518 MiB: `runs/` with logs, samples,
+traces and the T1 and Cal dumps, `template/`, `inst/A/` conf and logs, `h/`, `cls/`, `patch/`, `keys.txt`).
+`/mydata/s2r2` and `/mydata/u1r2` were not touched. `/mydata` 30 GiB free.
 
 ## 4. Conclusion (stage 2)
 
-pending
+*Written 2026-11-18 by the resumed stage-2 session.*
+
+**Verdict: true positive.** Protocol status: **`verified-OOM · deployment`** (JVM direct-buffer OOM),
+direction **convergence · multiplicity** (per-writer U within its implicit per-hint bound, sum unbounded).
+The claim covers deployments that enable `hints_compression` (LZ4 here); the shipped default writes hints
+uncompressed and has no such holder (U0).
+
+**Reason.** With every capacity setting at its default, heap 2 GiB and LZ4 hint compression on, 62 legal
+15 MiB writes at `LOCAL_ONE` hinted to 64 unreachable `dc2` nodes made the coordinator's
+`HintsWriteExecutor` die with `OutOfMemoryError: Direct buffer memory` at
+`CompressedHintsWriter.writeBuffer:55`, followed by the forced heap OOM and `kill -9`, in **3/3** runs at
+`MaxDirectMemorySize` 896 MiB (D*, chosen by the pre-registered rule from Cal), **1/1** without Byteman
+(T0) and **1/1** at 1,024 MiB (Bd, the value `cassandra-env.sh` resolves for a 4 GiB node). Each open
+destination writer held its own 15,790,416 B direct buffer: at the failure 51 of them = **768.0 MiB**
+(trace and dump agree), 87 % of the limit, next to 96 MiB of hint slabs and ≈ 18 MiB else; the 52nd
+writer's buffer did not fit. Cal at 2 GiB direct held 64 buffers = 963.8 MiB with no failure. The matched
+low-multiplicity control (29 destinations, same bytes and hints) survived **3/3** with plateaus of
+461–491 MiB (peak 552 MiB), and the intervention (one buffer shared by all writers, as the
+`HintsWriteExecutor` comment intends) survived **3/3** at the same load with all 186 hints written and
+the plateau down to 129.5 MiB (one buffer). No hints setting, `BufferPool` or reservation counts these
+buffers (K undefined); only `MaxDirectMemorySize` bounds their sum.
+
+**V1–V7**
+
+| | Evidence | Met |
+|---|---|---|
+| V1 Repetition | T1–T3 direct OOM 3/3 at D* = 896 MiB (plus T0 1/1, Bd 1/1) | yes |
+| V2 Matched control | L1–L3 (N = 29, same D*, build, bytes) survive 3/3, peak ≤ 552 MiB | yes |
+| V3 Measurement | U from the Byteman trace (open writers' distinct buffers), the JMX direct pool and the dumps, independent of any counter; K: none exists | yes |
+| V4 Intervention | I1–I3 (shared buffer, separate class tree, `harness/intervention.diff`) survive 3/3, 186 hints, plateau 129.5 MiB | yes |
+| V5 Initiating failure | first error `HintsWriteExecutor:1` stack at `CompressedHintsWriter.java:55`; T1 dump 768.0 MiB in `CompressedHintsWriter.compressionBuffer`; sampler 882.4 MiB just before | yes |
+| V6 Default constraints | yaml diff = topology/directories + `hints_compression` (a documented feature switch, not a capacity constraint); all hints, cache, commit-log and native limits default | yes |
+| V7 Acceptable budget | heap 2,048 MiB; direct 896 MiB (and 1,024) ≥ 512 MiB; no container limit | yes |
+
+**Budget search.** At N = 64 the endpoint is reached at 896 (3/3) and 1,024 MiB (1/1) and not at 2,048 MiB
+(Cal, 0/1): the largest budget shown to fail is **1,024 MiB**. The boundary moves with the destination
+count: about (D − 100 MiB) / 15.06 MiB destinations exhaust a direct limit D, so 2 GiB would need
+≈ 130 unreachable destinations (arithmetic, not run).
+
+**Limits of attribution and caveats.**
+- Needs `hints_compression` on, hints larger than 256 KiB (here 15 MiB mutations, under the 16 MiB
+  `max_mutation_size`), and many simultaneously unreachable destinations with open files below 128 MiB
+  (a remote-DC outage of a 64-node DC within `max_hint_window`). Smaller hints give smaller buffers
+  (`S + S/255 + 28` each), so more destinations are needed.
+- T1–T3 ran with an observation-only Byteman trace; T0 without it reached the same endpoint at the same
+  writer count, so the result does not depend on it (one T0 run).
+- Topology is simulated on one host (64 `dc2` instances on loopback, killed before readings,
+  `num_tokens: 1`); the victim JVM, its configuration and its budget are real.
+- Interpretation: a suspected implementation defect / design gap — the per-writer buffer was meant to be
+  shared (`HintsWriteExecutor.java:43-44`, the 6230 rewrite) but became per writer in 9428 and is never
+  released while a writer stays open.
+- The resumed session redid no arm; all readings come from the original queue (§3.1).

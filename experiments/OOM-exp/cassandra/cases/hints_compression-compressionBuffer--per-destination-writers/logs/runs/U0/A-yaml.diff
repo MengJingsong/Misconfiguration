@@ -1,0 +1,35 @@
+1,3c1,2
+< cluster_name: 'Test Cluster'
+< num_tokens: 16
+< allocate_tokens_for_local_replication_factor: 3
+---
+> cluster_name: 'c5'
+> num_tokens: 1
+7a7
+> hints_directory: /mydata/s4/c5-w1/inst/A/hints
+21a22,24
+> data_file_directories:
+>     - /mydata/s4/c5-w1/inst/A/data
+> commitlog_directory: /mydata/s4/c5-w1/inst/A/commitlog
+22a26
+> cdc_raw_directory: /mydata/s4/c5-w1/inst/A/cdc_raw
+31a36
+> saved_caches_directory: /mydata/s4/c5-w1/inst/A/saved_caches
+39c44
+<       - seeds: "127.0.0.1:7000"
+---
+>       - seeds: "127.0.5.1:7000"
+59c64
+< listen_address: localhost
+---
+> listen_address: 127.0.5.1
+63c68
+< rpc_address: localhost
+---
+> rpc_address: 127.0.5.1
+82c87
+< endpoint_snitch: SimpleSnitch
+---
+> endpoint_snitch: GossipingPropertyFileSnitch
+138a144
+> initial_token: 1

@@ -1,0 +1,46 @@
+# C6 stage 2: OOM-dump thread traces (hprof_scan.py, A3) and stdout OOM lines, as printed in the session (2026-11-18).
+# Full scan JSON on pc91: /mydata/s4/c6-w2/logs/<label>/scan-oom.json. Dumps were deleted after scanning.
+
+## H2-T-2 (2 GiB, N_OOM 1,040; dump 2,341,240,286 B; 66 traces in the dump, 2 match)
+stdout: java.lang.OutOfMemoryError: Java heap space
+        Dumping heap to /mydata/s4/c6-w2/run/dump/cassandra-1794990788-pid42270.hprof ...
+        Heap dump file created [2341240286 bytes in 23.958 secs]
+        # -XX:OnOutOfMemoryError="kill -9 %p"
+        #   Executing /bin/sh -c "kill -9 42270"...
+        Killed
+trace (thread serial 61, the thrower):
+  OutOfMemoryError.<init>:48
+  SlabAllocator$Region.<init>:179
+  SlabAllocator.getRegion:139
+  SlabAllocator.allocate:104
+  MemtableBufferAllocator$1.allocate:40
+  ByteBufferCloner.clone:77
+  ByteBufferCloner.clone:63
+  ByteBufferCloner.clone:46
+  SkipListMemtable.put:115
+  ColumnFamilyStore.apply:1477
+  CassandraTableWriteHandler.write:38
+  Keyspace.applyInternal:653
+  Keyspace.apply:510
+  Mutation.apply:249
+  Mutation.apply:269
+  StorageProxy$$Lambda$1651.run:-1
+  StorageProxy$4.runMayThrow:1682
+  StorageProxy$LocalMutationRunnable.run:2661
+trace (thread serial 36, also allocating a region):
+  SlabAllocator$Region.<init>:179
+  SlabAllocator.getRegion:139
+  SlabAllocator.allocate:104
+  MemtableBufferAllocator$1.allocate:40
+  ByteBufferCloner.clone:77 ... SkipListMemtable.put:115 ... Keyspace.apply:510 ... StorageProxy$LocalMutationRunnable$1.runMayThrow:2651
+  StorageProxy$HintRunnable.run:2721
+
+## H4-T-1 (4 GiB, N_OOM 2,333; dump 4,646,034,731 B; 5 traces match)
+stdout: java.lang.OutOfMemoryError: Java heap space
+        Heap dump file created [4646034731 bytes in 22.551 secs]
+        #   Executing /bin/sh -c "kill -9 51373"...
+        Killed
+thrower: OutOfMemoryError.<init>:48 <- Constants$Literal.prepare:266 <- Constants$Literal.prepare:212 ... (CQL literal of an unprepared INSERT)
+others (3 threads): SlabAllocator.getRegion:139 <- SlabAllocator.allocate:104 <- MemtableBufferAllocator$1.allocate:40 ...
+
+## H2-T-1 (2 GiB): scanned before A3 (no traces); stdout as H2-T-2 with "Heap dump file created [2344359189 bytes in 16.706 secs]".

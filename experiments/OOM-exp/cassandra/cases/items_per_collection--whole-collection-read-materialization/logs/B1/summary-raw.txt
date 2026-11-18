@@ -1,0 +1,11 @@
+RUN B1 heap=2G guard=16G table=s1m mode=set c=8 extra=- window=180 start_epoch=1794976904
+NODE up daemon_pid=109753 cgroup=/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/u3w1-B1.scope memory.max=17179869184 swap.max=0
+JVMARGS -XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M 
+CLIENTS start epoch=1794976922.908339825 table=s1m mode=set c=8
+CLIENTS stopped epoch=1794977104.560888346
+HISTO end | Total      17147684      723143968 | cells 4000000 160000000
+OOMKILL 1794977105678 3081207808 0 2943984
+STDOUT-OOM 2 | CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V INFO  [main] 2026-11-18T04:41:47,434 CassandraDaemon.java:619 - JVM Arguments: [-ea, -da:net.openhft..., -XX:+UseThreadPriorities, -XX:+HeapDumpOnOutOfMemoryError, -Xss256k, -XX:+AlwaysPreTouch, -XX:+UseTLAB, -XX:+ResizeTLAB, -XX:+UseNUMA, -XX:+PerfDisableSharedMem, -Djava
+SYSLOG ERROR=0 WARN=17 first_error=
+OUTCOME-RAW survived
+END end_epoch=1794977115 daemons_left=0

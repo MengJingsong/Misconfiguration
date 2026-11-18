@@ -1,0 +1,14 @@
+RUN HS8Gr3 heap=8G guard=22G table=s4m mode=set c=16 extra=- window=180 start_epoch=1794989366
+NODE up daemon_pid=159351 cgroup=/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/u3w1-HS8Gr3.scope memory.max=23622320128 swap.max=0
+JVMARGS -XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -Xms8G -Xmx8G -XX:MaxDirectMemorySize=15872M 
+CLIENTS start epoch=1794989385.438698764 table=s4m mode=set c=16
+CLIENTS stopped epoch=1794989566.295045288
+HISTO end |  | cells 
+OOMKILL 1794989576561 9771380736 0 9419032
+STDOUT-OOM 3 | CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V INFO  [main] 2026-11-18T08:09:29,823 CassandraDaemon.java:619 - JVM Arguments: [-ea, -da:net.openhft..., -XX:+UseThreadPriorities, -XX:+HeapDumpOnOutOfMemoryError, -Xss256k, -XX:+AlwaysPreTouch, -XX:+UseTLAB, -XX:+ResizeTLAB, -XX:+UseNUMA, -XX:+PerfDisableSharedMem, -Djava
+SYSLOG ERROR=0 WARN=8 first_error=
+OUTCOME-RAW survived
+HPROF /mydata/s4/u3-w1/runs/HS8Gr3/logs/cassandra-1794989367-pid159351.hprof 11598405855
+END end_epoch=1794989773 daemons_left=0
+[2026-11-18 01:16:12 1794989772203] dump wait 194s: Heap dump file created [11598405855 bytes in 241.669 secs]
+[2026-11-18 01:16:12 1794989772207] stopping node (stopdaemon)

@@ -1,0 +1,12 @@
+RUN P2 heap=2G guard=16G table=s1m mode=set c=16 extra=/mydata/s4/u3-w1/harness/arm-P.yaml window=180 start_epoch=1794977850
+NODE up daemon_pid=135375 cgroup=/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/u3w1-P2.scope memory.max=17179869184 swap.max=0
+JVMARGS -XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M 
+CLIENTS start epoch=1794977869.422972639 table=s1m mode=set c=16
+DAEMON DIED at epoch=1794977958.210763419 t=89s
+CLIENTS stopped epoch=1794977959.251949026
+OOMKILL 1794977958389 end 
+STDOUT-OOM 5 | CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V INFO  [main] 2026-11-18T04:57:33,778 CassandraDaemon.java:619 - JVM Arguments: [-ea, -da:net.openhft..., -XX:+UseThreadPriorities, -XX:+HeapDumpOnOutOfMemoryError, -Xss256k, -XX:+AlwaysPreTouch, -XX:+UseTLAB, -XX:+ResizeTLAB, -XX:+UseNUMA, -XX:+PerfDisableSharedMem, -Djava
+SYSLOG ERROR=0 WARN=5 first_error=
+OUTCOME-RAW died
+HPROF /mydata/s4/u3-w1/runs/P2/logs/cassandra-1794977851-pid135375.hprof 3074536984
+END end_epoch=1794977964 daemons_left=0

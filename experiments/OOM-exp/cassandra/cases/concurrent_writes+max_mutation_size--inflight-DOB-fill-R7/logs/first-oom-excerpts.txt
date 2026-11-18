@@ -1,0 +1,360 @@
+== E_d896_r1
+1198-INFO  [Service Thread] 2026-11-18T04:05:12,460 GCInspector.java:286 - G1 Old Generation GC in 474ms.  G1 Eden Space: 33554432 -> 0; G1 Old Gen: 1087534768 -> 1087526384; 
+1199-INFO  [Service Thread] 2026-11-18T04:05:13,043 GCInspector.java:286 - G1 Old Generation GC in 387ms.  G1 Eden Space: 50331648 -> 0; G1 Old Gen: 1188219960 -> 1154534336; 
+1200-ERROR [MutationStage-20] 2026-11-18T04:05:13,044 JVMStabilityInspector.java:70 - Exception in thread Thread[MutationStage-20,5,SharedPool]
+1201:java.lang.RuntimeException: java.lang.OutOfMemoryError: Direct buffer memory
+1202-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:108)
+1203-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:45)
+1204-	at org.apache.cassandra.net.InboundMessageHandler$ProcessMessage.run(InboundMessageHandler.java:430)
+1205-	at org.apache.cassandra.concurrent.ExecutionFailure$1.run(ExecutionFailure.java:133)
+1206-	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+1207-	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+1208-	at java.base/java.lang.Thread.run(Thread.java:829)
+1209-Caused by: java.lang.OutOfMemoryError: Direct buffer memory
+1210-	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+1211-	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+1212-	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+1213-	at org.apache.cassandra.io.util.DataOutputBuffer$1$1.allocate(DataOutputBuffer.java:87)
+1214-	at org.apache.cassandra.io.util.DataOutputBuffer.expandToFit(DataOutputBuffer.java:178)
+1215-	at org.apache.cassandra.io.util.DataOutputBuffer.doFlush(DataOutputBuffer.java:138)
+1216-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.write(BufferedDataOutputStreamPlus.java:146)
+1217-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.writeByte(BufferedDataOutputStreamPlus.java:162)
+1218-	at org.apache.cassandra.db.rows.UnfilteredSerializer.writeEndOfPartition(UnfilteredSerializer.java:415)
+1219-	at org.apache.cassandra.db.rows.UnfilteredRowIteratorSerializer.serialize(UnfilteredRowIteratorSerializer.java:153)
+1220-	at org.apache.cassandra.db.rows.UnfilteredRowIteratorSerializer.serialize(UnfilteredRowIteratorSerializer.java:101)
+1221-	at org.apache.cassandra.db.partitions.PartitionUpdate$PartitionUpdateSerializer.serialize(PartitionUpdate.java:717)
+1222-	at org.apache.cassandra.db.Mutation$MutationSerializer.serializeInternal(Mutation.java:483)
+1223-	at org.apache.cassandra.db.Mutation$SizeOnlyCacheableSerialization.serialize(Mutation.java:583)
+1224-	at org.apache.cassandra.db.Mutation$MutationSerializer.serialize(Mutation.java:414)
+1225-	at org.apache.cassandra.db.commitlog.CommitLog.add(CommitLog.java:308)
+1226-	at org.apache.cassandra.db.CassandraKeyspaceWriteHandler.addToCommitLog(CassandraKeyspaceWriteHandler.java:99)
+1227-	at org.apache.cassandra.db.CassandraKeyspaceWriteHandler.beginWrite(CassandraKeyspaceWriteHandler.java:53)
+1228-	at org.apache.cassandra.db.Keyspace.applyInternal(Keyspace.java:625)
+1229-	at org.apache.cassandra.db.Keyspace.applyFuture(Keyspace.java:474)
+1230-	at org.apache.cassandra.db.Mutation.applyFuture(Mutation.java:244)
+1231-	at org.apache.cassandra.db.MutationVerbHandler.applyMutation(MutationVerbHandler.java:75)
+1232-	at org.apache.cassandra.db.AbstractMutationVerbHandler.processMessage(AbstractMutationVerbHandler.java:66)
+1233-	at org.apache.cassandra.db.MutationVerbHandler.doVerb(MutationVerbHandler.java:64)
+1234-	at org.apache.cassandra.net.InboundSink.lambda$new$0(InboundSink.java:78)
+1235-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:97)
+1236-	... 6 common frames omitted
+1237-ERROR [MutationStage-21] 2026-11-18T04:05:13,025 JVMStabilityInspector.java:70 - Exception in thread Thread[MutationStage-21,5,SharedPool]
+1238-java.lang.RuntimeException: java.lang.OutOfMemoryError: Direct buffer memory
+1239-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:108)
+1240-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:45)
+1241-	at org.apache.cassandra.net.InboundMessageHandler$ProcessMessage.run(InboundMessageHandler.java:430)
+== E_d896_r2
+1114-INFO  [Service Thread] 2026-11-18T04:24:03,111 GCInspector.java:286 - G1 Old Generation GC in 294ms.  G1 Eden Space: 16777216 -> 0; G1 Old Gen: 1040385456 -> 1057078952; 
+1115-INFO  [Service Thread] 2026-11-18T04:24:03,857 GCInspector.java:286 - G1 Old Generation GC in 305ms.  G1 Eden Space: 16777216 -> 0; G1 Old Gen: 1057016312 -> 1057154256; 
+1116-ERROR [MutationStage-11] 2026-11-18T04:24:04,022 JVMStabilityInspector.java:70 - Exception in thread Thread[MutationStage-11,10,SharedPool]
+1117:java.lang.RuntimeException: java.lang.OutOfMemoryError: Direct buffer memory
+1118-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:108)
+1119-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:45)
+1120-	at org.apache.cassandra.net.InboundMessageHandler$ProcessMessage.run(InboundMessageHandler.java:430)
+1121-	at org.apache.cassandra.concurrent.ExecutionFailure$1.run(ExecutionFailure.java:133)
+1122-	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+1123-	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+1124-	at java.base/java.lang.Thread.run(Thread.java:829)
+1125-Caused by: java.lang.OutOfMemoryError: Direct buffer memory
+1126-	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+1127-	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+1128-	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+1129-	at org.apache.cassandra.io.util.DataOutputBuffer$1$1.allocate(DataOutputBuffer.java:87)
+1130-	at org.apache.cassandra.io.util.DataOutputBuffer.expandToFit(DataOutputBuffer.java:178)
+1131-	at org.apache.cassandra.io.util.DataOutputBuffer.doFlush(DataOutputBuffer.java:138)
+1132-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.write(BufferedDataOutputStreamPlus.java:146)
+1133-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.writeByte(BufferedDataOutputStreamPlus.java:162)
+1134-	at org.apache.cassandra.db.rows.UnfilteredSerializer.writeEndOfPartition(UnfilteredSerializer.java:415)
+1135-	at org.apache.cassandra.db.rows.UnfilteredRowIteratorSerializer.serialize(UnfilteredRowIteratorSerializer.java:153)
+1136-	at org.apache.cassandra.db.rows.UnfilteredRowIteratorSerializer.serialize(UnfilteredRowIteratorSerializer.java:101)
+1137-	at org.apache.cassandra.db.partitions.PartitionUpdate$PartitionUpdateSerializer.serialize(PartitionUpdate.java:717)
+1138-	at org.apache.cassandra.db.Mutation$MutationSerializer.serializeInternal(Mutation.java:483)
+1139-	at org.apache.cassandra.db.Mutation$SizeOnlyCacheableSerialization.serialize(Mutation.java:583)
+1140-	at org.apache.cassandra.db.Mutation$MutationSerializer.serialize(Mutation.java:414)
+1141-	at org.apache.cassandra.db.commitlog.CommitLog.add(CommitLog.java:308)
+1142-	at org.apache.cassandra.db.CassandraKeyspaceWriteHandler.addToCommitLog(CassandraKeyspaceWriteHandler.java:99)
+1143-	at org.apache.cassandra.db.CassandraKeyspaceWriteHandler.beginWrite(CassandraKeyspaceWriteHandler.java:53)
+1144-	at org.apache.cassandra.db.Keyspace.applyInternal(Keyspace.java:625)
+1145-	at org.apache.cassandra.db.Keyspace.applyFuture(Keyspace.java:474)
+1146-	at org.apache.cassandra.db.Mutation.applyFuture(Mutation.java:244)
+1147-	at org.apache.cassandra.db.MutationVerbHandler.applyMutation(MutationVerbHandler.java:75)
+1148-	at org.apache.cassandra.db.AbstractMutationVerbHandler.processMessage(AbstractMutationVerbHandler.java:66)
+1149-	at org.apache.cassandra.db.MutationVerbHandler.doVerb(MutationVerbHandler.java:64)
+1150-	at org.apache.cassandra.net.InboundSink.lambda$new$0(InboundSink.java:78)
+1151-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:97)
+1152-	... 6 common frames omitted
+1153-ERROR [MutationStage-11] 2026-11-18T04:24:04,111 JVMStabilityInspector.java:123 - OutOfMemory error letting the JVM handle the error:
+1154-java.lang.OutOfMemoryError: Direct buffer memory
+1155-	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+1156-	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+1157-	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+== E_d896_r3
+1504-INFO  [ScheduledTasks:1] 2026-11-18T04:43:22,838 StatusLogger.java:121 - system.available_ranges                   0,0
+1505-INFO  [ScheduledTasks:1] 2026-11-18T04:43:22,838 StatusLogger.java:121 - system.prepared_statements                 0,0
+1506-ERROR [MutationStage-14] 2026-11-18T04:43:22,920 JVMStabilityInspector.java:70 - Exception in thread Thread[MutationStage-14,5,SharedPool]
+1507:java.lang.RuntimeException: java.lang.OutOfMemoryError: Direct buffer memory
+1508-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:108)
+1509-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:45)
+1510-	at org.apache.cassandra.net.InboundMessageHandler$ProcessMessage.run(InboundMessageHandler.java:430)
+1511-	at org.apache.cassandra.concurrent.ExecutionFailure$1.run(ExecutionFailure.java:133)
+1512-	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+1513-	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+1514-	at java.base/java.lang.Thread.run(Thread.java:829)
+1515-Caused by: java.lang.OutOfMemoryError: Direct buffer memory
+1516-	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+1517-	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+1518-	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+1519-	at org.apache.cassandra.io.util.DataOutputBuffer$1$1.allocate(DataOutputBuffer.java:87)
+1520-	at org.apache.cassandra.io.util.DataOutputBuffer.expandToFit(DataOutputBuffer.java:178)
+1521-	at org.apache.cassandra.io.util.DataOutputBuffer.doFlush(DataOutputBuffer.java:138)
+1522-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.write(BufferedDataOutputStreamPlus.java:146)
+1523-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.writeByte(BufferedDataOutputStreamPlus.java:162)
+1524-	at org.apache.cassandra.db.rows.UnfilteredSerializer.writeEndOfPartition(UnfilteredSerializer.java:415)
+1525-	at org.apache.cassandra.db.rows.UnfilteredRowIteratorSerializer.serialize(UnfilteredRowIteratorSerializer.java:153)
+1526-	at org.apache.cassandra.db.rows.UnfilteredRowIteratorSerializer.serialize(UnfilteredRowIteratorSerializer.java:101)
+1527-	at org.apache.cassandra.db.partitions.PartitionUpdate$PartitionUpdateSerializer.serialize(PartitionUpdate.java:717)
+1528-	at org.apache.cassandra.db.Mutation$MutationSerializer.serializeInternal(Mutation.java:483)
+1529-	at org.apache.cassandra.db.Mutation$SizeOnlyCacheableSerialization.serialize(Mutation.java:583)
+1530-	at org.apache.cassandra.db.Mutation$MutationSerializer.serialize(Mutation.java:414)
+1531-	at org.apache.cassandra.db.commitlog.CommitLog.add(CommitLog.java:308)
+1532-	at org.apache.cassandra.db.CassandraKeyspaceWriteHandler.addToCommitLog(CassandraKeyspaceWriteHandler.java:99)
+1533-	at org.apache.cassandra.db.CassandraKeyspaceWriteHandler.beginWrite(CassandraKeyspaceWriteHandler.java:53)
+1534-	at org.apache.cassandra.db.Keyspace.applyInternal(Keyspace.java:625)
+1535-	at org.apache.cassandra.db.Keyspace.applyFuture(Keyspace.java:474)
+1536-	at org.apache.cassandra.db.Mutation.applyFuture(Mutation.java:244)
+1537-	at org.apache.cassandra.db.MutationVerbHandler.applyMutation(MutationVerbHandler.java:75)
+1538-	at org.apache.cassandra.db.AbstractMutationVerbHandler.processMessage(AbstractMutationVerbHandler.java:66)
+1539-	at org.apache.cassandra.db.MutationVerbHandler.doVerb(MutationVerbHandler.java:64)
+1540-	at org.apache.cassandra.net.InboundSink.lambda$new$0(InboundSink.java:78)
+1541-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:97)
+1542-	... 6 common frames omitted
+1543-ERROR [MutationStage-14] 2026-11-18T04:43:23,076 JVMStabilityInspector.java:123 - OutOfMemory error letting the JVM handle the error:
+1544-java.lang.OutOfMemoryError: Direct buffer memory
+1545-	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+1546-	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+1547-	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+== E_d896_r4
+1194-INFO  [NonPeriodicTasks:1] 2026-11-18T05:01:46,834 BigFormat.java:231 - Deleting sstable: /mydata/s4/r7-w1/inst/V/data/u1r2/t-f2c2c740e30c11f1916303d98f3a31bf/nb-11-big
+1195-INFO  [NonPeriodicTasks:1] 2026-11-18T05:01:47,526 BigFormat.java:231 - Deleting sstable: /mydata/s4/r7-w1/inst/V/data/u1r2/t-f2c2c740e30c11f1916303d98f3a31bf/nb-10-big
+1196-ERROR [MutationStage-20] 2026-11-18T05:01:47,230 JVMStabilityInspector.java:70 - Exception in thread Thread[MutationStage-20,5,SharedPool]
+1197:java.lang.RuntimeException: java.lang.OutOfMemoryError: Direct buffer memory
+1198-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:108)
+1199-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:45)
+1200-	at org.apache.cassandra.net.InboundMessageHandler$ProcessMessage.run(InboundMessageHandler.java:430)
+1201-	at org.apache.cassandra.concurrent.ExecutionFailure$1.run(ExecutionFailure.java:133)
+1202-	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+1203-	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+1204-	at java.base/java.lang.Thread.run(Thread.java:829)
+1205-Caused by: java.lang.OutOfMemoryError: Direct buffer memory
+1206-	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+1207-	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+1208-	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+1209-	at org.apache.cassandra.io.util.DataOutputBuffer$1$1.allocate(DataOutputBuffer.java:87)
+1210-	at org.apache.cassandra.io.util.DataOutputBuffer.expandToFit(DataOutputBuffer.java:178)
+1211-	at org.apache.cassandra.io.util.DataOutputBuffer.doFlush(DataOutputBuffer.java:138)
+1212-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.write(BufferedDataOutputStreamPlus.java:146)
+1213-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.writeByte(BufferedDataOutputStreamPlus.java:162)
+1214-	at org.apache.cassandra.db.rows.UnfilteredSerializer.writeEndOfPartition(UnfilteredSerializer.java:415)
+1215-	at org.apache.cassandra.db.rows.UnfilteredRowIteratorSerializer.serialize(UnfilteredRowIteratorSerializer.java:153)
+1216-	at org.apache.cassandra.db.rows.UnfilteredRowIteratorSerializer.serialize(UnfilteredRowIteratorSerializer.java:101)
+1217-	at org.apache.cassandra.db.partitions.PartitionUpdate$PartitionUpdateSerializer.serialize(PartitionUpdate.java:717)
+1218-	at org.apache.cassandra.db.Mutation$MutationSerializer.serializeInternal(Mutation.java:483)
+1219-	at org.apache.cassandra.db.Mutation$SizeOnlyCacheableSerialization.serialize(Mutation.java:583)
+1220-	at org.apache.cassandra.db.Mutation$MutationSerializer.serialize(Mutation.java:414)
+1221-	at org.apache.cassandra.db.commitlog.CommitLog.add(CommitLog.java:308)
+1222-	at org.apache.cassandra.db.CassandraKeyspaceWriteHandler.addToCommitLog(CassandraKeyspaceWriteHandler.java:99)
+1223-	at org.apache.cassandra.db.CassandraKeyspaceWriteHandler.beginWrite(CassandraKeyspaceWriteHandler.java:53)
+1224-	at org.apache.cassandra.db.Keyspace.applyInternal(Keyspace.java:625)
+1225-	at org.apache.cassandra.db.Keyspace.applyFuture(Keyspace.java:474)
+1226-	at org.apache.cassandra.db.Mutation.applyFuture(Mutation.java:244)
+1227-	at org.apache.cassandra.db.MutationVerbHandler.applyMutation(MutationVerbHandler.java:75)
+1228-	at org.apache.cassandra.db.AbstractMutationVerbHandler.processMessage(AbstractMutationVerbHandler.java:66)
+1229-	at org.apache.cassandra.db.MutationVerbHandler.doVerb(MutationVerbHandler.java:64)
+1230-	at org.apache.cassandra.net.InboundSink.lambda$new$0(InboundSink.java:78)
+1231-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:97)
+1232-	... 6 common frames omitted
+1233-ERROR [MutationStage-23] 2026-11-18T05:01:47,347 JVMStabilityInspector.java:70 - Exception in thread Thread[MutationStage-23,5,SharedPool]
+1234-java.lang.RuntimeException: java.lang.OutOfMemoryError: Direct buffer memory
+1235-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:108)
+1236-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:45)
+1237-	at org.apache.cassandra.net.InboundMessageHandler$ProcessMessage.run(InboundMessageHandler.java:430)
+== E_d896_r5
+1361-INFO  [ScheduledTasks:1] 2026-11-18T05:06:58,308 StatusLogger.java:121 - system.prepared_statements                 0,0
+1362-INFO  [Service Thread] 2026-11-18T05:06:58,863 GCInspector.java:286 - G1 Old Generation GC in 201ms.  G1 Eden Space: 50331648 -> 0; G1 Old Gen: 1108159984 -> 1091459832; 
+1363-ERROR [MutationStage-25] 2026-11-18T05:06:58,867 JVMStabilityInspector.java:70 - Exception in thread Thread[MutationStage-25,5,SharedPool]
+1364:java.lang.RuntimeException: java.lang.OutOfMemoryError: Direct buffer memory
+1365-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:108)
+1366-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:45)
+1367-	at org.apache.cassandra.net.InboundMessageHandler$ProcessMessage.run(InboundMessageHandler.java:430)
+1368-	at org.apache.cassandra.concurrent.ExecutionFailure$1.run(ExecutionFailure.java:133)
+1369-	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+1370-	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+1371-	at java.base/java.lang.Thread.run(Thread.java:829)
+1372-Caused by: java.lang.OutOfMemoryError: Direct buffer memory
+1373-	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+1374-	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+1375-	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+1376-	at org.apache.cassandra.io.util.DataOutputBuffer$1$1.allocate(DataOutputBuffer.java:87)
+1377-	at org.apache.cassandra.io.util.DataOutputBuffer.expandToFit(DataOutputBuffer.java:178)
+1378-	at org.apache.cassandra.io.util.DataOutputBuffer.doFlush(DataOutputBuffer.java:138)
+1379-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.write(BufferedDataOutputStreamPlus.java:146)
+1380-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.writeByte(BufferedDataOutputStreamPlus.java:162)
+1381-	at org.apache.cassandra.db.rows.UnfilteredSerializer.writeEndOfPartition(UnfilteredSerializer.java:415)
+1382-	at org.apache.cassandra.db.rows.UnfilteredRowIteratorSerializer.serialize(UnfilteredRowIteratorSerializer.java:153)
+1383-	at org.apache.cassandra.db.rows.UnfilteredRowIteratorSerializer.serialize(UnfilteredRowIteratorSerializer.java:101)
+1384-	at org.apache.cassandra.db.partitions.PartitionUpdate$PartitionUpdateSerializer.serialize(PartitionUpdate.java:717)
+1385-	at org.apache.cassandra.db.Mutation$MutationSerializer.serializeInternal(Mutation.java:483)
+1386-	at org.apache.cassandra.db.Mutation$SizeOnlyCacheableSerialization.serialize(Mutation.java:583)
+1387-	at org.apache.cassandra.db.Mutation$MutationSerializer.serialize(Mutation.java:414)
+1388-	at org.apache.cassandra.db.commitlog.CommitLog.add(CommitLog.java:308)
+1389-	at org.apache.cassandra.db.CassandraKeyspaceWriteHandler.addToCommitLog(CassandraKeyspaceWriteHandler.java:99)
+1390-	at org.apache.cassandra.db.CassandraKeyspaceWriteHandler.beginWrite(CassandraKeyspaceWriteHandler.java:53)
+1391-	at org.apache.cassandra.db.Keyspace.applyInternal(Keyspace.java:625)
+1392-	at org.apache.cassandra.db.Keyspace.applyFuture(Keyspace.java:474)
+1393-	at org.apache.cassandra.db.Mutation.applyFuture(Mutation.java:244)
+1394-	at org.apache.cassandra.db.MutationVerbHandler.applyMutation(MutationVerbHandler.java:75)
+1395-	at org.apache.cassandra.db.AbstractMutationVerbHandler.processMessage(AbstractMutationVerbHandler.java:66)
+1396-	at org.apache.cassandra.db.MutationVerbHandler.doVerb(MutationVerbHandler.java:64)
+1397-	at org.apache.cassandra.net.InboundSink.lambda$new$0(InboundSink.java:78)
+1398-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:97)
+1399-	... 6 common frames omitted
+1400-ERROR [MutationStage-25] 2026-11-18T05:06:58,902 JVMStabilityInspector.java:123 - OutOfMemory error letting the JVM handle the error:
+1401-java.lang.OutOfMemoryError: Direct buffer memory
+1402-	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+1403-	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+1404-	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+== E_d896_r7
+1102-INFO  [ScheduledTasks:1] 2026-11-18T08:11:04,409 StatusLogger.java:121 - system.prepared_statements                 0,0
+1103-INFO  [Service Thread] 2026-11-18T08:11:06,236 GCInspector.java:286 - G1 Old Generation GC in 287ms.  G1 Old Gen: 1001792976 -> 1001807504; 
+1104-ERROR [MutationStage-9] 2026-11-18T08:11:07,823 JVMStabilityInspector.java:70 - Exception in thread Thread[MutationStage-9,10,SharedPool]
+1105:java.lang.RuntimeException: java.lang.OutOfMemoryError: Direct buffer memory
+1106-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:108)
+1107-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:45)
+1108-	at org.apache.cassandra.net.InboundMessageHandler$ProcessMessage.run(InboundMessageHandler.java:430)
+1109-	at org.apache.cassandra.concurrent.ExecutionFailure$1.run(ExecutionFailure.java:133)
+1110-	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+1111-	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+1112-	at java.base/java.lang.Thread.run(Thread.java:829)
+1113-Caused by: java.lang.OutOfMemoryError: Direct buffer memory
+1114-	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+1115-	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+1116-	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+1117-	at org.apache.cassandra.io.util.DataOutputBuffer$1$1.allocate(DataOutputBuffer.java:87)
+1118-	at org.apache.cassandra.io.util.DataOutputBuffer.expandToFit(DataOutputBuffer.java:178)
+1119-	at org.apache.cassandra.io.util.DataOutputBuffer.doFlush(DataOutputBuffer.java:138)
+1120-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.write(BufferedDataOutputStreamPlus.java:146)
+1121-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.writeByte(BufferedDataOutputStreamPlus.java:162)
+1122-	at org.apache.cassandra.db.rows.UnfilteredSerializer.writeEndOfPartition(UnfilteredSerializer.java:415)
+1123-	at org.apache.cassandra.db.rows.UnfilteredRowIteratorSerializer.serialize(UnfilteredRowIteratorSerializer.java:153)
+1124-	at org.apache.cassandra.db.rows.UnfilteredRowIteratorSerializer.serialize(UnfilteredRowIteratorSerializer.java:101)
+1125-	at org.apache.cassandra.db.partitions.PartitionUpdate$PartitionUpdateSerializer.serialize(PartitionUpdate.java:717)
+1126-	at org.apache.cassandra.db.Mutation$MutationSerializer.serializeInternal(Mutation.java:483)
+1127-	at org.apache.cassandra.db.Mutation$SizeOnlyCacheableSerialization.serialize(Mutation.java:583)
+1128-	at org.apache.cassandra.db.Mutation$MutationSerializer.serialize(Mutation.java:414)
+1129-	at org.apache.cassandra.db.commitlog.CommitLog.add(CommitLog.java:308)
+1130-	at org.apache.cassandra.db.CassandraKeyspaceWriteHandler.addToCommitLog(CassandraKeyspaceWriteHandler.java:99)
+1131-	at org.apache.cassandra.db.CassandraKeyspaceWriteHandler.beginWrite(CassandraKeyspaceWriteHandler.java:53)
+1132-	at org.apache.cassandra.db.Keyspace.applyInternal(Keyspace.java:625)
+1133-	at org.apache.cassandra.db.Keyspace.applyFuture(Keyspace.java:474)
+1134-	at org.apache.cassandra.db.Mutation.applyFuture(Mutation.java:244)
+1135-	at org.apache.cassandra.db.MutationVerbHandler.applyMutation(MutationVerbHandler.java:75)
+1136-	at org.apache.cassandra.db.AbstractMutationVerbHandler.processMessage(AbstractMutationVerbHandler.java:66)
+1137-	at org.apache.cassandra.db.MutationVerbHandler.doVerb(MutationVerbHandler.java:64)
+1138-	at org.apache.cassandra.net.InboundSink.lambda$new$0(InboundSink.java:78)
+1139-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:97)
+1140-	... 6 common frames omitted
+1141-ERROR [MutationStage-14] 2026-11-18T08:11:07,892 JVMStabilityInspector.java:70 - Exception in thread Thread[MutationStage-14,5,SharedPool]
+1142-java.lang.RuntimeException: java.lang.OutOfMemoryError: Direct buffer memory
+1143-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:108)
+1144-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:45)
+1145-	at org.apache.cassandra.net.InboundMessageHandler$ProcessMessage.run(InboundMessageHandler.java:430)
+== H_d1024_r1
+1146-INFO  [Service Thread] 2026-11-18T05:12:05,384 GCInspector.java:286 - G1 Old Generation GC in 478ms.  G1 Old Gen: 1137297600 -> 1137350680; 
+1147-INFO  [Service Thread] 2026-11-18T05:12:06,288 GCInspector.java:286 - G1 Old Generation GC in 780ms.  G1 Eden Space: 33554432 -> 0; G1 Old Gen: 1137352592 -> 1137261400; 
+1148-ERROR [MutationStage-21] 2026-11-18T05:12:06,893 JVMStabilityInspector.java:70 - Exception in thread Thread[MutationStage-21,10,SharedPool]
+1149:java.lang.RuntimeException: java.lang.OutOfMemoryError: Direct buffer memory
+1150-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:108)
+1151-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:45)
+1152-	at org.apache.cassandra.net.InboundMessageHandler$ProcessMessage.run(InboundMessageHandler.java:430)
+1153-	at org.apache.cassandra.concurrent.ExecutionFailure$1.run(ExecutionFailure.java:133)
+1154-	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+1155-	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+1156-	at java.base/java.lang.Thread.run(Thread.java:829)
+1157-Caused by: java.lang.OutOfMemoryError: Direct buffer memory
+1158-	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+1159-	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+1160-	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+1161-	at org.apache.cassandra.io.util.DataOutputBuffer$1$1.allocate(DataOutputBuffer.java:87)
+1162-	at org.apache.cassandra.io.util.DataOutputBuffer.expandToFit(DataOutputBuffer.java:178)
+1163-	at org.apache.cassandra.io.util.DataOutputBuffer.doFlush(DataOutputBuffer.java:138)
+1164-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.write(BufferedDataOutputStreamPlus.java:146)
+1165-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.writeByte(BufferedDataOutputStreamPlus.java:162)
+1166-	at org.apache.cassandra.db.rows.UnfilteredSerializer.writeEndOfPartition(UnfilteredSerializer.java:415)
+1167-	at org.apache.cassandra.db.rows.UnfilteredRowIteratorSerializer.serialize(UnfilteredRowIteratorSerializer.java:153)
+1168-	at org.apache.cassandra.db.rows.UnfilteredRowIteratorSerializer.serialize(UnfilteredRowIteratorSerializer.java:101)
+1169-	at org.apache.cassandra.db.partitions.PartitionUpdate$PartitionUpdateSerializer.serialize(PartitionUpdate.java:717)
+1170-	at org.apache.cassandra.db.Mutation$MutationSerializer.serializeInternal(Mutation.java:483)
+1171-	at org.apache.cassandra.db.Mutation$SizeOnlyCacheableSerialization.serialize(Mutation.java:583)
+1172-	at org.apache.cassandra.db.Mutation$MutationSerializer.serialize(Mutation.java:414)
+1173-	at org.apache.cassandra.db.commitlog.CommitLog.add(CommitLog.java:308)
+1174-	at org.apache.cassandra.db.CassandraKeyspaceWriteHandler.addToCommitLog(CassandraKeyspaceWriteHandler.java:99)
+1175-	at org.apache.cassandra.db.CassandraKeyspaceWriteHandler.beginWrite(CassandraKeyspaceWriteHandler.java:53)
+1176-	at org.apache.cassandra.db.Keyspace.applyInternal(Keyspace.java:625)
+1177-	at org.apache.cassandra.db.Keyspace.applyFuture(Keyspace.java:474)
+1178-	at org.apache.cassandra.db.Mutation.applyFuture(Mutation.java:244)
+1179-	at org.apache.cassandra.db.MutationVerbHandler.applyMutation(MutationVerbHandler.java:75)
+1180-	at org.apache.cassandra.db.AbstractMutationVerbHandler.processMessage(AbstractMutationVerbHandler.java:66)
+1181-	at org.apache.cassandra.db.MutationVerbHandler.doVerb(MutationVerbHandler.java:64)
+1182-	at org.apache.cassandra.net.InboundSink.lambda$new$0(InboundSink.java:78)
+1183-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:97)
+1184-	... 6 common frames omitted
+1185-ERROR [MutationStage-21] 2026-11-18T05:12:06,908 JVMStabilityInspector.java:123 - OutOfMemory error letting the JVM handle the error:
+1186-java.lang.OutOfMemoryError: Direct buffer memory
+1187-	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+1188-	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+1189-	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+== H_d1024_r2
+1995-INFO  [ScheduledTasks:1] 2026-11-18T05:18:12,756 StatusLogger.java:121 - system.available_ranges                   0,0
+1996-INFO  [ScheduledTasks:1] 2026-11-18T05:18:12,756 StatusLogger.java:121 - system.prepared_statements                 0,0
+1997-ERROR [MutationStage-22] 2026-11-18T05:18:12,966 JVMStabilityInspector.java:70 - Exception in thread Thread[MutationStage-22,5,SharedPool]
+1998:java.lang.RuntimeException: java.lang.OutOfMemoryError: Direct buffer memory
+1999-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:108)
+2000-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:45)
+2001-	at org.apache.cassandra.net.InboundMessageHandler$ProcessMessage.run(InboundMessageHandler.java:430)
+2002-	at org.apache.cassandra.concurrent.ExecutionFailure$1.run(ExecutionFailure.java:133)
+2003-	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+2004-	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+2005-	at java.base/java.lang.Thread.run(Thread.java:829)
+2006-Caused by: java.lang.OutOfMemoryError: Direct buffer memory
+2007-	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+2008-	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+2009-	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+2010-	at org.apache.cassandra.io.util.DataOutputBuffer$1$1.allocate(DataOutputBuffer.java:87)
+2011-	at org.apache.cassandra.io.util.DataOutputBuffer.expandToFit(DataOutputBuffer.java:178)
+2012-	at org.apache.cassandra.io.util.DataOutputBuffer.doFlush(DataOutputBuffer.java:138)
+2013-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.write(BufferedDataOutputStreamPlus.java:146)
+2014-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.writeByte(BufferedDataOutputStreamPlus.java:162)
+2015-	at org.apache.cassandra.db.rows.UnfilteredSerializer.writeEndOfPartition(UnfilteredSerializer.java:415)
+2016-	at org.apache.cassandra.db.rows.UnfilteredRowIteratorSerializer.serialize(UnfilteredRowIteratorSerializer.java:153)
+2017-	at org.apache.cassandra.db.rows.UnfilteredRowIteratorSerializer.serialize(UnfilteredRowIteratorSerializer.java:101)
+2018-	at org.apache.cassandra.db.partitions.PartitionUpdate$PartitionUpdateSerializer.serialize(PartitionUpdate.java:717)
+2019-	at org.apache.cassandra.db.Mutation$MutationSerializer.serializeInternal(Mutation.java:483)
+2020-	at org.apache.cassandra.db.Mutation$SizeOnlyCacheableSerialization.serialize(Mutation.java:583)
+2021-	at org.apache.cassandra.db.Mutation$MutationSerializer.serialize(Mutation.java:414)
+2022-	at org.apache.cassandra.db.commitlog.CommitLog.add(CommitLog.java:308)
+2023-	at org.apache.cassandra.db.CassandraKeyspaceWriteHandler.addToCommitLog(CassandraKeyspaceWriteHandler.java:99)
+2024-	at org.apache.cassandra.db.CassandraKeyspaceWriteHandler.beginWrite(CassandraKeyspaceWriteHandler.java:53)
+2025-	at org.apache.cassandra.db.Keyspace.applyInternal(Keyspace.java:625)
+2026-	at org.apache.cassandra.db.Keyspace.applyFuture(Keyspace.java:474)
+2027-	at org.apache.cassandra.db.Mutation.applyFuture(Mutation.java:244)
+2028-	at org.apache.cassandra.db.MutationVerbHandler.applyMutation(MutationVerbHandler.java:75)
+2029-	at org.apache.cassandra.db.AbstractMutationVerbHandler.processMessage(AbstractMutationVerbHandler.java:66)
+2030-	at org.apache.cassandra.db.MutationVerbHandler.doVerb(MutationVerbHandler.java:64)
+2031-	at org.apache.cassandra.net.InboundSink.lambda$new$0(InboundSink.java:78)
+2032-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:97)
+2033-	... 6 common frames omitted
+2034-ERROR [MutationStage-22] 2026-11-18T05:18:13,027 JVMStabilityInspector.java:123 - OutOfMemory error letting the JVM handle the error:
+2035-java.lang.OutOfMemoryError: Direct buffer memory
+2036-	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+2037-	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+2038-	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)

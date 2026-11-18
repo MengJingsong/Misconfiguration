@@ -1,0 +1,40 @@
+[2026-11-17 21:40:41 1794976841043] + (warmup) exec java -Xmx4g -XX:MaxDirectMemorySize=8g -Dio.netty.eventLoopThreads=2 -Djdk.attach.allowAttachSelf=true --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL
+[2026-11-17 21:41:13 1794976873111] + jcmd 55766 GC.class_histogram > /mydata/s4/b10-w1/logs/T8-r1/histo-idle.txt
+[2026-11-17 21:41:13 1794976873708] histogram /mydata/s4/b10-w1/logs/T8-r1/histo-idle.txt: 1794976873111-1794976873698 QueryMessage=0 [B=27554480 top=[('[B', 27554480), ('[I', 15927128), ('[J', 9749584), ('[Ljava.lang.Object;', 6204384)]
+[2026-11-17 21:41:13 1794976873708] + java -cp /mydata/s4/b10-w1/classes Jmx 7199 'get' 'java.lang:type=Memory' 'HeapMemoryUsage' 'java.nio:type=BufferPool,name=direct' 'MemoryUsed' 'java.nio:type=BufferPool,name=direct' 'Count' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=Use
+[2026-11-17 21:41:14 1794976874106] + (flood-0) exec java -Xmx4g -XX:MaxDirectMemorySize=8g -Dio.netty.eventLoopThreads=2 -Djdk.attach.allowAttachSelf=true --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=AL
+[2026-11-17 21:41:14 1794976874107] + (flood-1) exec java -Xmx4g -XX:MaxDirectMemorySize=8g -Dio.netty.eventLoopThreads=2 -Djdk.attach.allowAttachSelf=true --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=AL
+[2026-11-17 21:41:14 1794976874107] + (flood-2) exec java -Xmx4g -XX:MaxDirectMemorySize=8g -Dio.netty.eventLoopThreads=2 -Djdk.attach.allowAttachSelf=true --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=AL
+[2026-11-17 21:41:14 1794976874108] + (flood-3) exec java -Xmx4g -XX:MaxDirectMemorySize=8g -Dio.netty.eventLoopThreads=2 -Djdk.attach.allowAttachSelf=true --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=AL
+[2026-11-17 21:41:14 1794976874109] + (flood-4) exec java -Xmx4g -XX:MaxDirectMemorySize=8g -Dio.netty.eventLoopThreads=2 -Djdk.attach.allowAttachSelf=true --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=AL
+[2026-11-17 21:41:14 1794976874110] + (flood-5) exec java -Xmx4g -XX:MaxDirectMemorySize=8g -Dio.netty.eventLoopThreads=2 -Djdk.attach.allowAttachSelf=true --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=AL
+[2026-11-17 21:41:14 1794976874111] + (flood-6) exec java -Xmx4g -XX:MaxDirectMemorySize=8g -Dio.netty.eventLoopThreads=2 -Djdk.attach.allowAttachSelf=true --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=AL
+[2026-11-17 21:41:14 1794976874112] + (flood-7) exec java -Xmx4g -XX:MaxDirectMemorySize=8g -Dio.netty.eventLoopThreads=2 -Djdk.attach.allowAttachSelf=true --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=AL
+[2026-11-17 21:41:16 1794976876332] t0 = 1794976876313
+[2026-11-17 21:41:37 1794976897100] + jcmd 55766 GC.class_histogram > /mydata/s4/b10-w1/logs/T8-r1/histo-1.txt
+[2026-11-17 21:41:37 1794976897807] histogram /mydata/s4/b10-w1/logs/T8-r1/histo-1.txt: 1794976897100-1794976897798 QueryMessage=66267 [B=8404931568 top=[('[B', 8404931568), ('[Ljava.lang.Object;', 24048136), ('[I', 15986672), ('java.nio.DirectByteBuffer', 12851136)]
+[2026-11-17 21:42:06 1794976926860] + jcmd 55766 GC.class_histogram > /mydata/s4/b10-w1/logs/T8-r1/histo-2.txt
+[2026-11-17 21:44:43 1794977083213] EXCEPTION Traceback (most recent call last):
+  File "/mydata/s4/b10-w1/harness/b10-run.py", line 518, in <module>
+    run(a[1], a[2], int(a[3]), int(a[4]), int(a[5]), throw, seconds, per_jvm, calib)
+  File "/mydata/s4/b10-w1/harness/b10-run.py", line 397, in run
+    h = histogram(pid, f'{LOGS}/histo-{len(histos) + 1}.txt')
+  File "/mydata/s4/b10-w1/harness/b10-run.py", line 208, in histogram
+    sh(f'jcmd {pid} GC.class_histogram > {path}', check=False, timeout=150, quiet=True)
+  File "/mydata/s4/b10-w1/harness/b10-run.py", line 66, in sh
+    r = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=timeout, env=env, cwd=cwd)
+  File "/usr/lib/python3.10/subprocess.py", line 505, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+  File "/usr/lib/python3.10/subprocess.py", line 1154, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+  File "/usr/lib/python3.10/subprocess.py", line 2022, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.10/subprocess.py", line 1198, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command 'jcmd 55766 GC.class_histogram > /mydata/s4/b10-w1/logs/T8-r1/histo-2.txt' timed out after 150 seconds
+
+[2026-11-17 21:44:43 1794977083236] + bin/nodetool -p 7199 stopdaemon
+nodetool: Failed to connect to '127.0.0.1:7199' - SocketException: 'Connection reset'.
+
+  rc=1
+[2026-11-17 21:45:28 1794977128358] after stop, CassandraDaemon processes on pc72: none

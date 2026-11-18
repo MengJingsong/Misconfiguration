@@ -1,0 +1,60 @@
+### S0 shakedown (ms0611, aarch64). Full logs: /mydata/s4/b12-w2/runs/S0
+endpoint: alive
+client # start 2026-11-18T01:21:19-0700 cl=SERIAL K=61440 nmax=2000 m=1000 conns=32
+client # milestone 1 drained=1000 ok=1000 err=0 out=0 at 4075 ms
+client # milestone 1 done=True at 23608 ms
+client # end all-threads-ended at 25816 ms (load 6 s) issued=2000 ok=2000 err=0 out=0
+client last: t=26114 ms issued 2000 ok 2000 err 0 out 0 alive 0
+rate first ~30 s: 75 done/s
+errcounts: 
+ms   drained Snapshot      Key ACTIVE   DecKey      [B MB      HBB   Total MB  memtOn MB  allMem MB  KCent
+0          -        0        0      0        7       14.7      633       46.3        0.0        0.0      8
+1       1000     1000     1000      0     1007      203.3     7649      245.6      123.8      123.8      8
+end        -     2000     2000      0     2007      209.4     5982      251.9       69.0       69.0      8
+slope (Total - allMemtablesOnHeap) per Snapshot, first->last milestone: 61126 B
+metrics last: 1794990159.198 casread=2000 read=2002 casprepare=2000 caspropose=2000
+RssAnon max 2507 MiB
+heap_info used max 1034 MiB
+GC pauses 13; heap after GC: max 240 MiB, last 240 MiB
+STW share over last 60 s of GC log: 0%; Pause Full count 4
+dumps: none
+### settings read-back
+paxos_cache_size = None
+paxos_variant = 'v1'
+paxos_state_purging = 'legacy'
+paxos_repair_enabled = 'true'
+memtable_heap_space = '512MiB'
+memtable_offheap_space = '512MiB'
+memtable_allocation_type = 'heap_buffers'
+memtable_cleanup_threshold = '0.33333334'
+memtable_flush_writers = '2'
+native_transport_max_request_data_in_flight = '214748364B'
+native_transport_max_request_data_in_flight_per_ip = '53687091B'
+key_cache_size = '100MiB'
+counter_cache_size = '50MiB'
+commitlog_total_space = '8192MiB'
+native_transport_max_frame_size = '16MiB'
+cas_contention_timeout = '1000ms'
+read_request_timeout = '5000ms'
+write_request_timeout = '2000ms'
+native_transport_timeout = '12s'
+### metrics.txt
+1794990079.796 casread=1000 read=1002 casprepare=1000 caspropose=1000
+1794990108.649 casread=2000 read=2002 casprepare=2000 caspropose=2000
+1794990133.877 casread=2000 read=2002 casprepare=2000 caspropose=2000
+1794990159.198 casread=2000 read=2002 casprepare=2000 caspropose=2000
+### histo-end (selected)
+   1:        102324      209402960  [B (java.base@11.0.33)
+  54:          2007          80280  org.apache.cassandra.db.PreHashedDecoratedKey
+  66:          2000          64000  org.apache.cassandra.service.paxos.PaxosState$Snapshot
+  78:          2000          48000  org.apache.cassandra.service.paxos.PaxosState$Key
+1663:             3             72  org.apache.cassandra.config.Config$PaxosStatePurging
+2238:             1             32  [Lorg.apache.cassandra.config.Config$PaxosStatePurging;
+2935:             1             24  org.apache.cassandra.service.paxos.uncommitted.PaxosStateTracker
+4788:             1             16  org.apache.cassandra.service.paxos.PaxosState$$Lambda$1302/0x00000001007a4840
+4789:             1             16  org.apache.cassandra.service.paxos.PaxosState$$Lambda$1705/0x000000010090b440
+4790:             1             16  org.apache.cassandra.service.paxos.PaxosState$$Lambda$1711/0x000000010090d440
+### vm flags
+MaxDirectMemorySize=16642998272
+MaxHeapSize=2147483648
+UseG1GC

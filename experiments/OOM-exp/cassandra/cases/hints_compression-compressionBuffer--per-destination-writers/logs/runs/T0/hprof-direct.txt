@@ -1,0 +1,21 @@
+DirectByteBuffer instances: 316; owners (allocateDirect) 124 = 882.4 MiB; mapped 24 = 64.0 MiB; slices of owners 4; other 164
+Netty PlatformDependent: DIRECT_MEMORY_COUNTER=160.0 MiB (counter object present), DIRECT_MEMORY_LIMIT=939524096, USE_DIRECT_BUFFER_NO_CLEANER=1, MAX_DIRECT_MEMORY=939524096
+DirectByteBuffers without cleaner and without a known owner (Netty no-cleaner / JNI / slices of those): 164, total capacity 450.5 MiB (upper bound; slices may overlap)
+
+Live direct memory by holder (owners = 882.4 MiB):
+  O: hints buffers                                        864.3 MiB   97.9 %
+  P: BufferPool chunks, no live consumer                   16.0 MiB    1.8 %
+  O: netty / NIO buffers                                    2.1 MiB    0.2 %
+  O: DataOutputBuffer scratch                               0.0 MiB    0.0 %
+
+Example referrer chain per category (buffer <- holder <- ...):
+  O: DataOutputBuffer scratch:
+      org.apache.cassandra.io.util.DataOutputBuffer$1$1.buffer
+  O: hints buffers:
+      org.apache.cassandra.hints.CompressedHintsWriter.compressionBuffer
+  O: netty / NIO buffers:
+      [Ljava.lang.Object;[].[] <- io.netty.util.internal.InternalThreadLocalMap.indexedVariables <- io.netty.util.concurrent.FastThreadLocalThread.threadLocalMap
+  P: BufferPool chunks, no live consumer:
+      java.nio.DirectByteBuffer.att <- org.apache.cassandra.utils.memory.BufferPool$Chunk.slab
+
+Owner sizes (bytes x count, top 8): 15790416 x 51, 65536 x 33, 128 x 13, 33554432 x 3, 4833 x 2, 0 x 2, 8392704 x 2, 358 x 2

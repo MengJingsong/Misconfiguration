@@ -1,0 +1,32 @@
+hop 1: 175 targets -> 242 referrers, 132 to follow
+hop 2: 132 targets -> 572 referrers, 557 to follow
+hop 3: 557 targets -> 1354 referrers, 889 to follow
+hop 4: 889 targets -> 3714 referrers, 2262 to follow
+hop 5: 2262 targets -> 6644 referrers, 3666 to follow
+DirectByteBuffer instances: 367; owners (allocateDirect) 123 = 267.2 MiB; mapped 64 = 1600.0 MiB; slices of owners 13; other 167
+Netty PlatformDependent: DIRECT_MEMORY_COUNTER=512.0 MiB (counter object present), DIRECT_MEMORY_LIMIT=1342177280, USE_DIRECT_BUFFER_NO_CLEANER=1, MAX_DIRECT_MEMORY=1342177280
+DirectByteBuffers without cleaner and without a known owner (Netty no-cleaner / JNI / slices of those): 167, total capacity 954.5 MiB (upper bound; slices may overlap)
+
+Live direct memory by holder (owners = 267.2 MiB):
+  O: DataOutputBuffer scratch                             195.0 MiB   73.0 %
+  O: hints buffers                                         32.2 MiB   12.1 %
+  O: no strong referrer (garbage awaiting Cleaner)         30.0 MiB   11.2 %
+  P: BufferPool chunks, no live consumer                    8.0 MiB    3.0 %
+  O: netty / NIO buffers                                    1.9 MiB    0.7 %
+  O: storage I/O buffers                                    0.1 MiB    0.0 %
+
+Example referrer chain per category (buffer <- holder <- ...):
+  O: netty / NIO buffers:
+      io.netty.channel.epoll.EpollEventArray.memory <- io.netty.channel.epoll.EpollEventLoop.events <- io.netty.util.internal.ThreadExecutorMap$1.val$eventExecutor <- io.netty.channel.epoll.EpollEventLoop.executor
+  O: DataOutputBuffer scratch:
+      org.apache.cassandra.io.util.DataOutputBuffer$1$1.buffer
+  P: BufferPool chunks, no live consumer:
+      java.nio.DirectByteBuffer.att <- org.apache.cassandra.utils.memory.BufferPool$Chunk.slab
+  O: storage I/O buffers:
+      org.apache.cassandra.io.compress.CompressedSequentialWriter.compressed
+  O: hints buffers:
+      org.apache.cassandra.hints.HintsWriteExecutor.writeBuffer
+  O: no strong referrer (garbage awaiting Cleaner):
+      
+
+Owner sizes (bytes x count, top 8): 128 x 35, 65536 x 25, 16384 x 14, 5202 x 11, 668 x 6, 31457366 x 6, 0 x 2, 2693 x 2

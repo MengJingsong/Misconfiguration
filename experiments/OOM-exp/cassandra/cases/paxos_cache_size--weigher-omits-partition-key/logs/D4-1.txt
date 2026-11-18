@@ -1,0 +1,127 @@
+### D4-1 (ms0611, aarch64). Full logs on the node: /mydata/s4/b12-w2/runs/D4-1
+endpoint: alive
+client # start 2026-11-18T02:48:39-0700 cl=SERIAL K=4096 nmax=200000 m=25000 conns=32
+client # milestone 1 drained=25000 ok=25000 err=0 out=0 at 24301 ms
+client # milestone 1 done=True at 44834 ms
+client # milestone 2 drained=50000 ok=50000 err=0 out=0 at 60218 ms
+client # milestone 2 done=True at 81251 ms
+client # milestone 3 drained=75000 ok=75000 err=0 out=0 at 94077 ms
+client # milestone 3 done=True at 114619 ms
+client # milestone 4 drained=100000 ok=100000 err=0 out=0 at 127779 ms
+client # milestone 4 done=True at 149836 ms
+client # milestone 5 drained=125000 ok=125000 err=0 out=0 at 160921 ms
+client # milestone 5 done=True at 182973 ms
+client # milestone 6 drained=150000 ok=150000 err=0 out=0 at 192429 ms
+client # milestone 6 done=True at 214473 ms
+client # milestone 7 drained=175000 ok=175000 err=0 out=0 at 223975 ms
+client # milestone 7 done=True at 246534 ms
+client # end nmax at 259020 ms (load 108 s) issued=200000 ok=200000 err=0 out=0
+client last: t=259713 ms issued 200000 ok 200000 err 0 out 0 alive 0
+rate first ~30 s: 819 done/s
+errcounts: 
+ms   drained Snapshot      Key ACTIVE   DecKey      [B MB      HBB   Total MB  memtOn MB  allMem MB  KCent
+0          -        0        0      0        7       14.7      633       46.3        0.0        0.0      8
+1      25000    25000    25000      0    25007      327.6   175680      407.3       49.3       49.3      8
+2      50000    50000    50000      0    50007      477.6   233079      575.6       98.7       98.7     20
+3      75000    75000    75000      0    75009      623.4   290515      739.9      148.0      148.0     38
+4     100000   100000   100000      0   100009      771.0   347998      907.2       18.4       18.4     60
+5     125000   125000   125000      0   125011      756.4   287808      890.4       67.5       67.5     78
+6     150000   150000   150000      0   150013      903.3   345097     1056.6      116.8      116.8     96
+7     175000   163840   163840      0   163858      842.9   273741      991.0      166.1      166.1    127
+end        -   163840   163840      0   163855      726.8   193073      859.8       36.5       36.5    195
+slope (Total - allMemtablesOnHeap) per Snapshot, first->last milestone: 3351 B
+metrics last: 1794995653.617 casread=200000 read=200002 casprepare= caspropose=
+RssAnon max 2535 MiB
+heap_info used max 1911 MiB
+GC pauses 66; heap after GC: max 1999 MiB, last 819 MiB
+STW share over last 60 s of GC log: 4%; Pause Full count 19
+dumps: none
+### driver
+2026-11-18T02:47:23 run D4-1 build=base heap=2G K=4096 cl=SERIAL nmax=200000 m=25000 cap0= arch=aarch64
+2026-11-18T02:47:23 free /mydata 25G /dev/shm 26G
+714ee9bf58b3bc1710377ac16bcbba03  /mydata/s4/b12-w2/cassandra-base/conf/cassandra.yaml
+2026-11-18T02:48:15 daemon pid 270153 up
+ddl ok
+2026-11-18T02:48:39 client start
+2026-11-18T02:49:04 milestone 1 drained=25000
+2026-11-18T02:49:40 milestone 2 drained=50000
+2026-11-18T02:50:14 milestone 3 drained=75000
+2026-11-18T02:50:48 milestone 4 drained=100000
+2026-11-18T02:51:21 milestone 5 drained=125000
+2026-11-18T02:51:52 milestone 6 drained=150000
+2026-11-18T02:52:24 milestone 7 drained=175000
+2026-11-18T02:53:00 client ended; daemon alive; hold 60 s
+2026-11-18T02:54:30 END alive
+2026-11-18T02:54:32 done
+ssandra-base/data
+total 0
+drwxr-xr-x  2 jason92 misconfiguration  40 Nov 18 02:47 .
+drwxr-xr-x 14 jason92 misconfiguration 280 Nov 18 02:47 ..
+### first errors
+### metrics.txt (last 3)
+1794995600.883 casread=200000 read=200002 casprepare=200000 caspropose=200000
+1794995627.226 casread=200000 read=200002 casprepare=200000 caspropose=200000
+1794995653.617 casread=200000 read=200002 casprepare= caspropose=
+### milestone memtable/keycache lines
+== 2026-11-18T02:48:23 0
+system.paxos MemtableOnHeapDataSize 0
+system.paxos AllMemtablesOnHeapDataSize 0
+Heap Memory (MB)       : 124.20 / 2048.00
+Off Heap Memory (MB)   : 0.00
+Key Cache              : entries 8, size 640 bytes, capacity 100 MiB, 78 hits, 85 requests, 0.918 recent hit rate, 14400 save period in seconds
+== 2026-11-18T02:49:06 1
+system.paxos MemtableOnHeapDataSize 49311240
+system.paxos AllMemtablesOnHeapDataSize 49311240
+Heap Memory (MB)       : 452.40 / 2048.00
+Off Heap Memory (MB)   : 0.70
+Key Cache              : entries 8, size 640 bytes, capacity 100 MiB, 79 hits, 86 requests, 0.919 recent hit rate, 14400 save period in seconds
+== 2026-11-18T02:49:42 2
+system.paxos MemtableOnHeapDataSize 98669340
+system.paxos AllMemtablesOnHeapDataSize 98669340
+Heap Memory (MB)       : 1316.93 / 2048.00
+Off Heap Memory (MB)   : 1.40
+Key Cache              : entries 20, size 49.47 KiB, capacity 100 MiB, 80 hits, 334 requests, 0.240 recent hit rate, 14400 save period in seconds
+== 2026-11-18T02:50:16 3
+system.paxos MemtableOnHeapDataSize 148027800
+system.paxos AllMemtablesOnHeapDataSize 148027800
+Heap Memory (MB)       : 805.16 / 2048.00
+Off Heap Memory (MB)   : 4.30
+Key Cache              : entries 38, size 122.73 KiB, capacity 100 MiB, 81 hits, 632 requests, 0.128 recent hit rate, 14400 save period in seconds
+== 2026-11-18T02:50:49 4
+system.paxos MemtableOnHeapDataSize 18426816
+system.paxos AllMemtablesOnHeapDataSize 18426816
+Heap Memory (MB)       : 1188.76 / 2048.00
+Off Heap Memory (MB)   : 6.11
+Key Cache              : entries 60, size 212.28 KiB, capacity 100 MiB, 82 hits, 851 requests, 0.096 recent hit rate, 14400 save period in seconds
+== 2026-11-18T02:51:23 5
+system.paxos MemtableOnHeapDataSize 67549044
+system.paxos AllMemtablesOnHeapDataSize 67549044
+Heap Memory (MB)       : 1601.16 / 2048.00
+Off Heap Memory (MB)   : 4.29
+Key Cache              : entries 78, size 285.55 KiB, capacity 100 MiB, 83 hits, 1312 requests, 0.063 recent hit rate, 14400 save period in seconds
+== 2026-11-18T02:51:54 6
+system.paxos MemtableOnHeapDataSize 116843940
+system.paxos AllMemtablesOnHeapDataSize 116843940
+Heap Memory (MB)       : 1535.64 / 2048.00
+Off Heap Memory (MB)   : 5.15
+Key Cache              : entries 96, size 358.81 KiB, capacity 100 MiB, 84 hits, 1799 requests, 0.047 recent hit rate, 14400 save period in seconds
+== 2026-11-18T02:52:26 7
+system.paxos MemtableOnHeapDataSize 166138356
+system.paxos AllMemtablesOnHeapDataSize 166138356
+Heap Memory (MB)       : 1745.06 / 2048.00
+Off Heap Memory (MB)   : 8.11
+Key Cache              : entries 127, size 484.99 KiB, capacity 100 MiB, 85 hits, 2232 requests, 0.038 recent hit rate, 14400 save period in seconds
+== 2026-11-18T02:54:03 end
+system.paxos MemtableOnHeapDataSize 36507936
+system.paxos AllMemtablesOnHeapDataSize 36507936
+Heap Memory (MB)       : 835.92 / 2048.00
+Off Heap Memory (MB)   : 7.10
+Key Cache              : entries 195, size 761.77 KiB, capacity 100 MiB, 86 hits, 2760 requests, 0.031 recent hit rate, 14400 save period in seconds
+### OOM lines (stdout/system.log)
+12:CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V
+### last heap_info
+1794995664.503 rssanon_kb=2595584 memcur=4289540096 270153:| garbage-first heap   total 2097152K, used 937905K [0x0000000080000000, 0x0000000100000000)|  region size 16384K, 8 young (131072K), 0 survivors (0K)| Metaspace
+### resolved flags
+MaxDirectMemorySize=16642998272
+MaxHeapSize=2147483648
+UseG1GC

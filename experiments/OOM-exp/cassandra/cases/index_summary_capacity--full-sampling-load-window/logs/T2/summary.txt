@@ -1,0 +1,24 @@
+[2026-11-18 00:01:16.568] arm T2 heap 1024 L 2048 sets DCBA src /mydata/s4/c4-w1/data/pristine role node quick '-q' extra '' script 8c66a0060757
+[2026-11-18 00:01:16.595] pre: load 0.38 0.88 1.68; mem used=2487 avail=125324; disk 473G free; daemons: 0
+[2026-11-18 00:01:17.289] staged: D summary=47439532 filter=16 cinfo=3020551; C summary=94877032 filter=16 cinfo=6041055; B summary=189752032 filter=16 cinfo=12082071; A summary=379502032 filter=16 cinfo=24164103; 
+[2026-11-18 00:01:17.305] yaml diff lines: 11 (extra: )
+[2026-11-18 00:01:54.477] up after 37 s: pid 3857912 unit c4w1-T2-1794978077 cg /sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/c4w1-T2-1794978077.scope memory.max 2147483648 swap.max 0
+[2026-11-18 00:01:54.484] readback: -XX:+AlwaysPreTouch -XX:+UseG1GC -Xms1024M -Xmx1024M -XX:MaxDirectMemorySize=512M -XX:ParallelGCThreads=32 -XX:ConcGCThreads=32 -Dcassandra.jmx.local.port=7199 -XX:ParallelGCThreads=16 -XX:ConcGCThreads=16 -Dcassandra.jmx.local.port=27099 
+[2026-11-18 00:01:54.491] readback log: disk_access_mode=legacy|disk_access_mode=mmap_index_only|file_cache_enabled=false|Global buffer pool limit is 256.000MiB |index_summary_capacity=null|index_summary_resize_interval=60m|memory pool size of 51 MB and a resize interval of 60 minutes|memtable_allocation_type=heap_buffers|networking_cache_size=null|
+[2026-11-18 00:01:54.498] affinity: 0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30
+[2026-11-18 00:01:55.407] cqlsh attempts 1
+[2026-11-18 00:02:56.720] rss idle: VmHWM: 1639584 kB VmRSS: 1639320 kB RssAnon: 1459292 kB RssFile: 180028 kB  cg: cur=1521606656 anon 1499242496 file 15212544  ev: max 0 oom 0 oom_kill 0 
+[2026-11-18 00:02:57.910] tablestats idle:  SSTable count: 0| Old SSTable count: 0| Off heap memory used (total): 0| Bloom filter off heap memory used: 0| Index summary off heap memory used: 0| Compression metadata off heap memory used: 0|
+[2026-11-18 00:02:58.282] is idle: ATTRS 1794978178239 pool_size_bytes=314 capacity_mb=51 avg_interval=128.0 resize_min=60 own_bytes=0
+[2026-11-18 00:02:58.582] nmt idle: Total: reserved=2691MB, committed=1450MB|Java Heap committed=1024MB)|Class committed=63MB)|Thread committed=54MB)|Code committed=30MB)|GC committed=104MB)|Internal committed=1MB)|Other committed=147MB)|Symbol committed=12MB)|Native Memory Tracking committed=3MB)|
+[2026-11-18 00:02:58.589] I0 (median RssAnon last 30 s) = 1459472 kB
+[2026-11-18 00:02:58.592] import start 1794978178591: nodetool import -q c4 isx /mydata/s4/c4-w1/stage_node/D /mydata/s4/c4-w1/stage_node/C /mydata/s4/c4-w1/stage_node/B /mydata/s4/c4-w1/stage_node/A
+[2026-11-18 00:03:01.558] import end 1794978181554 rc 2 dur 2 s: Doing a quick import - skipping sstable verification and row cache invalidation Cassandra has shutdown. error: null -- StackTrace -- java.io.EOFException 	at java.base/java.io.DataInputStream.readByte(DataInputStream.java:272) 	at java.rmi/sun.rmi.transport.StreamRemoteCall.executeCall(StreamRemoteCall.java:240) 	at java.rmi/sun.rmi.server.UnicastRef.invoke(UnicastRef.java:164) 	at jdk.remoteref/j
+[2026-11-18 00:03:01.563] peak RssAnon 2037336 kB; dRssAnon(peak - I0) = 564 MiB
+[2026-11-18 00:03:01.566] cgroup last rows: 1794978181309,,,,1403248640,1391362048,5468160,1065,1,1 1794978181520,,,,129282048,56799232,5468160,1065,1,1 
+[2026-11-18 00:03:01.568] alive at end: 0
+[2026-11-18 00:03:03.581] scope gone: inactive
+[2026-11-18 00:03:03.613] dmesg: [730375.169446] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0-1,oom_memcg=/user.slice/user-20001.slice/user@20001.service/app.slice/c4w1-T2-1794978077.scope,task_memcg=/user.slice/user-20001.slice/user@20001.service/app.slice/c4w1-T2-1794978077.scope,task=java,pid=3857912,uid=20001 [730375.169683] Memory cgroup out of memory: Killed process 3857912 (java) total-vm:74732796kB, anon-rss:2078836kB, file-rss:179588kB, shmem-rss:0kB, UID:20001 pgtables:4612kB oom_score_adj:0 
+[2026-11-18 00:03:03.624] log: last isx open: INFO  [RMI TCP Connection(8)-127.0.0.1] 2026-11-18T05:03:01,130 SortedTableReaderLoadingBuilder.java:55 - Opening /mydata/s4/c4-w1/arms/T2/data/c4/isx-2cd91420e30d11f1b620911afacc76e3/nb-2-big (3.561GiB); redistributions: 0+0; errors: 0
+[2026-11-18 00:03:03.629] import order: stage_node/B stage_node/A 
+[2026-11-18 00:03:03.724] done arm T2

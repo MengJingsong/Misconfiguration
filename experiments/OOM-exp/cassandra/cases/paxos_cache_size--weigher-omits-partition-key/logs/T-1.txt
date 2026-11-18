@@ -1,0 +1,159 @@
+### T-1 (ms0611, aarch64). Full logs on the node: /mydata/s4/b12-w2/runs/T-1
+endpoint: daemon-exit oom:java.lang.OutOfMemoryError: Java heap space
+stdout: java.lang.OutOfMemoryError: Java heap space
+stdout: Dumping heap to /dev/shm/b12-w2/T-1/cassandra-1794990241-pid131458.hprof ...
+stdout: Heap dump file created [2181218268 bytes in 4.269 secs]
+stdout: # java.lang.OutOfMemoryError: Java heap space
+stdout: # -XX:OnOutOfMemoryError="kill -9 %p"
+stdout: #   Executing /bin/sh -c "kill -9 131458"...
+client # start 2026-11-18T01:25:17-0700 cl=SERIAL K=61440 nmax=50000 m=4000 conns=32
+client # milestone 1 drained=4000 ok=4000 err=0 out=0 at 12522 ms
+client # milestone 1 done=True at 35069 ms
+client # milestone 2 drained=8000 ok=7904 err=96 out=0 at 53243 ms
+client # milestone 2 done=True at 74783 ms
+client # milestone 3 drained=12000 ok=11794 err=206 out=0 at 92764 ms
+client # milestone 3 done=True at 113807 ms
+client # milestone 4 drained=16000 ok=15794 err=206 out=0 at 123491 ms
+client # milestone 4 done=True at 146555 ms
+client # milestone 5 drained=20000 ok=19695 err=305 out=0 at 165255 ms
+client # milestone 5 done=True at 187300 ms
+client # milestone 6 drained=24000 ok=23421 err=579 out=0 at 222539 ms
+client # milestone 6 done=True at 245599 ms
+client # end all-threads-ended at 271677 ms (load 138 s) issued=26597 ok=25973 err=624 out=0
+client last: t=271888 ms issued 26597 ok 25973 err 624 out 0 alive 0
+rate first ~30 s: 126 done/s
+errcounts: 592 err:0x1200:Operation timed out - received only 0 responses. | 32 io:ConnectionResetError:[Errno 104] Connection reset by peer
+ms   drained Snapshot      Key ACTIVE   DecKey      [B MB      HBB   Total MB  memtOn MB  allMem MB  KCent
+0          -        0        0      0        7       14.7      633       46.3        0.0        0.0      8
+1       4000     4000     4000      0     4007      757.9    28694      811.8      136.8      136.8     25
+2       8000     8000     8000      0     8020      793.6    21770      844.7       87.6       87.6     57
+3      12000    12000    12000      0    12024      981.6    23378     1034.6       35.3       35.3    110
+4      16000    16000    16000      0    16038     1542.0    42523     1603.2      173.3      173.3    161
+5      20000    20000    20000      0    20042     1578.4    35586     1636.7      124.9      124.9    254
+6      24000    24000    24000      0    24050     1761.9    36768     1821.9       50.4       50.4    352
+slope (Total - allMemtablesOnHeap) per Snapshot, first->last milestone: 54826 B
+metrics last: 1794990542.464 casread=24000 read=24002 casprepare=24000 caspropose=23468
+RssAnon max 2584 MiB
+heap_info used max 2024 MiB
+GC pauses 449; heap after GC: max 2039 MiB, last 2024 MiB
+STW share over last 60 s of GC log: 48%; Pause Full count 192
+dumps: /dev/shm/b12-w2/T-1/cassandra-1794990241-pid131458.hprof (2080 MiB)
+### driver
+2026-11-18T01:24:01 run T-1 build=base heap=2G K=61440 cl=SERIAL nmax=50000 m=4000 cap0= arch=aarch64
+2026-11-18T01:24:01 free /mydata 26G /dev/shm 32G
+714ee9bf58b3bc1710377ac16bcbba03  /mydata/s4/b12-w2/cassandra-base/conf/cassandra.yaml
+2026-11-18T01:24:53 daemon pid 131458 up
+ddl ok
+2026-11-18T01:25:17 client start
+2026-11-18T01:25:30 milestone 1 drained=4000
+2026-11-18T01:26:11 milestone 2 drained=8000
+2026-11-18T01:26:50 milestone 3 drained=12000
+2026-11-18T01:27:21 milestone 4 drained=16000
+2026-11-18T01:28:03 milestone 5 drained=20000
+2026-11-18T01:29:00 milestone 6 drained=24000
+/mydata/s4/b12-w2/harness/run.sh: line 77: 131458 Killed                  ( ulimit -n 100000; cd $T; MAX_HEAP_SIZE=$HEAP JVM_EXTRA_OPTS="$YAML_OPT" CASSANDRA_HEAPDUMP_DIR=$D exec systemd-run --user --scope -p MemorySwapMax=0 --unit=b12-$RID -- bin/cassandra -f > $R/stdout.txt 2>&1 < /dev/null )
+2026-11-18T01:29:50 daemon gone while client running
+2026-11-18T01:29:54 END daemon-exit oom:java.lang.OutOfMemoryError: Java heap space
+2026-11-18T01:29:58 done
+ssandra-base/data
+total 2130096
+drwxr-xr-x 2 jason92 misconfiguration         60 Nov 18 01:29 .
+drwxr-xr-x 4 jason92 misconfiguration         80 Nov 18 01:24 ..
+-rw------- 1 jason92 misconfiguration 2181218268 Nov 18 01:29 cassandra-1794990241-pid131458.hprof
+### first errors
+45903 err:0x1200:Operation timed out - received only 0 responses.
+45948 err:0x1200:Operation timed out - received only 0 responses.
+45954 err:0x1200:Operation timed out - received only 0 responses.
+45959 err:0x1200:Operation timed out - received only 0 responses.
+45991 err:0x1200:Operation timed out - received only 0 responses.
+### metrics.txt (last 3)
+1794990476.256 casread=19697 read=20002 casprepare=20000 caspropose=19730
+1794990506.679 casread=22673 read=23320 casprepare=23322 caspropose=23040
+1794990542.464 casread=24000 read=24002 casprepare=24000 caspropose=23468
+### milestone memtable/keycache lines
+== 2026-11-18T01:25:01 0
+system.paxos MemtableOnHeapDataSize 0
+system.paxos AllMemtablesOnHeapDataSize 0
+Heap Memory (MB)       : 124.20 / 2048.00
+Off Heap Memory (MB)   : 0.00
+Key Cache              : entries 8, size 640 bytes, capacity 100 MiB, 78 hits, 85 requests, 0.918 recent hit rate, 14400 save period in seconds
+== 2026-11-18T01:25:32 1
+system.paxos MemtableOnHeapDataSize 136820020
+system.paxos AllMemtablesOnHeapDataSize 136820020
+Heap Memory (MB)       : 1590.21 / 2048.00
+Off Heap Memory (MB)   : 3.01
+Key Cache              : entries 25, size 1021.82 KiB, capacity 100 MiB, 79 hits, 100 requests, 0.790 recent hit rate, 14400 save period in seconds
+== 2026-11-18T01:26:13 2
+system.paxos MemtableOnHeapDataSize 87606000
+system.paxos AllMemtablesOnHeapDataSize 87606000
+Heap Memory (MB)       : 1148.44 / 2048.00
+Off Heap Memory (MB)   : 5.16
+Key Cache              : entries 57, size 2.88 MiB, capacity 100 MiB, 80 hits, 141 requests, 0.567 recent hit rate, 14400 save period in seconds
+== 2026-11-18T01:26:51 3
+system.paxos MemtableOnHeapDataSize 35288988
+system.paxos AllMemtablesOnHeapDataSize 35288988
+Heap Memory (MB)       : 1642.63 / 2048.00
+Off Heap Memory (MB)   : 7.59
+Key Cache              : entries 110, size 5.98 MiB, capacity 100 MiB, 81 hits, 278 requests, 0.291 recent hit rate, 14400 save period in seconds
+== 2026-11-18T01:27:23 4
+system.paxos MemtableOnHeapDataSize 173346320
+system.paxos AllMemtablesOnHeapDataSize 173346320
+Heap Memory (MB)       : 1468.47 / 2048.00
+Off Heap Memory (MB)   : 9.72
+Key Cache              : entries 161, size 8.98 MiB, capacity 100 MiB, 82 hits, 441 requests, 0.186 recent hit rate, 14400 save period in seconds
+== 2026-11-18T01:28:05 5
+system.paxos MemtableOnHeapDataSize 124878768
+system.paxos AllMemtablesOnHeapDataSize 124878768
+Heap Memory (MB)       : 1759.86 / 2048.00
+Off Heap Memory (MB)   : 11.76
+Key Cache              : entries 254, size 14.43 MiB, capacity 100 MiB, 83 hits, 728 requests, 0.114 recent hit rate, 14400 save period in seconds
+== 2026-11-18T01:29:01 6
+system.paxos MemtableOnHeapDataSize 50395036
+system.paxos AllMemtablesOnHeapDataSize 50395036
+Heap Memory (MB)       : 1805.73 / 2048.00
+Off Heap Memory (MB)   : 15.70
+Key Cache              : entries 352, size 20.18 MiB, capacity 100 MiB, 84 hits, 1088 requests, 0.077 recent hit rate, 14400 save period in seconds
+### OOM lines (stdout/system.log)
+12:CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V
+667:java.lang.OutOfMemoryError: Java heap space
+668:Dumping heap to /dev/shm/b12-w2/T-1/cassandra-1794990241-pid131458.hprof ...
+669:Heap dump file created [2181218268 bytes in 4.269 secs]
+671:# java.lang.OutOfMemoryError: Java heap space
+672:# -XX:OnOutOfMemoryError="kill -9 %p"
+673:#   Executing /bin/sh -c "kill -9 131458"...
+### last heap_info
+1794990586.218 rssanon_kb= memcur= 131458:|
+### resolved flags
+MaxDirectMemorySize=16642998272
+MaxHeapSize=2147483648
+UseG1GC
+### oome-thread (hprof)
+OOME-initiating thread: trace serial 10, thread serial 9
+    at java.lang.OutOfMemoryError.<init>(OutOfMemoryError.java:48)
+    at org.apache.cassandra.utils.Hex.bytesToHex(Hex.java:78)
+    at org.apache.cassandra.utils.ByteBufferUtil.bytesToHex(ByteBufferUtil.java:639)
+    at org.apache.cassandra.serializers.BytesSerializer.toString(BytesSerializer.java:49)
+    at org.apache.cassandra.serializers.BytesSerializer.toCQLLiteralNonNull(BytesSerializer.java:67)
+    at org.apache.cassandra.serializers.TypeSerializer.toCQLLiteral(TypeSerializer.java:85)
+    at org.apache.cassandra.cql3.CQL3Type$Native.toCQLLiteral(CQL3Type.java:135)
+    at org.apache.cassandra.db.marshal.AbstractType.toCQLString(AbstractType.java:165)
+    at org.apache.cassandra.db.DecoratedKey.toCQLString(DecoratedKey.java:187)
+    at org.apache.cassandra.db.DecoratedKey.toCQLString(DecoratedKey.java:174)
+    at org.apache.cassandra.db.SinglePartitionReadCommand.appendCQLWhereClause(SinglePartitionReadCommand.java:1228)
+    at org.apache.cassandra.db.AbstractReadQuery.toCQLString(AbstractReadQuery.java:109)
+    at org.apache.cassandra.db.ReadCommand.toCQLString(ReadCommand.java:91)
+    at org.apache.cassandra.db.ReadCommand.name(ReadCommand.java:897)
+    at org.apache.cassandra.db.monitoring.MonitoringTask$Operation.name(MonitoringTask.java:343)
+    at org.apache.cassandra.db.monitoring.MonitoringTask$OperationsQueue.popOperations(MonitoringTask.java:242)
+    at org.apache.cassandra.db.monitoring.MonitoringTask.logSlowOperations(MonitoringTask.java:168)
+    at org.apache.cassandra.db.monitoring.MonitoringTask.logOperations(MonitoringTask.java:138)
+    at org.apache.cassandra.db.monitoring.MonitoringTask.lambda$new$0(MonitoringTask.java:96)
+    at org.apache.cassandra.db.monitoring.MonitoringTask$$Lambda$1745.run(?:-1)
+    at org.apache.cassandra.concurrent.ExecutionFailure$1.run(ExecutionFailure.java:133)
+    at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:515)
+    at java.util.concurrent.FutureTask.runAndReset(FutureTask.java:305)
+    at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+    at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+    at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+    at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+    at java.lang.Thread.run(Thread.java:829)

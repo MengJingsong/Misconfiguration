@@ -7,12 +7,22 @@
 | Phase-1 case file | [`cql-row-limit-incrementRowCount-rowsCounted--autonomous`](../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/cql-row-limit-incrementRowCount-rowsCounted--autonomous.md) |
 | System / pinned source | Cassandra 5.0.9 (`systems/cassandra/source/`, `build.xml` `base.version` 5.0.9); built copy `pc75:/mydata/s4/cassandra-base` |
 | Stage 1 (design) | phase-2 OOM agent, stage 1 session (Claude Opus 5.5), 2026-11-17 22:40–23:30 EST; nothing run |
-| Stage 2 (verify) | pending (a fresh session) |
-| Verdict | `pending` |
+| Stage 2 (verify) | phase-2 OOM agent, stage 2 (Claude Opus 5.5): runs 2026-11-17 22:56 – 2026-11-18 00:19 EST (first session, cut off by an API usage limit before §3–§4); resumed 2026-11-18 02:54 EST in a fresh session that reused every lifetime and wrote §3–§4 (nothing re-run) |
+| Verdict | **true positive** — `verified-OOM · deployment` (unprotected configuration), Java heap OOM at heap 2 GiB, 4/5 |
 
 ## Summary
 
-- **Conclusion:** pending (stage 2).
+- **Conclusion:** **true positive.** At shipped defaults (read thresholds off, the driver's 5,000-row page) three
+  concurrent paged reads of 48 KiB rows killed a 2 GiB-heap Cassandra 5.0.9 node with `java.lang.OutOfMemoryError:
+  Java heap space` in **4/5** test runs (+ 1/1 calibration), thrown while a request thread grew the replica's page
+  `DataOutputBuffer`. The same load with 500-row pages (0/3) and with `local_read_size_fail_threshold: 64MiB` switched
+  on (0/3; every read rejected, 0 useful reads/s) did not OOM. `verified-OOM · deployment`, unprotected configuration.
+- **Root cause:** a page is bounded only in rows (`rowsCounted`), the byte bound that would cap it
+  (`read_thresholds_enabled`) ships off, and nothing sums the bytes of concurrent reads, so each in-flight 234 MiB
+  page holds a 216–324 MiB serialized buffer (plus the `ResultSet` copy) on the heap.
+- **Limit:** above 2 GiB (4 / 8 / 15.5 GiB heaps with their node-class direct limits) the same workload fails first
+  in Netty direct memory (`Message.encode`, C2's domain), not on the heap; the full 4 GiB-node pair (2 GiB heap,
+  1 GiB direct) survived 0/3 at c = 3.
 - **Hypothesis (stage 1):** at shipped defaults a page is bounded in rows only (the driver's default 5,000), the
   read-size thresholds that would bound its bytes are off, and each in-flight page is held twice on the heap
   (replica serialized buffer + coordinator `ResultSet`, ≈ 2.4 × page bytes). With 48 KiB rows a default page is
@@ -282,10 +292,141 @@ Per lifetime: load ≤ 180 s (`T`/`M`/`I`), ≤ 7 × 60 s (sweeps); client read 
 
 `sha256 of §1–§2 at freeze: 3d17b678d577ae6c2f1fe169095f42063239cdc9b853677bc7d1443a97ec527c` · computed over the lines from `## 1. Candidate` through the line before this one (`sed -n '/^## 1\. Candidate/,/^`sha256 of §1–§2 at freeze/p' <file> | sed '$d' | sha256sum`) · amendments after the freeze: dated, with reason, below this line.
 
+
+**Amendments (stage 2; recorded 2026-11-18 03:00 EST by the resumed session from the first session's harness and
+logs; none changes a constraint, budget value, workload or verdict rule):**
+- *A1, 2026-11-17, before the first lifetime (`LOAD`, 22:56 EST), work directory.* `ROOT=/mydata/s4/u4-w1` instead of `/mydata/u4`
+  (tree, conf-pristine, template, node, runs all under it). `/mydata/s4/rowlim-rc/` and `/mydata/s4/cassandra-base/`
+  were not touched (no file newer than 2026-11-17 20:00 MST). Environment only.
+- *A2, 2026-11-17, in effect from the first lifetime (`LOAD`, 22:56 EST), resolved "auto" direct.* §2 predicted `MaxDirectMemorySize = 7936M`
+  for a hand-set heap on pc75. The shipped `cassandra-env.sh` greps `JVM_OPTS` for `+UseConcMarkSweepGC`
+  (`USING_CMS=$?` = 1 under G1) and so uses `heap_limit = 31744`; with ½ RAM > 31744 it resolves
+  **direct = 31744 / 2 = 15872M** (and an unset heap to 31744M). All "auto" lifetimes therefore ran with
+  `-XX:MaxDirectMemorySize=15872M` (read from the process command line; `harness/victim-ctl.sh` comment and
+  `run.meta`). The 2 GiB heap and the explicit node-class pairs are unchanged. Consequence for the labels in §2:
+  15,872 MiB / 7,936 MiB is the resolution of a ≈ 31 GiB node, not pc75's own (pc75 would resolve 31,744 MiB /
+  15,872 MiB, not tested).
+- *A3, 2026-11-17 23:12 EST (after `CAL-2G`, before any T reading), c_T.* The batch's automatic step attribution put
+  the `CAL-2G` OOM in step c = 2 (a one-second offset); corrected from the sampler (NTR active = 3 at the last valid
+  sample) to **c_T = 3**. The first `T-2G-1` lifetime, started with c_T = 2, was stopped and kept as invalid
+  (`runs/T-2G-1.invalid-cT2/`); `T-2G-1` was rerun from a fresh template at c = 3.
+
 ## 3. Runs (stage 2)
 
-pending
+**Resumed after an interruption (2026-11-18 02:54 EST).** The first stage-2 session ran the whole frozen arm list
+(batch 2026-11-17 22:56 → 2026-11-18 00:19 EST, `pc75:/mydata/s4/u4-w1/batch.log`, `batch.outcomes`) and was cut
+off by an API usage limit before it wrote §3–§4. The resumed session (fresh, 02:54 EST) found no java process,
+no `u4-*` scope and load 0.00 on pc75, checked the freeze hash (matches), and checked every lifetime's logs: each has
+`run.meta`, `yaml.diff`, `samples.csv`, `client.csv`, `gcwin.txt`, `memory.events`, an `END` line in its
+`runs/<label>.out`, and (OOM lifetimes) the hprof plus `hprofhist`/`hprofstacks` summaries. **Reused: the build
+(`/mydata/s4/u4-w1/tree`), the loaded data (`template/`, verified), and all 22 valid lifetimes (IC, CAL-2G, T-2G-1..5,
+M-2G-1..3, I-2G-1..3, CAL-4G, CAL-8G, CAL-auto, REP-15872M-1..2, E2-2G1G-1..3). Nothing was re-run**: no arm had an
+incomplete log, and the one invalid lifetime (`T-2G-1.invalid-cT2`, A3) had already been redone. The resumed
+session only read logs (no process started on pc75) and wrote §3–§4 and the Summary.
+
+**Environment.** pc75 (x86_64 Xeon E5-2660 v2, 40 cores, 125 GiB RAM), Ubuntu 22.04, kernel 5.15, cgroup v2;
+JDK 11.0.33, G1 (`G1HeapRegionSize=16m`, `MaxGCPauseMillis=300`), shipped `-XX:OnOutOfMemoryError="kill -9 %p"`,
+`HeapDumpOnOutOfMemoryError`. Build: `/mydata/s4/u4-w1/tree` (copy of `/mydata/s4/cassandra-base`),
+`apache-cassandra-5.0.9-SNAPSHOT.jar` sha256 `cc734ea3e7b4797d5a01314e436088f4197b5cc0711788ee4b3558bc849b215f` in
+every lifetime. `yaml.diff` = the five directories (environment) in arm A; arm I adds exactly
+`read_thresholds_enabled: true`, `local_read_size_fail_threshold: 64MiB`. Victim in
+`systemd-run --user --scope -p MemoryMax=<heap+direct+8G> -p MemorySwapMax=0` (26,112M for 2G/auto; isolation only),
+client in its own scope (`MemoryMax=40G`, `-Xmx16g`). **`memory.events`: oom 0, oom_kill 0 in every lifetime.**
+Resolved flags (from `ps`, per `run.meta`): 2G/auto → `-Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M` (A2);
+explicit pairs as listed. Harness: [`harness/`](harness/) (`victim-ctl.sh`, `run-arm.sh`, `batch.sh`, `U4Load.java`,
+`C2Sampler.java`, `load.sh`, `load-data.sh`, `setup.sh`, `steps.py`, `gcwin.py`, `hprofhist.py`, `hprofstacks.py`,
+`verify-template.sh`). Excerpts: [`logs/<label>/`](logs/); full logs, GC logs and hprofs:
+`pc75:/mydata/s4/u4-w1/runs/<label>/`.
+
+**Data.** `LOAD` (8 GiB heap, 22:56–22:59 EST): 16 × 5,000 × 49,152 B; the loader reported 178 CL ONE write
+timeouts, so a `VERIFY` lifetime (8 GiB, 23:02–23:05 EST, [`logs/VERIFY/verify.txt`](logs/VERIFY/verify.txt)) read
+every partition's first page: **all 16 return 5,000 rows and 245,760,000 value bytes** (≈ 7 s each, no warnings).
+Compacted partition size 268,650,950 B. Every measured lifetime started from a fresh `cp -a` of `template/`.
+
+**Instrument check (`IC`, 2G/auto, `1:30`).** fetch 5000 → 5,000 rows, 245,760,000 value bytes; fetch 500 → 500
+rows, 24,576,000 bytes ([`logs/IC/ic-one.txt`](logs/IC/ic-one.txt)); samples and GC log present; survived.
+Instrument note: the sampler's JMX `java.nio` direct pool (56–57 MiB throughout) does **not** see Netty's
+no-cleaner direct buffers (`Message.encode`); NMT "Other" does (T-2G-1 peak 1,335 MB, M 597–695 MB, I 549–598 MB,
+E2-1 958 MB), and the Netty error text gives the exact used/max at a direct OOM.
+
+**Runs** (times EST 2026-11-17/18; "into step" = seconds after the client stepped to the failing c; old post-GC =
+G1 old-gen usage after GC, which includes not-yet-collected humongous garbage; histograms are live sets).
+
+| Label | Budget heap / direct | Steps reached | Outcome | Key readings |
+|---|---|---|---|---|
+| `CAL-2G` (23:07–23:10) | 2G / 15872M | c=1 61 s, c=2 60 s, c=3 | **Java heap OOM at c=3**, ≈ 3 s into step | c=2: 0.28 reads/s, 66 MB/s, NTR active ≤ 2, old post-GC ≤ 1,120 MiB, STW ≤ 1 %/60 s. hprof (1.49 GB): 5 `byte[]` ≥ 128 MiB = **1,296.8 MiB** (216, 216, 216, 324, 324), 3 `LocalDataResponse`, 3 `DataOutputBuffer`; dying thread in `DataOutputBuffer.expandToFit` |
+| `T-2G-1` (23:12–23:16) | 2G / 15872M | 1:20, 3:162 | survived | 0.36 reads/s, 85 MB/s, rows 5,000, NTR active ≤ 3, old post-GC ≤ 1,207 MiB, STW ≤ 2 %/60 s, t150 histogram `byte[]` 28.6 MB (between pages) |
+| `T-2G-2` (–23:19) | 2G / 15872M | 1:21, 3:44 | **Java heap OOM**, ≈ 52 s into c=3 | hprof (1.15 GB): 3 `byte[]` ≥ 128 MiB = 756.5 MiB (216, 216, 324) + **5,003 `byte[]` of 48 KiB = 234.5 MiB (1.00 coordinator page; 1 `ResultSet`)**, 2 `LocalDataResponse`/2 `DataOutputBuffer`; first error `OutOfMemoryError` ← `ByteBuffer.allocate` ← `BufferedDataOutputStreamPlus.allocate:77` ← `DataOutputBuffer.expandToFit:178` ← `Cell$Serializer.serialize` |
+| `T-2G-3` (–23:21) | 2G / 15872M | 1:20, 3:53 | **Java heap OOM**, ≈ 64 s into c=3 | hprof (1.48 GB): 5 `byte[]` ≥ 128 MiB = 1,296.8 MiB; 3 `LocalDataResponse`/3 `DataOutputBuffer`; same first stack |
+| `M-2G-1..3` (23:21–23:33) | 2G / 15872M | 1:20, 3:160 each | **survived 0/3 OOM** | rows 500; 16.6–18.3 reads/s, **389–430 MB/s**; NTR active ≤ 3–4; old post-GC ≤ 1,649–1,804 MiB; t150 histogram `byte[]` 29–54 MB; STW ≤ 10–14 %/60 s (no service loss); no direct OOM |
+| `I-2G-1..3` (23:33–23:45) | 2G / 15872M, arm **I** | 1:20, 3:160 each | **survived 0/3 OOM** | **0 completed reads/s**; READ_SIZE failures 105–115 at c=1, **1,870–2,427 at c=3** (≈ 12–15 rejections/s; "1 nodes loaded over 67140552 bytes and aborted the query … (see local_read_size_fail_threshold)", [`threshold-excerpt.txt`](logs/I-2G-1/threshold-excerpt.txt)); NTR active 3/3; t150 histogram `byte[]` 155–306 MB; STW ≤ 8–16 %/60 s |
+| `T-2G-4` (–23:47) | 2G / 15872M | 1:20, 3:9 | **Java heap OOM**, ≈ 21 s into c=3 | hprof (1.14 GB): 4 `byte[]` ≥ 128 MiB = 972.6 MiB; 3/3 replica holders; same first stack |
+| `T-2G-5` (–23:48) | 2G / 15872M | 1:20, 3 | **Java heap OOM**, ≈ 12 s into c=3 | hprof (1.02 GB): 3 `byte[]` ≥ 128 MiB = 756.5 MiB (+1 of 96 MiB); 3 `LocalDataResponse`/3 `DataOutputBuffer`; same first stack (outcome line corrected from c=1, see its `outcome`) |
+| `CAL-4G` (23:48–23:53) | 4G / 2048M | c=4, 6, 7 (≈ 63 s each), c=8 | **Netty direct OOM at c=8** (then Cassandra's forced heap OOM) | c=7: 0.71 reads/s, old post-GC ≤ 613 MiB (heap far from full). `io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 245860038 byte(s) of direct memory (used: 2090119018, max: 2147483648)` in `Message.encode` on an NTR thread → `JVMStabilityInspector.forceHeapSpaceOomMaybe` → "Java heap space" + dump (108 MB, no page holders) |
+| `CAL-8G` (23:53–23:57) | 8G / 4096M | c=10, 12, 14, c=16 | **Netty direct OOM at c=16** | old post-GC ≤ 5,651 / 4,216 / 862 MiB at c=10/12/14; direct used 4,191,217,050 of 4,294,967,296 |
+| `CAL-auto` (23:57–00:02) | 15872M / 7936M | c=20, 24, 28, c=32 | **Netty direct OOM at c=32** | c=28: 1.55 reads/s, 364 MB/s, old post-GC ≤ 1,641 MiB; direct used 8,124,977,658 of 8,321,499,136 |
+| `REP-15872M-1..2` (00:02–00:07) | 15872M / 7936M | 1:20, 32 | **Netty direct OOM 2/2**, ≈ 34–35 s into c=32 | NTR active 32, ReadStage active 31; old post-GC ≤ 11,929 / 13,632 MiB; direct used 8,108,200,442 of 8,321,499,136 |
+| `E2-2G1G-1..3` (00:07–00:19) | 2G / 1024M | 1:20, 3:162 each | **survived 0/3** (no heap, no direct OOM) | 0.36–0.38 reads/s, 86–88 MB/s; NTR active ≤ 2–3; old post-GC ≤ 1,009–1,423 MiB; STW ≤ 2 %/60 s |
+
+**Tallies.** Primary condition (2G heap, resolved direct 15872M, defaults, c = 3): **Java heap OOM 4/5 test runs**
+(T-2G-1 survived; per the §2 rule "if 2/3, add up to 2 more repetitions" T-2G-4 and -5 were added) plus the
+`CAL-2G` sweep (1/1 at c = 3, c = 2 survived 60 s). Every heap OOM's first error is in the replica serialization of
+a page (`DataOutputBuffer.expandToFit`), and every dump holds the claimed holders: **3–5 page buffers of 216–324 MiB
+(756–1,297 MiB, 37–63 % of the heap)** and in T-2G-2 one complete coordinator `ResultSet` (5,003 × 48 KiB). Matched
+control `M-2G` 0/3, intervention `I-2G` 0/3, E2 0/3. Budget search: every larger node-class budget failed, but in
+**Netty direct memory**, at c = ⌊direct / 234.5 MiB⌋ (8, 16, 32), with the heap far from full.
+Error bounds: T 4/5 vs E2 0/3 at the same heap and c (one-sided Fisher p ≈ 0.09) is not distinguishable at this n;
+the heap OOM at c = 3 depends on three page buffers being in their last growth step at once (T-2G-1 survived).
+
+**Deviations from the design.** A1–A3 (above). (1) The time plan's 02:30 EST deadline: all lifetimes ended at
+00:19 EST; §3–§4 were written by the resumed session after 02:54 EST (task deadline 07:30 EST). (2) `REP-*` ran at
+15,872 MiB, the largest budget that failed, but that failure is in the direct domain, so it does not extend the
+heap result. (3) Predicted vs observed: c_fail at 2 GiB = 3 as predicted; held per in-flight page is the replica
+buffer at 216–324 MiB as predicted; at 4 / 8 / 15.5 GiB the predicted heap c_fail (7 / 14 / 28) was **not** reached
+on the heap — c = 7, 14, 28 survived ≈ 64 s each — and the "direct stays far below" prediction was wrong: a local
+Java-driver client still had up to ≈ 33 encoded pages (234.5 MiB each) in Netty direct memory at c = 32. `M-2G` old
+post-GC (1.6–1.8 GiB) exceeded the predicted < 1 GiB; its live set (t150 histogram) was ≤ 54 MB of `byte[]`.
 
 ## 4. Conclusion (stage 2)
 
-pending
+**Verdict: true positive.** Protocol status: **`verified-OOM · deployment`**, direction **unprotected configuration**
+(`read_thresholds_enabled: false` ships off; the row limit is a count), endpoint **Java heap OOM**, n/N **4/5** at
+heap 2 GiB / direct 15,872M (resolved), every capacity constraint at its default. Largest failing heap-domain budget:
+**2 GiB**; at 4 / 8 / 15.5 GiB (node-class direct 2 / 4 / 7.75 GiB) the same workload fails first in Netty direct
+memory (C2's domain), which does not verify this design.
+
+**Reason.** With the driver's default 5,000-row page over 48 KiB rows (234.4 MiB of values per page), three
+concurrent paged reads killed a 2 GiB-heap Cassandra 5.0.9 node with `OutOfMemoryError: Java heap space` in 4 of 5
+test runs (12–64 s into the c = 3 step) and in the calibration sweep, after c = 2 survived; each dump holds 3–5
+replica page buffers of 216–324 MiB (756–1,297 MiB) and in one run a whole 234.5 MiB coordinator `ResultSet`, and
+each first error is a request thread growing the replica's `DataOutputBuffer`. The matched control with 500-row pages
+did 17–18 reads/s (≈ 410 MB/s, 5× the test's bytes per second) with ≤ 54 MB of live `byte[]` and 0/3 OOM, so the
+holder is page bytes, not request count or throughput. Switching on the byte bound that ships off
+(`local_read_size_fail_threshold: 64MiB`) removed the OOM 0/3, but by rejecting every read (≈ 12–15 READ_SIZE
+failures/s, 0 useful reads/s): the bound protects the node only by refusing the default-page workload.
+
+**V1–V7.**
+
+| | Evidence |
+|---|---|
+| V1 Repetition | `T-2G-1..5`: heap OOM 4/5 at c = 3 (+ `CAL-2G` 1/1) |
+| V2 Matched control | `M-2G-1..3`: 500-row pages, same build/budget/data/c — 0/3; multiplicity boundary `CAL-2G` c = 2 survived 60 s |
+| V3 Measurement | U from hprof (`byte[]` ≥ 128 MiB, 48 KiB `byte[]`, `LocalDataResponse`/`DataOutputBuffer`/`ResultSet` counts), live histograms at t150, G1 old post-GC, NMT; K = `rowsLastRead` 5,000 (500 in M) |
+| V4 Intervention | `I-2G-1..3`: `read_thresholds_enabled: true` + `local_read_size_fail_threshold: 64MiB` — 0/3 OOM; throughput 0 reads/s, all rejected (recorded) |
+| V5 Initiating failure | first `OutOfMemoryError` stack in `DataOutputBuffer.expandToFit:178` ← `Cell$Serializer.serialize` (T-2G-2..5), dumps written by `HeapDumpOnOutOfMemoryError` at the failure |
+| V6 Default constraints | read thresholds off, page-size guardrail off, driver page 5,000, NTR 128, `concurrent_reads` 32, caches/memtables default; `yaml.diff` = directories only |
+| V7 Acceptable budget | heap 2 GiB (ideal), direct 15,872M as resolved by the shipped `cassandra-env.sh` on pc75 with a hand-set heap (A2); both ≥ 512 MiB (standing rule); scope limit isolation only, never reached |
+
+**Limits of attribution.** (1) The fully resolved 4 GiB-node pair (2 GiB heap, 1 GiB direct, `E2`) survived 0/3
+at c = 3; the difference from T (4/5) is not significant at this n and has no mechanism identified (the heap
+holder does not depend on the direct limit), but a deployment claim for a 4 GiB node rests on the hand-set 2 GiB heap
+with the larger resolved direct limit. (2) Above 2 GiB the endpoint moves to Netty direct memory (`Message.encode`,
+one 245,860,038-byte encoded page per in-flight response), which is C2's domain; a heap-domain OOM at ≥ 4 GiB heap
+was not shown (c = 7 at 4 GiB survived with old post-GC ≤ 613 MiB). A follow-up that wants the largest heap
+budget for this holder would keep direct at its resolved 15,872M and step c upward at 4 / 8 GiB heap, or test pc75's
+own resolution (31,744 MiB / 15,872 MiB, A2). (3) Single node (coordinator = replica), one local client, protocol v4.
+(4) The OOM needs ≥ 3 page-sized buffers growing together; one of five runs at c = 3 survived 160 s.
+
+**Left on the node.** `pc75:/mydata/s4/u4-w1/` (≈ 27 GiB: `tree/` 469 MiB, `template/` and `node/` 3.7 GiB each,
+`runs/` 19 GiB of logs, GC logs and hprofs). No process or scope left running. `/mydata/s4/rowlim-rc/` and
+`/mydata/s4/cassandra-base/` untouched.

@@ -330,7 +330,9 @@ def run(run_id, arm, heap, n, R, throw, seconds, per_jvm, calib):
     src = f'{BASE}/data.pristine-{R}'
     if not os.path.isdir(src):
         fail('no ' + src)
-    memmax = heap + 6
+    # 2026-11-18 (resumed stage 2): B10_MEMMAX_ADD overrides the containment headroom (design §2.3: an invalid run
+    # with scope memory.events max > 0 is repeated once with MemoryMax + 4 GiB, i.e. B10_MEMMAX_ADD=10).
+    memmax = heap + int(os.environ.get('B10_MEMMAX_ADD', '6'))
     pid, cg = start_node(heap, f'oom-b10-{run_id}', memmax, src)
     # step 3 / calibration (c)
     if calib:
