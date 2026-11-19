@@ -93,7 +93,7 @@ container budget.
 | U10 | `pc82` | OC-322, OC-298, OC-299, OC-309…OC-318, OC-321, OC-44 | **true positive** | unpaged `count(v)` over ≈ 1 GiB is one sub-read: OOM 3/3 at 2 GiB; paging on 0/3 (overlaps U4) |
 | B17 | `pc72` | OC-320 | **true positive** | `pk IN (…) ORDER BY ck LIMIT 10` refuses paging and reads every partition whole: OOM 3/3 at 2 GiB; without ORDER BY 0/3 |
 | B18 | `pc75` | OC-323, OC-257, OC-266, OC-367, OC-373, OC-41, OC-46 | retry | memtable counter at 216–382 % of the limit under hot-partition CAS contention, T OOM 3/3, but control and intervention also OOM (re-send backlog) |
-| C9 | `pc99` | OC-303 | **true positive** (`diagnostic`: compaction paused) | 256 KiB direct read-ahead buffer per sstable per range scan: 40 scans over 2,000 sstables → direct OOM 3/3 |
+| C9 | `pc99` | OC-303 | **true positive** (`deployment`, owner ruling) | 256 KiB direct read-ahead buffer per sstable per range scan: 40 scans over 2,000 sstables → direct OOM 3/3 |
 | U11 | `pc96` | OC-206, OC-200, OC-201, OC-202, OC-368 | retry | RangeTombstoneList copied per write: real, uncounted, GC thrash, but OOM 0/6; service loss only 1/1 at 512 MiB |
 
 - **Result:** 7 true positive (U7, U8, U9, U10, B16, B17, C9), 4 retry (U5, U6, B18, U11), 0 false positive. None needs
@@ -103,9 +103,9 @@ container budget.
   legacy 4 / 2. Read with care: rows of one cluster share one verdict, and U10's cluster alone is 12 autonomous rows.
   By cluster primary (one row per case), all 11 came from the new agents: guided 8 primaries / 5 true positive
   (U7, U8, U10, B17, C9), autonomous 3 / 2 (B16, U9).
-- **Open points for the owner:** C9 is `diagnostic` because compaction was paused to hold 2,000 sstables (the agent
-  suggests `deployment` if an sstable backlog counts as a deployment state); U5's retry rests on the frozen
-  "OOM on the request thread" rule — 4/5 runs threw OOM inside the window, 2/5 on the request thread.
+- **Owner rulings (2026-11-18):** C9 is labelled `deployment` (stage 2 filed `diagnostic` because compaction was
+  paused to hold 2,000 sstables; an sstable backlog counts as a deployment state). U5 stays `retry` under the frozen
+  "OOM on the request thread" rule (4/5 runs threw OOM inside the window, 2/5 on the request thread).
 - **Left on the nodes (nothing running, 19:45 EST):** `pc82` `u10-w4` 62 GB, `pc72` `b17-w4` 38 GB, `ms0617`
   `u5-w4` 11 GB (3 hprofs), `pc91` `u9-w4` 8.9 GB (4 hprofs), `pc99` `c9-w4` 5.8 GB (3 hprofs), `ms0611` `b16-w4`
   2.3 GB, `ms0604` `u6-w4` 1.1 GB, `pc75` `b18-w4` 0.8 GB, `ms0640` `u8-w4` 0.7 GB, `ms0625` `u7-w4` 0.4 GB, `pc96`

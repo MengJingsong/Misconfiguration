@@ -8,7 +8,7 @@
 | System / pinned source | Cassandra 5.0.9 (`systems/cassandra/source/`, repository commit `411b6a8f`); node build `pc99:/mydata/s4/cassandra-base` (`build/apache-cassandra-5.0.9-SNAPSHOT.jar`) |
 | Stage 1 (design) | phase-2 OOM agent, stage 1, wave 4, 2026-11-18 (13:38–14:30 ET) |
 | Stage 2 (verify) | phase-2 OOM agent, stage 2 (fresh session), wave 4, 2026-11-18 13:52–14:50 ET, pc99 |
-| Verdict | **true positive** — `verified-OOM` · convergence by multiplicity · `diagnostic` |
+| Verdict | **true positive** — `verified-OOM` · convergence by multiplicity · `deployment` (owner ruling 2026-11-18; stage 2 filed `diagnostic`, §4) |
 
 **Summary:**
 - **Conclusion:** at every shipped capacity default and a 4 GiB heap / 2 GiB direct budget, 40 concurrent
@@ -16,8 +16,9 @@
   buffer memory` in 3/3 runs (6–17 s). The budget pc99 resolves by itself (15.5 GiB heap / 7,936 MiB
   direct) also failed 3/3, and so did 4 GiB direct (1/1). One scan at a time survived (0/3, 51 % of the
   limit), and disabling the read-ahead buffer (`0KiB`) at the same load survived (0/3). A 16 GiB direct
-  limit survived while touching it. The result is `diagnostic` only because compaction was paused on
-  the table to hold the 2,000-sstable count; re-enabling compaction at load start did not prevent it (RC).
+  limit survived while touching it. Stage 2 filed the result as `diagnostic` only because compaction was paused on
+  the table to hold the 2,000-sstable count; re-enabling compaction at load start did not prevent it (RC). The owner
+  ruled it `deployment` on 2026-11-18 (§4).
 - **Root cause:** every range command opens a scanner on each intersecting sstable at once, and each
   scanner allocates a 256 KiB direct read-ahead buffer (`ThreadLocalReadAheadBuffer.getBlock`) that no
   pool or counter charges. Concurrent range commands (≤ `concurrent_reads` 32) × sstable count (uncapped)
@@ -458,6 +459,11 @@ runs count as valid. A was ≥ 4 (32) in every T run.
 
 **Verdict: true positive.** Status (detail): **`verified-OOM` · convergence by multiplicity · `diagnostic`**
 (`deployment` if the owner rules that a paused-compaction / sstable-backlog state is a deployment state, §2.3).
+
+**Owner ruling (2026-11-18):** label `deployment`. A table holding 2,000 sstables (an sstable backlog, as with
+compaction paused or falling behind) counts as a deployment state for this case, and RC showed the OOM also with
+compaction re-enabled at load start. Status: **`verified-OOM` · convergence by multiplicity · `deployment`**. The verdict
+stays true positive; the stage-2 text below is unchanged.
 
 | | Evidence |
 |---|---|

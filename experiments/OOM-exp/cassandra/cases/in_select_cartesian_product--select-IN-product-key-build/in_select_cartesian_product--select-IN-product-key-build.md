@@ -8,7 +8,7 @@
 | System / pinned source | Cassandra 5.0.9 (`systems/cassandra/source/`, `build.xml` `base.version` 5.0.9); built tree `ms0617:/mydata/s4/cassandra-base` (`build/apache-cassandra-5.0.9-SNAPSHOT.jar`, sha256 `e55f4f29…5a942`), OpenJDK 11.0.33 **aarch64**, Ubuntu 22.04.1, kernel 5.15.0-191 |
 | Stage 1 (design) | phase-2 OOM agent, stage-1 session (workflow, wave 4), 2026-11-18 13:40–14:15 America/New_York; nothing run (node checked read-only) |
 | Stage 2 (verify) | phase-2 OOM agent, stage-2 session (fresh, not the designer), 2026-11-18 13:55–16:08 America/New_York (suspended with the wave; every lifetime had ended); resumed in a fresh session 18:20–18:50 the same day (§3 "Resumed session"): no new lifetimes, P4 write-up, re-reading of existing logs and dumps |
-| Verdict | `retry` (CK decides; §4) |
+| Verdict | `retry` (CK decides; §4; confirmed by the owner 2026-11-18) |
 
 ## Summary
 
@@ -686,6 +686,10 @@ Readings (P4):
 *Written by the first stage-2 session (before the 16:08 EST suspension) and completed and corrected by the resumed session (2026-11-18,
 18:20–18:50 EST): P4 added; the CK 2 GiB OOM counts corrected after re-reading `stdout.log` and the dumps (§3,
 "Resumed session").*
+
+**Owner ruling (2026-11-18):** the verdict stays `retry`. The frozen rule (CK heap OOM on the request thread in ≥ 3
+of 5 runs) is applied as written: 2/5 met it, although 4/5 threw `OutOfMemoryError` inside the window. The retry row
+carries the proposed redesign.
 
 **Verdict: `retry`** (CK decides the case. Frozen verdict rules: "true positive" needs the `T-CK-2G` heap OOM in ≥ 3
 runs **with the initiating thread = the NTR thread in the CK build frames**; that holds in 2 of 5. "Retry: OOM in fewer
