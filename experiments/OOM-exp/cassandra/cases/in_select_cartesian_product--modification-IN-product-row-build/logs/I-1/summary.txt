@@ -1,0 +1,45 @@
+endpoint: survived
+resolved: authenticator=PasswordAuthenticator{};
+resolved: authenticator=null;
+resolved: commitlog_segment_size=32MiB;
+resolved: in_select_cartesian_product_fail_threshold=1000;
+resolved: in_select_cartesian_product_warn_threshold=-1;
+resolved: max_mutation_size=null;
+resolved: memtable_allocation_type=heap_buffers;
+resolved: memtable_heap_space=null;
+resolved: native_transport_max_message_size=null;
+resolved: native_transport_max_request_data_in_flight=null;
+resolved: native_transport_max_request_data_in_flight_per_ip=null;
+resolved: native_transport_max_threads=128;
+resolved: native_transport_receive_queue_capacity=1MiB;
+resolved: native_transport_timeout=12s;
+resolved: write_request_timeout=2000ms;
+resolved: write_request_timeout=5000ms;
+flag MaxHeapSize 2147483648
+flag MaxDirectMemorySize 16642998272
+flag HeapDumpOnOutOfMemoryError +
+flag UseG1GC +
+flag G1HeapRegionSize 16777216
+flag AlwaysPreTouch +
+client: count k=0 rows=0 t=1795030600328
+client: count k=1999 rows=0 t=1795030601835
+client: count k=10000 rows=1000 t=1795030626509
+client: count k=10999 rows=1000 t=1795030628032
+client: count k=11000 rows=1000 t=1795030651760
+client: count k=11999 rows=1000 t=1795030653294
+step 0 update p=2000 q=20000 k0=0 rows=40000000 wire_est=176054 latency_ms=33 outcome=ERR InvalidRequest: Error from server: code=2200 [Invalid query] message="Guardrail in_select_cartesian_product violated: Aborting query because the cartesian product of the IN restrictions on partiti
+   GC during step 0 (full 0); baseline after-GC 64 MiB; max after-GC in step None MiB; U_peak - MiB; last after-GC 
+   K RequestsSize max 0 B; memtable max 0 MiB; MutationStage pending max 0; NTR active max 0
+step 1 update p=1000 q=1000 k0=10000 rows=1000000 wire_est=16054 latency_ms=6453 outcome=ERR WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message="Operation timed out - received only 0 responses." info={'consistency': 'ONE', 
+   GC during step 1 (full 0); baseline after-GC 64 MiB; max after-GC in step 158 MiB; U_peak 94 MiB; last after-GC 158
+   K RequestsSize max 16059 B; memtable max 71 MiB; MutationStage pending max 0; NTR active max 1
+step 2 update p=1000 q=1000 k0=11000 rows=1000000 wire_est=16054 latency_ms=4492 outcome=ERR WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message="Operation timed out - received only 0 responses." info={'consistency': 'ONE', 
+   GC during step 2 (full 0); baseline after-GC 158 MiB; max after-GC in step 406 MiB; U_peak 248 MiB; last after-GC 199 406
+   K RequestsSize max 16059 B; memtable max 141 MiB; MutationStage pending max 0; NTR active max 1
+jmx samples 50; RequestsSize max 16059; Paused max 0; direct max 43.1 MiB; last row 1795030660851,,,,,,,,
+thread samples 18; NTR-in-ModificationStatement top frames: - x16 SingleTableUpdatesCollector.toMutations x1 BTreeRow$Builder.build x1
+RssAnon max 2503 MiB
+heap_info used max 1047 MiB
+GCs 12; Pause Full 0; to-space exhausted 0; heap after GC max 406 MiB of 2048; first-6 after-GC 9 24 24 13 27 27
+STW share over last 60 s of GC log: 1%
+dumps: none

@@ -1,0 +1,78 @@
+T4-1: arm=T4 budget=B4 heap=8192 direct=4096 C=40 D=300 | OOM=direct (first: java.lang.OutOfMemoryError: Direct buffer memory) | node_gone=11.5s | peak direct 4096 MiB dCount 14761 A_max 32 | pages 0 workers_ok 0/40 | gate ok
+arm=T4 budget=B4 heap=8192 direct=4096 C=40 D=300
+up_after_s=13
+gate: LiveSSTableCount=2000 pending_compactions=0 table_pending=0
+NODE GONE at load+11.5s
+load_end at load+16.5s; node_alive=False
+stopped_clean=True valid_gate=True
+heap dump kept: /mydata/s4/c9-w4/dumps-kept/B4/T4-1-cassandra-1795030931-pid43374.hprof (0.16 GiB)
+
+B0 (idle 10 s before load): direct Count 101, MemoryUsed 52.1 MiB, chunk-cache size 16.0 MiB, networking size 0.0 MiB, heap used 2464 MiB, live sstables 2000
+peak direct_count: 14862 at load+3.2s
+peak direct_used: 4095.9 at load+3.2s
+peak cc_size: 392.0 at load+3.0s
+peak cc_used: 229.2 at load+3.2s
+peak cc_overflow: 0.0 at load+0.0s
+peak net_size: 0.0 at load+0.0s
+peak net_overflow: 0.0 at load+0.0s
+peak read_active: 32 at load+2.6s
+peak read_pending: 15 at load+2.4s
+peak heap_used: 2656.0 at load+1.0s
+at peak direct_used: Count 14862 (dCount 14761), dUsed 4043.8 MiB, A 32, pending 8, cc_overflow 0.0 MiB, cc_size 392.0 MiB
+last 5 samples (ms_rel, count, used MiB, cap MiB, A, pending, cc_size, cc_ovf, heap MiB):
+  3.2 14862 4095.9 4095.9 32 8 392.0 0.0 113
+  6.5 14861 4095.6 4094.9 32 8 392.0 0.0 209
+  9.9 14862 4095.9 4095.9 31 0 392.0 0.0 161
+  10.1 14862 4095.9 4095.9 31 0 392.0 0.0 193
+  10.3 14747 4056.1 4046.1 31 0 392.0 0.0 129
+A distribution (samples): 0:11, 1:1, 25:1, 31:3, 32:5
+dUsed per executing command, MiB (samples with A>0, includes the pool growth): median 126, p90 130
+  A=0: n=11 median dCount 23 dUsed 0 MiB; max dUsed 1 MiB
+  A=1: n=1 median dCount 45 dUsed 1 MiB; max dUsed 1 MiB
+  A=25: n=1 median dCount 830 dUsed 199 MiB; max dUsed 199 MiB
+  A=31: n=3 median dCount 14761 dUsed 4044 MiB; max dUsed 4044 MiB
+  A=32: n=5 median dCount 11988 dUsed 3352 MiB; max dUsed 4044 MiB
+dCount per executing command (samples with A>0): median 461, p90 476, max 476
+client: workers 40, workers with >=1 page 0, pages ok 0, full scans completed 0, latency median -1 ms p99 -1 ms, errors {'ReadFailure': 3, 'NoHostAvailable': 160}
+first client error at load+9.9s: ReadFailure:Error from server: code=1300 [Replica(s) failed to execute read] message="Operation failed - received 0 responses and 1 
+first OOM (system.log):
+  ERROR [ReadStage-42] 2026-11-18T19:42:54,158 JVMStabilityInspector.java:70 - Exception in thread Thread[ReadStage-42,10,SharedPool]
+  java.lang.OutOfMemoryError: Direct buffer memory
+  	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+  	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+  	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+  	at org.apache.cassandra.io.compress.BufferType$2.allocate(BufferType.java:35)
+  	at org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer.getBlock(ThreadLocalReadAheadBuffer.java:84)
+  	at org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer.allocateBuffer(ThreadLocalReadAheadBuffer.java:76)
+  	at org.apache.cassandra.io.util.CompressedChunkReader$ScanCompressedReader.allocateResources(CompressedChunkReader.java:204)
+  	at org.apache.cassandra.io.util.CompressedChunkReader$Standard.forScan(CompressedChunkReader.java:244)
+  	at org.apache.cassandra.io.util.CompressedChunkReader.instantiateRebufferer(CompressedChunkReader.java:95)
+  	at org.apache.cassandra.io.util.FileHandle.instantiateRebufferer(FileHandle.java:204)
+  	at org.apache.cassandra.io.util.FileHandle.createReader(FileHandle.java:156)
+  	at org.apache.cassandra.io.util.FileHandle.createReaderForScan(FileHandle.java:139)
+  	at org.apache.cassandra.io.sstable.format.SSTableReader.openDataReaderForScan(SSTableReader.java:1385)
+  	at org.apache.cassandra.io.sstable.format.SSTableScanner.<init>(SSTableScanner.java:78)
+  	at org.apache.cassandra.io.sstable.format.big.BigTableScanner.<init>(BigTableScanner.java:62)
+  	at org.apache.cassandra.io.sstable.format.big.BigTableScanner.getScanner(BigTableScanner.java:53)
+  	at org.apache.cassandra.io.sstable.format.big.BigTableReader.partitionIterator(BigTableReader.java:149)
+  	at org.apache.cassandra.io.sstable.format.big.BigTableReader.partitionIterator(BigTableReader.java:85)
+  	at org.apache.cassandra.db.PartitionRangeReadCommand.queryStorage(PartitionRangeReadCommand.java:340)
+  	at org.apache.cassandra.db.ReadCommand.executeLocally(ReadCommand.java:452)
+  	at org.apache.cassandra.service.StorageProxy$LocalReadRunnable.runMayThrow(StorageProxy.java:2209)
+  	at org.apache.cassandra.service.StorageProxy$DroppableRunnable.run(StorageProxy.java:2608)
+  	at org.apache.cassandra.concurrent.ExecutionFailure$2.run(ExecutionFailure.java:163)
+  	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+  	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+  	at java.base/java.lang.Thread.run(Thread.java:829)
+histogram lines:
+     6:         32895        2105280  java.nio.DirectByteBuffer (java.base@11.0.33)
+    12:         14698        1058256  org.apache.cassandra.io.sstable.format.big.BigTableScanner
+    18:         16883         675320  jdk.internal.ref.Cleaner (java.base@11.0.33)
+    28:         14862         475584  java.nio.DirectByteBuffer$Deallocator (java.base@11.0.33)
+    40:         15642         375408  org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer$Block
+    98:          2019          96912  org.apache.cassandra.io.util.CompressedChunkReader$Standard
+   137:          2019          64608  org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer
+   157:          2019          48456  org.apache.cassandra.io.util.CompressedChunkReader$RandomAccessCompressedReader
+   158:          2019          48456  org.apache.cassandra.io.util.CompressedChunkReader$ScanCompressedReader
+  4448:             1             16  org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer$$Lambda$1088/0x0000000840644040
+  4449:             1             16  org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer$1

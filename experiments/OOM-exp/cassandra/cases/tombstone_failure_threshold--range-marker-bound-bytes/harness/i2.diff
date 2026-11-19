@@ -1,0 +1,24 @@
+diff -ru orig/org/apache/cassandra/db/rows/RangeTombstoneBoundaryMarker.java new/org/apache/cassandra/db/rows/RangeTombstoneBoundaryMarker.java
+--- orig/org/apache/cassandra/db/rows/RangeTombstoneBoundaryMarker.java	2026-11-18 14:03:14.633864211 -0500
++++ new/org/apache/cassandra/db/rows/RangeTombstoneBoundaryMarker.java	2026-11-18 14:03:14.637864339 -0500
+@@ -196,7 +196,7 @@
+     @Override
+     public long unsharedHeapSize()
+     {
+-        return EMPTY_SIZE + startDeletion.unsharedHeapSize() + endDeletion.unsharedHeapSize();
++        return EMPTY_SIZE + bound.dataSize() + startDeletion.unsharedHeapSize() + endDeletion.unsharedHeapSize(); // B16 I2: count the bound
+     }
+ 
+     public String toString(TableMetadata metadata)
+diff -ru orig/org/apache/cassandra/db/rows/RangeTombstoneBoundMarker.java new/org/apache/cassandra/db/rows/RangeTombstoneBoundMarker.java
+--- orig/org/apache/cassandra/db/rows/RangeTombstoneBoundMarker.java	2026-11-18 14:03:14.629864085 -0500
++++ new/org/apache/cassandra/db/rows/RangeTombstoneBoundMarker.java	2026-11-18 14:03:14.633864211 -0500
+@@ -163,7 +163,7 @@
+     @Override
+     public long unsharedHeapSize()
+     {
+-        return EMPTY_SIZE + deletion.unsharedHeapSize();
++        return EMPTY_SIZE + bound.dataSize() + deletion.unsharedHeapSize(); // B16 I2: count the bound
+     }
+ 
+     public String toString(TableMetadata metadata)

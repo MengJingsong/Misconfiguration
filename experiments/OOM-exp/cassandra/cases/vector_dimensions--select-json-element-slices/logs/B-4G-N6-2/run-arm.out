@@ -1,0 +1,47 @@
+[2026-11-18 14:49:44 EST] ARM B-4G-N6-2 arm=A heap=4G mode=json N=6 R=3 D=16000000
+[2026-11-18 14:49:45 EST] started B-4G-N6-2 pid 313514 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/u8-B-4G-N6-2-1795031384.scope
+[2026-11-18 14:50:37 EST] ready B-4G-N6-2
+-XX:+HeapDumpOnOutOfMemoryError -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms4G -Xmx4G -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/u8-w4/runs/B-4G-N6-2/cassandra-1795031384-pid313514.hprof -XX:-HeapDumpOnOutOfMemoryError -XX:OnOutOfMemoryError=kill 
+12:50:45.125 [cluster1-nio-worker-0] DEBUG com.datastax.shaded.netty.buffer.PoolThreadCache -- Freed 30 thread-local buffer(s) from thread: cluster1-nio-worker-0
+12:50:45.125 [cluster1-nio-worker-1] DEBUG com.datastax.shaded.netty.buffer.PoolThreadCache -- Freed 12 thread-local buffer(s) from thread: cluster1-nio-worker-1
+[2026-11-18 14:50:49 EST] flushed
+12:50:55.260 [cluster1-nio-worker-0] DEBUG com.datastax.shaded.netty.buffer.PoolThreadCache -- Freed 30 thread-local buffer(s) from thread: cluster1-nio-worker-0
+1795031485,base,rssKB=4973336,rssAnonKB=4791360,scopeCurB=4959899648,scopeOomKill=0,1795031485094,873309936,84780784,0,0,0,41,0,0,44535329,0,-1,177,0,-1
+[2026-11-18 14:51:26 EST] client pid 314546
+1795031496,t+10,rssKB=4996568,rssAnonKB=4814588,scopeCurB=4986130432,scopeOomKill=0,1795031492095,3431025392,2172734192,0,6,0,137,0,0,44750648,12,-1,1245,0,-1
+1795031507,t+20,rssKB=5003428,rssAnonKB=4821448,scopeCurB=4994060288,scopeOomKill=0,1795031493095,3937294912,3870186048,3870186048,6,0,137,0,0,44712749,12,-1,3499,2715,-1
+1795031517,t+31,rssKB=5006028,rssAnonKB=4824048,scopeCurB=4997222400,scopeOomKill=0,1795031493095,3937294912,3870186048,3870186048,6,0,137,0,0,44712749,12,-1,3499,2715,-1
+1795031527,t+41,rssKB=5008232,rssAnonKB=4826252,scopeCurB=5000314880,scopeOomKill=0,1795031493095,3937294912,3870186048,3870186048,6,0,137,0,0,44712749,12,-1,3499,2715,-1
+1795031537,t+51,rssKB=5008232,rssAnonKB=4826252,scopeCurB=5000990720,scopeOomKill=0,1795031493095,3937294912,3870186048,3870186048,6,0,137,0,0,44712749,12,-1,3499,2715,-1
+1795031548,t+61,rssKB=5008496,rssAnonKB=4826516,scopeCurB=5001859072,scopeOomKill=0,1795031493095,3937294912,3870186048,3870186048,6,0,137,0,0,44712749,12,-1,3499,2715,-1
+1795031558,t+72,rssKB=5008716,rssAnonKB=4826736,scopeCurB=5002821632,scopeOomKill=0,1795031493095,3937294912,3870186048,3870186048,6,0,137,0,0,44712749,12,-1,3499,2715,-1
+1795031568,t+82,rssKB=5008716,rssAnonKB=4826736,scopeCurB=5003493376,scopeOomKill=0,1795031493095,3937294912,3870186048,3870186048,6,0,137,0,0,44712749,12,-1,3499,2715,-1
+/mydata/s4/u8-w4/harness/victim-ctl.sh: line 48: 313514 Killed                  CASSANDRA_CONF=$R/conf CASSANDRA_LOG_DIR=$R/logs MAX_HEAP_SIZE=$HEAP MAX_DIRECT_MEMORY_SIZE=$DENV CASSANDRA_HEAPDUMP_DIR=$R JVM_EXTRA_OPTS="$XO" setsid nohup systemd-run --user --scope --unit="u8-$L-$(date +%s)" -p MemoryMax=${MM}M -p MemorySwapMax=0 "$BUILD/bin/cassandra" -f < /dev/null > "$R/stdout.log" 2>&1
+[2026-11-18 14:52:52 EST] VICTIM DEAD at +86s
+SUMMARY ok=0 err=6 down=true
+[2026-11-18 14:52:53 EST] OOM/GC check
+CompileCommand: dontinline org/apache/cassandra/io/util/RebufferingInputStream.readPrimitiveSlowly(I)J
+CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.address()J
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.length()I
+CompileCommand: inline org/apache/cassandra/db/rows/UnfilteredSerializer.serializeRowBody(Lorg/apache/cassandra/db/rows/Row;ILorg/apache/cassandra/db/rows/SerializationHelper;Lorg/apache/cassandra/io/util/DataOutputPlus;)V
+CompileCommand: inline org/apache/cassandra/io/util/Memory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/SafeMemory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/TrackedDataInputPlus.checkCanRead(I)V
+CompileCommand: inline org/apache/cassandra/net/FrameDecoderWith8bHeader.decode(Ljava/util/Collection;Lorg/apache/cassandra/net/ShareableBytes;I)V
+CompileCommand: inline org/apache/cassandra/service/reads/repair/RowIteratorMergeListener.applyToPartition(ILjava/util/function/Consumer;)V
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.selectBoundary(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;II)I
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.strictnessOfLessThan(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;)I
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.indexes(Lorg/apache/cassandra/utils/IFilter/FilterKey;)[J
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.setIndexes(JJIJ[J)V
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare(Ljava/nio/ByteBuffer;[B)I
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare([BLjava/nio/ByteBuffer;)I
+--
+#
+# java.lang.OutOfMemoryError: Java heap space
+# -XX:OnOutOfMemoryError="kill -9 %p"
+#   Executing /bin/sh -c "kill -9 313514"...
+pauses=64 full_gcs=28 total_pause=78s max60=100% longest>=90%win=86s 98-184s (78s paused) service_loss(all STW)=MET oom_marks=none
+[2026-11-18 14:52:55 EST] stopped B-4G-N6-2
+OOM type="java.lang.OutOfMemoryError: Java heap space" at+86s completed=0 errors=6 lens=[      6 -1 ]
+[2026-11-18 14:52:56 EST] END B-4G-N6-2 OOM type="java.lang.OutOfMemoryError: Java heap space" at+86s completed=0 errors=6 lens=[      6 -1 ]

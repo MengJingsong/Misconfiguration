@@ -1,0 +1,72 @@
+[2026-11-18 14:02:04 EST] started LOAD pid 399093 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b16-LOAD-1795028523.scope
+[2026-11-18 14:02:55 EST] ready LOAD
+-XX:+HeapDumpOnOutOfMemoryError -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:G1NewSizePercent=50 -XX:MaxGCPauseMillis=300 -Xms8G -Xmx8G -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/b16-w4/runs/LOAD/cassandra-1795028524-pid399093.hprof -XX:NativeMemoryTracking=summary -XX:-HeapDumpOnOutOfMemoryError -XX:OnOutOfMemoryError=kill 
+resolved: -XX:MaxDirectMemorySize=16642998272 -XX:MaxHeapSize=8589934592
+12:03:00 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+schema ok
+[2026-11-18 14:03:05 EST] load t
+load ok tbl=t ranges=49999 boundBytes=12000 done=49999 errors=0 secs=14
+1795028606,after-t,nmtOtherKB=326912,nmtTotalKB=9223295,rssKB=9004156,rssAnonKB=8974072,scopeCurB=10167066624,scopeOomKill=0,1795028605653,2475524608,529367552,0,0,0,2562,0,0,49516307,0,-1,302,0,-1
+[2026-11-18 14:03:26 EST] load m
+load ok tbl=m ranges=49999 boundBytes=1000 done=49999 errors=0 secs=5
+[2026-11-18 14:03:38 EST] flush
+[2026-11-18 14:03:44 EST] compact
+[2026-11-18 14:04:08 EST] compact done
+		Table: m
+		SSTable count: 1
+		Old SSTable count: 0
+		Space used (live): 4393251
+		Number of partitions (estimate): 1
+		Compacted partition maximum bytes: 107964792
+		Table: t
+		SSTable count: 1
+		Old SSTable count: 0
+		Space used (live): 409496931
+		Number of partitions (estimate): 1
+		Compacted partition maximum bytes: 1386179893
+/mydata/s4/b16-w4/node/data/b16/m-ad443ca0e38211f19a713588f413561b/:
+total 4324
+drwxr-xr-x 2 jason92 misconfiguration    4096 Nov 18 12:03 .
+drwxr-xr-x 4 jason92 misconfiguration    4096 Nov 18 12:03 ..
+-rw-r--r-- 1 jason92 misconfiguration   49591 Nov 18 12:03 nb-2-big-CompressionInfo.db
+-rw-r--r-- 1 jason92 misconfiguration 1214056 Nov 18 12:03 nb-2-big-Data.db
+-rw-r--r-- 1 jason92 misconfiguration      10 Nov 18 12:03 nb-2-big-Digest.crc32
+-rw-r--r-- 1 jason92 misconfiguration      16 Nov 18 12:03 nb-2-big-Filter.db
+-rw-r--r-- 1 jason92 misconfiguration 3122618 Nov 18 12:03 nb-2-big-Index.db
+-rw-r--r-- 1 jason92 misconfiguration    6812 Nov 18 12:03 nb-2-big-Statistics.db
+-rw-r--r-- 1 jason92 misconfiguration      56 Nov 18 12:03 nb-2-big-Summary.db
+-rw-r--r-- 1 jason92 misconfiguration      92 Nov 18 12:03 nb-2-big-TOC.txt
+
+/mydata/s4/b16-w4/node/data/b16/t-acce4950e38211f19a713588f413561b/:
+total 399936
+drwxr-xr-x 2 jason92 misconfiguration      4096 Nov 18 12:04 .
+drwxr-xr-x 4 jason92 misconfiguration      4096 Nov 18 12:03 ..
+-rw-r--r-- 1 jason92 misconfiguration    586703 Nov 18 12:04 nb-6-big-CompressionInfo.db
+-rw-r--r-- 1 jason92 misconfiguration   8476961 Nov 18 12:04 nb-6-big-Data.db
+-rw-r--r-- 1 jason92 misconfiguration        10 Nov 18 12:04 nb-6-big-Digest.crc32
+-rw-r--r-- 1 jason92 misconfiguration        16 Nov 18 12:04 nb-6-big-Filter.db
+-rw-r--r-- 1 jason92 misconfiguration 400404281 Nov 18 12:04 nb-6-big-Index.db
+-rw-r--r-- 1 jason92 misconfiguration     28812 Nov 18 12:04 nb-6-big-Statistics.db
+-rw-r--r-- 1 jason92 misconfiguration        56 Nov 18 12:04 nb-6-big-Summary.db
+-rw-r--r-- 1 jason92 misconfiguration        92 Nov 18 12:04 nb-6-big-TOC.txt
+one tbl=m OK rows=0 ms=1488 fullyFetched=true warnings=[Read 0 live rows and 99998 tombstone cells for query SELECT * FROM b16.m WHERE pk = 0 LIMIT 5000 ALLOW FILTERING; token -3485513579396041028 (see tombstone_warn_threshold)]
+one tbl=t OK rows=0 ms=3943 fullyFetched=true warnings=[Read 0 live rows and 99998 tombstone cells for query SELECT * FROM b16.t WHERE pk = 0 LIMIT 5000 ALLOW FILTERING; token -3485513579396041028 (see tombstone_warn_threshold)]
+readback t TombstoneScannedHistogram.Max=105778
+readback t TombstoneScannedHistogram.Count=1
+readback t TombstoneFailures.Count=0
+readback t LocalReadSize.Max=0
+readback t LocalReadSize.Count=0
+readback t LocalReadSizeAborts.Count=0
+readback m TombstoneScannedHistogram.Max=105778
+readback m TombstoneScannedHistogram.Count=1
+readback m TombstoneFailures.Count=0
+readback m LocalReadSize.Max=0
+readback m LocalReadSize.Count=0
+readback m LocalReadSizeAborts.Count=0
+WARN  [ReadStage-2] 2026-11-18T19:04:17,536 ReadCommand.java:644 - Read 0 live rows and 99998 tombstone cells for query SELECT * FROM b16.m WHERE pk = 0 LIMIT 5000 ALLOW FILTERING; token -3485513579396041028 (see tombstone_warn_threshold)
+WARN  [ReadStage-2] 2026-11-18T19:04:27,733 ReadCommand.java:644 - Read 0 live rows and 99998 tombstone cells for query SELECT * FROM b16.t WHERE pk = 0 LIMIT 5000 ALLOW FILTERING; token -3485513579396041028 (see tombstone_warn_threshold)
+1795028717,end,nmtOtherKB=326721,nmtTotalKB=9230007,rssKB=9423348,rssAnonKB=9001668,scopeCurB=9767583744,scopeOomKill=0,1795028716676,4442447872,2982830080,0,0,0,5116,0,0,49334831,0,-1,526,0,-1
+[2026-11-18 14:05:29 EST] stopped LOAD
+396M	/mydata/s4/b16-w4/template
+/dev/mapper/emulab-node3--bs   39G  4.6G   33G  13% /mydata
+[2026-11-18 14:05:30 EST] LOAD end

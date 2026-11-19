@@ -1,0 +1,41 @@
+endpoint: survived
+resolved: authenticator=AllowAllAuthenticator{};
+resolved: authenticator=null;
+resolved: commitlog_segment_size=32MiB;
+resolved: in_select_cartesian_product_fail_threshold=-1;
+resolved: in_select_cartesian_product_warn_threshold=-1;
+resolved: max_mutation_size=null;
+resolved: memtable_allocation_type=heap_buffers;
+resolved: memtable_heap_space=null;
+resolved: native_transport_max_message_size=null;
+resolved: native_transport_max_request_data_in_flight=null;
+resolved: native_transport_max_request_data_in_flight_per_ip=null;
+resolved: native_transport_max_threads=128;
+resolved: native_transport_receive_queue_capacity=1MiB;
+resolved: native_transport_timeout=12s;
+resolved: write_request_timeout=2000ms;
+resolved: write_request_timeout=5000ms;
+flag MaxHeapSize 2147483648
+flag MaxDirectMemorySize 16642998272
+flag HeapDumpOnOutOfMemoryError +
+flag UseG1GC +
+flag G1HeapRegionSize 16777216
+flag AlwaysPreTouch +
+client: count k=0 rows=20000 t=1795030457430
+client: count k=99 rows=20000 t=1795030458942
+client: count k=5000 rows=21999 t=1795030477457
+client: count k=5000 rows=21999 t=1795030478984
+step 0 update p=100 q=20000 k0=0 rows=2000000 wire_est=160854 latency_ms=9217 outcome=ERR WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message="Operation timed out - received only 0 responses." info={'consistency': 'ONE', 
+   GC during step 2 (full 0); baseline after-GC 80 MiB; max after-GC in step 378 MiB; U_peak 298 MiB; last after-GC 232 378
+   K RequestsSize max 160859 B; memtable max 169 MiB; MutationStage pending max 67; NTR active max 1
+step 1 update p=1 q=21999 k0=5000 rows=21999 wire_est=176054 latency_ms=254 outcome=OK
+   GC during step 1 (full 0); baseline after-GC 378 MiB; max after-GC in step 782 MiB; U_peak 404 MiB; last after-GC 782
+   K RequestsSize max 0 B; memtable max 0 MiB; MutationStage pending max 0; NTR active max 0
+   rate 86610 rows/s over latency; U/row 19256.5 B (post-GC rise / rows)
+jmx samples 38; RequestsSize max 160859; Paused max 0; direct max 51.0 MiB; last row 1795030484618,,,,,,,,
+thread samples 14; NTR-in-ModificationStatement top frames: - x12 UpdateParameters.addCell x1 Mutation.validateSize x1
+RssAnon max 2513 MiB
+heap_info used max 1226 MiB
+GCs 12; Pause Full 0; to-space exhausted 0; heap after GC max 782 MiB of 2048; first-6 after-GC 9 16 16 13 29 29
+STW share over last 60 s of GC log: 2%
+dumps: none

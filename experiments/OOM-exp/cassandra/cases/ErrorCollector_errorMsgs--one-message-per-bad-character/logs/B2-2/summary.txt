@@ -1,0 +1,31 @@
+endpoint: daemon-exit oom:java.lang.OutOfMemoryError: Java heap space
+stdout: java.lang.OutOfMemoryError: Java heap space
+stdout: Dumping heap to /mydata/s4/u6-w4/runs/B2-2/cassandra-1795034308-pid289928.hprof ...
+stdout: Heap dump file created [2889314535 bytes in 42.960 secs]
+stdout: # java.lang.OutOfMemoryError: Java heap space
+stdout: #   Executing /bin/sh -c "kill -9 289928"...
+driver: 2026-11-18T13:39:43.523-0700 baseline done; client start N=3
+driver: 2026-11-18T13:40:49.103-0700 daemon gone while client running
+resolved: org.apache.cassandra.db:type=StorageService|NativeTransportMaxConcurrentRequestsInBytes|214748364 ; org.apache.cassandra.db:type=StorageService|NativeTransportMaxConcurrentRequestsInBytesPerIp|53687091 ; max_mutation_size=null; ; native_transport_max_frame_size=16MiB; ; native_transport_max_message_size=null; ; native_transport_max_threads=128; ; 
+client: body 16777207 B, established at 1795034383782
+  resp p0 t+64.9s conn 2 latency 64928 ms io_error - [Errno_104]_Connection_reset_by_peer
+  resp p0 t+64.9s conn 1 latency 64928 ms io_error - [Errno_104]_Connection_reset_by_peer
+  resp p0 t+64.9s conn 0 latency 64929 ms io_error - [Errno_104]_Connection_reset_by_peer
+client outstanding max 3; K_client max 50331621
+jmx samples 18
+K_server RequestsSize max 50331621; last 50331621
+PausedConnections max 0
+NTR active max 3; NTR pending max 0
+direct MemoryUsed max 42 MiB
+last jmx row: 1795034449568,,ERR,,ERR,,ERR,,ERR,,ERR,,ERR
+threads samples 6: max NTR 3, lex 2, syntaxError 0, parse 2, prepare 3, measure 0
+  lex series: 0 0 1 2 0 0 | last sample: 0 0 0 0 0 0
+RssAnon max 2572 MiB
+heap_info used max 1969 MiB
+GCs 27; heap after GC max 2047 MiB; last 8 after-GC: 1984 1922 2002 1964 1995 1995 1969 1969
+  first-10 after-GC (baseline): 9 16 16 13 29 29 32 79 79 753
+  Full GCs 7: after-GC MiB 1633 1855 1872 1922 1964 1969 1969; pause s 1.4 1.5 1.7 1.5 1.4 1.4 1.7
+pauses 27; STW share over last 60 s of GC log: 23%; GC log end at uptime 96.4 s
+to-space exhausted 6; humongous lines 21
+client cpu last sample: 1795034433  290643  0.4 59700; 291308  0.0  6752;
+dumps: cassandra-1795034308-pid289928.hprof (2755 MiB)

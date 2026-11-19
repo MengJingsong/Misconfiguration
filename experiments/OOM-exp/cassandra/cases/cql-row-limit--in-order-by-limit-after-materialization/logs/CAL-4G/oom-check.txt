@@ -1,0 +1,27 @@
+CompileCommand: dontinline org/apache/cassandra/io/util/RebufferingInputStream.readPrimitiveSlowly(I)J
+CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.address()J
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.length()I
+CompileCommand: inline org/apache/cassandra/db/rows/UnfilteredSerializer.serializeRowBody(Lorg/apache/cassandra/db/rows/Row;ILorg/apache/cassandra/db/rows/SerializationHelper;Lorg/apache/cassandra/io/util/DataOutputPlus;)V
+CompileCommand: inline org/apache/cassandra/io/util/Memory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/SafeMemory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/TrackedDataInputPlus.checkCanRead(I)V
+CompileCommand: inline org/apache/cassandra/net/FrameDecoderWith8bHeader.decode(Ljava/util/Collection;Lorg/apache/cassandra/net/ShareableBytes;I)V
+CompileCommand: inline org/apache/cassandra/service/reads/repair/RowIteratorMergeListener.applyToPartition(ILjava/util/function/Consumer;)V
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.selectBoundary(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;II)I
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.strictnessOfLessThan(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;)I
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.indexes(Lorg/apache/cassandra/utils/IFilter/FilterKey;)[J
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.setIndexes(JJIJ[J)V
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare(Ljava/nio/ByteBuffer;[B)I
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare([BLjava/nio/ByteBuffer;)I
+--
+INFO  [ScheduledTasks:1] 2026-11-18T19:58:22,046 NoSpamLogger.java:104 - Some operations were slow, details available at debug level (debug.log)
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /mydata/s4/b17-w4/runs/CAL-4G/cassandra-1795031876-pid43382.hprof ...
+Heap dump file created [4194594219 bytes in 12.968 secs]
+#
+# java.lang.OutOfMemoryError: Java heap space
+# -XX:OnOutOfMemoryError="kill -9 %p"
+#   Executing /bin/sh -c "kill -9 43382"...
+-rw-------  1 jason92 misconfiguration 4194594219 Nov 18 12:59 cassandra-1795031876-pid43382.hprof
+pauses=164 full_gcs=56 total_pause=8s max60=13% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=HeapDumper@71.061s,ReportJavaOutOfMemory@78.079s

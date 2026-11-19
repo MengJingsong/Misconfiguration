@@ -1,0 +1,12 @@
+SUMMARY secs=58 ok=6 err_readfail=3 err_readtimeout=0 err_invalid=0 err_other=0 inflight_left=0
+== sweep:M:4:5:1000
+  M k=4: n=5 ok=5 errs={} ms=[55, 67, 41, 40, 44] rows=[10] | heap max 311 MiB, old-postGC max 71 MiB, NTR active max 0, RS active max 0
+== sweep:T:1:1:0
+  T k=1: n=1 ok=1 errs={} ms=[21] rows=[10] | no samples
+     first10: 7/0 7/1 7/2 7/3 7/4 7/5 7/6 7/7 7/8 7/9 vbytes=2621440 pks=[7]
+== idle:20000
+== sweep:T:4:3:10000
+  T k=4: n=3 ok=0 errs={'ReadFailureException': 3} ms=[187, 208, 1941] rows=[] | heap max 1351 MiB, old-postGC max 71 MiB, NTR active max 1, RS active max 3
+     err: ReadFailureException: Cassandra failure during read query at consistency ONE (1 responses were required but only 0 replica responded, 1 failed)
+     err: ReadFailureException: Cassandra failure during read query at consistency ONE (1 responses were required but only 0 replica responded, 1 failed)
+     err: ReadFailureException: Cassandra failure during read query at consistency ONE (1 responses were required but only 0 replica responded, 1 failed)

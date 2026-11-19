@@ -1,0 +1,47 @@
+[2026-11-18 14:19:12 EST] ARM VERIFY-IC-PROBE arm=A heap=8G direct=4096M spec=one:T:5000:3,7;one:T:-1:3,7;one:I:-1:3,7;one:M:5000:3,7;idle:10000;sweep:T:1,2,3,4,6,8,12,16:3:10000 hist=0
+[2026-11-18 14:19:19 EST] started VERIFY-IC-PROBE pid 17307 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b17-VERIFY-IC-PROBE-1795029558.scope
+[2026-11-18 14:20:18 EST] ready VERIFY-IC-PROBE
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms8G -Xmx8G -XX:MaxDirectMemorySize=4096M -XX:HeapDumpPath=/mydata/s4/b17-w4/runs/VERIFY-IC-PROBE/cassandra-1795029558-pid17307.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-18 14:20:29 EST] GC.run VERIFY-IC-PROBE
+1795029632,base,nmtOtherKB=65365,nmtTotalKB=9119892,rssKB=9419912,rssAnonKB=9240560,scopeCurB=9504673792,scopeOomKill=0,1795029632233,160385200,76499120,76499120,0,0,0,0,0,50142308,0,-1,71,134,-1
+verify pk=0 rows=1024
+verify pk=1 rows=1024
+verify pk=2 rows=1024
+verify pk=3 rows=1024
+verify pk=4 rows=1024
+verify pk=5 rows=1024
+verify pk=6 rows=1024
+verify pk=7 rows=1024
+verify pk=8 rows=1024
+verify pk=9 rows=1024
+verify pk=10 rows=1024
+verify pk=11 rows=1024
+verify pk=12 rows=1024
+verify pk=13 rows=1024
+verify pk=14 rows=1024
+verify pk=15 rows=1024
+verify total_rows=16384 pk0_rows=1024 pk0_value_bytes=268435456 content_match=3/3 ms=2044
+[2026-11-18 14:20:55 EST] client pid 18241
+SUMMARY secs=308 ok=24 err_readfail=2 err_readtimeout=1 err_invalid=1 err_other=0 inflight_left=0
+[2026-11-18 14:26:14 EST] GC.run VERIFY-IC-PROBE
+[2026-11-18 14:26:17 EST] OOM/GC check
+CompileCommand: dontinline org/apache/cassandra/io/util/RebufferingInputStream.readPrimitiveSlowly(I)J
+CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.address()J
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.length()I
+CompileCommand: inline org/apache/cassandra/db/rows/UnfilteredSerializer.serializeRowBody(Lorg/apache/cassandra/db/rows/Row;ILorg/apache/cassandra/db/rows/SerializationHelper;Lorg/apache/cassandra/io/util/DataOutputPlus;)V
+CompileCommand: inline org/apache/cassandra/io/util/Memory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/SafeMemory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/TrackedDataInputPlus.checkCanRead(I)V
+CompileCommand: inline org/apache/cassandra/net/FrameDecoderWith8bHeader.decode(Ljava/util/Collection;Lorg/apache/cassandra/net/ShareableBytes;I)V
+CompileCommand: inline org/apache/cassandra/service/reads/repair/RowIteratorMergeListener.applyToPartition(ILjava/util/function/Consumer;)V
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.selectBoundary(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;II)I
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.strictnessOfLessThan(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;)I
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.indexes(Lorg/apache/cassandra/utils/IFilter/FilterKey;)[J
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.setIndexes(JJIJ[J)V
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare(Ljava/nio/ByteBuffer;[B)I
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare([BLjava/nio/ByteBuffer;)I
+pauses=335 full_gcs=0 total_pause=3s max60=3% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=none
+[2026-11-18 14:26:28 EST] stopped VERIFY-IC-PROBE
+SURVIVED cancelled=6
+[2026-11-18 14:26:29 EST] END VERIFY-IC-PROBE SURVIVED cancelled=6

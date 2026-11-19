@@ -1,0 +1,32 @@
+arm=R0 budget=B2 heap=4096 direct=2048 C=8 D=270
+up_after_s=12
+gate: LiveSSTableCount=2000 pending_compactions=0 table_pending=0
+trace: Executing seq scan across 2000 sstables
+NODE GONE at load+139.6s
+load_end at load+144.6s; node_alive=False
+stopped_clean=True valid_gate=True
+heap dump kept: /mydata/s4/c9-w4/dumps-kept/B2/R0-cassandra-1795028582-pid22418.hprof (0.16 GiB)
+-XX:+HeapDumpOnOutOfMemoryError
+-Xlog:gc=info,heap*=trace,age*=debug,safepoint=info,promotion*=trace:file=/mydata/s4/c9-w4/inst/R0/logs/gc.log:time,uptime,pid,tid,level:filecount=10,filesize=10485760
+-Xms4096M
+-Xmx4096M
+-XX:MaxDirectMemorySize=2048M
+-XX:HeapDumpPath=/mydata/s4/c9-w4/inst/R0/dumps/cassandra-1795028582-pid22418.hprof
+-Dcassandra.printHeapHistogramOnOutOfMemoryError=true
+-XX:OnOutOfMemoryError=kill
+2485a2486,2492
+> 
+> # ---- C9 stage-2 lines (environment; compressed_read_ahead_buffer_size only in arm I2) ----
+> data_file_directories: [/mydata/s4/c9-w4/inst/R0/data]
+> commitlog_directory: /mydata/s4/c9-w4/inst/R0/commitlog
+> hints_directory: /mydata/s4/c9-w4/inst/R0/hints
+> saved_caches_directory: /mydata/s4/c9-w4/inst/R0/saved_caches
+> cdc_raw_directory: /mydata/s4/c9-w4/inst/R0/cdc_raw
+connect_s=1.3
+go_ms=1795028619188
+end_ms=1795028889188
+streams=8
+ramp=1,2,3,4,6,8
+step=45.0
+                Executing seq scan across 2000 sstables for (min(-9223372036854775808), min(-9223372036854775808)] [ReadStage-1] | 2026-11-18 12:03:17.118000 | 127.0.0.1 |          19725 | 127.0.0.1
+                                                                           Read 10 live rows and 0 tombstone cells [ReadStage-1] | 2026-11-18 12:03:17.655000 | 127.0.0.1 |         556265 | 127.0.0.1

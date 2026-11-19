@@ -1,0 +1,40 @@
+T16-1: arm=T16 budget=B16 heap=15872 direct=16384 C=40 D=300 | OOM=none | node_gone=no | peak direct 16384 MiB dCount 90523 A_max 32 | pages 7565 workers_ok 40/40 | gate ok
+arm=T16 budget=B16 heap=15872 direct=16384 C=40 D=300
+up_after_s=12
+gate: LiveSSTableCount=2000 pending_compactions=0 table_pending=0
+load_end at load+303.4s; node_alive=True
+stopped_clean=True valid_gate=True
+
+B0 (idle 10 s before load): direct Count 101, MemoryUsed 52.1 MiB, chunk-cache size 16.0 MiB, networking size 0.0 MiB, heap used 2400 MiB, live sstables 2000
+peak direct_count: 90624 at load+287.9s
+peak direct_used: 16384.0 at load+298.6s
+peak cc_size: 962.7 at load+287.9s
+peak cc_used: 961.6 at load+5.4s
+peak cc_overflow: 450.7 at load+287.9s
+peak net_size: 0.0 at load+0.0s
+peak net_overflow: 0.0 at load+0.0s
+peak read_active: 32 at load+2.4s
+peak read_pending: 8 at load+2.4s
+peak heap_used: 9710.3 at load+189.7s
+at peak direct_used: Count 90587 (dCount 90486), dUsed 16331.9 MiB, A 32, pending 8, cc_overflow 450.0 MiB, cc_size 962.0 MiB
+last 5 samples (ms_rel, count, used MiB, cap MiB, A, pending, cc_size, cc_ovf, heap MiB):
+  302.5 58615 10860.0 10857.4 29 0 795.3 282.9 601
+  302.7 34052 7882.4 7883.6 15 0 586.7 74.7 825
+  302.9 22856 6059.2 6059.2 11 0 521.5 9.5 1129
+  303.1 248 549.7 549.7 0 0 512.0 0.0 1289
+  303.3 248 549.7 549.7 0 0 512.0 0.0 1289
+A distribution (samples): 0:14, 11:1, 15:1, 25:1, 26:1, 27:1, 28:1, 29:1, 31:1, 32:1463
+dUsed per executing command, MiB (samples with A>0, includes the pool growth): median 440, p90 481
+  A=0: n=14 median dCount 46 dUsed 1 MiB; max dUsed 498 MiB
+  A=11: n=1 median dCount 22755 dUsed 6007 MiB; max dUsed 6007 MiB
+  A=15: n=1 median dCount 33951 dUsed 7830 MiB; max dUsed 7830 MiB
+  A=25: n=1 median dCount 51804 dUsed 10691 MiB; max dUsed 10691 MiB
+  A=26: n=1 median dCount 54343 dUsed 11007 MiB; max dUsed 11007 MiB
+  A=27: n=1 median dCount 41645 dUsed 9694 MiB; max dUsed 9694 MiB
+  A=28: n=1 median dCount 66227 dUsed 12686 MiB; max dUsed 12686 MiB
+  A=29: n=1 median dCount 58514 dUsed 10808 MiB; max dUsed 10808 MiB
+  A=31: n=1 median dCount 77056 dUsed 14548 MiB; max dUsed 14548 MiB
+  A=32: n=1463 median dCount 73473 dUsed 14073 MiB; max dUsed 16332 MiB
+dCount per executing command (samples with A>0): median 2318, p90 2632, max 2829
+client: workers 40, workers with >=1 page 40, pages ok 7565, full scans completed 0, latency median 1507 ms p99 2556 ms, errors {'ReadFailure': 32, 'ReadTimeout': 2}
+first client error at load+7.4s: ReadFailure:Error from server: code=1300 [Replica(s) failed to execute read] message="Operation failed - received 0 responses and 1 

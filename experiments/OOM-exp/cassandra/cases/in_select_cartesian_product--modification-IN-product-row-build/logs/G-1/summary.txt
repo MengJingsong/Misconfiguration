@@ -1,0 +1,36 @@
+endpoint: OOM(oom) oom:java.lang.OutOfMemoryError: Java heap space
+stdout: java.lang.OutOfMemoryError: Java heap space
+stdout: Dumping heap to /mydata/s4/u7-w4/runs/G-1/cassandra-1795048161-pid655155.hprof ...
+stdout: Heap dump file created [3390306762 bytes in 253.024 secs]
+resolved: authenticator=PasswordAuthenticator{};
+resolved: authenticator=null;
+resolved: commitlog_segment_size=32MiB;
+resolved: in_select_cartesian_product_fail_threshold=5000;
+resolved: in_select_cartesian_product_warn_threshold=-1;
+resolved: max_mutation_size=null;
+resolved: memtable_allocation_type=heap_buffers;
+resolved: memtable_heap_space=null;
+resolved: native_transport_max_message_size=null;
+resolved: native_transport_max_request_data_in_flight=null;
+resolved: native_transport_max_request_data_in_flight_per_ip=null;
+resolved: native_transport_max_threads=128;
+resolved: native_transport_receive_queue_capacity=1MiB;
+resolved: native_transport_timeout=12s;
+resolved: write_request_timeout=2000ms;
+resolved: write_request_timeout=5000ms;
+flag MaxHeapSize 2147483648
+flag MaxDirectMemorySize 16642998272
+flag HeapDumpOnOutOfMemoryError +
+flag UseG1GC +
+flag G1HeapRegionSize 16777216
+flag AlwaysPreTouch +
+step 0 update p=5000 q=5000 k0=0 rows=25000000 wire_est=80054 latency_ms=149810 outcome=ERR NoHostAvailable: ('Unable to complete the operation against any hosts', {<Host: 127.0.0.1:9042 datacenter1>: ConnectionShutdown('errors=Connection heartbeat timeout after 30 seconds, last_host=127
+   GC during step 69 (full 37); baseline after-GC 69 MiB; max after-GC in step 2048 MiB; U_peak 1979 MiB; last after-GC 2032 2032 2032 2032 2032 2032
+   K RequestsSize max 80059 B; memtable max 0 MiB; MutationStage pending max 0; NTR active max 1
+jmx samples 57; RequestsSize max 80059; Paused max 0; direct max 42.8 MiB; last row 1795048341112,,,,,,,,
+thread samples 36; NTR-in-ModificationStatement top frames: - x22 UpdateParameters.addCell x9 BTreeRow$Builder.build x3 UpdateStatement.addUpdateForKey x1 StorageProxy.fetchRows x1
+RssAnon max 2484 MiB
+heap_info used max 2030 MiB
+GCs 188; Pause Full 110; to-space exhausted 20; heap after GC max 2048 MiB of 2048; first-6 after-GC 9 24 24 13 28 28
+STW share over last 60 s of GC log: 105%
+dumps: cassandra-1795048161-pid655155.hprof (3233 MiB)

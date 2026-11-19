@@ -1,0 +1,197 @@
+{
+ "label": "H8-T-1",
+ "mode": "life",
+ "args": [
+  "life",
+  "H8-T-1",
+  "T",
+  "8G"
+ ],
+ "cotenancy": {
+  "daemons": "none",
+  "MemAvailable_MiB": 127156
+ },
+ "start": {
+  "pid": 27577,
+  "up_s": 40,
+  "unit": "b18-h8-t-1-1795031031",
+  "cgroup": "/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/b18-h8-t-1-1795031031.scope",
+  "memory.max": "15032385536",
+  "swap.max": "0",
+  "scope_ok": true,
+  "flags": {
+   "-XX:+UseG1GC": true,
+   "-XX:G1HeapRegionSize=16m": true,
+   "-XX:+HeapDumpOnOutOfMemoryError": true,
+   "-XX:OnOutOfMemoryError=kill -9 %p": true,
+   "-Xmx8G": true,
+   "-XX:G1NewSizePercent=50": true,
+   "-XX:MaxGCPauseMillis=300": true
+  },
+  "flags_ok": true,
+  "MaxDirectMemorySize": [
+   "-XX:MaxDirectMemorySize=15872M"
+  ],
+  "HeapDumpPath": [
+   "-XX:HeapDumpPath=/mydata/s4/b18-w4/run/dump/cassandra-1795031031-pid27577.hprof"
+  ],
+  "xmx": [
+   "-Xmx8G"
+  ],
+  "xms": [
+   "-Xms8G"
+  ],
+  "xmn": []
+ },
+ "settings": {
+  "values": {
+   "memtable_allocation_type": "heap_buffers",
+   "memtable_heap_space": "2048MiB",
+   "memtable_offheap_space": "2048MiB",
+   "memtable_cleanup_threshold": "0.33333334",
+   "memtable_flush_writers": "2",
+   "concurrent_writes": "32",
+   "concurrent_counter_writes": "32",
+   "native_transport_max_request_data_in_flight": "858993459B",
+   "native_transport_max_request_data_in_flight_per_ip": "214748364B",
+   "native_transport_max_message_size": "16777216B",
+   "write_request_timeout": "2000ms",
+   "max_mutation_size": "16384KiB",
+   "commitlog_segment_size": "32MiB",
+   "commitlog_total_space": "8192MiB",
+   "native_transport_throw_on_overload": "false",
+   "hinted_handoff_enabled": "true",
+   "key_cache_size": "100MiB",
+   "batch_size_fail_threshold": "50KiB",
+   "native_transport_timeout": "12s"
+  },
+  "expected": {
+   "memtable_allocation_type": "heap_buffers",
+   "memtable_heap_space": "2048MiB",
+   "concurrent_writes": "32",
+   "write_request_timeout": "2000ms",
+   "commitlog_segment_size": "32MiB"
+  },
+  "ok": true
+ },
+ "schema": {
+  "cmd": "schema",
+  "args": [],
+  "start_ms": 1795031072561,
+  "agreement": true,
+  "tables": [
+   "t"
+  ],
+  "seconds": 0.27
+ },
+ "hist s0": {
+  "h1_total": 68651176,
+  "total": 68651200,
+  "bb": 16028760,
+  "bn": 100591,
+  "K": 19067,
+  "ms": 1795031090422
+ },
+ "L0": {
+  "h1_total": 68651176,
+  "total": 68651200,
+  "bb": 16028760,
+  "bn": 100591,
+  "K": 19067,
+  "ms": 1795031090422
+ },
+ "workload_start": {
+  "ms": 1795031100807,
+  "mode": "hot",
+  "R": 1792,
+  "S_MiB": 14.0,
+  "secs": 300,
+  "rate": 0
+ },
+ "first_trigger": {
+  "req_ok": 38,
+  "max_mut_active": 32,
+  "need_active": 24,
+  "client_ips": [
+   "127.0.0.11",
+   "127.0.0.12",
+   "127.0.0.13",
+   "127.0.0.14"
+  ],
+  "at_s": 21,
+  "ok": true
+ },
+ "workload_outcome": {
+  "outcome": "client_stalled",
+  "at_s": 71,
+  "client": {
+   "ms": 1795031171050,
+   "req_ok": 38,
+   "rows_ok": 68096,
+   "errs": [
+    86,
+    0,
+    0,
+    0,
+    36
+   ],
+   "conn": 4
+  }
+ },
+ "oom": {
+  "stdout_lines": [
+   "CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V",
+   "INFO  [main] 2026-11-18T19:43:55,264 CassandraDaemon.java:619 - JVM Arguments: [-ea, -da:net.openhft..., -XX:+UseThreadPriorities, -XX:+HeapDumpOnOutOfMemoryError, -Xss256k, -XX:+AlwaysPreTouch, -XX:+UseTLAB, -XX:+ResizeTLAB, -XX:+UseNUMA, -XX:+PerfDisableSharedMem, -Djava.net.preferIPv4Stack=true, -Dchronicle.analytics.disable=true, -XX:-UseBiasedLocking, -XX:+UseG1GC, -XX:+ParallelRefProcEnabled, -XX:MaxTenuringThreshold=2, -XX:G1HeapRegionSize=16m, -XX:+UnlockExperimentalVMOptions, -XX:G1NewSizePercent=50, -XX:G1RSetUpdatingPauseTimePercent=5, -XX:MaxGCPauseMillis=300, -XX:InitiatingHeapOccupancyPercent=70, -Djdk.attach.allowAttachSelf=true, --add-exports=java.base/jdk.internal.misc=ALL-UNNAMED, --add-exports=java.base/jdk.internal.ref=ALL-UNNAMED, --add-exports=java.base/jdk.internal.util=ALL-UNNAMED, --add-exports=java.base/sun.nio.ch=ALL-UNNAMED, --add-exports=java.management.rmi/com.sun.jmx.remote.internal.rmi=ALL-UNNAMED, --add-exports=java.rmi/sun.rmi.registry=ALL-UNNAMED, --add-exports=java.rmi/sun.rmi.server=ALL-UNNAMED, --add-exports=java.sql/java.sql=ALL-UNNAMED, --add-opens=java.base/java.lang.module=ALL-UNNAMED, --add-opens=java.base/jdk.internal.loader=ALL-UNNAMED, --add-opens=java.base/jdk.internal.ref=ALL-UNNAMED, --add-opens=java.base/jdk.internal.reflect=ALL-UNNAMED, --add-opens=java.base/jdk.internal.math=ALL-UNNAMED, --add-opens=java.base/jdk.internal.module=ALL-UNNAMED, --add-opens=java.base/jdk.internal.util.jar=ALL-UNNAMED, --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED, -Dio.netty.tryReflectionSetAccessible=true, -Dio.netty.allocator.useCacheForAllThreads=true, -Dio.netty.allocator.maxOrder=11, -Xlog:gc=info,heap*=trace,age*=debug,safepoint=info,promotion*=trace:file=/mydata/s4/b18-w4/run/logs/gc.log:time,uptime,pid,tid,level:filecount=10,filesize=10485760, -Xms8G, -Xmx8G, -XX:MaxDirectMemorySize=15872M, -XX:ParallelGCThreads=40, -XX:ConcGCThreads=40, -XX:CompileCommandFile=/mydata/s4/b18-w4/run/conf/hotspot_compiler, -javaagent:/mydata/s4/b18-w4/cassandra/bin/../lib/jamm-0.4.0.jar, -XX:HeapDumpPath=/mydata/s4/b18-w4/run/dump/cassandra-1795031031-pid27577.hprof, -Dcassandra.jmx.local.port=7199, -Dcom.sun.management.jmxremote.authenticate=false, -Dcom.sun.management.jmxremote.password.file=/etc/cassandra/jmxremote.password, -Djava.library.path=/mydata/s4/b18-w4/cassandra/bin/../lib/sigar-bin, -XX:OnOutOfMemoryError=kill -9 %p, -Dlogback.configurationFile=logback.xml, -Dcassandra.logdir=/mydata/s4/b18-w4/run/logs, -Dcassandra.storagedir=/mydata/s4/b18-w4/cassandra/bin/../data, -Dcassandra-pidfile=/mydata/s4/b18-w4/run/cassandra.pid, -Dcassandra-foreground=yes]",
+   "java.lang.OutOfMemoryError: Java heap space",
+   "Dumping heap to /mydata/s4/b18-w4/run/dump/cassandra-1795031031-pid27577.hprof ...",
+   "Heap dump file created [8471318830 bytes in 50.197 secs]",
+   "# java.lang.OutOfMemoryError: Java heap space",
+   "# -XX:OnOutOfMemoryError=\"kill -9 %p\"",
+   "#   Executing /bin/sh -c \"kill -9 27577\"...",
+   "Killed"
+  ],
+  "dumps": [
+   {
+    "file": "cassandra-1795031031-pid27577.hprof",
+    "birth_s": "1795031123",
+    "mtime_s": "1795031171",
+    "bytes": "8471318830"
+   }
+  ],
+  "exit": 137,
+  "since_workload_s": 86
+ },
+ "flush_lines": [
+  "TRACE [MemtableFlushWriter:1] 2026-11-18T19:45:05,072 SkipListMemtable.java:266 - High update contention in 1/1 partitions of Memtable-t@1948482119(450.461MiB serialized bytes, 57344 ops, 5.500GiB (275%) on-heap, 0B (0%) off-heap)",
+  "[PerDiskMemtableFlushWriter_0:2] 2026-11-18T19:45:05,099 Flushing.java:153 - Writing Memtable-t@1948482119(450.461MiB serialized bytes, 57344 ops, 5.500GiB (275%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "eFlushWriter_0:2] 2026-11-18T19:45:07,777 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-79f590f0e38811f1afb1f93a1dc45406/nb-1-big-Data.db (448.860MiB) for commitlog position CommitLogPosition(segmentId=1795031036402, position=29396096)"
+ ],
+ "client_end": {
+  "ms": 1795031186059,
+  "req_ok": 38,
+  "rows_ok": 68096,
+  "errs": [
+   86,
+   0,
+   36,
+   72,
+   57
+  ],
+  "conn": 0
+ },
+ "scan oom": {
+  "region_arrays": 6758,
+  "region_bytes": 7086384736,
+  "near_region_arrays": 0,
+  "total_shallow_bytes": 8424270200,
+  "byte_array_bytes": 8279062840,
+  "instances": 1980305,
+  "file_bytes": 8471318830,
+  "slab_traces": 18,
+  "error": null
+ },
+ "end": {
+  "daemons_left": "none"
+ },
+ "DONE": true
+}

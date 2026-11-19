@@ -1,0 +1,47 @@
+SUMMARY secs=308 ok=24 err_readfail=2 err_readtimeout=1 err_invalid=1 err_other=0 inflight_left=0
+== one:T:5000:3,7
+  T k=2: n=1 ok=0 errs={'InvalidQueryException': 1} ms=[11] rows=[] | no samples
+     err: InvalidQueryException: Cannot page queries with both ORDER BY and a IN restriction on the partition key; you must either remove the ORDER BY or the IN and sort client side, or disable
+== one:T:-1:3,7
+  T k=2: n=1 ok=1 errs={} ms=[1034] rows=[10] | heap max 7310 MiB, old-postGC max 73 MiB, NTR active max 1, RS active max 0
+     first10: 3/0 7/0 3/1 7/1 3/2 7/2 3/3 7/3 3/4 7/4 vbytes=2621440 pks=[3, 7]
+== one:I:-1:3,7
+  I k=2: n=1 ok=1 errs={} ms=[35] rows=[10] | no samples
+     first10: 3/0 7/0 3/1 7/1 3/2 7/2 3/3 7/3 3/4 7/4 vbytes=2621440 pks=[3, 7]
+== one:M:5000:3,7
+  M k=2: n=1 ok=1 errs={} ms=[29] rows=[10] | no samples
+     first10: 3/0 3/1 3/2 3/3 3/4 3/5 3/6 3/7 3/8 3/9 vbytes=2621440 pks=[3, 7]
+== idle:10000
+== sweep:T:1,2,3,4,6,8,12,16:3:10000
+  T k=1: n=3 ok=3 errs={} ms=[29, 31, 45] rows=[10] | heap max 1580 MiB, old-postGC max 73 MiB, NTR active max 0, RS active max 0
+     first10: 15/0 15/1 15/2 15/3 15/4 15/5 15/6 15/7 15/8 15/9 vbytes=2621440 pks=[15]
+     first10: 2/0 2/1 2/2 2/3 2/4 2/5 2/6 2/7 2/8 2/9 vbytes=2621440 pks=[2]
+     first10: 8/0 8/1 8/2 8/3 8/4 8/5 8/6 8/7 8/8 8/9 vbytes=2621440 pks=[8]
+  T k=2: n=3 ok=3 errs={} ms=[968, 1043, 940] rows=[10] | heap max 4796 MiB, old-postGC max 73 MiB, NTR active max 1, RS active max 2
+     first10: 6/0 12/0 6/1 12/1 6/2 12/2 6/3 12/3 6/4 12/4 vbytes=2621440 pks=[6, 12]
+     first10: 0/0 11/0 0/1 11/1 0/2 11/2 0/3 11/3 0/4 11/4 vbytes=2621440 pks=[11, 0]
+     first10: 1/0 7/0 1/1 7/1 1/2 7/2 1/3 7/3 1/4 7/4 vbytes=2621440 pks=[7, 1]
+  T k=3: n=3 ok=3 errs={} ms=[1116, 1738, 1711] rows=[10] | heap max 6717 MiB, old-postGC max 1021 MiB, NTR active max 1, RS active max 3
+     first10: 1/0 10/0 15/0 1/1 10/1 15/1 1/2 10/2 15/2 1/3 vbytes=2621440 pks=[15, 10, 1]
+     first10: 5/0 11/0 12/0 5/1 11/1 12/1 5/2 11/2 12/2 5/3 vbytes=2621440 pks=[12, 5, 11]
+     first10: 7/0 10/0 14/0 7/1 10/1 14/1 7/2 10/2 14/2 7/3 vbytes=2621440 pks=[10, 7, 14]
+  T k=4: n=3 ok=3 errs={} ms=[1960, 1224, 1976] rows=[10] | heap max 5194 MiB, old-postGC max 986 MiB, NTR active max 1, RS active max 4
+     first10: 2/0 11/0 14/0 15/0 2/1 11/1 14/1 15/1 2/2 11/2 vbytes=2621440 pks=[2, 14, 15, 11]
+     first10: 2/0 7/0 9/0 13/0 2/1 7/1 9/1 13/1 2/2 7/2 vbytes=2621440 pks=[9, 13, 7, 2]
+     first10: 6/0 8/0 14/0 15/0 6/1 8/1 14/1 15/1 6/2 8/2 vbytes=2621440 pks=[8, 15, 14, 6]
+  T k=6: n=3 ok=3 errs={} ms=[2805, 2808, 2760] rows=[10] | heap max 7066 MiB, old-postGC max 986 MiB, NTR active max 1, RS active max 3
+     first10: 3/0 7/0 8/0 10/0 13/0 14/0 3/1 7/1 8/1 10/1 vbytes=2621440 pks=[8, 14, 7, 13, 3, 10]
+     first10: 0/0 2/0 5/0 9/0 11/0 12/0 0/1 2/1 5/1 9/1 vbytes=2621440 pks=[9, 0, 5, 11, 2, 12]
+     first10: 3/0 6/0 7/0 11/0 14/0 15/0 3/1 6/1 7/1 11/1 vbytes=2621440 pks=[3, 11, 15, 14, 6, 7]
+  T k=8: n=3 ok=3 errs={} ms=[3769, 3640, 3151] rows=[10] | heap max 7706 MiB, old-postGC max 986 MiB, NTR active max 1, RS active max 3
+     first10: 0/0 3/0 5/0 6/0 8/0 9/0 10/0 14/0 0/1 3/1 vbytes=2621440 pks=[5, 14, 9, 0, 10, 3, 6, 8]
+     first10: 2/0 3/0 4/0 8/0 9/0 10/0 11/0 14/0 2/1 3/1 vbytes=2621440 pks=[10, 2, 4, 9, 11, 14, 3, 8]
+     first10: 0/0 1/0 4/0 5/0 6/0 8/0 10/0 11/0 0/1 1/1 vbytes=2621440 pks=[10, 5, 4, 6, 11, 1, 8, 0]
+  T k=12: n=3 ok=3 errs={} ms=[4378, 5007, 5655] rows=[10] | heap max 7288 MiB, old-postGC max 3913 MiB, NTR active max 1, RS active max 4
+     first10: 1/0 2/0 3/0 5/0 7/0 8/0 10/0 11/0 12/0 13/0 vbytes=2621440 pks=[11, 5, 10, 7, 8, 1, 3, 12, 13, 15, 14, 2]
+     first10: 2/0 3/0 5/0 6/0 7/0 8/0 9/0 11/0 12/0 13/0 vbytes=2621440 pks=[7, 12, 6, 15, 3, 5, 9, 13, 14, 8, 11, 2]
+     first10: 0/0 1/0 3/0 5/0 6/0 7/0 9/0 11/0 12/0 13/0 vbytes=2621440 pks=[6, 14, 12, 15, 9, 5, 1, 11, 7, 13, 3, 0]
+  T k=16: n=3 ok=0 errs={'ReadTimeoutException': 1, 'ReadFailureException': 2} ms=[5029, 5085, 5012] rows=[] | heap max 6746 MiB, old-postGC max 3913 MiB, NTR active max 1, RS active max 3
+     err: ReadTimeoutException: Cassandra timeout during read query at consistency ONE (1 responses were required but only 0 replica responded). In case this was generated during read repair, 
+     err: ReadFailureException: Cassandra failure during read query at consistency ONE (1 responses were required but only 0 replica responded, 1 failed)
+     err: ReadFailureException: Cassandra failure during read query at consistency ONE (1 responses were required but only 0 replica responded, 1 failed)

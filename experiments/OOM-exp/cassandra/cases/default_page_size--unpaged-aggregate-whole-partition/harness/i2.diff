@@ -1,0 +1,12 @@
+--- a/src/java/org/apache/cassandra/service/pager/AggregationQueryPager.java
++++ b/src/java/org/apache/cassandra/service/pager/AggregationQueryPager.java
+@@ -59,7 +59,8 @@
+         if (limits.isGroupByLimit())
+             return new GroupByPartitionIterator(pageSize, consistency, clientState, requestTime);
+ 
+-        return new AggregationPartitionIterator(pageSize, consistency, clientState, requestTime);
++        return new AggregationPartitionIterator(pageSize <= 0 ? org.apache.cassandra.cql3.statements.SelectStatement.DEFAULT_PAGE_SIZE : pageSize,
++                                                consistency, clientState, requestTime);
+     }
+ 
+     @Override

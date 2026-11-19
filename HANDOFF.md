@@ -70,63 +70,55 @@ Owner's redesign; map and flowchart in [`experiments/FLOWCHART.md`](experiments/
   their own stage-2 agent; the owner decided no independent review is needed (2026-11-18). 128 open stage-5
   candidates that repeat an existing case were closed as `covered by <case>` (owner, from the triage). None of the tested candidates came from the new
   stage-5 agents (all were legacy rows or retries), so no per-agent true-positive rate exists yet.
-- The five UMass x86 nodes (`pc91`, `pc84`, `pc72`, `pc99`, `pc75`) have been unreachable since ≈ 04:04 on
-  2026-11-18 (the CloudLab experiment may have expired); their run data is only what the case folders hold.
-  Left on the ARM nodes and `pc96`: per-case `/mydata/s4/<id>-w*` folders (largest: `pc96` 102 GB incl. C4's
-  92 GB data set; `ms0611` 15 GB; `ms0625` 13 GB); nothing running.
+- The UMass x86 allocation `jason92-326528` went unreachable at ≈ 04:04 on 2026-11-18; the owner replaced it with
+  `jason92-326665` (see "Nodes and access"). The owner then deleted all run data on the ten nodes and `pc96` (only
+  `/mydata/s4/cassandra-base` remained); wave 4's leftovers are listed under wave 4 below.
 
-**Wave 4 — leftover work (start here; suspended 2026-11-18 11:27 EST for the 5-hour usage limit; the owner
-will start it in a new session).** Nothing of wave 4 ran: no design finished, no case file or node folder was
-written, nothing runs on any node. The 51 candidate rows of the clusters below are already marked
-`picked: <case>` in `phase1-oom-candidates.md` (committed with this note).
+**Wave 4 (2026-11-18 13:38 → 19:40 EST, owner-approved; done).** The first phase-2 cases built from **stage-5**
+candidates: 11 cases, each testing the mechanism shared by a cluster of candidates from the triage
+(`stage5-oom-clue-find/runs/triage-2026-11-18.md`), with the verdict written to **every row of the cluster** (51 rows).
+Run as workflow `oom-pipeline-wave4.js` (design → verify per case, deadline 18:07); the owner suspended it at 16:08
+with U5–U7 mid-run, and fresh stage-2 agents resumed those three at 18:20 from their frozen designs and work
+directories (deadline 20:20). All designs were frozen with sha256 and checked by their stage-2 agent; none needed a
+container budget.
 
-*Purpose:* the first phase-2 cases built from **stage-5** candidates (wave 1–3 cases all came from legacy rows or
-retries). Each case tests one mechanism shared by a cluster of candidates from the triage
-(`stage5-oom-clue-find/runs/triage-2026-11-18.md`, top 20 and its §4 clusters); the verdict is written to
-**every row of the cluster**, which gives the first true-positive rates per stage-5 agent. The clusters hold
-28 autonomous, 19 guided and 4 legacy rows.
-
-| Case | Node | Cluster (primary first) | Mechanism | Phase-1 case file |
+| Case | Node | Cluster (primary first) | Verdict | Deciding result |
 |---|---|---|---|---|
-| U5 | `ms0617` | OC-412, OC-351, OC-352, OC-365, OC-276 | clustering-key `IN × IN` cartesian product built on the coordinator (slice path skips the guard; guardrail −1) | `no_constraint-handleinfilter-restriction_position--autonomous` (+3) |
-| U6 | `ms0604` | OC-409, OC-140, OC-278, OC-285, OC-410 | parser/lexer amplification: a 16 MiB malformed query or huge `IN (?,…)` builds per-character errors / terms before the marker check | `no_constraint-istokenvalid-token_position--autonomous` (+2) |
-| U7 | `ms0625` | OC-366 | write-side `IN` product: `UPDATE/DELETE … pk IN … ck IN …` builds all mutations before `max_mutation_size` (per mutation) | `none-validatekey-key_remaining--autonomous` |
-| B16 | `ms0611` (no build: copy from `ms0617`) | OC-282, OC-158, OC-161, OC-162, OC-295, OC-48 | tombstone-count reads: `tombstone_failure_threshold` counts tombstones, not bytes; large range tombstones held per read | `tombstone-failure-threshold-withMetricsRecording-failureThreshold--autonomous` (+1) |
-| U8 | `ms0640` | OC-407 | vector split: one ≈ 48 B ByteBuffer per element, dimension uncapped (`vector_dimensions` guardrail −1) | `no_constraint-isallzero-vectorelement--autonomous` |
-| U9 | `pc91` | OC-277, OC-63, OC-122, OC-280 | BIG-format writer keeps a partition's whole row index on heap with large clustering keys (flush/compaction) | `max-unsigned-short-ClusteringPrefix-validate-accessor-size--autonomous` (+3) |
-| U10 | `pc82` | OC-322, OC-298, OC-299, OC-309, OC-310, OC-311, OC-312, OC-313, OC-314, OC-315, OC-316, OC-317, OC-318, OC-321, OC-44 | aggregates / GROUP BY with paging off: NO_LIMIT, whole partition or one row per group held (overlaps U4) | `default_page_size-cqlgroupbylimits_onclose-rowlimit--autonomous` (+7) |
-| B17 | `pc72` | OC-320 | `IN` on the partition key + `ORDER BY` refuses paging: every listed partition serialized at once (U4 holder, new path) | `cql-row-limit-incrementRowCount-rowsCounted--autonomous` |
-| B18 | `pc75` | OC-323, OC-257, OC-266, OC-367, OC-373, OC-41, OC-46 | memtable overshoot under write contention: failed CAS merge clones / waste stay charged in slab regions (near C6) | `excess_waste_bytes-updatewastedallocationtracker-wastedbytes-2--autonomous` (+4) |
-| C9 | `pc99` | OC-303 | range read opens a scanner per intersecting sstable, each with a 256 KiB compressed read-ahead direct buffer | `max-compacting-l0-getSTCSInL0CompactionCandidate-l0SstableCount--autonomous` |
-| U11 | `pc96` (local) | OC-206, OC-200, OC-201, OC-202, OC-368 | range-tombstone list copied and grown 1.5× on every write into a partition holding N of them | `range_tombstone_list_growth_factor-addInternal-capacity--autonomous` (+3) |
+| U5 | `ms0617` | OC-412, OC-351, OC-352, OC-365, OC-276 | retry | IN × IN key product: PK form OOM 3/3 at 2 GiB, but the deciding CK form spirals in G1 (request-thread OOM 2/5 < 3); CK OOM 3/3 at 8 GiB without control/intervention |
+| U6 | `ms0604` | OC-409, OC-140, OC-278, OC-285, OC-410 | retry | 16 MiB unlexable query: one error message per character (92 % of heap), but GC service loss 3/3, OOM 0/3; PREPARE-marker arm OOM 3/3 |
+| U7 | `ms0625` | OC-366 | **true positive** | prepared `UPDATE … k IN ? AND c IN ?` (176 KB) builds 4×10^7 rows on the NTR thread: OOM 3/3 at 2 GiB (DELETE 3/3); controls 0/3; guardrail rejects |
+| B16 | `ms0611` | OC-282, OC-158, OC-161, OC-162, OC-295, OC-48 | **true positive** | 99,998 range markers with 12 KB bounds pass `tombstone_failure_threshold`: one read OOMs 3/3 at 2 GiB in `LocalDataResponse.build` |
+| U8 | `ms0640` | OC-407 | **true positive** | SELECT JSON splits a vector cell into one ByteBuffer per element: OOM 3/3 at 2 GiB |
+| U9 | `pc91` | OC-277, OC-63, OC-122, OC-280 | **true positive** | BIG row index with 64 KiB clustering keys ≈ 2× the data: one major compaction OOMs 3/3 at 2 and 4 GiB |
+| U10 | `pc82` | OC-322, OC-298, OC-299, OC-309…OC-318, OC-321, OC-44 | **true positive** | unpaged `count(v)` over ≈ 1 GiB is one sub-read: OOM 3/3 at 2 GiB; paging on 0/3 (overlaps U4) |
+| B17 | `pc72` | OC-320 | **true positive** | `pk IN (…) ORDER BY ck LIMIT 10` refuses paging and reads every partition whole: OOM 3/3 at 2 GiB; without ORDER BY 0/3 |
+| B18 | `pc75` | OC-323, OC-257, OC-266, OC-367, OC-373, OC-41, OC-46 | retry | memtable counter at 216–382 % of the limit under hot-partition CAS contention, T OOM 3/3, but control and intervention also OOM (re-send backlog) |
+| C9 | `pc99` | OC-303 | **true positive** (`diagnostic`: compaction paused) | 256 KiB direct read-ahead buffer per sstable per range scan: 40 scans over 2,000 sstables → direct OOM 3/3 |
+| U11 | `pc96` | OC-206, OC-200, OC-201, OC-202, OC-368 | retry | RangeTombstoneList copied per write: real, uncounted, GC thrash, but OOM 0/6; service loss only 1/1 at 512 MiB |
 
-(U = unprotected accumulation, B = bypass, C = convergence; IDs are the next free ones.)
-
-*How to run it* ([`OOM-exp/oom-agent-playbook.md`](experiments/OOM-exp/oom-agent-playbook.md)):
-1. Check the 10 remote nodes and `pc96` are reachable and idle (`pgrep -x java`). x86 nodes: new allocation
-   `jason92-326665` (table in "Nodes and access"); ARM nodes and `pc96` have `/mydata/s4/cassandra-base`
-   except `ms0611`. Work dir per case: `/mydata/s4/<id lower-case>-w4`.
-2. Per case, one fresh **stage-1** agent (pick is done; in §1 quote every row of the cluster and say which rows
-   the design covers; JIRA prior art read-only; freeze §1–§2 with sha256), then a fresh **stage-2** agent on the
-   assigned node. Budgets: heap and/or direct ≥ 512 MiB (2 GiB ideal; search for the largest failing budget);
-   a design needing a container budget stops for owner review. Set a run deadline (the suspended run used
-   about 4.5 h from start). State the overlap with U4, C6 or U5 where the table says so.
-3. The previous session used a workflow (`oom-pipeline-wave4.js`, a copy of the wave-2 script: design →
-   verify per case; script under `~/.claude/projects/…/b95f0a5a…/workflows/scripts/`). Waves used ≈ 6 M agent
-   tokens each; wave 1 hit the 5-hour limit — keep the stage-2 prompts telling agents to stop at the deadline,
-   and resume interrupted cases from their frozen designs (waves 2–3 did this without redoing finished arms).
-4. *File:* each verdict to every row of its cluster (`true positive (<ID>)` / `false positive (<ID>)` /
-   `retry (<ID>)`), retry rows to `OOM-exp/cassandra/phase2-retry-list.md`, `_INDEX.md` rows (Verdict, phase-1
-   case file); then count per stage-5 agent: autonomous / guided / legacy rows tested and true positives.
-   Commit and push.
+- **Result:** 7 true positive (U7, U8, U9, U10, B16, B17, C9), 4 retry (U5, U6, B18, U11), 0 false positive. None needs
+  a new CP pattern. Filed: cluster rows in `phase1-oom-candidates.md` (`true positive (<ID>)` / `retry (<ID>)`),
+  the 4 retries in `OOM-exp/cassandra/phase2-retry-list.md`, 11 rows in `OOM-exp/cassandra/cases/_INDEX.md`.
+- **First true-positive rates per stage-5 agent (rows tested / true positive):** autonomous 29 / 17, guided 18 / 10,
+  legacy 4 / 2. Read with care: rows of one cluster share one verdict, and U10's cluster alone is 12 autonomous rows.
+  By cluster primary (one row per case), all 11 came from the new agents: guided 8 primaries / 5 true positive
+  (U7, U8, U10, B17, C9), autonomous 3 / 2 (B16, U9).
+- **Open points for the owner:** C9 is `diagnostic` because compaction was paused to hold 2,000 sstables (the agent
+  suggests `deployment` if an sstable backlog counts as a deployment state); U5's retry rests on the frozen
+  "OOM on the request thread" rule — 4/5 runs threw OOM inside the window, 2/5 on the request thread.
+- **Left on the nodes (nothing running, 19:45 EST):** `pc82` `u10-w4` 62 GB, `pc72` `b17-w4` 38 GB, `ms0617`
+  `u5-w4` 11 GB (3 hprofs), `pc91` `u9-w4` 8.9 GB (4 hprofs), `pc99` `c9-w4` 5.8 GB (3 hprofs), `ms0611` `b16-w4`
+  2.3 GB, `ms0604` `u6-w4` 1.1 GB, `pc75` `b18-w4` 0.8 GB, `ms0640` `u8-w4` 0.7 GB, `ms0625` `u7-w4` 0.4 GB, `pc96`
+  `u11-w4` 0.4 GB; all under `/mydata/s4/`.
 
 **Other open work:**
-- 373 candidate rows are `open` (OC-1…OC-577 minus closed/picked); the triage covered only OC-63…412 —
+- 373 candidate rows are `open` (OC-1…OC-577 minus closed and tested rows); the triage covered only OC-63…412 —
   OC-413…577 (wave 3) are untriaged. Its §2 "not reachable at shipped defaults" and §3 "too slow / too much
   disk" lists were **not** closed (owner closed only the already-covered list).
-- Retry list: 5 rows `open` (C3, R5, R8, B11, B14).
+- Retry list: 9 rows `open` (C3, R5, R8, B11, B14, and wave 4's U5, U6, B18, U11, each with its proposed change).
 - Hadoop: JIRA OOM report built; stage 5 runs with Yang's and Jingsong's batches (`hadoop/PROCEDURE.md` 5b);
-  no Hadoop phase 2 yet.
+  no Hadoop phase 2 yet. Jingsong's Hadoop stage-4 nodes `pc41`, `pc39`, `pc29` failed SSH host-key checks on
+  2026-11-18 (probably reallocated): a new Hadoop stage-4 node needs `jingsong/setup-node.sh`.
 - Earlier verdict calls (R1/R6 take their `-V` verdict; C3 retry by the mixed-status rule; B1 false positive;
   disk case closed as skipped) stand unless the owner revisits them.
 
@@ -389,7 +381,7 @@ available.
 | `ms0611` | node3.jason92-326377 | aarch64 / 8 / 62 GiB | 35 GiB | `10.10.1.4` | JDK 11 + Ant |
 | `ms0617` | node4.jason92-326377 | aarch64 / 8 / 62 GiB | 37 GiB | `10.10.1.5` | JDK 11 + Ant |
 
-- **2026-11-18:** the UMass experiment `jason92-326528` (`pc91/84/72/99/75`) went unreachable at ≈ 04:04 and its data is gone; the owner's new allocation `jason92-326665` is `pc91`, `pc82`, `pc72`, `pc75`, `pc99` (table above). All ten nodes and `pc96` had their run data deleted on 2026-11-18 (owner); only the Cassandra builds remain.
+- **2026-11-18:** the UMass experiment `jason92-326528` (`pc91/84/72/99/75`) went unreachable at ≈ 04:04 and its data is gone; the owner's new allocation `jason92-326665` is `pc91`, `pc82`, `pc72`, `pc75`, `pc99` (table above). All ten nodes and `pc96` had their run data deleted on 2026-11-18 (owner); wave 4 then left one `/mydata/s4/<id>-w4` folder per case (sizes under wave 4 above). `ms0611` now has a build inside `b16-w4` but still no `/mydata/s4/cassandra-base`.
 - The two sets are on different sites (UMass, Utah; ≈ 50 ms apart) with separate `10.10.1.0/24` LANs:
   run a cluster within one set. The m400s are **ARM**: never mix them with x86 nodes in one case's
   matched arms, and record `aarch64` (smoke test: `experiments/OOM-exp/cassandra/node-smoke/2026-11-16-ms0625/`).

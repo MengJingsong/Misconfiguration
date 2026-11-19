@@ -1,0 +1,44 @@
+[2026-11-18 15:10:44 EST] ARM REP-8G-1 arm=A heap=8G direct=4096M spec=sweep:M:4:5:1000;sweep:T:1:1:0;idle:20000;run:T:6:4/120 hist=0
+[2026-11-18 15:10:50 EST] started REP-8G-1 pid 51432 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b17-REP-8G-1-1795032649.scope
+[2026-11-18 15:11:47 EST] ready REP-8G-1
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms8G -Xmx8G -XX:MaxDirectMemorySize=4096M -XX:HeapDumpPath=/mydata/s4/b17-w4/runs/REP-8G-1/cassandra-1795032649-pid51432.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-18 15:11:54 EST] GC.run REP-8G-1
+1795032717,base,nmtOtherKB=66391,nmtTotalKB=9135187,rssKB=9438572,rssAnonKB=9259336,scopeCurB=9524301824,scopeOomKill=0,1795032716999,162332240,78446160,78446160,0,0,0,0,0,51192932,0,-1,60,127,-1
+[2026-11-18 15:11:58 EST] client pid 52157
+/mydata/s4/b17-w4/harness/victim-ctl.sh: line 52: 51432 Killed                  CASSANDRA_CONF=$R/conf CASSANDRA_LOG_DIR=$R/logs MAX_HEAP_SIZE=$HEAP MAX_DIRECT_MEMORY_SIZE=$DIRECT CASSANDRA_HEAPDUMP_DIR=$R JVM_EXTRA_OPTS="-XX:NativeMemoryTracking=summary -Xlog:gc=info,safepoint=info:file=$R/gc.log:time,uptime,level,tags:filecount=20,filesize=20m" setsid nohup systemd-run --user --scope --unit="b17-$L-$(date +%s)" -p MemorySwapMax=0 "$BUILD/bin/cassandra" -f < /dev/null > "$R/stdout.log" 2>&1
+[2026-11-18 15:13:01 EST] VICTIM DEAD at +63s
+HOSTGONE
+SUMMARY secs=58 ok=6 err_readfail=0 err_readtimeout=0 err_invalid=0 err_other=8 inflight_left=0
+20:12:53 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+20:12:57 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 2000 milliseconds
+[2026-11-18 15:13:10 EST] OOM/GC check
+CompileCommand: dontinline org/apache/cassandra/io/util/RebufferingInputStream.readPrimitiveSlowly(I)J
+CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.address()J
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.length()I
+CompileCommand: inline org/apache/cassandra/db/rows/UnfilteredSerializer.serializeRowBody(Lorg/apache/cassandra/db/rows/Row;ILorg/apache/cassandra/db/rows/SerializationHelper;Lorg/apache/cassandra/io/util/DataOutputPlus;)V
+CompileCommand: inline org/apache/cassandra/io/util/Memory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/SafeMemory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/TrackedDataInputPlus.checkCanRead(I)V
+CompileCommand: inline org/apache/cassandra/net/FrameDecoderWith8bHeader.decode(Ljava/util/Collection;Lorg/apache/cassandra/net/ShareableBytes;I)V
+CompileCommand: inline org/apache/cassandra/service/reads/repair/RowIteratorMergeListener.applyToPartition(ILjava/util/function/Consumer;)V
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.selectBoundary(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;II)I
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.strictnessOfLessThan(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;)I
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.indexes(Lorg/apache/cassandra/utils/IFilter/FilterKey;)[J
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.setIndexes(JJIJ[J)V
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare(Ljava/nio/ByteBuffer;[B)I
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare([BLjava/nio/ByteBuffer;)I
+--
+INFO  [ReadStage-5] 2026-11-18T20:12:35,426 MonitoringTask.java:95 - Scheduling monitoring task with report interval of 5000 ms, max operations 50
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /mydata/s4/b17-w4/runs/REP-8G-1/cassandra-1795032649-pid51432.hprof ...
+Heap dump file created [6325600768 bytes in 14.753 secs]
+#
+# java.lang.OutOfMemoryError: Java heap space
+# -XX:OnOutOfMemoryError="kill -9 %p"
+#   Executing /bin/sh -c "kill -9 51432"...
+-rw-------  1 jason92 misconfiguration 6325600768 Nov 18 13:12 cassandra-1795032649-pid51432.hprof
+pauses=29 full_gcs=4 total_pause=1s max60=1% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=HeapDumper@107.616s,ReportJavaOutOfMemory@122.369s
+[2026-11-18 15:13:12 EST] stopped REP-8G-1
+OOM type="java.lang.OutOfMemoryError: Java heap space" at+63s cancelled=0 last=[Q {"start":1795032776488,"end":1795032776489,"ms":1,"Q":"T","k":6,"thread":0,"fetch":2147483647,"pks":"[12, 5, 11, 6, 7, 0]","rows":0,"first":"","vbytes":0,"err":"NoHostAvailableException","msg":"All ]
+[2026-11-18 15:13:16 EST] END REP-8G-1 OOM type="java.lang.OutOfMemoryError: Java heap space" at+63s cancelled=0 last=[Q {"start":1795032776488,"end":1795032776489,"ms":1,"Q":"T","k":6,"thread":0,"fetch":2147483647,"pks":"[12, 5, 11, 6, 7, 0]","rows":0,"first":"","vbytes":0,"err":"NoHostAvailableException","msg":"All ]

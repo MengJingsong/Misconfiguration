@@ -1,0 +1,12 @@
+HOSTGONE
+SUMMARY secs=42 ok=6 err_readfail=0 err_readtimeout=0 err_invalid=0 err_other=2 inflight_left=0
+== sweep:M:4:5:1000
+  M k=4: n=5 ok=5 errs={} ms=[143, 63, 52, 44, 2799] rows=[10] | heap max 346 MiB, old-postGC max 74 MiB, NTR active max 0, RS active max 0
+== sweep:T:1:1:0
+  T k=1: n=1 ok=1 errs={} ms=[30] rows=[10] | no samples
+     first10: 7/0 7/1 7/2 7/3 7/4 7/5 7/6 7/7 7/8 7/9 vbytes=2621440 pks=[7]
+== idle:20000
+== sweep:T:4:3:10000
+  T k=4: n=2 ok=0 errs={'TransportException': 1, 'NoHostAvailableException': 1} ms=[4115, 0] rows=[] | heap max 1534 MiB, old-postGC max 1198 MiB, NTR active max 1, RS active max 3
+     err: TransportException: [/127.0.0.1:9042] Connection has been closed
+     err: NoHostAvailableException: All host(s) tried for query failed (no host was tried)

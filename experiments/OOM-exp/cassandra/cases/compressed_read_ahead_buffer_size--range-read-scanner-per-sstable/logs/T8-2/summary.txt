@@ -1,0 +1,76 @@
+T8-2: arm=T8 budget=B8 heap=15872 direct=7936 C=40 D=300 | OOM=direct (first: java.lang.OutOfMemoryError: Direct buffer memory) | node_gone=16.8s | peak direct 7936 MiB dCount 29654 A_max 32 | pages 0 workers_ok 0/40 | gate ok
+arm=T8 budget=B8 heap=15872 direct=7936 C=40 D=300
+up_after_s=16
+gate: LiveSSTableCount=2000 pending_compactions=2 table_pending=0
+NODE GONE at load+16.8s
+load_end at load+21.8s; node_alive=False
+stopped_clean=True valid_gate=True
+heap dump deleted (not first for B8): 4.17 GiB
+
+B0 (idle 10 s before load): direct Count 101, MemoryUsed 52.1 MiB, chunk-cache size 16.0 MiB, networking size 0.0 MiB, heap used 2416 MiB, live sstables 2000
+peak direct_count: 29755 at load+6.8s
+peak direct_used: 7935.9 at load+6.8s
+peak cc_size: 512.0 at load+3.8s
+peak cc_used: 461.7 at load+3.8s
+peak cc_overflow: 0.0 at load+0.2s
+peak net_size: 0.0 at load+0.2s
+peak net_overflow: 0.0 at load+0.2s
+peak read_active: 32 at load+2.6s
+peak read_pending: 9 at load+9.3s
+peak heap_used: 8686.0 at load+9.9s
+at peak direct_used: Count 29755 (dCount 29654), dUsed 7883.8 MiB, A 32, pending 8, cc_overflow 0.0 MiB, cc_size 512.0 MiB
+last 5 samples (ms_rel, count, used MiB, cap MiB, A, pending, cc_size, cc_ovf, heap MiB):
+  6.8 29755 7935.9 7935.9 32 8 512.0 0.0 141
+  9.3 29755 7935.9 7935.9 32 9 512.0 0.0 190
+  9.5 29755 7935.9 7935.9 32 9 512.0 0.0 8398
+  9.7 29755 7935.9 7935.9 32 9 512.0 0.0 8414
+  9.9 28850 7709.7 7709.7 30 0 512.0 0.0 8686
+A distribution (samples): 0:12, 30:1, 32:16
+dUsed per executing command, MiB (samples with A>0, includes the pool growth): median 246, p90 246
+  A=0: n=12 median dCount 47 dUsed 1 MiB; max dUsed 1 MiB
+  A=30: n=1 median dCount 28749 dUsed 7658 MiB; max dUsed 7658 MiB
+  A=32: n=16 median dCount 29653 dUsed 7884 MiB; max dUsed 7884 MiB
+dCount per executing command (samples with A>0): median 927, p90 927, max 958
+client: workers 40, workers with >=1 page 0, pages ok 0, full scans completed 0, latency median -1 ms p99 -1 ms, errors {'NoHostAvailable': 160, 'ReadFailure': 4}
+first client error at load+6.5s: ReadFailure:Error from server: code=1300 [Replica(s) failed to execute read] message="Operation failed - received 0 responses and 1 
+first OOM (system.log):
+  ERROR [ReadStage-67] 2026-11-18T19:34:46,743 JVMStabilityInspector.java:70 - Exception in thread Thread[ReadStage-67,10,SharedPool]
+  java.lang.OutOfMemoryError: Direct buffer memory
+  	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+  	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+  	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+  	at org.apache.cassandra.io.compress.BufferType$2.allocate(BufferType.java:35)
+  	at org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer.getBlock(ThreadLocalReadAheadBuffer.java:84)
+  	at org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer.allocateBuffer(ThreadLocalReadAheadBuffer.java:76)
+  	at org.apache.cassandra.io.util.CompressedChunkReader$ScanCompressedReader.allocateResources(CompressedChunkReader.java:204)
+  	at org.apache.cassandra.io.util.CompressedChunkReader$Standard.forScan(CompressedChunkReader.java:244)
+  	at org.apache.cassandra.io.util.CompressedChunkReader.instantiateRebufferer(CompressedChunkReader.java:95)
+  	at org.apache.cassandra.io.util.FileHandle.instantiateRebufferer(FileHandle.java:204)
+  	at org.apache.cassandra.io.util.FileHandle.createReader(FileHandle.java:156)
+  	at org.apache.cassandra.io.util.FileHandle.createReaderForScan(FileHandle.java:139)
+  	at org.apache.cassandra.io.sstable.format.SSTableReader.openDataReaderForScan(SSTableReader.java:1385)
+  	at org.apache.cassandra.io.sstable.format.SSTableScanner.<init>(SSTableScanner.java:78)
+  	at org.apache.cassandra.io.sstable.format.big.BigTableScanner.<init>(BigTableScanner.java:62)
+  	at org.apache.cassandra.io.sstable.format.big.BigTableScanner.getScanner(BigTableScanner.java:53)
+  	at org.apache.cassandra.io.sstable.format.big.BigTableReader.partitionIterator(BigTableReader.java:149)
+  	at org.apache.cassandra.io.sstable.format.big.BigTableReader.partitionIterator(BigTableReader.java:85)
+  	at org.apache.cassandra.db.PartitionRangeReadCommand.queryStorage(PartitionRangeReadCommand.java:340)
+  	at org.apache.cassandra.db.ReadCommand.executeLocally(ReadCommand.java:452)
+  	at org.apache.cassandra.service.StorageProxy$LocalReadRunnable.runMayThrow(StorageProxy.java:2209)
+  	at org.apache.cassandra.service.StorageProxy$DroppableRunnable.run(StorageProxy.java:2608)
+  	at org.apache.cassandra.concurrent.ExecutionFailure$2.run(ExecutionFailure.java:163)
+  	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+  	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+  	at java.base/java.lang.Thread.run(Thread.java:829)
+histogram lines:
+     5:         63569        4068416  java.nio.DirectByteBuffer (java.base@11.0.33)
+     7:         29554        2127888  org.apache.cassandra.io.sstable.format.big.BigTableScanner
+    13:         31751        1270040  jdk.internal.ref.Cleaner (java.base@11.0.33)
+    18:         29730         951360  java.nio.DirectByteBuffer$Deallocator (java.base@11.0.33)
+    27:         30560         733440  org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer$Block
+    99:          2019          96912  org.apache.cassandra.io.util.CompressedChunkReader$Standard
+   137:          2019          64608  org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer
+   158:          2019          48456  org.apache.cassandra.io.util.CompressedChunkReader$RandomAccessCompressedReader
+   159:          2019          48456  org.apache.cassandra.io.util.CompressedChunkReader$ScanCompressedReader
+  4331:             1             16  org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer$$Lambda$1088/0x0000000840644040
+  4332:             1             16  org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer$1

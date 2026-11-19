@@ -1,0 +1,37 @@
+--- systems/cassandra/source/src/java/org/apache/cassandra/db/marshal/VectorType.java	2026-11-04 11:32:02.454981000 -0500
++++ VectorType.java	2026-11-18 13:52:08.942062000 -0500
+@@ -279,12 +279,29 @@
+     {
+         StringBuilder sb = new StringBuilder();
+         sb.append('[');
+-        List<V> split = split(value, accessor);
+-        for (int i = 0; i < dimension; i++)
++        if (elementType.isValueLengthFixed())
+         {
+-            if (i > 0)
+-                sb.append(", ");
+-            sb.append(elementType.toJSONString(split.get(i), accessor, protocolVersion));
++            // U8 intervention: walk the elements one at a time instead of materializing split()
++            int length = elementType.valueLengthIfFixed();
++            int offset = 0;
++            for (int i = 0; i < dimension; i++)
++            {
++                if (i > 0)
++                    sb.append(", ");
++                V element = accessor.slice(value, offset, length);
++                offset += length;
++                sb.append(elementType.toJSONString(element, accessor, protocolVersion));
++            }
++        }
++        else
++        {
++            List<V> split = split(value, accessor);
++            for (int i = 0; i < dimension; i++)
++            {
++                if (i > 0)
++                    sb.append(", ");
++                sb.append(elementType.toJSONString(split.get(i), accessor, protocolVersion));
++            }
+         }
+         sb.append(']');
+         return sb.toString();

@@ -1,0 +1,17 @@
+1795031900.482 14:58:20 start label=D1-2G heap=2G arm=D frac=0.85 wcount=20000 wmax=300
+19282 /bin/bash -c source /users/jason92/.claude/shell-snapshots/snapshot-bash-1795026547582-9e7gg8.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'which'; \builtin unset -f -- 'which'; } >/dev/null 2>&1 || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'for i in $(seq 1 50); do o=$(timeout 20 ssh ms0640 '"'"'tail -1 /mydata/s4/u8-w4/batch-2.log'"'"'); echo "$o" | grep -q "batch done" && break; sleep 5; done; echo "$o"; C=/proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/OOM-exp/cassandra/cases/vector_dimensions--select-json-element-slices/harness; rsync -a $C/ ms0640:/mydata/s4/u8-w4/harness/ && timeout 60 ssh ms0640 '"'"'cd /mydata/s4/u8-w4; J=tree/build/lib/jars; javac -cp "$J/cassandra-driver-core-3.12.1-shaded.jar:$J/guava-32.0.1-jre.jar:$J/metrics-core-4.2.28.jar:tree/lib/*" -d cls harness/U8Client.java && sha256sum cls/U8Client.class && pgrep -af "CassandraDaemon|U8Client" | grep -v pgrep | cut -c1-60; ( setsid nohup bash /mydata/s4/u8-w4/harness/batch-b2.sh < /dev/null > /mydata/s4/u8-w4/batch-b2.log 2>&1 & )'"'"'; TZ=America/New_York date' && pwd -P >| /tmp/claude-6544-cwd
+               total        used        free      shared  buff/cache   available
+Mem:          128850        2712       91125           4       35012      125099
+Swap:           8192          16        8176
+1795031938.722 14:58:58 native up=1 pid=20835
+{"schema": "ok"}
+{"commitlog_segment_size": "32MiB", "concurrent_writes": "32", "initial_range_tombstone_list_allocation_size": "1", "key_cache_size": "100MiB", "max_mutation_size": "16384KiB", "memtable_allocation_type": "heap_buffers", "memtable_cleanup_threshold": "0.33333334", "memtable_flush_writers": "2", "memtable_heap_space": "512MiB", "memtable_offheap_space": "512MiB", "native_transport_max_request_data_in_flight": "214748364B", "native_transport_max_request_data_in_flight_per_ip": "53687091B", "native_transport_timeout": "12s", "range_tombstone_list_growth_factor": "1.5", "write_request_timeout": "2000ms"}
+1795031940.939 14:59:00 fill target K=152113428
+{"batches": 3000, "tombstones": 300000, "partitions": 1, "n_per_partition_max": 300000, "I0": 300000, "K_at_stop": 152706152, "K_after": 152757152, "switch": 0, "seconds": 153.4}
+1795032094.786 15:01:34 quiesce
+1795032105.310 15:01:45 L0 done
+1795032125.316 15:02:05 W start I0=300000
+{"stop": "maxsec", "ok": 9323, "timeouts": 3113, "errors": 0, "issued": 12436, "outstanding_after_drain": 0, "seconds": 300.4, "rate_per_s": 31.0, "p50_ms": 1274.8, "p99_ms": 2410.0, "max_ms": 3990.3, "first_errors": ["WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0 responses.\" info={'consistency': 'ONE', 'required_response", "WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0 responses.\" info={'consistency': 'ONE', 'required_response", "WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0 responses.\" info={'consistency': 'ONE', 'required_response"], "I_max": 312436}
+1795032433.546 15:07:13 L1 done
+1795032442.564 15:07:22 node stopped
+1795032442.579 15:07:22 done alive=1

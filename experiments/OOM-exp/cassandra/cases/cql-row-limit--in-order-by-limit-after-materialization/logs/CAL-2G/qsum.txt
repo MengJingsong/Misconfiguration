@@ -1,0 +1,14 @@
+HOSTGONE
+SUMMARY secs=96 ok=6 err_readfail=0 err_readtimeout=0 err_invalid=0 err_other=2 inflight_left=0
+== sweep:T:2,3,4,5,6,8:3:10000
+  T k=2: n=3 ok=3 errs={} ms=[1095, 7794, 1199] rows=[10] | heap max 1806 MiB, old-postGC max 796 MiB, NTR active max 1, RS active max 2
+     first10: 4/0 15/0 4/1 15/1 4/2 15/2 4/3 15/3 4/4 15/4 vbytes=2621440 pks=[15, 4]
+     first10: 2/0 4/0 2/1 4/1 2/2 4/2 2/3 4/3 2/4 4/4 vbytes=2621440 pks=[2, 4]
+     first10: 8/0 10/0 8/1 10/1 8/2 10/2 8/3 10/3 8/4 10/4 vbytes=2621440 pks=[8, 10]
+  T k=3: n=3 ok=3 errs={} ms=[6666, 1947, 1998] rows=[10] | heap max 1901 MiB, old-postGC max 1633 MiB, NTR active max 1, RS active max 2
+     first10: 5/0 6/0 12/0 5/1 6/1 12/1 5/2 6/2 12/2 5/3 vbytes=2621440 pks=[6, 12, 5]
+     first10: 0/0 3/0 11/0 0/1 3/1 11/1 0/2 3/2 11/2 0/3 vbytes=2621440 pks=[11, 0, 3]
+     first10: 1/0 2/0 7/0 1/1 2/1 7/1 1/2 2/2 7/2 1/3 vbytes=2621440 pks=[7, 1, 2]
+  T k=4: n=2 ok=0 errs={'TransportException': 1, 'NoHostAvailableException': 1} ms=[3637, 0] rows=[] | heap max 1308 MiB, old-postGC max 108 MiB, NTR active max 1, RS active max 4
+     err: TransportException: [/127.0.0.1:9042] Connection has been closed
+     err: NoHostAvailableException: All host(s) tried for query failed (no host was tried)

@@ -1,0 +1,36 @@
+endpoint: survived oom:java.lang.OutOfMemoryError: Java heap space
+stdout: java.lang.OutOfMemoryError: Java heap space
+stdout: Dumping heap to /mydata/s4/u7-w4/runs/T-2/cassandra-1795028958-pid531948.hprof ...
+stdout: Heap dump file created [3391990543 bytes in 88.064 secs]
+resolved: authenticator=AllowAllAuthenticator{};
+resolved: authenticator=null;
+resolved: commitlog_segment_size=32MiB;
+resolved: in_select_cartesian_product_fail_threshold=-1;
+resolved: in_select_cartesian_product_warn_threshold=-1;
+resolved: max_mutation_size=null;
+resolved: memtable_allocation_type=heap_buffers;
+resolved: memtable_heap_space=null;
+resolved: native_transport_max_message_size=null;
+resolved: native_transport_max_request_data_in_flight=null;
+resolved: native_transport_max_request_data_in_flight_per_ip=null;
+resolved: native_transport_max_threads=128;
+resolved: native_transport_receive_queue_capacity=1MiB;
+resolved: native_transport_timeout=12s;
+resolved: write_request_timeout=2000ms;
+resolved: write_request_timeout=5000ms;
+flag MaxHeapSize 2147483648
+flag MaxDirectMemorySize 16642998272
+flag HeapDumpOnOutOfMemoryError +
+flag UseG1GC +
+flag G1HeapRegionSize 16777216
+flag AlwaysPreTouch +
+step 0 update p=2000 q=20000 k0=0 rows=40000000 wire_est=176054 latency_ms=119924 outcome=ERR NoHostAvailable: ('Unable to complete the operation against any hosts', {<Host: 127.0.0.1:9042 datacenter1>: ConnectionShutdown('errors=Connection heartbeat timeout after 30 seconds, last_host=127
+   GC during step 52 (full 26); baseline after-GC 65 MiB; max after-GC in step 2048 MiB; U_peak 1983 MiB; last after-GC 2033 2033 2033 2033 2033 2033
+   K RequestsSize max 176059 B; memtable max 0 MiB; MutationStage pending max 0; NTR active max 1
+jmx samples 47; RequestsSize max 176059; Paused max 0; direct max 42.5 MiB; last row 1795029109219,,,,,,,,
+thread samples 24; NTR-in-ModificationStatement top frames: - x13 UpdateStatement.addUpdateForKey x7 BTreeRow$Builder.build x4
+RssAnon max 2482 MiB
+heap_info used max 2029 MiB
+GCs 101; Pause Full 52; to-space exhausted 16; heap after GC max 2048 MiB of 2048; first-6 after-GC 9 24 24 13 27 27
+STW share over last 60 s of GC log: 101%
+dumps: cassandra-1795028958-pid531948.hprof (3234 MiB)

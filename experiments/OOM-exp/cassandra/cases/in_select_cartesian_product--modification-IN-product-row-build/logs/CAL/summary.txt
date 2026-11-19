@@ -1,0 +1,55 @@
+endpoint: survived
+resolved: authenticator=AllowAllAuthenticator{};
+resolved: authenticator=null;
+resolved: commitlog_segment_size=32MiB;
+resolved: in_select_cartesian_product_fail_threshold=-1;
+resolved: in_select_cartesian_product_warn_threshold=-1;
+resolved: max_mutation_size=null;
+resolved: memtable_allocation_type=heap_buffers;
+resolved: memtable_heap_space=null;
+resolved: native_transport_max_message_size=null;
+resolved: native_transport_max_request_data_in_flight=null;
+resolved: native_transport_max_request_data_in_flight_per_ip=null;
+resolved: native_transport_max_threads=128;
+resolved: native_transport_receive_queue_capacity=1MiB;
+resolved: native_transport_timeout=12s;
+resolved: write_request_timeout=2000ms;
+resolved: write_request_timeout=5000ms;
+flag MaxHeapSize 2147483648
+flag MaxDirectMemorySize 16642998272
+flag HeapDumpOnOutOfMemoryError +
+flag UseG1GC +
+flag G1HeapRegionSize 16777216
+flag AlwaysPreTouch +
+client: count k=0 rows=20000 t=1795028208457
+client: count k=9 rows=20000 t=1795028209951
+client: count k=100 rows=20000 t=1795028232646
+client: count k=149 rows=20000 t=1795028234057
+client: count k=200 rows=20000 t=1795028260762
+client: count k=299 rows=20000 t=1795028262127
+client: count k=400 rows=20000 t=1795028297764
+client: count k=599 rows=20000 t=1795028299200
+client: count k=800 rows=0 t=1795028355120
+client: count k=1199 rows=0 t=1795028357011
+step 0 update p=10 q=20000 k0=0 rows=200000 wire_est=160134 latency_ms=2583 outcome=ERR WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message="Operation timed out - received only 0 responses." info={'consistency': 'ONE', 
+   GC during step 0 (full 0); baseline after-GC 74 MiB; max after-GC in step None MiB; U_peak - MiB; last after-GC 
+   K RequestsSize max 160139 B; memtable max 50 MiB; MutationStage pending max 0; NTR active max 1
+step 1 update p=50 q=20000 k0=100 rows=1000000 wire_est=160454 latency_ms=4164 outcome=ERR WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message="Operation timed out - received only 0 responses." info={'consistency': 'ONE', 
+   GC during step 2 (full 0); baseline after-GC 74 MiB; max after-GC in step 374 MiB; U_peak 300 MiB; last after-GC 182 374
+   K RequestsSize max 160459 B; memtable max 50 MiB; MutationStage pending max 0; NTR active max 1
+step 2 update p=100 q=20000 k0=200 rows=2000000 wire_est=160854 latency_ms=7954 outcome=ERR WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message="Operation timed out - received only 0 responses." info={'consistency': 'ONE', 
+   GC during step 2 (full 0); baseline after-GC 374 MiB; max after-GC in step 960 MiB; U_peak 586 MiB; last after-GC 611 960
+   K RequestsSize max 160859 B; memtable max 164 MiB; MutationStage pending max 0; NTR active max 1
+step 3 update p=200 q=20000 k0=400 rows=4000000 wire_est=161654 latency_ms=17560 outcome=ERR WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message="Operation timed out - received only 0 responses." info={'consistency': 'ONE', 
+   GC during step 5 (full 1); baseline after-GC 960 MiB; max after-GC in step 2048 MiB; U_peak 1088 MiB; last after-GC 1776 2048 529 677 938
+   K RequestsSize max 161659 B; memtable max 164 MiB; MutationStage pending max 67; NTR active max 1
+step 4 update p=400 q=20000 k0=800 rows=8000000 wire_est=163254 latency_ms=37866 outcome=ERR WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message="Operation timed out - received only 0 responses." info={'consistency': 'ONE', 
+   GC during step 14 (full 5); baseline after-GC 575 MiB; max after-GC in step 2001 MiB; U_peak 1426 MiB; last after-GC 1990 1121 2001 1162 1994 1279
+   K RequestsSize max 163259 B; memtable max 164 MiB; MutationStage pending max 354; NTR active max 1
+jmx samples 100; RequestsSize max 163259; Paused max 0; direct max 52.4 MiB; last row 1795028366840,,,,,,,,
+thread samples 34; NTR-in-ModificationStatement top frames: - x21 Mutation.validateSize x6 SingleTableUpdatesCollector.toMutations x2 UpdateStatement.addUpdateForKey x2 StorageProxy.mutateWithTriggers x1 UpdateParameters.addCell x1 BTreeRow$Builder.build x1
+RssAnon max 2507 MiB
+heap_info used max 1915 MiB
+GCs 47; Pause Full 10; to-space exhausted 20; heap after GC max 2048 MiB of 2048; first-6 after-GC 9 16 16 13 29 29
+STW share over last 60 s of GC log: 36%
+dumps: none

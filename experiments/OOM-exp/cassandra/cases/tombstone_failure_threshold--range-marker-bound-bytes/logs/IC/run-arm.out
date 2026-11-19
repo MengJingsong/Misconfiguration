@@ -1,0 +1,59 @@
+[2026-11-18 14:05:40 EST] ARM IC arm=R heap=8G tbl=t steps=
+[2026-11-18 14:05:42 EST] started IC pid 401782 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b16-IC-1795028741.scope
+[2026-11-18 14:06:02 EST] ready IC
+-XX:+HeapDumpOnOutOfMemoryError -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:G1NewSizePercent=50 -XX:MaxGCPauseMillis=300 -Xms8G -Xmx8G -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/b16-w4/runs/IC/cassandra-1795028742-pid401782.hprof -XX:NativeMemoryTracking=summary -XX:-HeapDumpOnOutOfMemoryError -XX:OnOutOfMemoryError=kill 
+resolved: -XX:MaxDirectMemorySize=16642998272 -XX:MaxHeapSize=8589934592
+[2026-11-18 14:06:10 EST] GC.run IC
+1795028773,base,nmtOtherKB=67945,nmtTotalKB=8953256,rssKB=8962444,rssAnonKB=8939304,scopeCurB=9194369024,scopeOomKill=0,1795028773354,124095984,56987120,56987120,0,0,0,0,0,52784156,0,-1,200,141,-1
+one tbl=m OK rows=0 ms=1742 fullyFetched=true warnings=[1 nodes scanned up to 99998 tombstones and issued tombstone warnings for query SELECT * FROM b16.m WHERE pk = 0 LIMIT 5000 ALLOW FILTERING (see tombstone_warn_threshold) with token=-3485513579396041028]
+1795028786,after-m,nmtOtherKB=264617,nmtTotalKB=9188740,rssKB=8991748,rssAnonKB=8968376,scopeCurB=9227489280,scopeOomKill=0,1795028785356,912625136,493194736,56987120,0,0,18,0,0,52843044,0,-1,200,141,-1
+after-m t TombstoneScannedHistogram.Max=0
+after-m t TombstoneScannedHistogram.Count=0
+after-m t TombstoneFailures.Count=0
+after-m t LocalReadSize.Max=0
+after-m t LocalReadSize.Count=0
+after-m t LocalReadSizeAborts.Count=0
+after-m m TombstoneScannedHistogram.Max=105778
+after-m m TombstoneScannedHistogram.Count=1
+after-m m TombstoneFailures.Count=0
+after-m m LocalReadSize.Max=4866323
+after-m m LocalReadSize.Count=1
+after-m m LocalReadSizeAborts.Count=0
+/mydata/s4/b16-w4/runs/IC/ic-m.jfr: events=8 expandToFit allocs=8 max=151732240 B (144.7 MiB) max_under_LocalDataResponse=0.0 MiB top sizes MiB=[8.0, 16.1, 32.2, 64.3, 96.5, 144.7]
+one tbl=t OK rows=0 ms=4189 fullyFetched=true warnings=[1 nodes scanned up to 99998 tombstones and issued tombstone warnings for query SELECT * FROM b16.t WHERE pk = 0 LIMIT 5000 ALLOW FILTERING (see tombstone_warn_threshold) with token=-3485513579396041028]
+1795028845,after-t,nmtOtherKB=313785,nmtTotalKB=9231217,rssKB=9403876,rssAnonKB=8987684,scopeCurB=9248157696,scopeOomKill=0,1795028845367,6012898800,5526359536,56987120,0,0,36,0,0,52870228,0,-1,255,141,-1
+after-t t TombstoneScannedHistogram.Max=105778
+after-t t TombstoneScannedHistogram.Count=1
+after-t t TombstoneFailures.Count=0
+after-t t LocalReadSize.Max=4866323
+after-t t LocalReadSize.Count=1
+after-t t LocalReadSizeAborts.Count=0
+after-t m TombstoneScannedHistogram.Max=0
+after-t m TombstoneScannedHistogram.Count=1
+after-t m TombstoneFailures.Count=0
+after-t m LocalReadSize.Max=0
+after-t m LocalReadSize.Count=1
+after-t m LocalReadSizeAborts.Count=0
+/mydata/s4/b16-w4/runs/IC/ic-t.jfr: events=181 expandToFit allocs=13 max=1683675088 B (1605.7 MiB) max_under_LocalDataResponse=0.0 MiB top sizes MiB=[211.4, 317.2, 475.8, 713.6, 1070.5, 1605.7]
+1795028895,end-pre,nmtOtherKB=313785,nmtTotalKB=9228540,rssKB=9404584,rssAnonKB=8988392,scopeCurB=9248313344,scopeOomKill=0,1795028895375,6096784880,5526359536,56987120,0,0,36,0,0,52870228,0,-1,255,141,-1
+[2026-11-18 14:08:15 EST] OOM/GC check
+CompileCommand: dontinline org/apache/cassandra/io/util/RebufferingInputStream.readPrimitiveSlowly(I)J
+CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.address()J
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.length()I
+CompileCommand: inline org/apache/cassandra/db/rows/UnfilteredSerializer.serializeRowBody(Lorg/apache/cassandra/db/rows/Row;ILorg/apache/cassandra/db/rows/SerializationHelper;Lorg/apache/cassandra/io/util/DataOutputPlus;)V
+CompileCommand: inline org/apache/cassandra/io/util/Memory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/SafeMemory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/TrackedDataInputPlus.checkCanRead(I)V
+CompileCommand: inline org/apache/cassandra/net/FrameDecoderWith8bHeader.decode(Ljava/util/Collection;Lorg/apache/cassandra/net/ShareableBytes;I)V
+CompileCommand: inline org/apache/cassandra/service/reads/repair/RowIteratorMergeListener.applyToPartition(ILjava/util/function/Consumer;)V
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.selectBoundary(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;II)I
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.strictnessOfLessThan(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;)I
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.indexes(Lorg/apache/cassandra/utils/IFilter/FilterKey;)[J
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.setIndexes(JJIJ[J)V
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare(Ljava/nio/ByteBuffer;[B)I
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare([BLjava/nio/ByteBuffer;)I
+pauses=11 full_gcs=0 total_pause=0s max60=1% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=none
+[2026-11-18 14:08:29 EST] stopped IC
+IC done (see ic-one.txt, ic-jfr.txt, tblmetrics.txt)
+[2026-11-18 14:08:29 EST] END IC IC done (see ic-one.txt, ic-jfr.txt, tblmetrics.txt)

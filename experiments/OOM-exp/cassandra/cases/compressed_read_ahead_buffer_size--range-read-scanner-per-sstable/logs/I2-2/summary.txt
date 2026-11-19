@@ -1,0 +1,36 @@
+I2-2: arm=I2 budget=B2 heap=4096 direct=2048 C=40 D=180 | OOM=none | node_gone=no | peak direct 1039 MiB dCount 31459 A_max 32 | pages 32966 workers_ok 40/40 | gate ok
+arm=I2 budget=B2 heap=4096 direct=2048 C=40 D=180
+up_after_s=13
+gate: LiveSSTableCount=2000 pending_compactions=0 table_pending=0
+load_end at load+182.9s; node_alive=True
+stopped_clean=True valid_gate=True
+
+B0 (idle 10 s before load): direct Count 99, MemoryUsed 52.1 MiB, chunk-cache size 16.0 MiB, networking size 0.0 MiB, heap used 306 MiB, live sstables 2000
+peak direct_count: 31558 at load+162.9s
+peak direct_used: 1038.9 at load+162.9s
+peak cc_size: 1000.9 at load+162.9s
+peak cc_used: 1000.0 at load+12.6s
+peak cc_overflow: 488.9 at load+162.9s
+peak net_size: 0.0 at load+0.0s
+peak net_overflow: 0.0 at load+0.0s
+peak read_active: 32 at load+2.6s
+peak read_pending: 17 at load+2.4s
+peak heap_used: 2559.1 at load+134.1s
+at peak direct_used: Count 31558 (dCount 31459), dUsed 986.8 MiB, A 32, pending 7, cc_overflow 488.9 MiB, cc_size 1000.9 MiB
+last 5 samples (ms_rel, count, used MiB, cap MiB, A, pending, cc_size, cc_ovf, heap MiB):
+  181.9 27504 975.6 975.6 32 6 935.7 421.1 857
+  182.1 24085 921.6 921.2 32 4 884.4 372.0 1737
+  182.3 23829 918.2 918.2 32 5 880.1 368.1 222
+  182.5 271 550.1 550.1 0 0 512.0 0.0 670
+  182.7 271 550.1 550.1 0 0 512.0 0.0 670
+A distribution (samples): 0:13, 1:1, 3:1, 28:2, 30:1, 31:12, 32:884
+dUsed per executing command, MiB (samples with A>0, includes the pool growth): median 29, p90 30
+  A=0: n=13 median dCount 47 dUsed 1 MiB; max dUsed 498 MiB
+  A=1: n=1 median dCount 47 dUsed 1 MiB; max dUsed 1 MiB
+  A=3: n=1 median dCount 47 dUsed 1 MiB; max dUsed 1 MiB
+  A=28: n=2 median dCount 15666 dUsed 740 MiB; max dUsed 740 MiB
+  A=30: n=1 median dCount 20880 dUsed 822 MiB; max dUsed 822 MiB
+  A=31: n=12 median dCount 23116 dUsed 858 MiB; max dUsed 912 MiB
+  A=32: n=884 median dCount 27000 dUsed 918 MiB; max dUsed 987 MiB
+dCount per executing command (samples with A>0): median 842, p90 924, max 983
+client: workers 40, workers with >=1 page 40, pages ok 32966, full scans completed 0, latency median 214 ms p99 337 ms, errors {}

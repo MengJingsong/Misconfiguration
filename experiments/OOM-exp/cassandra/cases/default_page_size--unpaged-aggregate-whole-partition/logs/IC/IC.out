@@ -1,0 +1,57 @@
+[2026-11-18 14:06:40 EST] started IC pid 10642 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/u10-IC-1795028799.scope
+[2026-11-18 14:06:54 EST] ready IC
+-XX:+HeapDumpOnOutOfMemoryError -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms8192M -Xmx8192M -XX:MaxDirectMemorySize=4096M -XX:HeapDumpPath=/mydata/s4/u10-w4/runs/IC/cassandra-1795028799-pid10642.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-18 14:06:54 EST] 1 VERIFY
+verify pk=0 rows=65536 maxCk=65535 v0Bytes=16384 OK
+verify pk=1 rows=65536 maxCk=65535 v0Bytes=16384 OK
+verify pk=2 rows=65536 maxCk=65535 v0Bytes=16384 OK
+verify pk=3 rows=65536 maxCk=65535 v0Bytes=16384 OK
+verify pk=4 rows=65536 maxCk=65535 v0Bytes=16384 OK
+verify pk=5 rows=65536 maxCk=65535 v0Bytes=16384 OK
+verify pk=6 rows=65536 maxCk=65535 v0Bytes=16384 OK
+verify pk=7 rows=65536 maxCk=65535 v0Bytes=16384 OK
+[2026-11-18 14:07:27 EST] 2 paging mode
+one pk=0 n=6000 fetch=off kind=sel OK result=6000 firstPageRows=6000 ms=340 pagingState=false warnings=[]
+one pk=0 n=6000 fetch=5000 kind=sel OK result=5000 firstPageRows=5000 ms=273 pagingState=true warnings=[]
+[2026-11-18 14:07:36 EST] 3 sub-reads per query (Local read count delta)
+one pk=1 n=20000 fetch=off kind=agg OK result=20000 firstPageRows=1 ms=1144 pagingState=false warnings=[]
+subreads fetch=off n=20000 before=122 after=123 delta=1
+one pk=1 n=20000 fetch=5000 kind=agg OK result=20000 firstPageRows=1 ms=998 pagingState=false warnings=[]
+subreads fetch=5000 n=20000 before=123 after=128 delta=5
+[2026-11-18 14:07:54 EST] 4 CAL-R read time per n
+cal 1795028875996 fetch=off n=8192 pk=0 OK count=8192 correct=true ms=421
+cal 1795028877930 fetch=off n=8192 pk=1 OK count=8192 correct=true ms=413
+cal 1795028879887 fetch=off n=8192 pk=2 OK count=8192 correct=true ms=457
+cal 1795028882301 fetch=off n=16384 pk=3 OK count=16384 correct=true ms=913
+cal 1795028884705 fetch=off n=16384 pk=4 OK count=16384 correct=true ms=904
+cal 1795028887104 fetch=off n=16384 pk=5 OK count=16384 correct=true ms=899
+cal 1795028890581 fetch=off n=32768 pk=6 OK count=32768 correct=true ms=1976
+cal 1795028893976 fetch=off n=32768 pk=7 OK count=32768 correct=true ms=1894
+cal 1795028897452 fetch=off n=32768 pk=0 OK count=32768 correct=true ms=1975
+cal 1795028901846 fetch=off n=49152 pk=1 OK count=49152 correct=true ms=2893
+cal 1795028906241 fetch=off n=49152 pk=2 OK count=49152 correct=true ms=2894
+cal 1795028910658 fetch=off n=49152 pk=3 OK count=49152 correct=true ms=2917
+cal 1795028915629 fetch=off n=65536 pk=4 OK count=65536 correct=true ms=3470
+cal 1795028920618 fetch=off n=65536 pk=5 OK count=65536 correct=true ms=3488
+cal 1795028925556 fetch=off n=65536 pk=6 OK count=65536 correct=true ms=3437
+cal 1795028931929 fetch=5000 n=8192 pk=0 OK count=8192 correct=true ms=411
+cal 1795028933841 fetch=5000 n=8192 pk=1 OK count=8192 correct=true ms=392
+cal 1795028935737 fetch=5000 n=8192 pk=2 OK count=8192 correct=true ms=395
+cal 1795028938034 fetch=5000 n=16384 pk=3 OK count=16384 correct=true ms=796
+cal 1795028940361 fetch=5000 n=16384 pk=4 OK count=16384 correct=true ms=826
+cal 1795028942683 fetch=5000 n=16384 pk=5 OK count=16384 correct=true ms=821
+cal 1795028945776 fetch=5000 n=32768 pk=6 OK count=32768 correct=true ms=1592
+cal 1795028948873 fetch=5000 n=32768 pk=7 OK count=32768 correct=true ms=1596
+cal 1795028951947 fetch=5000 n=32768 pk=0 OK count=32768 correct=true ms=1574
+cal 1795028955843 fetch=5000 n=49152 pk=1 OK count=49152 correct=true ms=2395
+cal 1795028959702 fetch=5000 n=49152 pk=2 OK count=49152 correct=true ms=2358
+cal 1795028963598 fetch=5000 n=49152 pk=3 OK count=49152 correct=true ms=2396
+cal 1795028968308 fetch=5000 n=65536 pk=4 OK count=65536 correct=true ms=3209
+cal 1795028973015 fetch=5000 n=65536 pk=5 OK count=65536 correct=true ms=3206
+cal 1795028977761 fetch=5000 n=65536 pk=6 OK count=65536 correct=true ms=3245
+[2026-11-18 14:09:42 EST] GC.run IC
+1795028986,end,nmtOtherKB=540753,nmtTotalKB=9619409,rssKB=9485352,rssAnonKB=9302140,scopeCurB=9574031360,scopeOomKill=0,1795028985490,84076008,84076008,84076008,0,0,274,0,0,50405885,0,0,584,141,0
+query-cancelled-timeout: 0
+pauses=41 full_gcs=0 total_pause=1s max60=1% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=none
+[2026-11-18 14:09:55 EST] stopped IC
+[2026-11-18 14:09:55 EST] IC done

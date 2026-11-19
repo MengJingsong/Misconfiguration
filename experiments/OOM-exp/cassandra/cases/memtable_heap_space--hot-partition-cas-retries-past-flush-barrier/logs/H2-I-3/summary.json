@@ -1,0 +1,260 @@
+{
+ "label": "H2-I-3",
+ "mode": "life",
+ "args": [
+  "life",
+  "H2-I-3",
+  "I",
+  "2G"
+ ],
+ "cotenancy": {
+  "daemons": "none",
+  "MemAvailable_MiB": 127188
+ },
+ "start": {
+  "pid": 19097,
+  "up_s": 40,
+  "unit": "b18-h2-i-3-1795029666",
+  "cgroup": "/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/b18-h2-i-3-1795029666.scope",
+  "memory.max": "8589934592",
+  "swap.max": "0",
+  "scope_ok": true,
+  "flags": {
+   "-XX:+UseG1GC": true,
+   "-XX:G1HeapRegionSize=16m": true,
+   "-XX:+HeapDumpOnOutOfMemoryError": true,
+   "-XX:OnOutOfMemoryError=kill -9 %p": true,
+   "-Xmx2G": true,
+   "-XX:G1NewSizePercent=50": true,
+   "-XX:MaxGCPauseMillis=300": true
+  },
+  "flags_ok": true,
+  "MaxDirectMemorySize": [
+   "-XX:MaxDirectMemorySize=15872M"
+  ],
+  "HeapDumpPath": [
+   "-XX:HeapDumpPath=/mydata/s4/b18-w4/run/dump/cassandra-1795029666-pid19097.hprof"
+  ],
+  "xmx": [
+   "-Xmx2G"
+  ],
+  "xms": [
+   "-Xms2G"
+  ],
+  "xmn": []
+ },
+ "settings": {
+  "values": {
+   "memtable_allocation_type": "heap_buffers",
+   "memtable_heap_space": "512MiB",
+   "memtable_offheap_space": "512MiB",
+   "memtable_cleanup_threshold": "0.33333334",
+   "memtable_flush_writers": "2",
+   "concurrent_writes": "4",
+   "concurrent_counter_writes": "32",
+   "native_transport_max_request_data_in_flight": "214748364B",
+   "native_transport_max_request_data_in_flight_per_ip": "53687091B",
+   "native_transport_max_message_size": "16777216B",
+   "write_request_timeout": "2000ms",
+   "max_mutation_size": "16384KiB",
+   "commitlog_segment_size": "32MiB",
+   "commitlog_total_space": "8192MiB",
+   "native_transport_throw_on_overload": "false",
+   "hinted_handoff_enabled": "true",
+   "key_cache_size": "100MiB",
+   "batch_size_fail_threshold": "50KiB",
+   "native_transport_timeout": "12s"
+  },
+  "expected": {
+   "memtable_allocation_type": "heap_buffers",
+   "memtable_heap_space": "512MiB",
+   "concurrent_writes": "4",
+   "write_request_timeout": "2000ms",
+   "commitlog_segment_size": "32MiB"
+  },
+  "ok": true
+ },
+ "schema": {
+  "cmd": "schema",
+  "args": [],
+  "start_ms": 1795029707050,
+  "agreement": true,
+  "tables": [
+   "t"
+  ],
+  "seconds": 0.29
+ },
+ "hist s0": {
+  "h1_total": 67991584,
+  "total": 67992040,
+  "bb": 16027216,
+  "bn": 100576,
+  "K": 19067,
+  "ms": 1795029724835
+ },
+ "L0": {
+  "h1_total": 67991584,
+  "total": 67992040,
+  "bb": 16027216,
+  "bn": 100576,
+  "K": 19067,
+  "ms": 1795029724835
+ },
+ "workload_start": {
+  "ms": 1795029735217,
+  "mode": "hot",
+  "R": 640,
+  "S_MiB": 5.0,
+  "secs": 240,
+  "rate": 0
+ },
+ "first_trigger": {
+  "req_ok": 197,
+  "max_mut_active": 4,
+  "need_active": 3,
+  "client_ips": [
+   "127.0.0.11",
+   "127.0.0.12",
+   "127.0.0.13",
+   "127.0.0.14"
+  ],
+  "at_s": 21,
+  "ok": true
+ },
+ "workload_outcome": {
+  "outcome": "node_gone",
+  "at_s": 99,
+  "client": {
+   "ms": 1795029833717,
+   "req_ok": 298,
+   "rows_ok": 190720,
+   "errs": [
+    779,
+    0,
+    0,
+    0,
+    0
+   ],
+   "conn": 4
+  }
+ },
+ "oom": {
+  "stdout_lines": [
+   "CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V",
+   "INFO  [main] 2026-11-18T19:21:09,401 CassandraDaemon.java:619 - JVM Arguments: [-ea, -da:net.openhft..., -XX:+UseThreadPriorities, -XX:+HeapDumpOnOutOfMemoryError, -Xss256k, -XX:+AlwaysPreTouch, -XX:+UseTLAB, -XX:+ResizeTLAB, -XX:+UseNUMA, -XX:+PerfDisableSharedMem, -Djava.net.preferIPv4Stack=true, -Dchronicle.analytics.disable=true, -XX:-UseBiasedLocking, -XX:+UseG1GC, -XX:+ParallelRefProcEnabled, -XX:MaxTenuringThreshold=2, -XX:G1HeapRegionSize=16m, -XX:+UnlockExperimentalVMOptions, -XX:G1NewSizePercent=50, -XX:G1RSetUpdatingPauseTimePercent=5, -XX:MaxGCPauseMillis=300, -XX:InitiatingHeapOccupancyPercent=70, -Djdk.attach.allowAttachSelf=true, --add-exports=java.base/jdk.internal.misc=ALL-UNNAMED, --add-exports=java.base/jdk.internal.ref=ALL-UNNAMED, --add-exports=java.base/jdk.internal.util=ALL-UNNAMED, --add-exports=java.base/sun.nio.ch=ALL-UNNAMED, --add-exports=java.management.rmi/com.sun.jmx.remote.internal.rmi=ALL-UNNAMED, --add-exports=java.rmi/sun.rmi.registry=ALL-UNNAMED, --add-exports=java.rmi/sun.rmi.server=ALL-UNNAMED, --add-exports=java.sql/java.sql=ALL-UNNAMED, --add-opens=java.base/java.lang.module=ALL-UNNAMED, --add-opens=java.base/jdk.internal.loader=ALL-UNNAMED, --add-opens=java.base/jdk.internal.ref=ALL-UNNAMED, --add-opens=java.base/jdk.internal.reflect=ALL-UNNAMED, --add-opens=java.base/jdk.internal.math=ALL-UNNAMED, --add-opens=java.base/jdk.internal.module=ALL-UNNAMED, --add-opens=java.base/jdk.internal.util.jar=ALL-UNNAMED, --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED, -Dio.netty.tryReflectionSetAccessible=true, -Dio.netty.allocator.useCacheForAllThreads=true, -Dio.netty.allocator.maxOrder=11, -Xlog:gc=info,heap*=trace,age*=debug,safepoint=info,promotion*=trace:file=/mydata/s4/b18-w4/run/logs/gc.log:time,uptime,pid,tid,level:filecount=10,filesize=10485760, -Xms2G, -Xmx2G, -XX:MaxDirectMemorySize=15872M, -XX:ParallelGCThreads=40, -XX:ConcGCThreads=40, -XX:CompileCommandFile=/mydata/s4/b18-w4/run/conf/hotspot_compiler, -javaagent:/mydata/s4/b18-w4/cassandra/bin/../lib/jamm-0.4.0.jar, -XX:HeapDumpPath=/mydata/s4/b18-w4/run/dump/cassandra-1795029666-pid19097.hprof, -Dcassandra.jmx.local.port=7199, -Dcom.sun.management.jmxremote.authenticate=false, -Dcom.sun.management.jmxremote.password.file=/etc/cassandra/jmxremote.password, -Djava.library.path=/mydata/s4/b18-w4/cassandra/bin/../lib/sigar-bin, -XX:OnOutOfMemoryError=kill -9 %p, -Dlogback.configurationFile=logback.xml, -Dcassandra.logdir=/mydata/s4/b18-w4/run/logs, -Dcassandra.storagedir=/mydata/s4/b18-w4/cassandra/bin/../data, -Dcassandra-pidfile=/mydata/s4/b18-w4/run/cassandra.pid, -Dcassandra-foreground=yes]",
+   "java.lang.OutOfMemoryError: Java heap space",
+   "Dumping heap to /mydata/s4/b18-w4/run/dump/cassandra-1795029666-pid19097.hprof ...",
+   "Heap dump file created [2166840932 bytes in 19.518 secs]",
+   "# java.lang.OutOfMemoryError: Java heap space",
+   "# -XX:OnOutOfMemoryError=\"kill -9 %p\"",
+   "#   Executing /bin/sh -c \"kill -9 19097\"...",
+   "Killed"
+  ],
+  "dumps": [
+   {
+    "file": "cassandra-1795029666-pid19097.hprof",
+    "birth_s": "1795029814",
+    "mtime_s": "1795029833",
+    "bytes": "2166840932"
+   }
+  ],
+  "exit": 137,
+  "since_workload_s": 101
+ },
+ "flush_lines": [
+  "[PerDiskMemtableFlushWriter_0:2] 2026-11-18T19:22:17,799 Flushing.java:153 - Writing Memtable-t@769402458(105.577MiB serialized bytes, 13440 ops, 193.641MiB (38%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "PerDiskMemtableFlushWriter_0:1] 2026-11-18T19:22:17,992 Flushing.java:153 - Writing Memtable-t@1060274635(110.604MiB serialized bytes, 14080 ops, 208.818MiB (41%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "eFlushWriter_0:2] 2026-11-18T19:22:18,589 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-1-big-Data.db (105.192MiB) for commitlog position CommitLogPosition(segmentId=1795029669879, position=15748018)",
+  " [PerDiskMemtableFlushWriter_0:2] 2026-11-18T19:22:18,734 Flushing.java:153 - Writing Memtable-t@357324141(95.522MiB serialized bytes, 12160 ops, 183.298MiB (36%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "leFlushWriter_0:1] 2026-11-18T19:22:18,748 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-2-big-Data.db (110.205MiB) for commitlog position CommitLogPosition(segmentId=1795029669883, position=5249358)",
+  "PerDiskMemtableFlushWriter_0:1] 2026-11-18T19:22:19,010 Flushing.java:153 - Writing Memtable-t@1094845232(115.632MiB serialized bytes, 14720 ops, 183.974MiB (36%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "leFlushWriter_0:2] 2026-11-18T19:22:19,570 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-3-big-Data.db (95.184MiB) for commitlog position CommitLogPosition(segmentId=1795029669886, position=10498696)",
+  "leFlushWriter_0:1] 2026-11-18T19:22:19,789 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-4-big-Data.db (115.223MiB) for commitlog position CommitLogPosition(segmentId=1795029669890, position=5249358)",
+  "PerDiskMemtableFlushWriter_0:2] 2026-11-18T19:22:20,930 Flushing.java:153 - Writing Memtable-t@2092982219(105.577MiB serialized bytes, 13440 ops, 193.641MiB (38%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "[PerDiskMemtableFlushWriter_0:1] 2026-11-18T19:22:21,099 Flushing.java:153 - Writing Memtable-t@806770989(130.714MiB serialized bytes, 16640 ops, 179.478MiB (35%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "eFlushWriter_0:2] 2026-11-18T19:22:21,421 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-6-big-Data.db (105.203MiB) for commitlog position CommitLogPosition(segmentId=1795029669893, position=20997356)",
+  "eFlushWriter_0:1] 2026-11-18T19:22:21,683 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-7-big-Data.db (130.253MiB) for commitlog position CommitLogPosition(segmentId=1795029669897, position=31496008)",
+  "PerDiskMemtableFlushWriter_0:2] 2026-11-18T19:22:23,686 Flushing.java:153 - Writing Memtable-t@1324003513(115.632MiB serialized bytes, 14720 ops, 188.976MiB (37%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "[PerDiskMemtableFlushWriter_0:1] 2026-11-18T19:22:24,095 Flushing.java:153 - Writing Memtable-t@938496956(140.769MiB serialized bytes, 17920 ops, 184.819MiB (36%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "eFlushWriter_0:2] 2026-11-18T19:22:24,396 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-8-big-Data.db (115.233MiB) for commitlog position CommitLogPosition(segmentId=1795029669901, position=26246686)",
+  "eFlushWriter_0:1] 2026-11-18T19:22:24,698 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-9-big-Data.db (140.270MiB) for commitlog position CommitLogPosition(segmentId=1795029669906, position=15748018)",
+  "PerDiskMemtableFlushWriter_0:2] 2026-11-18T19:22:29,573 Flushing.java:153 - Writing Memtable-t@1771895848(196.071MiB serialized bytes, 24960 ops, 341.753MiB (67%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "FlushWriter_0:2] 2026-11-18T19:22:30,648 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-11-big-Data.db (195.400MiB) for commitlog position CommitLogPosition(segmentId=1795029669912, position=31496008)",
+  "[PerDiskMemtableFlushWriter_0:1] 2026-11-18T19:22:31,718 Flushing.java:153 - Writing Memtable-t@685442324(115.632MiB serialized bytes, 14720 ops, 218.991MiB (43%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "PerDiskMemtableFlushWriter_0:2] 2026-11-18T19:22:32,182 Flushing.java:153 - Writing Memtable-t@1844874936(155.851MiB serialized bytes, 19840 ops, 195.330MiB (38%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "FlushWriter_0:1] 2026-11-18T19:22:32,425 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-12-big-Data.db (115.228MiB) for commitlog position CommitLogPosition(segmentId=1795029669916, position=26246946)",
+  "FlushWriter_0:2] 2026-11-18T19:22:32,798 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-13-big-Data.db (155.307MiB) for commitlog position CommitLogPosition(segmentId=1795029669921, position=31496008)",
+  "[PerDiskMemtableFlushWriter_0:1] 2026-11-18T19:22:36,976 Flushing.java:153 - Writing Memtable-t@903794847(120.659MiB serialized bytes, 15360 ops, 184.143MiB (36%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "PerDiskMemtableFlushWriter_0:2] 2026-11-18T19:22:38,095 Flushing.java:153 - Writing Memtable-t@1871510986(170.934MiB serialized bytes, 21760 ops, 210.845MiB (41%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "FlushWriter_0:1] 2026-11-18T19:22:38,551 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-14-big-Data.db (120.233MiB) for commitlog position CommitLogPosition(segmentId=1795029669925, position=31496008)",
+  "FlushWriter_0:2] 2026-11-18T19:22:38,838 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-15-big-Data.db (170.344MiB) for commitlog position CommitLogPosition(segmentId=1795029669931, position=20997348)",
+  "[PerDiskMemtableFlushWriter_0:1] 2026-11-18T19:22:41,167 Flushing.java:153 - Writing Memtable-t@171006003(120.659MiB serialized bytes, 15360 ops, 204.153MiB (40%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "PerDiskMemtableFlushWriter_0:2] 2026-11-18T19:22:41,775 Flushing.java:153 - Writing Memtable-t@1138421075(155.851MiB serialized bytes, 19840 ops, 215.340MiB (42%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "FlushWriter_0:1] 2026-11-18T19:22:42,167 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-17-big-Data.db (120.232MiB) for commitlog position CommitLogPosition(segmentId=1795029669935, position=20997356)",
+  "FlushWriter_0:2] 2026-11-18T19:22:42,448 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-18-big-Data.db (155.316MiB) for commitlog position CommitLogPosition(segmentId=1795029669940, position=26246678)",
+  "[PerDiskMemtableFlushWriter_0:1] 2026-11-18T19:22:44,267 Flushing.java:153 - Writing Memtable-t@596176176(100.549MiB serialized bytes, 12800 ops, 193.472MiB (38%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "PerDiskMemtableFlushWriter_0:2] 2026-11-18T19:22:44,608 Flushing.java:153 - Writing Memtable-t@1355306589(130.714MiB serialized bytes, 16640 ops, 184.481MiB (36%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "eFlushWriter_0:1] 2026-11-18T19:22:44,941 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-19-big-Data.db (100.201MiB) for commitlog position CommitLogPosition(segmentId=1795029669944, position=5249358)",
+  "FlushWriter_0:2] 2026-11-18T19:22:45,201 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-20-big-Data.db (130.253MiB) for commitlog position CommitLogPosition(segmentId=1795029669948, position=15748018)",
+  "[PerDiskMemtableFlushWriter_0:1] 2026-11-18T19:22:48,581 Flushing.java:153 - Writing Memtable-t@945676737(155.851MiB serialized bytes, 19840 ops, 270.367MiB (53%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "[PerDiskMemtableFlushWriter_0:2] 2026-11-18T19:22:49,522 Flushing.java:153 - Writing Memtable-t@470465471(115.632MiB serialized bytes, 14720 ops, 183.974MiB (36%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "FlushWriter_0:1] 2026-11-18T19:22:49,947 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-22-big-Data.db (155.317MiB) for commitlog position CommitLogPosition(segmentId=1795029669953, position=20997348)",
+  "FlushWriter_0:2] 2026-11-18T19:22:50,004 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-23-big-Data.db (115.227MiB) for commitlog position CommitLogPosition(segmentId=1795029669957, position=15748018)",
+  "[PerDiskMemtableFlushWriter_0:1] 2026-11-18T19:22:54,385 Flushing.java:153 - Writing Memtable-t@420930649(120.659MiB serialized bytes, 15360 ops, 184.143MiB (36%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "PerDiskMemtableFlushWriter_0:2] 2026-11-18T19:22:54,555 Flushing.java:153 - Writing Memtable-t@2107873224(150.824MiB serialized bytes, 19200 ops, 190.159MiB (37%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "FlushWriter_0:1] 2026-11-18T19:22:55,083 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-24-big-Data.db (120.238MiB) for commitlog position CommitLogPosition(segmentId=1795029669961, position=15748018)",
+  "FlushWriter_0:2] 2026-11-18T19:22:55,401 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-25-big-Data.db (150.297MiB) for commitlog position CommitLogPosition(segmentId=1795029669966, position=15748018)",
+  "PerDiskMemtableFlushWriter_0:1] 2026-11-18T19:22:59,953 Flushing.java:153 - Writing Memtable-t@1581340084(105.577MiB serialized bytes, 13440 ops, 183.636MiB (36%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "[PerDiskMemtableFlushWriter_0:2] 2026-11-18T19:23:00,666 Flushing.java:153 - Writing Memtable-t@540206764(120.659MiB serialized bytes, 15360 ops, 194.148MiB (38%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "FlushWriter_0:1] 2026-11-18T19:23:01,108 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-27-big-Data.db (105.211MiB) for commitlog position CommitLogPosition(segmentId=1795029669969, position=31496016)",
+  "FlushWriter_0:2] 2026-11-18T19:23:01,258 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-28-big-Data.db (120.233MiB) for commitlog position CommitLogPosition(segmentId=1795029669973, position=31496008)",
+  "PerDiskMemtableFlushWriter_0:1] 2026-11-18T19:23:02,949 Flushing.java:153 - Writing Memtable-t@1111933636(125.687MiB serialized bytes, 16000 ops, 189.314MiB (37%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "[PerDiskMemtableFlushWriter_0:2] 2026-11-18T19:23:03,377 Flushing.java:153 - Writing Memtable-t@679525824(125.687MiB serialized bytes, 16000 ops, 209.324MiB (41%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "eFlushWriter_0:1] 2026-11-18T19:23:03,726 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-30-big-Data.db (125.244MiB) for commitlog position CommitLogPosition(segmentId=1795029669978, position=5249358)",
+  "FlushWriter_0:2] 2026-11-18T19:23:04,101 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-31-big-Data.db (125.251MiB) for commitlog position CommitLogPosition(segmentId=1795029669982, position=10498688)",
+  "PerDiskMemtableFlushWriter_0:1] 2026-11-18T19:23:10,205 Flushing.java:153 - Writing Memtable-t@1973004937(125.687MiB serialized bytes, 16000 ops, 189.314MiB (37%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "[PerDiskMemtableFlushWriter_0:2] 2026-11-18T19:23:10,966 Flushing.java:153 - Writing Memtable-t@797243794(125.687MiB serialized bytes, 16000 ops, 204.322MiB (40%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "FlushWriter_0:1] 2026-11-18T19:23:11,536 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-32-big-Data.db (125.241MiB) for commitlog position CommitLogPosition(segmentId=1795029669986, position=15748018)",
+  "FlushWriter_0:2] 2026-11-18T19:23:12,649 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-33-big-Data.db (125.251MiB) for commitlog position CommitLogPosition(segmentId=1795029669990, position=20997348)",
+  "[PerDiskMemtableFlushWriter_0:1] 2026-11-18T19:23:16,610 Flushing.java:153 - Writing Memtable-t@630576812(135.742MiB serialized bytes, 17280 ops, 204.659MiB (40%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "[PerDiskMemtableFlushWriter_0:2] 2026-11-18T19:23:17,163 Flushing.java:153 - Writing Memtable-t@629189671(115.632MiB serialized bytes, 14720 ops, 183.974MiB (36%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "eFlushWriter_0:1] 2026-11-18T19:23:17,911 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-35-big-Data.db (135.266MiB) for commitlog position CommitLogPosition(segmentId=1795029669995, position=5249358)",
+  "FlushWriter_0:2] 2026-11-18T19:23:17,928 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-36-big-Data.db (115.227MiB) for commitlog position CommitLogPosition(segmentId=1795029669998, position=31496008)",
+  "[PerDiskMemtableFlushWriter_0:1] 2026-11-18T19:23:21,879 Flushing.java:153 - Writing Memtable-t@326841293(110.604MiB serialized bytes, 14080 ops, 188.808MiB (37%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "PerDiskMemtableFlushWriter_0:2] 2026-11-18T19:23:22,376 Flushing.java:153 - Writing Memtable-t@1944226949(135.742MiB serialized bytes, 17280 ops, 189.652MiB (37%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "FlushWriter_0:1] 2026-11-18T19:23:22,640 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-37-big-Data.db (110.224MiB) for commitlog position CommitLogPosition(segmentId=1795029670002, position=20997356)",
+  "eFlushWriter_0:2] 2026-11-18T19:23:23,265 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-38-big-Data.db (135.261MiB) for commitlog position CommitLogPosition(segmentId=1795029670007, position=5249358)",
+  "[PerDiskMemtableFlushWriter_0:1] 2026-11-18T19:23:26,119 Flushing.java:153 - Writing Memtable-t@303827330(120.659MiB serialized bytes, 15360 ops, 184.143MiB (36%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "PerDiskMemtableFlushWriter_0:2] 2026-11-18T19:23:27,434 Flushing.java:153 - Writing Memtable-t@1920599301(110.604MiB serialized bytes, 14080 ops, 188.807MiB (37%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "eFlushWriter_0:1] 2026-11-18T19:23:27,703 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-39-big-Data.db (120.244MiB) for commitlog position CommitLogPosition(segmentId=1795029670011, position=5249358)",
+  "FlushWriter_0:2] 2026-11-18T19:23:28,104 Flushing.java:179 - Completed flushing /mydata/s4/b18-w4/run/data/ks/t-4c10c900e38511f19e855547b007f30e/nb-40-big-Data.db (110.215MiB) for commitlog position CommitLogPosition(segmentId=1795029670014, position=26246678)"
+ ],
+ "client_end": {
+  "ms": 1795029835718,
+  "req_ok": 298,
+  "rows_ok": 190720,
+  "errs": [
+   779,
+   0,
+   36,
+   0,
+   0
+  ],
+  "conn": 0
+ },
+ "scan oom": {
+  "region_arrays": 644,
+  "region_bytes": 675293248,
+  "near_region_arrays": 0,
+  "total_shallow_bytes": 2123046968,
+  "byte_array_bytes": 1977595952,
+  "instances": 1813080,
+  "file_bytes": 2166840932,
+  "slab_traces": 5,
+  "error": null
+ },
+ "end": {
+  "daemons_left": "none"
+ },
+ "DONE": true
+}

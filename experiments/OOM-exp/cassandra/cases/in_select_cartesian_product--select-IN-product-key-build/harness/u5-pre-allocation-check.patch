@@ -1,0 +1,24 @@
+--- MultiCBuilder.java.orig	2026-11-18 11:58:12.022607043 -0700
++++ MultiCBuilder.java	2026-11-18 11:58:12.054607318 -0700
+@@ -339,6 +339,10 @@
+         public MultiCBuilder addEachElementToAll(List<ByteBuffer> values)
+         {
+             checkUpdateable();
++            long u5Limit = Long.getLong("u5.max_in_product", -1L);
++            if (u5Limit > 0 && (long) Math.max(1, elementsList.size()) * values.size() > u5Limit)
++                throw new org.apache.cassandra.exceptions.InvalidRequestException(
++                    "u5: IN cartesian product " + Math.max(1, elementsList.size()) + " x " + values.size() + " exceeds " + u5Limit);
+ 
+             if (elementsList.isEmpty())
+                 elementsList.add(new ArrayList<>());
+@@ -376,6 +380,10 @@
+         public MultiCBuilder addAllElementsToAll(List<List<ByteBuffer>> values)
+         {
+             checkUpdateable();
++            long u5Limit = Long.getLong("u5.max_in_product", -1L);
++            if (u5Limit > 0 && (long) Math.max(1, elementsList.size()) * values.size() > u5Limit)
++                throw new org.apache.cassandra.exceptions.InvalidRequestException(
++                    "u5: IN cartesian product " + Math.max(1, elementsList.size()) + " x " + values.size() + " exceeds " + u5Limit);
+ 
+             if (elementsList.isEmpty())
+                 elementsList.add(new ArrayList<>());

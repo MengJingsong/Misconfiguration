@@ -1,0 +1,13 @@
+[2026-11-18 15:34:42 EST] BEGIN LOADG arm=LOADG heap=2G cond=- k1=0 k2=0 N=0 window=0s
+[2026-11-18 15:34:43 EST] started pid 231699 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/u5-LOADG-1795034082.scope
+[2026-11-18 15:35:35 EST] ready
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/u5-w4/runs/LOADG/cassandra-1795034082-pid231699.hprof -XX:OnOutOfMemoryError=kill 
+INFO  [OptionalTasks:1] 2026-11-18T20:35:44,096 CassandraRoleManager.java:454 - Created default superuser role 'cassandra'
+role u5 created
+ok: CREATE KEYSPACE IF NOT EXISTS u5 WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+ok: CREATE TABLE IF NOT EXISTS u5.ck (pk int, c1 int, c2 int, v int, PRIMARY KEY (pk, c1, c2))
+ok: CREATE TABLE IF NOT EXISTS u5.pk (a int, b int, v int, PRIMARY KEY ((a, b)))
+ok: INSERT INTO u5.ck (pk,c1,c2,v) VALUES (0,0,0,1)
+ok: INSERT INTO u5.pk (a,b,v) VALUES (0,0,1)
+1.2M	/mydata/s4/u5-w4/template-G
+[2026-11-18 15:36:02 EST] END LOADG LOADED /mydata/s4/u5-w4/template-G

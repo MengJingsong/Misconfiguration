@@ -1,0 +1,44 @@
+--- /mydata/s4/b18-w4/cassandra/src/java/org/apache/cassandra/db/partitions/AtomicBTreePartition.java	2026-11-04 09:32:02.492431000 -0700
++++ /mydata/s4/b18-w4/var/lock2/src/AtomicBTreePartition.java	2026-11-18 12:30:55.620845606 -0700
+@@ -84,6 +84,10 @@
+ 
+     private volatile BTreePartitionData ref;
+ 
++    // B18 I2 (diagnostic): an exclusive per-partition lock for the waste tracker's pessimistic mode
++    static final class B18Lock extends java.util.concurrent.locks.ReentrantLock {}
++    final B18Lock b18Lock = new B18Lock();
++
+     @Unmetered
+     private final TableMetadataRef metadata;
+ 
+@@ -154,11 +158,29 @@
+                 {
+                     if (shouldLock)
+                     {
+-                        synchronized (this)
++                        // B18 I2: exclusive per-partition lock; give up waiting (attempt unlocked) only when the write's
++                        // op group is blocking a flush barrier (CASSANDRA-15367 4.0 semantics)
++                        boolean locked = false;
++                        try
++                        {
++                            while (!(locked = b18Lock.tryLock(1, java.util.concurrent.TimeUnit.MILLISECONDS)))
++                                if (writeOp.isBlocking())
++                                    break;
++                        }
++                        catch (InterruptedException e)
++                        {
++                            Thread.currentThread().interrupt();
++                        }
++                        try
+                         {
+                             if (tryUpdateData(update))
+                                 return this;
+                         }
++                        finally
++                        {
++                            if (locked)
++                                b18Lock.unlock();
++                        }
+                     }
+                     else
+                     {

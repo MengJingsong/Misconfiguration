@@ -1,0 +1,51 @@
+diff -r ./cassandra-env.sh /mydata/s4/u11-w4/T3-2G/conf/cassandra-env.sh
+235c235
+< JMX_PORT="7199"
+---
+> JMX_PORT="7699"
+diff -r ./cassandra.yaml /mydata/s4/u11-w4/T3-2G/conf/cassandra.yaml
+26c26
+< cluster_name: 'Test Cluster'
+---
+> cluster_name: 'u11-T3-2G'
+97c97
+< # hints_directory: /var/lib/cassandra/hints
+---
+> hints_directory: /mydata/s4/u11-w4/T3-2G/hints
+395c395,397
+< # data_file_directories:
+---
+> data_file_directories:
+>     - /mydata/s4/u11-w4/T3-2G/data
+> # (orig) data_file_directories:
+408c410
+< # commitlog_directory: /var/lib/cassandra/commitlog
+---
+> commitlog_directory: /mydata/s4/u11-w4/T3-2G/commitlog
+431c433
+< # cdc_raw_directory: /var/lib/cassandra/cdc_raw
+---
+> cdc_raw_directory: /mydata/s4/u11-w4/T3-2G/cdc_raw
+611c613
+< # saved_caches_directory: /var/lib/cassandra/saved_caches
+---
+> saved_caches_directory: /mydata/s4/u11-w4/T3-2G/saved_caches
+706c708
+<       - seeds: "127.0.0.1:7000"
+---
+>       - seeds: "127.0.0.1:7610"
+960c962
+< storage_port: 7000
+---
+> storage_port: 7610
+966c968
+< ssl_storage_port: 7001
+---
+> ssl_storage_port: 7611
+1023c1025
+< native_transport_port: 9042
+---
+> native_transport_port: 9642
+diff -r ./jvm-server.options /mydata/s4/u11-w4/T3-2G/conf/jvm-server.options
+188a189
+> -Xlog:gc*=info,gc+heap=debug,safepoint=info:file=/mydata/s4/u11-w4/T3-2G/logs/gc.log:time,uptime,level,tags:filecount=50,filesize=20M

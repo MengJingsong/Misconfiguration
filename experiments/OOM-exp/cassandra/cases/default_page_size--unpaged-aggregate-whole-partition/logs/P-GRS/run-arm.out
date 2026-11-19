@@ -1,0 +1,78 @@
+[2026-11-18 15:19:27 EST] ARM P-GRS arm=A heap=2048M direct=1024M fetch=off kind=grs steps=1:16384:40,1:32768:40,1:65536:40
+[2026-11-18 15:19:38 EST] started P-GRS pid 51570 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/u10-P-GRS-1795033177.scope
+[2026-11-18 15:19:52 EST] ready P-GRS
+-XX:+HeapDumpOnOutOfMemoryError -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms2048M -Xmx2048M -XX:MaxDirectMemorySize=1024M -XX:HeapDumpPath=/mydata/s4/u10-w4/runs/P-GRS/cassandra-1795033177-pid51570.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-18 15:19:58 EST] GC.run P-GRS
+1795033201,base,nmtOtherKB=65365,nmtTotalKB=2591723,rssKB=2847880,rssAnonKB=2668236,scopeCurB=2761617408,scopeOomKill=0,1795033201702,91647280,74870064,74870064,0,0,0,-1,-1,50142200,0,0,54,115,0
+		SSTable count: 1
+		Old SSTable count: 0
+		Space used (live): 8646564259
+		Number of partitions (estimate): 8
+		Local read count: 0
+[2026-11-18 15:20:06 EST] client pid 52186
+1795033217,t+10,nmtOtherKB=229526,nmtTotalKB=2769959,rssKB=2919704,rssAnonKB=2737340,scopeCurB=2837635072,scopeOomKill=0,1795033216703,1825073080,1372088248,247872424,1,0,41,1,0,50466630,17,0,262,307,0
+1795033216405,1,16384,1,8,0,0,0,0,0,-1,-1,
+1795033227,t+21,nmtOtherKB=229528,nmtTotalKB=2772106,rssKB=2923364,rssAnonKB=2740868,scopeCurB=2840412160,scopeOomKill=0,1795033226703,1775543432,1507107976,1154786440,0,0,49,0,0,50468678,17,0,521,377,0
+1795033226568,1,16384,1,16,0,0,0,0,0,-1,-1,
+1795033237,t+31,nmtOtherKB=229528,nmtTotalKB=2774187,rssKB=2923060,rssAnonKB=2740564,scopeCurB=2842583040,scopeOomKill=0,1795033237703,1658425824,1205440992,502468400,1,0,74,1,0,50468678,17,0,849,472,0
+1795033237578,1,16384,1,25,0,0,0,0,1,1356,1356,FrameTooLongException: Response frame exceeded maximum allowed length
+1795033248,t+41,nmtOtherKB=229528,nmtTotalKB=2797878,rssKB=2924736,rssAnonKB=2742088,scopeCurB=2844426240,scopeOomKill=0,1795033247708,1710319560,1290889160,200370120,1,0,82,1,0,50468678,17,0,1120,665,0
+1795033247586,1,32768,1,33,0,0,0,0,0,-1,-1,
+1795033258,t+52,nmtOtherKB=229499,nmtTotalKB=2771981,rssKB=2924276,rssAnonKB=2741436,scopeCurB=2845630464,scopeOomKill=0,1795033257710,1991119936,1588466752,1185813568,1,0,86,1,0,50449360,17,0,1450,665,0
+1795033257594,1,32768,1,37,0,0,0,0,0,-1,-1,
+1795033268,t+62,nmtOtherKB=754425,nmtTotalKB=3297672,rssKB=3451536,rssAnonKB=3268504,scopeCurB=3386941440,scopeOomKill=0,1795033268713,1000251792,916365712,651366776,1,0,107,0,0,50449360,17,0,1805,870,0
+1795033268602,1,32768,1,41,0,0,0,0,0,-1,-1,
+1795033279,t+72,nmtOtherKB=229497,nmtTotalKB=2773253,rssKB=2926632,rssAnonKB=2743716,scopeCurB=2848321536,scopeOomKill=0,1795033278715,1533552208,1449666128,1365780048,0,0,112,0,0,50449360,17,0,2095,995,0
+1795033278610,1,32768,1,45,0,0,0,0,0,-1,-1,
+1795033289,t+83,nmtOtherKB=229497,nmtTotalKB=2771434,rssKB=2926752,rssAnonKB=2743656,scopeCurB=2850770944,scopeOomKill=0,1795033288717,1437440944,1387109296,1135404936,1,0,115,1,0,50449360,17,0,2422,1201,0
+1795033288617,1,65536,1,49,0,0,0,0,0,-1,-1,
+/mydata/s4/u10-w4/harness/victim-ctl.sh: line 46: 51570 Killed                  CASSANDRA_CONF=$R/conf CASSANDRA_LOG_DIR=$R/logs MAX_HEAP_SIZE=$HEAP MAX_DIRECT_MEMORY_SIZE=$DM CASSANDRA_HEAPDUMP_DIR=$R JVM_EXTRA_OPTS="-XX:NativeMemoryTracking=summary -Xlog:gc=info,safepoint=info:file=$R/gc.log:time,uptime,level,tags:filecount=20,filesize=20m" setsid nohup systemd-run --user --scope --unit="u10-$L-$(date +%s)" -p MemoryMax=${MM}M -p MemorySwapMax=0 "$BUILD/bin/cassandra" -f < /dev/null > "$R/stdout.log" 2>&1
+[2026-11-18 15:21:39 EST] VICTIM DEAD at +93s
+SUMMARY secs=121 done=3959367 ok=0 correct=0 err_rt=0 err_rf=0 err_other=3959367 inflight_left=0
+20:21:38 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 8000 milliseconds
+20:21:46 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 16000 milliseconds
+20:22:02 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 32000 milliseconds
+[2026-11-18 15:22:08 EST] OOM/GC check
+ERROR [Native-Transport-Requests-1] 2026-11-18T20:21:30,496 JVMStabilityInspector.java:70 - Exception in thread Thread[Native-Transport-Requests-1,5,SharedPool]
+org.apache.cassandra.transport.messages.ErrorMessage$WrappedException: io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 1075052560 byte(s) of direct memory (used: 184549376, max: 1073741824)
+	at org.apache.cassandra.transport.messages.ErrorMessage.wrap(ErrorMessage.java:486)
+	at org.apache.cassandra.transport.Message.encode(Message.java:423)
+	at org.apache.cassandra.transport.PreV5Handlers$LegacyDispatchHandler.toFlushItem(PreV5Handlers.java:95)
+	at org.apache.cassandra.transport.Dispatcher.processRequest(Dispatcher.java:462)
+	at org.apache.cassandra.transport.Dispatcher$RequestProcessor.run(Dispatcher.java:307)
+	at org.apache.cassandra.concurrent.FutureTask$1.call(FutureTask.java:99)
+	at org.apache.cassandra.concurrent.FutureTask.call(FutureTask.java:61)
+	at org.apache.cassandra.concurrent.FutureTask.run(FutureTask.java:71)
+	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+Caused by: io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 1075052560 byte(s) of direct memory (used: 184549376, max: 1073741824)
+	at io.netty.util.internal.PlatformDependent.incrementMemoryCounter(PlatformDependent.java:880)
+	at io.netty.util.internal.PlatformDependent.allocateDirectNoCleaner(PlatformDependent.java:809)
+	at io.netty.buffer.PoolArena$DirectArena.allocateDirect(PoolArena.java:718)
+	at io.netty.buffer.PoolArena$DirectArena.newUnpooledChunk(PoolArena.java:707)
+	at io.netty.buffer.PoolArena.allocateHuge(PoolArena.java:224)
+	at io.netty.buffer.PoolArena.allocate(PoolArena.java:142)
+	at io.netty.buffer.PoolArena.allocate(PoolArena.java:127)
+	at io.netty.buffer.PooledByteBufAllocator.newDirectBuffer(PooledByteBufAllocator.java:403)
+	at io.netty.buffer.AbstractByteBufAllocator.directBuffer(AbstractByteBufAllocator.java:188)
+	at io.netty.buffer.AbstractByteBufAllocator.directBuffer(AbstractByteBufAllocator.java:179)
+	at io.netty.buffer.AbstractByteBufAllocator.buffer(AbstractByteBufAllocator.java:116)
+	at org.apache.cassandra.transport.Message.encode(Message.java:367)
+	... 9 common frames omitted
+ERROR [Native-Transport-Requests-1] 2026-11-18T20:21:30,500 JVMStabilityInspector.java:123 - OutOfMemory error letting the JVM handle the error:
+io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 1075052560 byte(s) of direct memory (used: 184549376, max: 1073741824)
+	at io.netty.util.internal.PlatformDependent.incrementMemoryCounter(PlatformDependent.java:880)
+	at io.netty.util.internal.PlatformDependent.allocateDirectNoCleaner(PlatformDependent.java:809)
+	at io.netty.buffer.PoolArena$DirectArena.allocateDirect(PoolArena.java:718)
+	at io.netty.buffer.PoolArena$DirectArena.newUnpooledChunk(PoolArena.java:707)
+	at io.netty.buffer.PoolArena.allocateHuge(PoolArena.java:224)
+	at io.netty.buffer.PoolArena.allocate(PoolArena.java:142)
+	at io.netty.buffer.PoolArena.allocate(PoolArena.java:127)
+	at io.netty.buffer.PooledByteBufAllocator.newDirectBuffer(PooledByteBufAllocator.java:403)
+	at io.netty.buffer.AbstractByteBufAllocator.directBuffer(AbstractByteBufAllocator.java:188)
+	at io.netty.buffer.AbstractByteBufAllocator.directBuffer(AbstractByteBufAllocator.java:179)
+	at io.netty.buffer.AbstractByteBufAllocator.buffer(AbstractByteBufAllocator.java:116)
+[2026-11-18 15:22:10 EST] stopped P-GRS
+OOM c=1 n=65536 type="java.lang.OutOfMemoryError: Java heap space" at+93s
+[2026-11-18 15:22:10 EST] END P-GRS OOM c=1 n=65536 type="java.lang.OutOfMemoryError: Java heap space" at+93s

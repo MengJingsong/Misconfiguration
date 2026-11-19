@@ -1,0 +1,33 @@
+endpoint: cap
+resolved: authenticator=AllowAllAuthenticator{};
+resolved: authenticator=null;
+resolved: commitlog_segment_size=32MiB;
+resolved: in_select_cartesian_product_fail_threshold=-1;
+resolved: in_select_cartesian_product_warn_threshold=-1;
+resolved: max_mutation_size=null;
+resolved: memtable_allocation_type=heap_buffers;
+resolved: memtable_heap_space=null;
+resolved: native_transport_max_message_size=null;
+resolved: native_transport_max_request_data_in_flight=null;
+resolved: native_transport_max_request_data_in_flight_per_ip=null;
+resolved: native_transport_max_threads=128;
+resolved: native_transport_receive_queue_capacity=1MiB;
+resolved: native_transport_timeout=12s;
+resolved: write_request_timeout=2000ms;
+resolved: write_request_timeout=5000ms;
+flag MaxHeapSize 17179869184
+flag MaxDirectMemorySize 16642998272
+flag HeapDumpOnOutOfMemoryError -
+flag UseG1GC +
+flag G1HeapRegionSize 16777216
+flag AlwaysPreTouch +
+step 0 update p=40000 q=20000 k0=0 rows=800000000 wire_est=480054 latency_ms=569861 outcome=ERR NoHostAvailable: ('Unable to complete the operation against any hosts', {})
+   GC during step 32 (full 15); baseline after-GC 88 MiB; max after-GC in step 16331 MiB; U_peak 16243 MiB; last after-GC 16278 16310 16283 16331 16291 16323
+   K RequestsSize max 480059 B; memtable max 0 MiB; MutationStage pending max 0; NTR active max 2
+jmx samples 328; RequestsSize max 480059; Paused max 0; direct max 42.5 MiB; last row 1795045462689,480059,0,,,,,,
+thread samples 108; NTR-in-ModificationStatement top frames: - x65 UpdateStatement.addUpdateForKey x18 BTreeRow$Builder.build x12 ModificationStatement.addUpdates x7 UpdateParameters.addCell x6
+RssAnon max 17343 MiB
+heap_info used max 16366 MiB
+GCs 123; Pause Full 56; to-space exhausted 56; heap after GC max 16382 MiB of 16384; first-6 after-GC 16353 16369 16353 16369 16353 16369
+STW share over last 60 s of GC log: 481%
+dumps: none
