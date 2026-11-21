@@ -1,0 +1,64 @@
+OOME-initiating thread: trace serial 7, thread serial 6
+    at java.lang.OutOfMemoryError.<init>(OutOfMemoryError.java:48)
+    at java.util.Arrays.copyOf(Arrays.java:3745)
+    at java.lang.AbstractStringBuilder.ensureCapacityInternal(AbstractStringBuilder.java:172)
+    at java.lang.AbstractStringBuilder.append(AbstractStringBuilder.java:538)
+    at java.lang.StringBuilder.append(StringBuilder.java:178)
+    at ch.qos.logback.classic.pattern.ThrowableProxyConverter.recursiveAppend(ThrowableProxyConverter.java:163)
+    at ch.qos.logback.classic.pattern.ThrowableProxyConverter.throwableProxyToString(ThrowableProxyConverter.java:154)
+    at ch.qos.logback.classic.pattern.ThrowableProxyConverter.convert(ThrowableProxyConverter.java:148)
+    at ch.qos.logback.classic.pattern.ThrowableProxyConverter.convert(ThrowableProxyConverter.java:35)
+    at ch.qos.logback.core.pattern.FormattingConverter.write(FormattingConverter.java:36)
+    at ch.qos.logback.core.pattern.PatternLayoutBase.writeLoopOnConverters(PatternLayoutBase.java:174)
+    at ch.qos.logback.classic.PatternLayout.doLayout(PatternLayout.java:200)
+    at ch.qos.logback.classic.PatternLayout.doLayout(PatternLayout.java:41)
+    at ch.qos.logback.core.encoder.LayoutWrappingEncoder.encode(LayoutWrappingEncoder.java:114)
+    at ch.qos.logback.core.OutputStreamAppender.writeOut(OutputStreamAppender.java:203)
+    at ch.qos.logback.core.FileAppender.writeOut(FileAppender.java:247)
+    at ch.qos.logback.core.OutputStreamAppender.subAppend(OutputStreamAppender.java:257)
+    at ch.qos.logback.core.rolling.RollingFileAppender.subAppend(RollingFileAppender.java:259)
+    at ch.qos.logback.core.OutputStreamAppender.append(OutputStreamAppender.java:111)
+    at ch.qos.logback.core.UnsynchronizedAppenderBase.doAppend(UnsynchronizedAppenderBase.java:85)
+    at ch.qos.logback.core.spi.AppenderAttachableImpl.appendLoopOnAppenders(AppenderAttachableImpl.java:51)
+    at ch.qos.logback.core.AsyncAppenderBase$Worker.run(AsyncAppenderBase.java:302)
+dump IM-2.hprof: all objects 1808.9 MiB shallow; arrays >= 1048576 B: 96, 1724.8 MiB
+category shares of the dump total (arrays >= min):
+  H_M      0.0 MiB    0.0%
+  H_R    551.1 MiB   30.5%
+  H_F      0.0 MiB    0.0%
+  H_L    427.2 MiB   23.6%
+  H_O    244.1 MiB   13.5%
+  H_unreachable    502.4 MiB   27.8%
+  H_M+H_R+H_F  30.5%   (reachable arrays >= min: 1222.4 MiB; H_M of them 0.0%, H_R 45.1%)
+[R]
+   byte[]       16000000 x19       289.9 MiB
+   byte[]       32000095 x8        244.1 MiB
+   byte[]        1048576 x17        17.0 MiB
+[L]
+   byte[]       32000095 x11       335.7 MiB
+   byte[]       32000146 x1         30.5 MiB
+   byte[]       32000152 x1         30.5 MiB
+   byte[]       32000058 x1         30.5 MiB
+[O]
+   byte[]       32000042 x2         61.0 MiB
+   byte[]       64000086 x1         61.0 MiB
+   byte[]       32000002 x2         61.0 MiB
+   byte[]       32000058 x1         30.5 MiB
+   byte[]       32000006 x1         30.5 MiB
+[unreachable]
+   byte[]       64000086 x3        183.1 MiB
+   byte[]       32000006 x4        122.1 MiB
+   byte[]       32000058 x2         61.0 MiB
+   byte[]       32000000 x2         61.0 MiB
+   byte[]       16000000 x2         30.5 MiB
+   int[]         2097148 x1          8.0 MiB
+   int[]         1250766 x1          4.8 MiB
+   int[]         1123612 x1          4.3 MiB
+   int[]          949086 x1          3.6 MiB
+   int[]          901458 x1          3.4 MiB
+monitor instances: {'org.apache.cassandra.db.monitoring.MonitoringTask$$Lambda$1611': 1, 'org.apache.cassandra.db.monitoring.MonitoringTask$OperationsQueue': 2}
+  slowOperationsQueue: maxOperations=0 queue count=0
+  failedOperationsQueue: maxOperations=0 queue count=0
+name-length byte[] (32,000,003..32,000,400) by category: {'R': 8, 'unreachable': 6, 'L': 14, 'O': 4}
+NTR threads: 11 (with traceQuery on stack: 1); ScheduledTasks threads: 1
+O detail: ReadStage [QueryCancelledException render] 152.6 MiB (8.4%), (no direct frame root) 91.6 MiB (5.1%)

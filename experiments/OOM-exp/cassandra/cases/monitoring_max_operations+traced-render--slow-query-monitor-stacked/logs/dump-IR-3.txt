@@ -1,0 +1,67 @@
+OOME-initiating thread: trace serial 10, thread serial 9
+    at java.lang.OutOfMemoryError.<init>(OutOfMemoryError.java:48)
+    at java.util.Arrays.copyOf(Arrays.java:3745)
+    at java.lang.AbstractStringBuilder.ensureCapacityInternal(AbstractStringBuilder.java:172)
+    at java.lang.AbstractStringBuilder.append(AbstractStringBuilder.java:538)
+    at java.lang.StringBuilder.append(StringBuilder.java:178)
+    at org.apache.cassandra.db.AbstractReadQuery.toCQLString(AbstractReadQuery.java:115)
+    at org.apache.cassandra.db.ReadCommand.toCQLString(ReadCommand.java:91)
+    at org.apache.cassandra.db.ReadCommand.name(ReadCommand.java:897)
+    at org.apache.cassandra.db.monitoring.MonitoringTask$Operation.name(MonitoringTask.java:343)
+    at org.apache.cassandra.db.monitoring.MonitoringTask$OperationsQueue.popOperations(MonitoringTask.java:242)
+    at org.apache.cassandra.db.monitoring.MonitoringTask.logFailedOperations(MonitoringTask.java:147)
+    at org.apache.cassandra.db.monitoring.MonitoringTask.logOperations(MonitoringTask.java:139)
+    at org.apache.cassandra.db.monitoring.MonitoringTask.lambda$new$0(MonitoringTask.java:96)
+    at org.apache.cassandra.db.monitoring.MonitoringTask$$Lambda$1617.run(?:-1)
+    at org.apache.cassandra.concurrent.ExecutionFailure$1.run(ExecutionFailure.java:133)
+    at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:515)
+    at java.util.concurrent.FutureTask.runAndReset(FutureTask.java:305)
+    at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+    at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+    at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+    at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+    at java.lang.Thread.run(Thread.java:829)
+dump IR-3.hprof: all objects 1801.0 MiB shallow; arrays >= 1048576 B: 94, 1713.1 MiB
+category shares of the dump total (arrays >= min):
+  H_M    457.8 MiB   25.4%
+  H_R      0.0 MiB    0.0%
+  H_F    444.2 MiB   24.7%
+  H_L    335.7 MiB   18.6%
+  H_O    274.7 MiB   15.3%
+  H_unreachable    200.8 MiB   11.1%
+  H_M+H_R+H_F  50.1%   (reachable arrays >= min: 1512.4 MiB; H_M of them 30.3%, H_R 0.0%)
+[M]
+   byte[]       16000000 x26       396.7 MiB
+   byte[]       32000058 x1         30.5 MiB
+   byte[]       32000042 x1         30.5 MiB
+[F]
+   byte[]       32000095 x5        152.6 MiB
+   byte[]       16000000 x10       152.6 MiB
+   char[]       32000000 x1         61.0 MiB
+   byte[]       32000146 x1         30.5 MiB
+   byte[]       32000058 x1         30.5 MiB
+   byte[]        1048576 x17        17.0 MiB
+[L]
+   byte[]       32000095 x10       305.2 MiB
+   byte[]       32003750 x1         30.5 MiB
+[O]
+   char[]       32000000 x3        183.1 MiB
+   byte[]       32000000 x2         61.0 MiB
+   byte[]       32000006 x1         30.5 MiB
+[unreachable]
+   byte[]       32003750 x2         61.0 MiB
+   byte[]       32000006 x2         61.0 MiB
+   byte[]       32000058 x1         30.5 MiB
+   byte[]       32000002 x1         30.5 MiB
+   int[]         1041968 x1          4.0 MiB
+   int[]          750240 x1          2.9 MiB
+   int[]          677338 x1          2.6 MiB
+   int[]          658046 x1          2.5 MiB
+   int[]          436196 x1          1.7 MiB
+   int[]          436158 x1          1.7 MiB
+monitor instances: {'org.apache.cassandra.db.monitoring.MonitoringTask$$Lambda$1617': 1, 'org.apache.cassandra.db.monitoring.MonitoringTask$OperationsQueue': 2, 'org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation': 26}
+  slowOperationsQueue: maxOperations=50 queue count=0
+  failedOperationsQueue: maxOperations=50 queue count=24
+name-length byte[] (32,000,003..32,000,400) by category: {'F': 7, 'unreachable': 3, 'L': 10, 'O': 1, 'M': 2}
+NTR threads: 10 (with traceQuery on stack: 0); ScheduledTasks threads: 1
+O detail: ReadStage [QueryCancelledException render] 213.6 MiB (11.9%), (no direct frame root) 61.0 MiB (3.4%)

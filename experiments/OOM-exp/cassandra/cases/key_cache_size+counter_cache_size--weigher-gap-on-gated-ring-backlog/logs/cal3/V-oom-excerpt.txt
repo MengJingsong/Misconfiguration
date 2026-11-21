@@ -1,0 +1,40 @@
+INFO  [Service Thread] 2026-11-20T16:35:30,401 StatusLogger.java:71 - CompactionExecutor                   2         0            111         0                 0
+ERROR [GossipStage:1] 2026-11-20T16:35:30,400 JVMStabilityInspector.java:70 - Exception in thread Thread[GossipStage:1,5,GossipStage]
+java.lang.RuntimeException: java.lang.OutOfMemoryError: Java heap space
+	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:108)
+	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:45)
+	at org.apache.cassandra.net.InboundMessageHandler$ProcessMessage.run(InboundMessageHandler.java:430)
+	at org.apache.cassandra.concurrent.ExecutionFailure$1.run(ExecutionFailure.java:133)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+Caused by: java.lang.OutOfMemoryError: Java heap space
+	at java.base/java.util.EnumMap.keySet(EnumMap.java:381)
+	at org.apache.cassandra.gms.EndpointState.hasLegacyFields(EndpointState.java:202)
+	at org.apache.cassandra.gms.EndpointState.removeMajorVersion3LegacyApplicationStates(EndpointState.java:188)
+	at org.apache.cassandra.gms.Gossiper.applyNewStates(Gossiper.java:1812)
+	at org.apache.cassandra.gms.Gossiper.applyStateLocally(Gossiper.java:1765)
+	at org.apache.cassandra.gms.GossipDigestAck2VerbHandler.doVerb(GossipDigestAck2VerbHandler.java:50)
+	at org.apache.cassandra.net.InboundSink.lambda$new$0(InboundSink.java:78)
+	at org.apache.cassandra.net.InboundSink$$Lambda$829/0x0000000100607040.accept(Unknown Source)
+	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:97)
+	... 7 common frames omitted
+INFO  [Service Thread] 2026-11-20T16:35:30,401 StatusLogger.java:71 - SecondaryIndexExecutor               0         0              0         0                 0
+INFO  [Service Thread] 2026-11-20T16:35:30,401 StatusLogger.java:71 - MutationStage                       32     56882         361983         0                 0
+INFO  [Service Thread] 2026-11-20T16:35:30,402 StatusLogger.java:71 - MemtableReclaimMemory                0         0             17         0                 0
+INFO  [Service Thread] 2026-11-20T16:35:30,402 StatusLogger.java:71 - PendingRangeCalculator               0         0              4         0                 0
+INFO  [Service Thread] 2026-11-20T16:35:30,402 StatusLogger.java:71 - GossipStage                          1        10           1247         0                 0
+INFO  [Service Thread] 2026-11-20T16:35:30,403 StatusLogger.java:71 - SecondaryIndexManagement             0         0              1         0                 0
+ERROR [GossipStage:1] 2026-11-20T16:35:30,402 JVMStabilityInspector.java:123 - OutOfMemory error letting the JVM handle the error:
+java.lang.OutOfMemoryError: Java heap space
+	at java.base/java.util.EnumMap.keySet(EnumMap.java:381)
+	at org.apache.cassandra.gms.EndpointState.hasLegacyFields(EndpointState.java:202)
+	at org.apache.cassandra.gms.EndpointState.removeMajorVersion3LegacyApplicationStates(EndpointState.java:188)
+	at org.apache.cassandra.gms.Gossiper.applyNewStates(Gossiper.java:1812)
+	at org.apache.cassandra.gms.Gossiper.applyStateLocally(Gossiper.java:1765)
+	at org.apache.cassandra.gms.GossipDigestAck2VerbHandler.doVerb(GossipDigestAck2VerbHandler.java:50)
+	at org.apache.cassandra.net.InboundSink.lambda$new$0(InboundSink.java:78)
+	at org.apache.cassandra.net.InboundSink$$Lambda$829/0x0000000100607040.accept(Unknown Source)
+	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:97)
+	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:45)

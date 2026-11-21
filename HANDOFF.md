@@ -106,16 +106,50 @@ container budget.
 - **Owner rulings (2026-11-18):** C9 is labelled `deployment` (stage 2 filed `diagnostic` because compaction was
   paused to hold 2,000 sstables; an sstable backlog counts as a deployment state). U5 stays `retry` under the frozen
   "OOM on the request thread" rule (4/5 runs threw OOM inside the window, 2/5 on the request thread).
-- **Left on the nodes (nothing running, 19:45 EST):** `pc82` `u10-w4` 62 GB, `pc72` `b17-w4` 38 GB, `ms0617`
-  `u5-w4` 11 GB (3 hprofs), `pc91` `u9-w4` 8.9 GB (4 hprofs), `pc99` `c9-w4` 5.8 GB (3 hprofs), `ms0611` `b16-w4`
-  2.3 GB, `ms0604` `u6-w4` 1.1 GB, `pc75` `b18-w4` 0.8 GB, `ms0640` `u8-w4` 0.7 GB, `ms0625` `u7-w4` 0.4 GB, `pc96`
-  `u11-w4` 0.4 GB; all under `/mydata/s4/`.
+- **Node data:** all eleven `/mydata/s4/<id>-w4` folders were deleted on 2026-11-20 (owner).
+
+**Wave 5 (2026-11-20 10:30 EST → 2026-11-21 ≈ 00:00, owner-approved): the 9 open retry rows, plus the OC-413…577 triage.**
+Run with the Agent tool (not a workflow): one fresh stage-1 design agent and one fresh stage-2 verify agent per case.
+Three verify agents (R10, R15, R17) were cut by the API usage limit at ≈ 13:00; their node-side runs had already
+finished, and they wrote up at ≈ 21:30 with a dated clock-shift amendment (deadline 03:30).
+- **Triage:** `stage5-oom-clue-find/runs/triage-2026-11-20.md` (advisory, statuses unchanged) places all 165 rows of
+  OC-413…577: top 5 (OC-533 LZ4 declared-length allocation, OC-504 legacy 2i build page, OC-565 unpaged vector top-K,
+  OC-509 range-read fan-out, OC-479 RFP raw responses), 94 covered, 29 not reachable at defaults, 14 too slow, 23 other.
+
+| Case | Retry of | Node | Verdict | Deciding result |
+|---|---|---|---|---|
+| R9 | C3 | (`pc72`, not run) | **false positive** (owner) | ceiling screen: retention ≤ 246 MiB reachable, ≤ 438 MiB with every default pool at cap; owner closed C3 without the optional run |
+| R10 | R5 | `pc99` | retry | owner-approved container 2,048 / heap 1,024: T killed 3/3 but before the compaction; control and intervention also killed (memcg `file_mapped` 170 MiB ate the headroom) |
+| R11 | R8 / B7 | `ms0611`+`ms0617`+`ms0625` | retry | S2 backlog and B7 gap both reproduced on the RF=3 ring, but the pending-count gate does not fix the burst; 5-arm calibration cap hit, no counted arm |
+| R12 | B11 (+ OC-445) | `ms0640` | **true positive** | slow-query monitor alone keeps whole 16 MB commands + 32 MB hex names past its 50-op cap: OOM 5/5 at 2 GiB (monitor-attributed 3/5 after A-4 added 2 runs), 3/3 at 8 GiB; controls 0/3 |
+| R13 | B14 | `ms0604` | **true positive** | v5 tiny-value batch decodes ≈ 10× its wire bytes past the in-flight limit: OOM 3/3 at 2 GiB in decode; never-writes control and 16 MiB limit 0/3; fails to 8 GiB |
+| R14 | U5 | `pc91` | **true positive** | CK IN × IN product at a ×1.5 growth step: OOM 3/3 at 8 GiB on the request thread (strict count 3/3 too); fails to 28 GiB |
+| R15 | U6 | `pc82` | **B true positive · A retry** | B: 8.4 M-marker PREPARE OOMs 3/3 at 2 GiB in the parse before the 65,535 check; A: trigger frame takes ≈ 218 s to arrive under thrash, 0/3 in the 180 s hold, 3/3 at 4 GiB without controls |
+| R16 | B18 | `pc75` | retry | gated client works and T OOMs 3/3, but `concurrent_writes: 4` also OOMs: holder is the stale `BTree.Updater.updateF` pinning flushed memtables (new, release defect) |
+| R17 | U11 | `pc96` | retry | thrash never entered at ≤ 8 GiB (commit-log cap flushes at ≈ 150 s); at 15,872 MiB the blob backlog reached ≈ 9 GiB but arrivals were throttled |
+
+- **Owner rulings (2026-11-20):** C3 closed as false positive from R9's arithmetic; R10's container budget approved
+  (C4 shape) for V7; R14's verdict decided by its pre-registered rule (OOM on any thread counts with dump attribution),
+  strict request-thread count reported beside it.
+- **Filed:** case files, retry list (9 rows closed; new open rows R10, R11, R15-A, R16, R17), candidate list (OC-11, 22,
+  38, 200–202, 206, 276, 278, 285, 351, 352, 365, 368, 409, 410, 412, 445; OC-140 still reads `retry (U6)`, its literal
+  form untested by U6 and R15), `_INDEX.md` rows.
+- **Owner rulings after the wave (2026-11-20):** OC-4 (R13's decode copy, protocol v4) closed as covered by R13;
+  R12's unmapped holder Q (`QueryCancelledException` renders the whole command, `QueryCancelledException.java:26`,
+  logged at `StorageProxy.java:2223`) filed as candidate **OC-578** with the new Agent value `phase-2 (R12)` (new lead
+  source: playbook stage 2, stage-5 README and `FLOWCHART.md` updated); R12's A-4 stands; R10's next budget
+  (heap 1,280 / direct 640 / container 2,560) is approved for V7.
+- **Left on the nodes (nothing running):** `pc99` `/mydata/s4/r10` 58 GB (generated sstables), `pc91` `/mydata/s4/r14`
+  18 GB (2 hprofs), `ms0611` `/mydata/r11` 4.9 GB (1 hprof), `ms0640` `/mydata/s4/r12-w5` 2.2 GB, `pc82`
+  `/mydata/s4/r15-w5` 1.8 GB, `ms0625` `/mydata/r11` 1.5 GB, `ms0617` `/mydata/r11` 1.2 GB, `pc75` `/mydata/s4/r16`
+  0.9 GB, `ms0604` `/mydata/s4/r13-w1` 0.7 GB, `pc96` `/mydata/s4/r17` 0.4 GB, `/tmp/r12-dumps` 3.7 GB (2 hprofs),
+  `/mydata/r11-evidence` 0.1 GB. `ms0640` has only ≈ 17 GB free on `/mydata` (20 GB used outside `/mydata/s4`).
 
 **Other open work:**
-- 373 candidate rows are `open` (OC-1…OC-577 minus closed and tested rows); the triage covered only OC-63…412 —
-  OC-413…577 (wave 3) are untriaged. Its §2 "not reachable at shipped defaults" and §3 "too slow / too much
-  disk" lists were **not** closed (owner closed only the already-covered list).
-- Retry list: 9 rows `open` (C3, R5, R8, B11, B14, and wave 4's U5, U6, B18, U11, each with its proposed change).
+- 372 candidate rows are `open` (OC-4 closed, OC-578 added). All of OC-63…577 are now triaged (2026-11-18 and 2026-11-20 files); the 11-18
+  triage's §2 "not reachable at shipped defaults" and §3 "too slow / too much disk" lists were **not** closed (owner
+  closed only the already-covered list), and the 11-20 triage's "covered" list is not closed either.
+- Retry list: 5 rows `open` (R10, R11, R15 condition A, R16, R17, each with its proposed change).
 - Hadoop: JIRA OOM report built; stage 5 runs with Yang's and Jingsong's batches (`hadoop/PROCEDURE.md` 5b);
   no Hadoop phase 2 yet. Jingsong's Hadoop stage-4 nodes `pc41`, `pc39`, `pc29` failed SSH host-key checks on
   2026-11-18 (probably reallocated): a new Hadoop stage-4 node needs `jingsong/setup-node.sh`.
@@ -381,7 +415,7 @@ available.
 | `ms0611` | node3.jason92-326377 | aarch64 / 8 / 62 GiB | 35 GiB | `10.10.1.4` | JDK 11 + Ant |
 | `ms0617` | node4.jason92-326377 | aarch64 / 8 / 62 GiB | 37 GiB | `10.10.1.5` | JDK 11 + Ant |
 
-- **2026-11-18:** the UMass experiment `jason92-326528` (`pc91/84/72/99/75`) went unreachable at ≈ 04:04 and its data is gone; the owner's new allocation `jason92-326665` is `pc91`, `pc82`, `pc72`, `pc75`, `pc99` (table above). All ten nodes and `pc96` had their run data deleted on 2026-11-18 (owner); wave 4 then left one `/mydata/s4/<id>-w4` folder per case (sizes under wave 4 above). `ms0611` now has a build inside `b16-w4` but still no `/mydata/s4/cassandra-base`.
+- **2026-11-18:** the UMass experiment `jason92-326528` (`pc91/84/72/99/75`) went unreachable at ≈ 04:04 and its data is gone; the owner's new allocation `jason92-326665` is `pc91`, `pc82`, `pc72`, `pc75`, `pc99` (table above). All ten nodes and `pc96` had their run data deleted on 2026-11-18 (owner); wave 4 then left one `/mydata/s4/<id>-w4` folder per case (sizes under wave 4 above). As of 2026-11-20 every node has `/mydata/s4/cassandra-base` (the `ms0625` jar differs from `ms0611`'s; R11 copied `ms0611`'s build to the ring); on the m400s `/mydata` is owned by root, so a new top-level folder needs `sudo mkdir` + `chown`.
 - The two sets are on different sites (UMass, Utah; ≈ 50 ms apart) with separate `10.10.1.0/24` LANs:
   run a cluster within one set. The m400s are **ARM**: never mix them with x86 nodes in one case's
   matched arms, and record `aarch64` (smoke test: `experiments/OOM-exp/cassandra/node-smoke/2026-11-16-ms0625/`).

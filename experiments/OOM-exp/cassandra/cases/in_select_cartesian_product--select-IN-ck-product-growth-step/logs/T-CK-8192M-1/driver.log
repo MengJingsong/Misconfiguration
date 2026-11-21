@@ -1,0 +1,17 @@
+[2026-11-20 10:50:25 EST] BEGIN T-CK-8192M-1 arm=A heap=8192M cond=CK k1=160 k2=1600000 N=256000000 W=600s G=600s
+[2026-11-20 10:50:25 EST] free /mydata 716181 MiB
+[2026-11-20 10:50:26 EST] started pid 158948 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/r14-T-CK-8192M-1-1795189825.scope
+[2026-11-20 10:50:32 EST] ready
+-XX:+HeapDumpOnOutOfMemoryError -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms8192M -Xmx8192M -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/r14/runs/T-CK-8192M-1/cassandra-1795189825-pid158948.hprof -XX:OnOutOfMemoryError=kill 
+[2026-11-20 10:50:38 EST] sent: {"ev": "sent", "t_send_ms": 1795189838253, "body_bytes": 12801331, "t_ms": 1795189838275}
+[2026-11-20 10:50:58 EST] +20s jmx: 1795189855898,7846783664,6336834224,5699300016,1,0,1,0,0,56979114,1,-1,3162,1303,-1
+[2026-11-20 10:51:18 EST] +40s jmx: 1795189870325,8337401080,8320623864,8320623864,1,0,1,0,0,56980906,1,-1,4505,11180,-1
+[2026-11-20 10:51:26 EST] THROWN seen at +48s: 1795189885.097 java.lang.OutOfMemoryError: Java heap space
+[2026-11-20 10:51:38 EST] +60s jmx: 1795189880940,8356830720,8340053504,8340053504,1,0,1,0,0,56980906,1,-1,4625,21159,-1
+[2026-11-20 10:51:58 EST] +80s jmx: 1795189880940,8356830720,8340053504,8340053504,1,0,1,0,0,56980906,1,-1,4625,21159,-1
+[2026-11-20 10:52:18 EST] +100s jmx: 1795189880940,8356830720,8340053504,8340053504,1,0,1,0,0,56980906,1,-1,4625,21159,-1
+[2026-11-20 10:52:38 EST] +120s jmx: 1795189880940,8356830720,8340053504,8340053504,1,0,1,0,0,56980906,1,-1,4625,21159,-1
+[2026-11-20 10:52:50 EST] dump done seen at +132s
+/mydata/s4/r14/h/run-arm.sh: line 52: 158948 Killed                  CASSANDRA_CONF=$R/conf CASSANDRA_LOG_DIR=$R/logs MAX_HEAP_SIZE=$HEAP MAX_DIRECT_MEMORY_SIZE= CASSANDRA_HEAPDUMP_DIR=$R JVM_EXTRA_OPTS="$EX" setsid nohup systemd-run --user --scope --unit="r14-$L-$(date +%s)" -p MemoryMax=${MM}M -p MemorySwapMax=0 "$TREE/bin/cassandra" -f < /dev/null > "$R/stdout.log" 2>&1
+[2026-11-20 10:52:54 EST] VICTIM DEAD at +136s
+[2026-11-20 10:52:58 EST] END T-CK-8192M-1 OOM type="java.lang.OutOfMemoryError: Java heap space" thrown_at=+46.8s dump_done_at=+131.6s kill9_at=+134.6s jvm_exit_at=+136s(poll) client={"ev": "conn_closed", "msg": "[Errno 104] Connection reset by peer", "latency_s": 135.63, "t_ms": 1795189973884}

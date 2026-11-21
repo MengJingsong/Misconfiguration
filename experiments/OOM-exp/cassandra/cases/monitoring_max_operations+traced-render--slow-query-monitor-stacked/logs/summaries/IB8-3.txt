@@ -1,0 +1,37 @@
+### driver.txt
+2026-11-20T10:23:41 run IB8-3 build=base heap=8G tracing=off values=distinct monitor=mon0 mode=fixed:13 hold=150 k=2
+2026-11-20T10:23:41 free 14G
+2026-11-20T10:23:41 JVM_EXTRA_OPTS='-Dcassandra.monitoring_max_operations=0 -XX:-HeapDumpOnOutOfMemoryError'
+2026-11-20T10:24:01 daemon pid 473431 up
+2026-11-20T10:24:03 client start --k 2 --tracing off --distinct --fixed 13 --hold-s 150
+2026-11-20T10:26:35 client ended; daemon alive (hold end)
+2026-11-20T10:26:46 END hold
+2026-11-20T10:26:59 done
+### summary.txt
+endpoint: hold
+client # start 2026-11-20T10:24:03-0700 tracing=off distinct=True k=2 steps=[13] S=16000000
+client # step 0 N=13 established=13 at 261 ms
+client # end 150278 ms done=1244 err=13
+client max established 13, completed 1234, errors 13, max outstanding 13, max K_client 208000351
+last step N=13 started at 261 ms; ok completions after it: 1255; last completion line at 151445 ms (+151.2 s)
+  step N=13: ok 1255, median latency 1438 ms
+  error x8: err:0x1300:Operation
+  error x5: err:0x1200:Operation
+threads samples 24: max NTR 14, max R(traceQuery) 0, max in hex 0, in String.<init> 0, in concat 0
+  R series: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  ScheduledTasks phases: {'idle': 24}  AsyncAppender-Worker: {'idle': 22, 'write': 2}
+  ST series: idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle
+K_server RequestsSize max 208000351 (samples 6) series 208000351 208000351 208000351 208000351 208000351 192000324; paused max 0
+RssAnon max 9175 MiB
+heap_info used max 7871 MiB
+GCs 35; humongous after GC: max 67 regions (1072 MiB), median 54; before GC max 356
+pauses 43; STW share over last 60 s of GC log: 1%; Pause Full count 0; to-space exhausted 1
+debug.log* bytes max 245 MiB
+/mydata avail min 13.7 GiB
+drains: TOTAL slow drains 0 (queue full=queued>=50: 0; dropped>0: 0; max names 0; max queued 0); failed drains 0 (max queued 0)
+monitor task line: 11-20T17:24:08,891 MonitoringTask.java:95 - Scheduling monitoring task with report interval of 5000 ms, max operations 0
+dumps: none
+### drains.txt
+TOTAL slow drains 0 (queue full=queued>=50: 0; dropped>0: 0; max names 0; max queued 0); failed drains 0 (max queued 0)
+### montask.txt
+INFO  [Native-Transport-Requests-1] 2026-11-20T17:24:08,891 MonitoringTask.java:95 - Scheduling monitoring task with report interval of 5000 ms, max operations 0

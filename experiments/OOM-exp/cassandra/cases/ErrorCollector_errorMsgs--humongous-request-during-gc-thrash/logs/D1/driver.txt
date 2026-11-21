@@ -1,0 +1,10 @@
+2026-11-20T11:08:25.351-0700 run D1 build=base heap=2G arm=H N=2 k=1 trig=gc hold_after=1800 len=default tmax=300
+2026-11-20T11:08:25.402-0700 free 713G
+2026-11-20T11:09:05.548-0700 daemon pid 219210 up
+2026-11-20T11:09:26.577-0700 baseline done; client start N=2 k=1 --trig-at gc:/mydata/s4/r15-w5/cassandra/logs/gc.log:2048 --trig-max 300
+2026-11-20T11:15:08.805-0700 OOM line seen in stdout
+/mydata/s4/r15-w5/harness/run.sh: line 84: 219210 Killed                  ( ulimit -n 100000; cd $T; exec env MAX_HEAP_SIZE=$HEAP CASSANDRA_HEAPDUMP_DIR=$R setsid nohup systemd-run --user --scope -p MemorySwapMax=0 --unit=r15-$RID -- bin/cassandra -f > $R/stdout.txt 2>&1 < /dev/null )
+2026-11-20T11:15:23.880-0700 daemon gone while client running
+2026-11-20T11:15:26.888-0700 daemon stopped
+2026-11-20T11:15:29.906-0700 END daemon-exit oom:java.lang.OutOfMemoryError: Java heap space
+2026-11-20T11:15:37.069-0700 done

@@ -1,0 +1,62 @@
+OOME-initiating thread: trace serial 10, thread serial 9
+    at java.lang.OutOfMemoryError.<init>(OutOfMemoryError.java:48)
+    at java.util.Arrays.copyOf(Arrays.java:3745)
+    at java.lang.AbstractStringBuilder.ensureCapacityInternal(AbstractStringBuilder.java:172)
+    at java.lang.AbstractStringBuilder.append(AbstractStringBuilder.java:538)
+    at java.lang.StringBuilder.append(StringBuilder.java:178)
+    at java.lang.StringBuilder.append(StringBuilder.java:89)
+    at java.lang.AbstractStringBuilder.append(AbstractStringBuilder.java:573)
+    at java.lang.StringBuilder.append(StringBuilder.java:208)
+    at java.lang.StringBuilder.append(StringBuilder.java:89)
+    at java.util.Formatter$FormatSpecifier.appendJustified(Formatter.java:3068)
+    at java.util.Formatter$FormatSpecifier.print(Formatter.java:3058)
+    at java.util.Formatter$FormatSpecifier.printString(Formatter.java:3031)
+    at java.util.Formatter$FormatSpecifier.print(Formatter.java:2908)
+    at java.util.Formatter.format(Formatter.java:2673)
+    at java.util.Formatter.format(Formatter.java:2609)
+    at java.lang.String.format(String.java:2897)
+    at org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation.getLogMessage(MonitoringTask.java:371)
+    at org.apache.cassandra.db.monitoring.MonitoringTask$AggregatedOperations.addOperation(MonitoringTask.java:299)
+    at org.apache.cassandra.db.monitoring.MonitoringTask$AggregatedOperations.lambda$getLogMessage$0(MonitoringTask.java:283)
+    at org.apache.cassandra.db.monitoring.MonitoringTask$AggregatedOperations$$Lambda$1645.accept(?:-1)
+    at java.util.HashMap$Values.forEach(HashMap.java:977)
+    at org.apache.cassandra.db.monitoring.MonitoringTask$AggregatedOperations.getLogMessage(MonitoringTask.java:283)
+    at org.apache.cassandra.db.monitoring.MonitoringTask.logFailedOperations(MonitoringTask.java:158)
+    at org.apache.cassandra.db.monitoring.MonitoringTask.logOperations(MonitoringTask.java:139)
+    at org.apache.cassandra.db.monitoring.MonitoringTask.lambda$new$0(MonitoringTask.java:96)
+    at org.apache.cassandra.db.monitoring.MonitoringTask$$Lambda$1605.run(?:-1)
+    at org.apache.cassandra.concurrent.ExecutionFailure$1.run(ExecutionFailure.java:133)
+    at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:515)
+    at java.util.concurrent.FutureTask.runAndReset(FutureTask.java:305)
+    at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+    at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+    at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+dump TB-4.hprof: all objects 1781.2 MiB shallow; arrays >= 1048576 B: 117, 1735.6 MiB
+category shares of the dump total (arrays >= min):
+  H_M   1449.6 MiB   81.4%
+  H_R      0.0 MiB    0.0%
+  H_F    215.4 MiB   12.1%
+  H_L      0.0 MiB    0.0%
+  H_O      0.0 MiB    0.0%
+  H_unreachable     70.6 MiB    4.0%
+  H_M+H_R+H_F  93.5%   (reachable arrays >= min: 1665.0 MiB; H_M of them 87.1%, H_R 0.0%)
+[M]
+   byte[]       16000000 x65       991.8 MiB
+   byte[]       32000058 x15       457.8 MiB
+[F]
+   byte[]       16000000 x13       198.4 MiB
+   byte[]        1048576 x17        17.0 MiB
+[unreachable]
+   byte[]       64000086 x1         61.0 MiB
+   int[]          451852 x1          1.7 MiB
+   int[]          440120 x1          1.7 MiB
+   int[]          438580 x1          1.7 MiB
+   int[]          429624 x1          1.6 MiB
+   int[]          429380 x1          1.6 MiB
+   int[]          328848 x1          1.3 MiB
+monitor instances: {'org.apache.cassandra.db.monitoring.MonitoringTask$$Lambda$1605': 1, 'org.apache.cassandra.db.monitoring.MonitoringTask$OperationsQueue': 2, 'org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation': 15, 'org.apache.cassandra.db.monitoring.MonitoringTask$SlowOperation': 50, 'org.apache.cassandra.db.monitoring.MonitoringTask$AggregatedOperations$$Lambda$1645': 1, 'org.apache.cassandra.db.monitoring.MonitoringTask$AggregatedOperations': 1}
+  slowOperationsQueue: maxOperations=50 queue count=50
+  failedOperationsQueue: maxOperations=50 queue count=0
+name-length byte[] (32,000,003..32,000,400) by category: {'M': 15}
+NTR threads: 13 (with traceQuery on stack: 0); ScheduledTasks threads: 1
+O detail: 

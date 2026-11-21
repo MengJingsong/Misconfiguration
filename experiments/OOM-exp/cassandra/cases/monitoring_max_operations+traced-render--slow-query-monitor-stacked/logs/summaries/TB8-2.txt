@@ -1,0 +1,42 @@
+### driver.txt
+2026-11-20T10:02:28 run TB8-2 build=base heap=8G tracing=off values=distinct monitor=mon50 mode=fixed:13 hold=180 k=2
+2026-11-20T10:02:28 free 15G
+2026-11-20T10:02:29 JVM_EXTRA_OPTS=' -XX:-HeapDumpOnOutOfMemoryError'
+2026-11-20T10:02:49 daemon pid 439466 up
+2026-11-20T10:02:50 client start --k 2 --tracing off --distinct --fixed 13 --hold-s 180
+/mydata/s4/r12-w5/harness/run2.sh: line 53: 439466 Killed                  ( ulimit -n 100000; cd $T; MAX_HEAP_SIZE=$HEAP CASSANDRA_HEAPDUMP_DIR=$R JVM_EXTRA_OPTS="$EXTRA" exec systemd-run --user --scope -p MemorySwapMax=0 --unit=r12-$RID -- bin/cassandra -f > $R/stdout.txt 2>&1 < /dev/null )
+2026-11-20T10:04:58 daemon gone while client running
+2026-11-20T10:05:05 END daemon-exit oom:# java.lang.OutOfMemoryError: Java heap space
+2026-11-20T10:05:19 done
+### summary.txt
+endpoint: daemon-exit oom:# java.lang.OutOfMemoryError: Java heap space
+stdout: # java.lang.OutOfMemoryError: Java heap space
+stdout: #   Executing /bin/sh -c "kill -9 439466"...
+client # start 2026-11-20T10:02:50-0700 tracing=off distinct=True k=2 steps=[13] S=16000000
+client # step 0 N=13 established=13 at 266 ms
+client # all connections ended at 127719 ms
+client # end 127719 ms done=656 err=26
+client max established 13, completed 656, errors 13, max outstanding 13, max K_client 208000351
+last step N=13 started at 266 ms; ok completions after it: 656; last completion line at 127346 ms (+127.1 s)
+  step N=13: ok 656, median latency 2127 ms
+  error x13: io_error:[Errno
+  error x10: err:0x1200:Operation
+  error x3: err:0x1300:Operation
+threads samples 20: max NTR 15, max R(traceQuery) 0, max in hex 0, in String.<init> 0, in concat 0
+  R series: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  ScheduledTasks phases: {'idle': 3, 'pop-fmt': 2, 'pop': 10, 'pop-hex': 5}  AsyncAppender-Worker: {'idle': 18, 'layout': 1, 'write': 1}
+  ST series: idle idle pop-fmt pop pop pop-hex pop pop-hex pop pop-hex pop pop pop-hex pop-hex pop pop-fmt pop pop pop idle
+K_server RequestsSize max 208000351 (samples 5) series 208000351 208000351 208000351 192000324 192000324; paused max 0
+RssAnon max 9165 MiB
+heap_info used max 7964 MiB
+GCs 233; humongous after GC: max 504 regions (8064 MiB), median 433; before GC max 504
+pauses 513; STW share over last 60 s of GC log: 15%; Pause Full count 17; to-space exhausted 12
+debug.log* bytes max 185 MiB
+/mydata avail min 14.3 GiB
+drains: TOTAL slow drains 0 (queue full=queued>=50: 0; dropped>0: 0; max names 0; max queued 0); failed drains 0 (max queued 0)
+monitor task line: 1-20T17:02:56,517 MonitoringTask.java:95 - Scheduling monitoring task with report interval of 5000 ms, max operations 50
+dumps: none
+### drains.txt
+TOTAL slow drains 0 (queue full=queued>=50: 0; dropped>0: 0; max names 0; max queued 0); failed drains 0 (max queued 0)
+### montask.txt
+INFO  [ReadStage-5] 2026-11-20T17:02:56,517 MonitoringTask.java:95 - Scheduling monitoring task with report interval of 5000 ms, max operations 50

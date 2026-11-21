@@ -63,7 +63,9 @@ dated); that is the guided agent's only indirect view of phase 2.
 - **Phase-1 case file:** the stem, or `none` for a candidate that names no single case (a sum across
   constraints).
 - **Agent:** `autonomous`, `guided`, or `legacy` (migrated 2026-11-17 from the retired lists; the
-  clue cell starts with its old origin, e.g. `[N13, blind recheck]`).
+  clue cell starts with its old origin, e.g. `[N13, blind recheck]`). Since 2026-11-20 also `phase-2 (<case ID>)`: a holder
+  that a phase-2 stage-2 agent found in its own runs but did not test as a claim, added with the owner's approval
+  (owner, 2026-11-20; first row OC-578 from R12).
 - **Patterns:** guided rows give the pattern IDs (`CP-1, CP-3`); autonomous rows `—`.
 - **Status** (written by phase 2, forward only): `open` → `picked: <phase-2 case ID>` → `true positive` /
   `false positive` / `retry` (each with the case ID); or `skipped: <reason>` (the OOM agent looked and

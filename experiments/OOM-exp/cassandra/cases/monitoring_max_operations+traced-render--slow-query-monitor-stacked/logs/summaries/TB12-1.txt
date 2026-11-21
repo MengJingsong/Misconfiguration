@@ -1,0 +1,40 @@
+### driver.txt
+2026-11-20T09:57:46 run TB12-1 build=base heap=12G tracing=off values=distinct monitor=mon50 mode=fixed:13 hold=180 k=2
+2026-11-20T09:57:46 free 11G
+2026-11-20T09:57:46 JVM_EXTRA_OPTS=' -XX:-HeapDumpOnOutOfMemoryError'
+2026-11-20T09:58:10 daemon pid 432918 up
+2026-11-20T09:58:12 client start --k 2 --tracing off --distinct --fixed 13 --hold-s 180
+2026-11-20T10:01:14 client ended; daemon alive (hold end)
+/mydata/s4/r12-w5/harness/run2.sh: line 60: 432918 Killed                  ( ulimit -n 100000; cd $T; MAX_HEAP_SIZE=$HEAP CASSANDRA_HEAPDUMP_DIR=$R JVM_EXTRA_OPTS="$EXTRA" exec systemd-run --user --scope -p MemorySwapMax=0 --unit=r12-$RID -- bin/cassandra -f > $R/stdout.txt 2>&1 < /dev/null )
+2026-11-20T10:01:34 END hold oom:# java.lang.OutOfMemoryError: Java heap space
+2026-11-20T10:01:34 NOTE: no 'Scheduling monitoring task' line (no slow/failed op reached the monitor)
+2026-11-20T10:01:52 done
+### summary.txt
+endpoint: hold oom:# java.lang.OutOfMemoryError: Java heap space
+stdout: # java.lang.OutOfMemoryError: Java heap space
+stdout: #   Executing /bin/sh -c "kill -9 432918"...
+client # start 2026-11-20T09:58:12-0700 tracing=off distinct=True k=2 steps=[13] S=16000000
+client # step 0 N=13 established=13 at 264 ms
+client # end 180495 ms done=870 err=15
+client max established 13, completed 870, errors 15, max outstanding 13, max K_client 208000351
+last step N=13 started at 264 ms; ok completions after it: 875; last completion line at 181049 ms (+180.8 s)
+  step N=13: ok 875, median latency 2499 ms
+  error x11: err:0x1200:Operation
+  error x4: err:0x1300:Operation
+threads samples 30: max NTR 14, max R(traceQuery) 0, max in hex 0, in String.<init> 0, in concat 0
+  R series: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  ScheduledTasks phases: {'idle': 3, 'pop-fmt': 5, 'pop': 16, 'pop-hex': 6}  AsyncAppender-Worker: {'idle': 28, 'encode': 1, 'write': 1}
+  ST series: idle idle pop-fmt pop-fmt pop pop pop pop pop-hex pop pop pop pop-hex pop pop-hex pop-fmt pop-fmt pop pop pop pop-hex pop-hex pop pop pop-hex pop pop pop pop-fmt idle
+K_server RequestsSize max 208000351 (samples 8) series 208000351 176000297 208000351 208000351 192000324 208000351 208000351 0; paused max 0
+RssAnon max 13440 MiB
+heap_info used max 12051 MiB
+GCs 314; humongous after GC: max 739 regions (11824 MiB), median 550; before GC max 741
+pauses 826; STW share over last 60 s of GC log: 15%; Pause Full count 6; to-space exhausted 6
+debug.log* bytes max 239 MiB
+/mydata avail min 10.6 GiB
+drains: TOTAL slow drains 0 (queue full=queued>=50: 0; dropped>0: 0; max names 0; max queued 0); failed drains 0 (max queued 0)
+monitor task line: none
+dumps: none
+### drains.txt
+TOTAL slow drains 0 (queue full=queued>=50: 0; dropped>0: 0; max names 0; max queued 0); failed drains 0 (max queued 0)
+### montask.txt

@@ -1,0 +1,36 @@
+[10:48:31] golden small F=20000
+[10:48:32] stopped V (none)
+[10:48:33] stopped R1 (none)
+[10:48:33] stopped R2 (none)
+[10:48:34] gen V xmx=2G build=/mydata/r11/run-orig
+[10:48:35] gen R1 xmx=2G build=/mydata/r11/run-orig
+[10:48:36] gen R2 xmx=2G build=/mydata/r11/run-orig
+[10:48:40] launched V pid=452718 unit=r11-V-1795189717 build=/mydata/r11/run-orig swap.max=0 memory.max=max
+[10:49:10] launched R1 pid=666909 unit=r11-R1-1795189747 build=/mydata/r11/run-orig swap.max=0 memory.max=max
+[10:49:10] launched R2 pid=256850 unit=r11-R2-1795189747 build=/mydata/r11/run-orig swap.max=0 memory.max=max
+[10:49:30] ring UN=3
+08:49:34 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+schema ok
+Schema Version:342ad3c4-143c-3cb9-a541-5ba0b18cba17
+TokenRange: 
+	TokenRange(start_token:-9223372036854775808, end_token:-3074457345618258603, endpoints:[10.10.1.1], rpc_endpoints:[10.10.1.1], endpoint_details:[EndpointDetails(host:10.10.1.1, datacenter:c, rack:r1)])
+	TokenRange(start_token:-3074457345618258603, end_token:3074457345618258602, endpoints:[10.10.1.5], rpc_endpoints:[10.10.1.5], endpoint_details:[EndpointDetails(host:10.10.1.5, datacenter:c, rack:r1)])
+	TokenRange(start_token:3074457345618258602, end_token:-9223372036854775808, endpoints:[10.10.1.4], rpc_endpoints:[10.10.1.4], endpoint_details:[EndpointDetails(host:10.10.1.4, datacenter:c, rack:r1)])
+[10:49:50] insert 20000 kept kv keys
+RANGEOK kept=1000 rejected=1000 candidates=3245
+DONE mode=insert table=kv keyBytes=8 first=0 count=20000 candidates=60454 ok=20000 err=0 rows=0 secs=3.4 ops/s=5929
+[10:50:02] insert took 12 s
+		SSTable count: 1
+		Old SSTable count: 0
+		Space used (live): 661280
+		Number of partitions (estimate): 19848
+[10:50:52] stopped V (452718)
+[10:50:55] stopped R1 (666909)
+[10:50:58] stopped R2 (256850)
+-rw-r--r-- 1 jason92 misconfiguration 651313 Nov 20 08:50 /mydata/r11/golden-V.tgz
+1.8M	data
+-rw-r--r-- 1 jason92 misconfiguration 65616 Nov 20 08:51 /mydata/r11/golden-R1.tgz
+1.1M	data
+-rw-r--r-- 1 jason92 misconfiguration 67949 Nov 20 08:51 /mydata/r11/golden-R2.tgz
+1.2M	data
+[10:51:02] golden small done (total 72 s after insert start)

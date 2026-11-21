@@ -1,0 +1,29 @@
+[2026-11-20 09:44:48.417] arm KQ1 heap 1024 L 2048 P 0 Q 1 redistribute 0 role node quick '-q' sets ' Q1 Q2 Q3 Q4' script d76e4599931c
+[2026-11-20 09:44:48.481] pre: load 0.90 0.70 0.83; mem used=596 avail=127475; disk 656G free; daemons: 0; java procs: 0
+[2026-11-20 09:44:49.358] staged: Q1 summary=31627032 cinfo=2013711 data=314704592; Q2 summary=31627032 cinfo=2013711 data=314756395; Q3 summary=31627032 cinfo=2013711 data=316587638; Q4 summary=31627032 cinfo=2013711 data=314764721; 
+[2026-11-20 09:44:49.648] dropped page cache
+[2026-11-20 09:44:49.964] yaml diff lines: 11 (environment only)
+[2026-11-20 09:45:39.439] up after 49 s: pid 226733 unit r10-KQ1-1795193089 cg /sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/r10-KQ1-1795193089.scope memory.max 2147483648 swap.max 0
+[2026-11-20 09:45:39.444] readback: -XX:+AlwaysPreTouch -XX:+UseG1GC -Xms1024M -Xmx1024M -XX:MaxDirectMemorySize=512M -XX:ParallelGCThreads=32 -XX:ConcGCThreads=32 -Dcassandra.jmx.local.port=7199 -XX:ParallelGCThreads=16 -XX:ConcGCThreads=16 -Dcassandra.jmx.local.port=27199 
+[2026-11-20 09:45:39.451] readback log: compaction_throughput=64MiB/s|concurrent_compactors=null|disk_access_mode=legacy|disk_access_mode=mmap_index_only|file_cache_enabled=false|Global buffer pool limit is 256.000MiB |index_summary_capacity=null|index_summary_resize_interval=60m|memory pool size of 51 MB and a resize interval of 60 minutes|memtable_allocation_type=heap_buffers|networking_cache_size=null|sstable_preemptive_open_interval=50MiB|storage_compatibility_mode=CASSANDRA_4|
+[2026-11-20 09:45:41.603] readback compactors: Current concurrent compactors in the system is:  2  throughput: Current compaction throughput: 64 MB/s 
+[2026-11-20 09:45:41.607] affinity: 0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30
+[2026-11-20 09:45:43.091] cqlsh attempts 1
+[2026-11-20 09:46:44.468] rss idle: VmHWM: 1638456 kB VmRSS: 1630680 kB RssAnon: 1450720 kB RssFile: 179960 kB  cg: cur=1786826752 anon 1489096704 file 284635136  ev: max 0 oom 0 oom_kill 0 
+[2026-11-20 09:46:45.673] tablestats idle:  SSTable count: 0| Old SSTable count: 0| Off heap memory used (total): 0| Bloom filter off heap memory used: 0| Index summary off heap memory used: 0| Compression metadata off heap memory used: 0|
+[2026-11-20 09:46:46.911] is idle: ATTRS 1795193206865 pool_size_bytes=316 capacity_mb=51 avg_interval=128.0 resize_min=60 own_bytes=0
+[2026-11-20 09:46:47.214] nmt idle: Total: reserved=2689MB, committed=1450MB|Java Heap committed=1024MB)|Class committed=63MB)|Thread committed=54MB)|Code committed=29MB)|GC committed=104MB)|Internal committed=1MB)|Other committed=147MB)|Symbol committed=12MB)|Native Memory Tracking committed=3MB)|Arena Chunk committed=1MB)|
+[2026-11-20 09:46:47.220] I0 (median RssAnon last 30 s) = 1451048 kB = 1417 MiB
+[2026-11-20 09:49:20.633] import Q start 1795193360631: nodetool import -q r10 isx /mydata/s4/r10/stage_node/Q1 /mydata/s4/r10/stage_node/Q2 /mydata/s4/r10/stage_node/Q3 /mydata/s4/r10/stage_node/Q4
+[2026-11-20 09:49:22.305] import Q end 1795193362301 rc 0 dur 1 s: Doing a quick import - skipping sstable verification and row cache invalidation 
+[2026-11-20 09:50:39.750] compaction started: INFO  [CompactionExecutor:4] 2026-11-20T16:50:38,747 CompactionTask.java:175 - Compacting (83b357a0-e502-11f1-a05c-a70bf8214fa4) [/mydata/s4/r10/arms/KQ1/data/r10/isx-d34fb3e0e50111f1a05ca70bf8214fa4/nb-4-big-Data.db:level=0, /mydata/s4/r10/arms/KQ1/data/r10/isx-d34fb3e0e50111f1a05ca70bf8214fa4/nb-1-big-Data.db:level=0, /mydata/s4/r10/arms/KQ1/data/r10/isx-d34fb3e0e50111f1a05ca70bf8214fa4/nb-3-big
+[2026-11-20 09:55:23.916] end reason: normal
+[2026-11-20 09:55:23.924] peak RssAnon 1867340 kB; dRssAnon(peak - I0) = 406 MiB
+[2026-11-20 09:55:23.927] cgroup last rows: 1795193723542,,,,206184448,0,176209920,98660,1,1 1795193723745,,,,,,,,,, 
+[2026-11-20 09:55:23.929] alive at end: 0
+[2026-11-20 09:55:26.027] scope gone: inactive
+[2026-11-20 09:55:26.120] dmesg: [176166.794379] CompactionExecu invoked oom-killer: gfp_mask=0xcc0(GFP_KERNEL), order=0, oom_score_adj=0 [176166.794501] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0-1,oom_memcg=/user.slice/user-20001.slice/user@20001.service/app.slice/r10-KQ1-1795193089.scope,task_memcg=/user.slice/user-20001.slice/user@20001.service/app.slice/r10-KQ1-1795193089.scope,task=java,pid=226733,uid=20001 [176166.794736] Memory cgroup out of memory: Killed process 226733 (java) total-vm:35136292kB, anon-rss:1873984kB, file-rss:179396kB, shmem-rss:0kB, UID:20001 pgtables:9456kB oom_score_adj:0 
+[2026-11-20 09:55:26.148] log: redistributions: 0+0; errors: 0
+[2026-11-20 09:55:26.153] import order: stage_node/Q4 stage_node/Q3 stage_node/Q2 stage_node/Q1 
+[2026-11-20 09:55:26.188] data dir after: 3306 44 51 169 51 7960 3854 51 289 120 51 51 98 314704592 314764721 1305092491 316587638 314756395 706 
+[2026-11-20 09:55:26.471] done arm KQ1

@@ -1,0 +1,13 @@
+[2026-11-20 11:40:54 EST] BEGIN T-PK-2G-2 arm=A heap=2G cond=PK k1=16 k2=500000 N=8000000 W=300s G=300s
+[2026-11-20 11:40:54 EST] free /mydata 523882 MiB
+[2026-11-20 11:40:55 EST] started pid 180405 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/r14-T-PK-2G-2-1795192854.scope
+[2026-11-20 11:41:01 EST] ready
+-XX:+HeapDumpOnOutOfMemoryError -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/r14/runs/T-PK-2G-2/cassandra-1795192855-pid180405.hprof -XX:OnOutOfMemoryError=kill 
+[2026-11-20 11:41:07 EST] sent: {"ev": "sent", "t_send_ms": 1795192867164, "body_bytes": 4000171, "t_ms": 1795192867167}
+[2026-11-20 11:41:19 EST] THROWN seen at +12s: 1795192877.637 java.lang.OutOfMemoryError: Java heap space
+[2026-11-20 11:41:27 EST] +20s jmx: 1795192874225,2090143160,2090143160,2090143160,1,0,1,0,0,56979114,1,-1,1451,2834,-1
+[2026-11-20 11:41:47 EST] +40s jmx: 1795192874225,2090143160,2090143160,2090143160,1,0,1,0,0,56979114,1,-1,1451,2834,-1
+[2026-11-20 11:41:51 EST] dump done seen at +44s
+/mydata/s4/r14/h/run-arm.sh: line 52: 180405 Killed                  CASSANDRA_CONF=$R/conf CASSANDRA_LOG_DIR=$R/logs MAX_HEAP_SIZE=$HEAP MAX_DIRECT_MEMORY_SIZE= CASSANDRA_HEAPDUMP_DIR=$R JVM_EXTRA_OPTS="$EX" setsid nohup systemd-run --user --scope --unit="r14-$L-$(date +%s)" -p MemoryMax=${MM}M -p MemorySwapMax=0 "$TREE/bin/cassandra" -f < /dev/null > "$R/stdout.log" 2>&1
+[2026-11-20 11:41:53 EST] VICTIM DEAD at +46s
+[2026-11-20 11:41:56 EST] END T-PK-2G-2 OOM type="java.lang.OutOfMemoryError: Java heap space" thrown_at=+10.5s dump_done_at=+44.4s kill9_at=+44.5s jvm_exit_at=+46s(poll) client={"ev": "conn_closed", "msg": "[Errno 104] Connection reset by peer", "latency_s": 44.897, "t_ms": 1795192912061}

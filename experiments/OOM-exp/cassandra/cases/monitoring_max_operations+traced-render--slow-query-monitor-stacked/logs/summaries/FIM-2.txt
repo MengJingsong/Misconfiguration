@@ -1,0 +1,35 @@
+### driver.txt
+2026-11-20T10:35:13 run FIM-2 build=base heap=2G tracing=on values=ident monitor=mon0 mode=fixed:13 hold=150 k=0
+2026-11-20T10:35:13 free 13G
+2026-11-20T10:35:13 JVM_EXTRA_OPTS='-Dcassandra.monitoring_max_operations=0'
+2026-11-20T10:35:33 daemon pid 486949 up
+2026-11-20T10:35:34 client start --k 0 --tracing on  --fixed 13 --hold-s 150
+2026-11-20T10:38:06 client ended; daemon alive (hold end)
+2026-11-20T10:38:17 END hold
+2026-11-20T10:38:19 done
+### summary.txt
+endpoint: hold
+client # start 2026-11-20T10:35:34-0700 tracing=on distinct=False k=0 steps=[13] S=16000000
+client # step 0 N=13 established=13 at 258 ms
+client # end 150427 ms done=2537 err=0
+client max established 13, completed 2514, errors 0, max outstanding 13, max K_client 208000351
+last step N=13 started at 258 ms; ok completions after it: 2550; last completion line at 150819 ms (+150.6 s)
+  step N=13: ok 2550, median latency 747 ms
+threads samples 23: max NTR 13, max R(traceQuery) 13, max in hex 10, in String.<init> 4, in concat 3
+  R series: 12 8 8 10 11 9 4 10 9 9 8 8 8 13 10 5 6 6 8 9 10 7 0
+  ScheduledTasks phases: {'idle': 23}  AsyncAppender-Worker: {'idle': 23}
+  ST series: idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle
+K_server RequestsSize max 160000270 (samples 5) series 160000270 112000189 48000081 128000216 128000216; paused max 0
+RssAnon max 2896 MiB
+heap_info used max 1899 MiB
+GCs 379; humongous after GC: max 71 regions (1136 MiB), median 37; before GC max 117
+pauses 793; STW share over last 60 s of GC log: 7%; Pause Full count 0; to-space exhausted 3
+debug.log* bytes max 0 MiB
+/mydata avail min 12.2 GiB
+drains: TOTAL slow drains 0 (queue full=queued>=50: 0; dropped>0: 0; max names 0; max queued 0); failed drains 0 (max queued 0)
+monitor task line: 11-20T17:35:36,778 MonitoringTask.java:95 - Scheduling monitoring task with report interval of 5000 ms, max operations 0
+dumps: none
+### drains.txt
+TOTAL slow drains 0 (queue full=queued>=50: 0; dropped>0: 0; max names 0; max queued 0); failed drains 0 (max queued 0)
+### montask.txt
+INFO  [Native-Transport-Requests-12] 2026-11-20T17:35:36,778 MonitoringTask.java:95 - Scheduling monitoring task with report interval of 5000 ms, max operations 0

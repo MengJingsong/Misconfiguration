@@ -55,6 +55,7 @@ positive** or **retry** (stage 2).
 | Stage 5 writes OOM candidates; the OOM agent picks from them | phase 1 → 2 | candidate list |
 | Stage 2 writes each candidate's verdict back (per-agent true-positive rate) | phase 2 → 1 | candidate list Status |
 | A true positive whose shape no pattern covers becomes a new clue pattern | phase 2 → 1 | `oom-clue-patterns.md` |
+| A new holder a stage-2 run revealed but did not claim becomes a candidate row (owner-approved, Agent `phase-2 (<ID>)`) | phase 2 → 1 | candidate list |
 | Each phase-2 case names its phase-1 case file | phase 2 → 1 | case file §1, `_INDEX.md` |
 
 ## 5. Flowchart
@@ -114,6 +115,7 @@ flowchart TD
   O2 --> RT
   RT --> RL
   O2 -.->|verdict| CL
+  O2 -.->|new holder| CL
   TP -.->|new pattern| CPAT
 
   class CF,JR,CPAT,CL,RL,CASE store
@@ -134,3 +136,4 @@ Notes on the chart:
 | 2026-11-17 | Flowchart reduced to step names; descriptions stay in sections 2–4 (owner) |
 | 2026-11-17 | **Redesign (owner):** the 2026-11-16/17 linking machinery and phase 2's lead sources removed; phase 1 gains stage 5 (OOM clue find: JIRA OOM reports → clue patterns; autonomous and guided agents → candidate list); phase 2 becomes the OOM agent's two stages with true positive / false positive / retry and a retry list; data-flow tracing dropped |
 | 2026-11-18 | Candidate list status vocabulary gains `closed: covered by <case ID> (<verdict>)` (owner); no step or arrow changed |
+| 2026-11-20 | New lead source (owner): stage 2 may propose a holder its runs revealed but did not claim; with approval it becomes a candidate row with Agent `phase-2 (<case ID>)` (first: OC-578 from R12). §4 row and a dotted `new holder` arrow O2 → CL added |

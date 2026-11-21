@@ -1,0 +1,61 @@
+[11:45:00] args: name=cal5 type=T V-build=orig G=60000 VX=2G RX=2G sess=8 loadcap=120 fill_small=0 platform=aarch64
+[11:45:03] stopped V (none)
+[11:45:06] stopped R1 (none)
+[11:45:09] stopped R2 (none)
+[11:45:15] gen V xmx=2G build=/mydata/r11/run-orig
+[11:45:16] restored V from /mydata/r11/golden-V.tgz (53M data, saved_caches: 0 files)
+[11:45:17] gen R1 xmx=2G build=/mydata/r11/run-orig
+[11:45:18] restored R1 from /mydata/r11/golden-R1.tgz (1.1M data, saved_caches: 0 files)
+[11:45:18] gen R2 xmx=2G build=/mydata/r11/run-orig
+[11:45:19] restored R2 from /mydata/r11/golden-R2.tgz (1.1M data, saved_caches: 0 files)
+[11:45:22] launched V pid=475099 unit=r11-V-1795193120 build=/mydata/r11/run-orig swap.max=0 memory.max=max
+[11:46:32] launched R2 pid=267549 unit=r11-R2-1795193190 build=/mydata/r11/run-orig swap.max=0 memory.max=max
+[11:46:32] launched R1 pid=671918 unit=r11-R1-1795193190 build=/mydata/r11/run-orig swap.max=0 memory.max=max
+[11:46:52] ring UN=3
+V pid 475099 build /mydata/r11/run-orig jar md5 1becab414e5f
+V resolved: -XX:+UseG1GC -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M 
+V VM.flags: MaxDirectMemorySize=16642998272 MaxHeapSize=2147483648 
+V cgroup: /sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/r11-V-1795193120.scope swap.max=0 memory.max=max
+2026-11-20T16:45:33,246 CacheService.java:121 - Initializing key cache with capacity of 100 MiBs.
+2026-11-20T16:45:33,282 CacheService.java:143 - Initializing row cache with capacity of 0 MiBs
+2026-11-20T16:45:33,287 CacheService.java:174 - Initializing counter cache with capacity of 50 MiBs
+V start info:
+Key Cache              : entries 27, size 2.2 KiB, capacity 100 MiB, 104 hits, 130 requests, 0.800 recent hit rate, 14400 save period in seconds
+Counter Cache          : entries 0, size 0 bytes, capacity 50 MiB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds
+[11:47:08] fill: read 1500000 kv
+RANGEOK kept=1000 rejected=1000 candidates=3245
+DONE mode=read table=kv keyBytes=8 first=0 count=1500000 candidates=4500841 ok=1500000 err=0 rows=1500000 secs=102.9 ops/s=14581
+[11:48:58] fill: counter 550000 ctr
+RANGEOK kept=1000 rejected=1000 candidates=3245
+DONE mode=counter table=ctr keyBytes=8 first=0 count=550000 candidates=1649894 ok=550000 err=0 rows=0 secs=48.6 ops/s=11320
+[11:50:10] after fill: key cache 100.00 MiB, counter cache 50.00 MiB
+== pre-burst nodetool info
+Heap Memory (MB)       : 1442.84 / 2048.00
+Off Heap Memory (MB)   : 2.95
+Key Cache              : entries 1310720, size 100 MiB, capacity 100 MiB, 111 hits, 1501461 requests, 0.000 recent hit rate, 14400 save period in seconds
+Counter Cache          : entries 468114, size 50 MiB, capacity 50 MiB, 0 hits, 550000 requests, 0.000 recent hit rate, 7200 save period in seconds
+== tablestats
+		Table: t_blob
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Table: ctr
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Table: kv
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+[11:50:25] pre-burst live heap (histogram total): Total      10244855      411290696
+[11:50:35] burst start G=60000 sess=8
+[11:53:03] client exited: GATE_CONNECTED 10.10.1.4:7401 FINAL sent=6877250 ok=142172 err=6735078 firstOkMs=1795193440798 lastOkMs=1795193488952 total=9223372036854775807 stop=false endMs=1795193560738 NoHostAvailableException: All host(s) tried for query failed (no host was tried) 
+[11:53:04] gate: 
+[11:53:05] observation: DEAD (1795193585 DEAD)
+V_DEAD
+R1_ALIVE
+R2_ALIVE
+[11:53:16] stopped V (475099)
+[11:53:30] stopped R1 (671918)
+[11:53:45] stopped R2 (267549)
+[11:53:51] cal5 V: type=T G=60000 xmx=2G 0 OOMError lines | pauses=157 max_after_any=2044MiB(99.8%) full_gcs=72 max_after_full=2030MiB(99.1%) ReportJavaOutOfMemory=1 | full>95%: n=55 window=74s pause=45s (61%) service_loss=not met | pauses=157 total_pause=68s max60=82% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=HeapDumper@394.579s,ReportJavaOutOfMemory@419.811s | obs=DEAD | client: FINAL sent=6877250 ok=142172 err=6735078 firstOkMs=1795193440798 lastOkMs=1795193488952 total=9223372036854775807 stop=false endMs=1795193560738 NoHostAvailableException: All host(s) tried for query failed (no host was tried) | R1: cal5 R1: type=T G=60000 xmx=2G 0 OOMError lines | pauses=20 max_after_any=2048MiB(100.0%) full_gcs=1 max_after_full=219MiB(10.7%) ReportJavaOutOfMemory=0  | R2: cal5 R2: type=T G=60000 xmx=2G 0 OOMError lines | pauses=18 max_after_any=2047MiB(100.0%) full_gcs=1 max_after_full=201MiB(9.8%) ReportJavaOutOfMemory=0 

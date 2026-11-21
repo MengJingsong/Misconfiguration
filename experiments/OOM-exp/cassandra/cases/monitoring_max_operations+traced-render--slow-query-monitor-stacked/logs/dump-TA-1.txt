@@ -1,0 +1,73 @@
+OOME-initiating thread: trace serial 66, thread serial 65
+    at java.lang.OutOfMemoryError.<init>(OutOfMemoryError.java:48)
+    at org.apache.cassandra.utils.Hex.bytesToHex(Hex.java:78)
+    at org.apache.cassandra.utils.ByteBufferUtil.bytesToHex(ByteBufferUtil.java:639)
+    at org.apache.cassandra.serializers.BytesSerializer.toString(BytesSerializer.java:49)
+    at org.apache.cassandra.serializers.BytesSerializer.toCQLLiteralNonNull(BytesSerializer.java:67)
+    at org.apache.cassandra.serializers.TypeSerializer.toCQLLiteral(TypeSerializer.java:85)
+    at org.apache.cassandra.cql3.CQL3Type$Native.toCQLLiteral(CQL3Type.java:135)
+    at org.apache.cassandra.db.marshal.AbstractType.toCQLString(AbstractType.java:165)
+    at org.apache.cassandra.db.filter.RowFilter$SimpleExpression.toString(RowFilter.java:876)
+    at org.apache.cassandra.db.filter.RowFilter.toString(RowFilter.java:470)
+    at org.apache.cassandra.db.filter.RowFilter.toCQLString(RowFilter.java:460)
+    at org.apache.cassandra.db.Slices$SelectAllSlices.toCQLString(Slices.java:780)
+    at org.apache.cassandra.db.filter.ClusteringIndexSliceFilter.toCQLString(ClusteringIndexSliceFilter.java:141)
+    at org.apache.cassandra.db.SinglePartitionReadCommand.appendCQLWhereClause(SinglePartitionReadCommand.java:1230)
+    at org.apache.cassandra.db.AbstractReadQuery.toCQLString(AbstractReadQuery.java:109)
+    at org.apache.cassandra.db.ReadCommand.toCQLString(ReadCommand.java:91)
+    at org.apache.cassandra.exceptions.QueryCancelledException.<init>(QueryCancelledException.java:26)
+    at org.apache.cassandra.db.ReadCommand$QueryCancellationChecker.maybeCancel(ReadCommand.java:791)
+    at org.apache.cassandra.db.ReadCommand$QueryCancellationChecker.applyToRow(ReadCommand.java:773)
+    at org.apache.cassandra.db.transform.BaseRows.hasNext(BaseRows.java:141)
+    at org.apache.cassandra.db.filter.RowFilter$1.applyToPartition(RowFilter.java:257)
+    at org.apache.cassandra.db.transform.BasePartitions.hasNext(BasePartitions.java:94)
+    at org.apache.cassandra.db.partitions.UnfilteredPartitionIterators$Serializer.serialize(UnfilteredPartitionIterators.java:334)
+    at org.apache.cassandra.db.ReadResponse$LocalDataResponse.build(ReadResponse.java:201)
+    at org.apache.cassandra.db.ReadResponse$LocalDataResponse.<init>(ReadResponse.java:186)
+    at org.apache.cassandra.db.ReadResponse.createDataResponse(ReadResponse.java:48)
+    at org.apache.cassandra.db.ReadCommand.createResponse(ReadCommand.java:374)
+    at org.apache.cassandra.service.StorageProxy$LocalReadRunnable.runMayThrow(StorageProxy.java:2211)
+    at org.apache.cassandra.service.StorageProxy$DroppableRunnable.run(StorageProxy.java:2608)
+    at org.apache.cassandra.concurrent.ExecutionFailure$2.run(ExecutionFailure.java:163)
+    at org.apache.cassandra.concurrent.SEPExecutor.maybeExecuteImmediately(SEPExecutor.java:229)
+    at org.apache.cassandra.concurrent.Stage.maybeExecuteImmediately(Stage.java:127)
+dump TA-1.hprof: all objects 1658.4 MiB shallow; arrays >= 1048576 B: 85, 1594.2 MiB
+category shares of the dump total (arrays >= min):
+  H_M    442.5 MiB   26.7%
+  H_R    261.1 MiB   15.7%
+  H_F      0.0 MiB    0.0%
+  H_L    305.2 MiB   18.4%
+  H_O    122.1 MiB    7.4%
+  H_unreachable    463.3 MiB   27.9%
+  H_M+H_R+H_F  42.4%   (reachable arrays >= min: 1130.9 MiB; H_M of them 39.1%, H_R 23.1%)
+[M]
+   byte[]       16000000 x25       381.5 MiB
+   byte[]       32000058 x2         61.0 MiB
+[R]
+   byte[]       16000000 x10       152.6 MiB
+   byte[]       32000000 x2         61.0 MiB
+   byte[]       32000095 x1         30.5 MiB
+   byte[]        1048576 x17        17.0 MiB
+[L]
+   byte[]       32000095 x7        213.6 MiB
+   byte[]       32003751 x1         30.5 MiB
+   byte[]       32000146 x1         30.5 MiB
+   byte[]       32000058 x1         30.5 MiB
+[O]
+   byte[]       32000006 x2         61.0 MiB
+   char[]       32000000 x1         61.0 MiB
+[unreachable]
+   byte[]       32000006 x7        213.6 MiB
+   byte[]       64000306 x1         61.0 MiB
+   byte[]       64000086 x1         61.0 MiB
+   byte[]       32000002 x2         61.0 MiB
+   char[]       32000000 x1         61.0 MiB
+   int[]          660550 x1          2.5 MiB
+   int[]          429330 x1          1.6 MiB
+   int[]          357320 x1          1.4 MiB
+monitor instances: {'org.apache.cassandra.db.monitoring.MonitoringTask$$Lambda$1604': 1, 'org.apache.cassandra.db.monitoring.MonitoringTask$OperationsQueue': 2, 'org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation': 20, 'org.apache.cassandra.db.monitoring.MonitoringTask$SlowOperation': 5}
+  slowOperationsQueue: maxOperations=50 queue count=5
+  failedOperationsQueue: maxOperations=50 queue count=18
+name-length byte[] (32,000,003..32,000,400) by category: {'L': 9, 'M': 2, 'R': 1, 'unreachable': 7, 'O': 2}
+NTR threads: 10 (with traceQuery on stack: 3); ScheduledTasks threads: 1
+O detail: (no direct frame root) 61.0 MiB (3.7%), ReadStage [QueryCancelledException render] 61.0 MiB (3.7%)

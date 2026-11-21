@@ -71,6 +71,9 @@ fit the readings.
      `retry (<ID>)`;
    - for `retry`, add a row to the retry list;
    - update the case's row in [`<system>/cases/_INDEX.md`](cassandra/cases/_INDEX.md) (Verdict column);
+   - for a new holder the runs revealed but the design did not claim (for example one that dominates some dumps),
+     propose it to the owner; with approval it becomes a candidate-list row with Agent `phase-2 (<case ID>)`
+     (added 2026-11-20, owner);
    - for a `true positive` whose shape no clue pattern covers, add a pattern to
      `../capacity-enforcement-exp/stage5-oom-clue-find/oom-clue-patterns.md` with source
      `phase 2: <case ID>` and the date.

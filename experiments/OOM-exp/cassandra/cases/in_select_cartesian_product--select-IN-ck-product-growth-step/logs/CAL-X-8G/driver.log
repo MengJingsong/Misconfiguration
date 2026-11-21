@@ -1,0 +1,17 @@
+[2026-11-20 10:46:46 EST] BEGIN CAL-X-8G arm=A heap=8192M cond=CK k1=160 k2=1600000 N=256000000 W=600s G=600s
+[2026-11-20 10:46:46 EST] free /mydata 730004 MiB
+[2026-11-20 10:46:48 EST] started pid 157740 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/r14-CAL-X-8G-1795189607.scope
+[2026-11-20 10:46:54 EST] ready
+-XX:+HeapDumpOnOutOfMemoryError -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms8192M -Xmx8192M -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/r14/runs/CAL-X-8G/cassandra-1795189607-pid157740.hprof -XX:OnOutOfMemoryError=kill 
+[2026-11-20 10:46:59 EST] sent: {"ev": "sent", "t_send_ms": 1795189619631, "body_bytes": 12801331, "t_ms": 1795189619644}
+[2026-11-20 10:47:01 EST] THROWN seen at +2s: 1795189608.167 CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V
+[2026-11-20 10:47:19 EST] +20s jmx: 1795189637336,7897111360,6336830272,5699296064,1,0,1,0,0,56979114,1,-1,3183,1325,-1
+[2026-11-20 10:47:39 EST] +40s jmx: 1795189652038,8368355736,8334801304,8334801304,1,0,1,0,0,56980906,1,-1,4860,10225,-1
+[2026-11-20 10:47:59 EST] +60s jmx: 1795189652038,8368355736,8334801304,8334801304,1,0,1,0,0,56980906,1,-1,4860,10225,-1
+[2026-11-20 10:48:19 EST] +80s jmx: 1795189652038,8368355736,8334801304,8334801304,1,0,1,0,0,56980906,1,-1,4860,10225,-1
+[2026-11-20 10:48:39 EST] +100s jmx: 1795189652038,8368355736,8334801304,8334801304,1,0,1,0,0,56980906,1,-1,4860,10225,-1
+[2026-11-20 10:49:00 EST] dump done seen at +121s
+[2026-11-20 10:49:00 EST] +121s jmx: 1795189652038,8368355736,8334801304,8334801304,1,0,1,0,0,56980906,1,-1,4860,10225,-1
+/mydata/s4/r14/h/run-arm.sh: line 52: 157740 Killed                  CASSANDRA_CONF=$R/conf CASSANDRA_LOG_DIR=$R/logs MAX_HEAP_SIZE=$HEAP MAX_DIRECT_MEMORY_SIZE= CASSANDRA_HEAPDUMP_DIR=$R JVM_EXTRA_OPTS="$EX" setsid nohup systemd-run --user --scope --unit="r14-$L-$(date +%s)" -p MemoryMax=${MM}M -p MemorySwapMax=0 "$TREE/bin/cassandra" -f < /dev/null > "$R/stdout.log" 2>&1
+[2026-11-20 10:49:02 EST] VICTIM DEAD at +123s
+[2026-11-20 10:49:06 EST] END CAL-X-8G OOM type="java.lang.OutOfMemoryError: Java heap space" thrown_at=+35.9s dump_done_at=+120.2s kill9_at=-9.7s jvm_exit_at=+123s(poll) client={"ev": "conn_closed", "msg": "[Errno 104] Connection reset by peer", "latency_s": 121.284, "t_ms": 1795189740915}

@@ -1,0 +1,43 @@
+### driver.txt
+2026-11-20T08:59:22 run CAL-c build=base heap=2G tracing=on values=ident monitor=mon50 mode=fixed:2 hold=30 k=2
+2026-11-20T08:59:22 free 17G
+2026-11-20T08:59:23 JVM_EXTRA_OPTS=''
+2026-11-20T08:59:43 daemon pid 354985 up
+2026-11-20T08:59:44 client start --k 2 --tracing on  --fixed 2 --hold-s 30
+2026-11-20T09:00:16 client ended; daemon alive (hold end)
+2026-11-20T09:00:27 END hold
+2026-11-20T09:00:29 done
+### summary.txt
+endpoint: hold
+client # start 2026-11-20T08:59:44-0700 tracing=on distinct=False k=2 steps=[2] S=16000000
+client # step 0 N=2 established=2 at 247 ms
+client # end 30311 ms done=58 err=0
+client max established 2, completed 58, errors 0, max outstanding 2, max K_client 32000054
+last step N=2 started at 247 ms; ok completions after it: 60; last completion line at 31052 ms (+30.8 s)
+  step N=2: ok 60, median latency 992 ms
+threads samples 7: max NTR 2, max R(traceQuery) 2, max in hex 1, in String.<init> 1, in concat 0
+  R series: 0 0 0 0 2 0 0
+  ScheduledTasks phases: {'idle': 4, 'pop-fmt': 2, 'pop': 1}  AsyncAppender-Worker: {'idle': 7}
+  ST series: idle idle pop-fmt idle pop pop-fmt idle
+K_server RequestsSize max 32000054 (samples 2) series 32000054 32000054; paused max 0
+RssAnon max 2588 MiB
+heap_info used max 1664 MiB
+GCs 41; humongous after GC: max 36 regions (576 MiB), median 19; before GC max 100
+pauses 115; STW share over last 60 s of GC log: 3%; Pause Full count 0; to-space exhausted 1
+debug.log* bytes max 31 MiB
+/mydata avail min 16.6 GiB
+drains: TOTAL slow drains 2 (queue full=queued>=50: 0; dropped>0: 0; max names 1; max queued 32); failed drains 0 (max queued 0)
+  2026-11-20T16:00:00,959 were_slow  n=1 interval_ms=5002 names=1 queued=28 dropped=0 multi=28
+  2026-11-20T16:00:16,832 were_slow  n=1 interval_ms=13406 names=1 queued=32 dropped=0 multi=32
+monitor task line: 1-20T15:59:47,577 MonitoringTask.java:95 - Scheduling monitoring task with report interval of 5000 ms, max operations 50
+dumps: none
+### drains.txt
+2026-11-20T16:00:00,959 were_slow  n=1 interval_ms=5002 names=1 queued=28 dropped=0 multi=28
+2026-11-20T16:00:16,832 were_slow  n=1 interval_ms=13406 names=1 queued=32 dropped=0 multi=32
+TOTAL slow drains 2 (queue full=queued>=50: 0; dropped>0: 0; max names 1; max queued 32); failed drains 0 (max queued 0)
+### montask.txt
+INFO  [ReadStage-3] 2026-11-20T15:59:47,577 MonitoringTask.java:95 - Scheduling monitoring task with report interval of 5000 ms, max operations 50
+### trace-check.txt
+bound_var_0_v len=1004 head=0x0001020304 tail=f1f2...'
+bound_var_0_v len=1004 head=0x0001020304 tail=f1f2...'
+bound_var_0_v len=1004 head=0x0001020304 tail=f1f2...'

@@ -1,0 +1,57 @@
+--- /tmp/r15-Parser.g.orig	2026-11-20 08:43:21.489462358 -0700
++++ src/antlr/Parser.g	2026-11-20 08:43:21.493462427 -0700
+@@ -27,6 +27,14 @@
+     private final List<ErrorListener> listeners = new ArrayList<ErrorListener>();
+     protected final List<ColumnIdentifier> bindVariables = new ArrayList<ColumnIdentifier>();
+ 
++    // R15 intervention (diagnostic build only): apply the 65535-marker bound during the parse
++    private void checkMarkerCount()
++    {
++        if (bindVariables.size() >= org.apache.cassandra.utils.FBUtilities.MAX_UNSIGNED_SHORT)
++            throw new org.apache.cassandra.exceptions.InvalidRequestException(
++                "Too many markers(?). More than 65535 markers (R15 intervention: checked during the parse)");
++    }
++
+     public static final Set<String> reservedTypeNames = new HashSet<String>()
+     {{
+         add("byte");
+@@ -40,6 +48,7 @@
+ 
+     public AbstractMarker.Raw newBindVariables(ColumnIdentifier name)
+     {
++        checkMarkerCount();
+         AbstractMarker.Raw marker = new AbstractMarker.Raw(bindVariables.size());
+         bindVariables.add(name);
+         return marker;
+@@ -47,6 +56,7 @@
+ 
+     public AbstractMarker.INRaw newINBindVariables(ColumnIdentifier name)
+     {
++        checkMarkerCount();
+         AbstractMarker.INRaw marker = new AbstractMarker.INRaw(bindVariables.size());
+         bindVariables.add(name);
+         return marker;
+@@ -54,6 +64,7 @@
+ 
+     public Tuples.Raw newTupleBindVariables(ColumnIdentifier name)
+     {
++        checkMarkerCount();
+         Tuples.Raw marker = new Tuples.Raw(bindVariables.size());
+         bindVariables.add(name);
+         return marker;
+@@ -61,6 +72,7 @@
+ 
+     public Tuples.INRaw newTupleINBindVariables(ColumnIdentifier name)
+     {
++        checkMarkerCount();
+         Tuples.INRaw marker = new Tuples.INRaw(bindVariables.size());
+         bindVariables.add(name);
+         return marker;
+@@ -68,6 +80,7 @@
+ 
+     public Json.Marker newJsonBindVariables(ColumnIdentifier name)
+     {
++        checkMarkerCount();
+         Json.Marker marker = new Json.Marker(bindVariables.size());
+         bindVariables.add(name);
+         return marker;

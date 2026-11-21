@@ -1,0 +1,45 @@
+### driver.txt
+2026-11-20T09:04:55 run TA-3 build=base heap=2G tracing=on values=ident monitor=mon50 mode=fixed:13 hold=180 k=2
+2026-11-20T09:04:55 free 13G
+2026-11-20T09:04:55 JVM_EXTRA_OPTS=''
+2026-11-20T09:05:19 daemon pid 361432 up
+2026-11-20T09:05:21 client start --k 2 --tracing on  --fixed 13 --hold-s 180
+/mydata/s4/r12-w5/harness/run.sh: line 53: 361432 Killed                  ( ulimit -n 100000; cd $T; MAX_HEAP_SIZE=$HEAP CASSANDRA_HEAPDUMP_DIR=$R JVM_EXTRA_OPTS="$EXTRA" exec systemd-run --user --scope -p MemorySwapMax=0 --unit=r12-$RID -- bin/cassandra -f > $R/stdout.txt 2>&1 < /dev/null )
+2026-11-20T09:05:44 daemon gone while client running
+2026-11-20T09:05:50 END daemon-exit oom:java.lang.OutOfMemoryError: Java heap space
+2026-11-20T09:05:51 done
+### summary.txt
+endpoint: daemon-exit oom:java.lang.OutOfMemoryError: Java heap space
+stdout: java.lang.OutOfMemoryError: Java heap space
+stdout: Dumping heap to /mydata/s4/r12-w5/runs/TA-3/cassandra-1795190695-pid361432.hprof ...
+stdout: Heap dump file created [2053584031 bytes in 6.825 secs]
+stdout: # java.lang.OutOfMemoryError: Java heap space
+stdout: #   Executing /bin/sh -c "kill -9 361432"...
+client # start 2026-11-20T09:05:21-0700 tracing=on distinct=False k=2 steps=[13] S=16000000
+client # step 0 N=13 established=13 at 261 ms
+client # all connections ended at 23325 ms
+client # end 23325 ms done=0 err=37
+client max established 13, completed 0, errors 37, max outstanding 13, max K_client 208000351
+last step N=13 started at 261 ms; ok completions after it: 0; last completion line at 22967 ms (+22.7 s)
+  step N=13: ok 0, median latency - ms
+  error x16: err:0x1200:Operation
+  error x13: io_error:[Errno
+  error x8: err:0x1300:Operation
+threads samples 4: max NTR 13, max R(traceQuery) 12, max in hex 4, in String.<init> 5, in concat 3
+  R series: 12 4 4 0
+  ScheduledTasks phases: {'idle': 3, 'pop': 1}  AsyncAppender-Worker: {'idle': 2, 'layout': 2}
+  ST series: idle idle pop idle
+K_server RequestsSize max 208000351 (samples 1) series 208000351; paused max -
+RssAnon max 2895 MiB
+heap_info used max 1901 MiB
+GCs 54; humongous after GC: max 122 regions (1952 MiB), median 96; before GC max 122
+pauses 83; STW share over last 60 s of GC log: 3%; Pause Full count 5; to-space exhausted 2
+debug.log* bytes max 184 MiB
+/mydata avail min 12.7 GiB
+drains: TOTAL slow drains 0 (queue full=queued>=50: 0; dropped>0: 0; max names 0; max queued 0); failed drains 0 (max queued 0)
+monitor task line: 1-20T16:05:27,178 MonitoringTask.java:95 - Scheduling monitoring task with report interval of 5000 ms, max operations 50
+dumps: cassandra-1795190695-pid361432.hprof (1958 MiB)
+### drains.txt
+TOTAL slow drains 0 (queue full=queued>=50: 0; dropped>0: 0; max names 0; max queued 0); failed drains 0 (max queued 0)
+### montask.txt
+INFO  [ReadStage-15] 2026-11-20T16:05:27,178 MonitoringTask.java:95 - Scheduling monitoring task with report interval of 5000 ms, max operations 50

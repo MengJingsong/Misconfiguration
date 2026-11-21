@@ -1,0 +1,52 @@
+OOME-initiating thread: trace serial 10, thread serial 9
+    at java.lang.OutOfMemoryError.<init>(OutOfMemoryError.java:48)
+    at java.util.Arrays.copyOf(Arrays.java:3745)
+    at java.lang.AbstractStringBuilder.ensureCapacityInternal(AbstractStringBuilder.java:172)
+    at java.lang.AbstractStringBuilder.append(AbstractStringBuilder.java:538)
+    at java.lang.StringBuilder.append(StringBuilder.java:178)
+    at org.apache.cassandra.db.AbstractReadQuery.toCQLString(AbstractReadQuery.java:115)
+    at org.apache.cassandra.db.ReadCommand.toCQLString(ReadCommand.java:91)
+    at org.apache.cassandra.db.ReadCommand.name(ReadCommand.java:897)
+    at org.apache.cassandra.db.monitoring.MonitoringTask$Operation.name(MonitoringTask.java:343)
+    at org.apache.cassandra.db.monitoring.MonitoringTask$OperationsQueue.popOperations(MonitoringTask.java:242)
+    at org.apache.cassandra.db.monitoring.MonitoringTask.logSlowOperations(MonitoringTask.java:168)
+    at org.apache.cassandra.db.monitoring.MonitoringTask.logOperations(MonitoringTask.java:138)
+    at org.apache.cassandra.db.monitoring.MonitoringTask.lambda$new$0(MonitoringTask.java:96)
+    at org.apache.cassandra.db.monitoring.MonitoringTask$$Lambda$1594.run(?:-1)
+    at org.apache.cassandra.concurrent.ExecutionFailure$1.run(ExecutionFailure.java:133)
+    at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:515)
+    at java.util.concurrent.FutureTask.runAndReset(FutureTask.java:305)
+    at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+    at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+    at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+    at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+    at java.lang.Thread.run(Thread.java:829)
+dump FTA-2.hprof: all objects 1671.4 MiB shallow; arrays >= 1048576 B: 94, 1582.8 MiB
+category shares of the dump total (arrays >= min):
+  H_M    854.5 MiB   51.1%
+  H_R    718.9 MiB   43.0%
+  H_F      0.0 MiB    0.0%
+  H_L      0.0 MiB    0.0%
+  H_O      0.0 MiB    0.0%
+  H_unreachable      9.4 MiB    0.6%
+  H_M+H_R+H_F  94.1%   (reachable arrays >= min: 1573.4 MiB; H_M of them 54.3%, H_R 45.7%)
+[M]
+   byte[]       16000000 x52       793.5 MiB
+   byte[]       32000058 x1         30.5 MiB
+   byte[]       32000042 x1         30.5 MiB
+[R]
+   char[]       32000000 x8        488.3 MiB
+   byte[]       16000000 x8        122.1 MiB
+   byte[]       32000000 x3         91.6 MiB
+   byte[]        1048576 x17        17.0 MiB
+[unreachable]
+   int[]          671082 x1          2.6 MiB
+   int[]          596494 x1          2.3 MiB
+   int[]          596346 x1          2.3 MiB
+   int[]          596276 x1          2.3 MiB
+monitor instances: {'org.apache.cassandra.db.monitoring.MonitoringTask$SlowOperation': 52, 'org.apache.cassandra.db.monitoring.MonitoringTask$$Lambda$1594': 1, 'org.apache.cassandra.db.monitoring.MonitoringTask$OperationsQueue': 2}
+  slowOperationsQueue: maxOperations=50 queue count=50
+  failedOperationsQueue: maxOperations=50 queue count=0
+name-length byte[] (32,000,003..32,000,400) by category: {'M': 2}
+NTR threads: 9 (with traceQuery on stack: 8); ScheduledTasks threads: 1
+O detail: 

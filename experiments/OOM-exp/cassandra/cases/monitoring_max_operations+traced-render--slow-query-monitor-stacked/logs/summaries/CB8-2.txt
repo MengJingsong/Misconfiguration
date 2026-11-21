@@ -1,0 +1,37 @@
+### driver.txt
+2026-11-20T10:10:01 run CB8-2 build=base heap=8G tracing=off values=ident monitor=mon50 mode=fixed:13 hold=150 k=2
+2026-11-20T10:10:01 free 15G
+2026-11-20T10:10:02 JVM_EXTRA_OPTS=' -XX:-HeapDumpOnOutOfMemoryError'
+2026-11-20T10:10:22 daemon pid 450622 up
+2026-11-20T10:10:23 client start --k 2 --tracing off  --fixed 13 --hold-s 150
+2026-11-20T10:12:56 client ended; daemon alive (hold end)
+2026-11-20T10:13:17 END hold
+2026-11-20T10:13:30 done
+### summary.txt
+endpoint: hold
+client # start 2026-11-20T10:10:23-0700 tracing=off distinct=False k=2 steps=[13] S=16000000
+client # step 0 N=13 established=13 at 256 ms
+client # end 150341 ms done=1123 err=13
+client max established 13, completed 1123, errors 13, max outstanding 13, max K_client 208000351
+last step N=13 started at 256 ms; ok completions after it: 1136; last completion line at 151327 ms (+151.1 s)
+  step N=13: ok 1136, median latency 1619 ms
+  error x10: err:0x1300:Operation
+  error x3: err:0x1200:Operation
+threads samples 26: max NTR 13, max R(traceQuery) 0, max in hex 0, in String.<init> 0, in concat 0
+  R series: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  ScheduledTasks phases: {'idle': 3, 'pop-hex': 9, 'pop-fmt': 3, 'pop': 11}  AsyncAppender-Worker: {'idle': 24, 'write': 1, 'encode': 1}
+  ST series: idle idle pop-hex pop-fmt pop-hex pop pop-hex pop pop-hex pop-hex pop-hex pop-hex pop-fmt pop pop-hex pop-fmt pop pop pop pop pop pop pop-hex pop pop idle
+K_server RequestsSize max 208000351 (samples 6) series 208000351 208000351 208000351 208000351 208000351 208000351; paused max 0
+RssAnon max 9154 MiB
+heap_info used max 7894 MiB
+GCs 60; humongous after GC: max 245 regions (3920 MiB), median 137; before GC max 455
+pauses 92; STW share over last 60 s of GC log: 2%; Pause Full count 0; to-space exhausted 4
+debug.log* bytes max 220 MiB
+/mydata avail min 14.0 GiB
+drains: TOTAL slow drains 0 (queue full=queued>=50: 0; dropped>0: 0; max names 0; max queued 0); failed drains 0 (max queued 0)
+monitor task line: 1-20T17:10:29,381 MonitoringTask.java:95 - Scheduling monitoring task with report interval of 5000 ms, max operations 50
+dumps: none
+### drains.txt
+TOTAL slow drains 0 (queue full=queued>=50: 0; dropped>0: 0; max names 0; max queued 0); failed drains 0 (max queued 0)
+### montask.txt
+INFO  [Native-Transport-Requests-1] 2026-11-20T17:10:29,381 MonitoringTask.java:95 - Scheduling monitoring task with report interval of 5000 ms, max operations 50

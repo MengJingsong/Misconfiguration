@@ -1,0 +1,12 @@
+[2026-11-20 10:45:41 EST] BEGIN LOAD arm=LOAD heap=2G cond=- k1=0 k2=0 N=0 W=60s G=60s
+[2026-11-20 10:45:41 EST] free /mydata 730010 MiB
+[2026-11-20 10:45:42 EST] started pid 156448 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/r14-LOAD-1795189541.scope
+[2026-11-20 10:46:19 EST] ready
+-XX:+HeapDumpOnOutOfMemoryError -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/r14/runs/LOAD/cassandra-1795189542-pid156448.hprof -XX:OnOutOfMemoryError=kill 
+ok: CREATE KEYSPACE IF NOT EXISTS u5 WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+ok: CREATE TABLE IF NOT EXISTS u5.ck (pk int, c1 int, c2 int, v int, PRIMARY KEY (pk, c1, c2))
+ok: CREATE TABLE IF NOT EXISTS u5.pk (a int, b int, v int, PRIMARY KEY ((a, b)))
+ok: INSERT INTO u5.ck (pk,c1,c2,v) VALUES (0,0,0,1)
+ok: INSERT INTO u5.pk (a,b,v) VALUES (0,0,1)
+1.2M	/mydata/s4/r14/template-A
+[2026-11-20 10:46:27 EST] END LOAD LOADED /mydata/s4/r14/template-A

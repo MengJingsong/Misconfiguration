@@ -1,0 +1,38 @@
+endpoint: daemon-exit oom:java.lang.OutOfMemoryError: Java heap space
+stdout: java.lang.OutOfMemoryError: Java heap space
+stdout: Dumping heap to /mydata/s4/r15-w5/runs/TB2-1/cassandra-1795194956-pid165069.hprof ...
+stdout: Heap dump file created [2867294137 bytes in 23.095 secs]
+stdout: # java.lang.OutOfMemoryError: Java heap space
+stdout: #   Executing /bin/sh -c "kill -9 165069"...
+driver: 2026-11-20T10:16:57.936-0700 baseline done; client start N=3 k=0 --trig-at none
+driver: 2026-11-20T10:17:29.098-0700 daemon gone while client running
+resolved: MaxDirectMemorySize=15872M ; org.apache.cassandra.db:type=StorageService|NativeTransportMaxConcurrentRequestsInBytes|214748364 ; org.apache.cassandra.db:type=StorageService|NativeTransportMaxConcurrentRequestsInBytesPerIp|53687091 ; max_mutation_size=null; ; native_transport_max_frame_size=16MiB; ; native_transport_max_message_size=null; ; native_transport_max_threads=128; ; 
+client: body 16777206 B, established at 1795195018143
+  resp p0 t+30.3s conn 2 latency 30250 ms io_error - [Errno_104]_Connection_reset_by_peer
+  resp p0 t+30.3s conn 0 latency 30250 ms io_error - [Errno_104]_Connection_reset_by_peer
+  resp p0 t+30.3s conn 1 latency 30251 ms io_error - [Errno_104]_Connection_reset_by_peer
+client outstanding max 3; K_client max 50331618
+jmx samples 11
+K_server RequestsSize max 50331618; last 50331618
+PausedConnections max 0
+NTR active max 3; NTR pending max 0
+direct MemoryUsed max 48 MiB
+last jmx row: 1795195048411,,ERR,,ERR,,ERR,,ERR,,ERR,,ERR
+threads samples 4: max NTR 3, lex 1, syntaxError 0, parse 2, prepare 3, measure 0
+  lex series: 0 0 1 0 | last sample: 0 0 0 0 0 0
+RssAnon max 2836 MiB
+heap_info used max 1946 MiB
+GCs 30; heap after GC max 2023 MiB; last 8 after-GC: 1904 1887 1967 1937 1963 1963 1946 1945
+  first-10 after-GC (baseline): 24 47 47 27 43 43 66 189 189 1799
+  Full GCs 7: after-GC MiB 1406 1749 1867 1887 1937 1946 1945; pause s 0.3 0.4 0.4 0.4 0.4 0.4 0.4
+pauses 30; STW share over last 60 s of GC log: 6%; GC log end at uptime 67.9 s
+to-space exhausted 8; humongous lines 22
+client cpu last sample: 1795195038  168998  0.6 61372; 169523  0.1  7976;
+dumps: cassandra-1795194956-pid165069.hprof (2734 MiB)
+trigger: load_start 10:16:58; t_det -; t_trig -
+OOM line seen at +6.8 s after load start; t_OOM - t_trig = - (no trigger)
+last Full GCs (no trigger):
+  GC(24) +5.8 s Pause Full (G1 Evacuation Pause) 1967M->1937M 410 ms; regions after: Ede 0 Hum 35 Old 91 Sur 0; free regions 2
+  GC(28) +6.2 s Pause Full (G1 Humongous Allocation) 1963M->1946M 386 ms; regions after: Ede 0 Hum 35 Old 92 Sur 0; free regions 1
+  GC(29) +6.6 s Pause Full (G1 Humongous Allocation) 1946M->1945M 411 ms; regions after: Ede 0 Hum 35 Old 91 Sur 0; free regions 2
+stw: client interval 31 s; max 60-s STW share 0% (window end +0 s); first >=90% window end at +- s; windows >=90%: 0 of 0 GC ends; span first..last >=90%: - s

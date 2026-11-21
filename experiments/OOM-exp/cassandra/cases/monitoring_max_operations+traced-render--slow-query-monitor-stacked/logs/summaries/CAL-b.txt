@@ -1,0 +1,41 @@
+### driver.txt
+2026-11-20T08:56:51 run CAL-b build=base heap=2G tracing=off values=ident monitor=mon50 mode=fixed:13 hold=60 k=2
+2026-11-20T08:56:51 free 17G
+2026-11-20T08:56:51 JVM_EXTRA_OPTS=''
+2026-11-20T08:57:11 daemon pid 352038 up
+2026-11-20T08:57:13 client start --k 2 --tracing off  --fixed 13 --hold-s 60
+2026-11-20T08:58:15 client ended; daemon alive (hold end)
+2026-11-20T08:58:35 END hold
+2026-11-20T08:58:50 done
+### summary.txt
+endpoint: hold
+client # start 2026-11-20T08:57:13-0700 tracing=off distinct=False k=2 steps=[13] S=16000000
+client # step 0 N=13 established=13 at 263 ms
+client # end 60500 ms done=264 err=14
+client max established 13, completed 260, errors 14, max outstanding 13, max K_client 208000351
+last step N=13 started at 263 ms; ok completions after it: 271; last completion line at 61614 ms (+61.4 s)
+  step N=13: ok 271, median latency 2311 ms
+  error x12: err:0x1300:Operation
+  error x2: err:0x1200:Operation
+threads samples 13: max NTR 13, max R(traceQuery) 0, max in hex 0, in String.<init> 0, in concat 0
+  R series: 0 0 0 0 0 0 0 0 0 0 0 0 0
+  ScheduledTasks phases: {'idle': 4, 'pop-hex': 5, 'pop': 3, 'pop-fmt': 1}  AsyncAppender-Worker: {'idle': 12, 'layout': 1}
+  ST series: idle idle pop-hex pop idle pop-hex pop-hex pop-hex pop-fmt pop-hex pop pop idle
+K_server RequestsSize max 208000351 (samples 3) series 80000135 208000351 208000351; paused max 0
+RssAnon max 2929 MiB
+heap_info used max 1763 MiB
+GCs 169; humongous after GC: max 111 regions (1776 MiB), median 71; before GC max 117
+pauses 423; STW share over last 60 s of GC log: 6%; Pause Full count 3; to-space exhausted 1
+debug.log* bytes max 337 MiB
+/mydata avail min 16.3 GiB
+drains: TOTAL slow drains 1 (queue full=queued>=50: 1; dropped>0: 1; max names 1; max queued 87); failed drains 1 (max queued 14)
+  2026-11-20T15:57:39,201 timed_out  n=1 interval_ms=5147 names=1 queued=14 dropped=0 multi=14
+  2026-11-20T15:58:30,132 were_slow  n=191 interval_ms=19931 names=1 queued=87 dropped=190 multi=87
+monitor task line: 1-20T15:57:19,219 MonitoringTask.java:95 - Scheduling monitoring task with report interval of 5000 ms, max operations 50
+dumps: none
+### drains.txt
+2026-11-20T15:57:39,201 timed_out  n=1 interval_ms=5147 names=1 queued=14 dropped=0 multi=14
+2026-11-20T15:58:30,132 were_slow  n=191 interval_ms=19931 names=1 queued=87 dropped=190 multi=87
+TOTAL slow drains 1 (queue full=queued>=50: 1; dropped>0: 1; max names 1; max queued 87); failed drains 1 (max queued 14)
+### montask.txt
+INFO  [Native-Transport-Requests-1] 2026-11-20T15:57:19,219 MonitoringTask.java:95 - Scheduling monitoring task with report interval of 5000 ms, max operations 50

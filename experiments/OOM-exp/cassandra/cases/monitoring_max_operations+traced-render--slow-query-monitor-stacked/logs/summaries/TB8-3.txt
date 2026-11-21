@@ -1,0 +1,42 @@
+### driver.txt
+2026-11-20T10:05:19 run TB8-3 build=base heap=8G tracing=off values=distinct monitor=mon50 mode=fixed:13 hold=180 k=2
+2026-11-20T10:05:19 free 15G
+2026-11-20T10:05:19 JVM_EXTRA_OPTS=' -XX:-HeapDumpOnOutOfMemoryError'
+2026-11-20T10:05:39 daemon pid 443284 up
+2026-11-20T10:05:41 client start --k 2 --tracing off --distinct --fixed 13 --hold-s 180
+/mydata/s4/r12-w5/harness/run2.sh: line 53: 443284 Killed                  ( ulimit -n 100000; cd $T; MAX_HEAP_SIZE=$HEAP CASSANDRA_HEAPDUMP_DIR=$R JVM_EXTRA_OPTS="$EXTRA" exec systemd-run --user --scope -p MemorySwapMax=0 --unit=r12-$RID -- bin/cassandra -f > $R/stdout.txt 2>&1 < /dev/null )
+2026-11-20T10:06:11 daemon gone while client running
+2026-11-20T10:06:17 END daemon-exit oom:# java.lang.OutOfMemoryError: Java heap space
+2026-11-20T10:06:33 done
+### summary.txt
+endpoint: daemon-exit oom:# java.lang.OutOfMemoryError: Java heap space
+stdout: # java.lang.OutOfMemoryError: Java heap space
+stdout: #   Executing /bin/sh -c "kill -9 443284"...
+client # start 2026-11-20T10:05:41-0700 tracing=off distinct=True k=2 steps=[13] S=16000000
+client # step 0 N=13 established=13 at 255 ms
+client # all connections ended at 29863 ms
+client # end 29863 ms done=100 err=32
+client max established 13, completed 100, errors 19, max outstanding 13, max K_client 208000351
+last step N=13 started at 255 ms; ok completions after it: 100; last completion line at 29459 ms (+29.2 s)
+  step N=13: ok 100, median latency 1907 ms
+  error x17: err:0x1200:Operation
+  error x13: io_error:[Errno
+  error x2: err:0x1300:Operation
+threads samples 5: max NTR 14, max R(traceQuery) 0, max in hex 0, in String.<init> 0, in concat 0
+  R series: 0 0 0 0 0
+  ScheduledTasks phases: {'idle': 3, 'pop': 2}  AsyncAppender-Worker: {'idle': 3, 'layout': 1, 'encode': 1}
+  ST series: idle idle pop pop idle
+K_server RequestsSize max 208000351 (samples 1) series 208000351; paused max 0
+RssAnon max 9169 MiB
+heap_info used max 7394 MiB
+GCs 13; humongous after GC: max 184 regions (2944 MiB), median 123; before GC max 359
+pauses 27; STW share over last 60 s of GC log: 2%; Pause Full count 0; to-space exhausted 3
+debug.log* bytes max 246 MiB
+/mydata avail min 14.1 GiB
+drains: TOTAL slow drains 0 (queue full=queued>=50: 0; dropped>0: 0; max names 0; max queued 0); failed drains 0 (max queued 0)
+monitor task line: 1-20T17:05:46,610 MonitoringTask.java:95 - Scheduling monitoring task with report interval of 5000 ms, max operations 50
+dumps: none
+### drains.txt
+TOTAL slow drains 0 (queue full=queued>=50: 0; dropped>0: 0; max names 0; max queued 0); failed drains 0 (max queued 0)
+### montask.txt
+INFO  [ReadStage-2] 2026-11-20T17:05:46,610 MonitoringTask.java:95 - Scheduling monitoring task with report interval of 5000 ms, max operations 50
