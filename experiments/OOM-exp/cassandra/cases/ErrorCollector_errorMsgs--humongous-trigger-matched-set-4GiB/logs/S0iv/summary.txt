@@ -1,0 +1,35 @@
+endpoint: hold 
+driver: 2026-11-21T00:05:02.095-0700 S0 payload H
+driver: 2026-11-21T00:05:10.438-0700 client ended; daemon alive (hold end) 
+resolved: MaxDirectMemorySize=15872M ; org.apache.cassandra.db:type=StorageService|NativeTransportMaxConcurrentRequestsInBytes|214748364 ; org.apache.cassandra.db:type=StorageService|NativeTransportMaxConcurrentRequestsInBytesPerIp|53687091 ; max_mutation_size=null; ; native_transport_max_frame_size=16MiB; ; native_transport_max_message_size=null; ; native_transport_max_threads=128; ; 
+client: body 1048583 B, established at 1795244702243
+  resp H t+3.5s conn 0 latency 3518 ms ERROR 0x2000 line_1:0_no_viable_alternative_at_character_'#'
+  resp H t+6.4s conn 0 latency 2923 ms ERROR 0x2000 line_1:0_no_viable_alternative_at_character_'#'
+client outstanding max 1; K_client max 1048583
+jmx samples 7
+K_server RequestsSize max 1048583; last 0
+PausedConnections max 0
+NTR active max 1; NTR pending max 0
+direct MemoryUsed max 48 MiB
+last jmx row: 1795244711980,0,0,0,0,50161389,84199416
+threads samples 4: max NTR 1, lex 1, syntaxError 0, parse 0, prepare 0, measure 0
+  lex series: 0 0 1 0 | last sample: 1 0 0 0 0 0
+RssAnon max 2653 MiB
+heap_info used max 1221 MiB
+GCs 10; heap after GC max 68 MiB; last 8 after-GC: 47 27 43 43 62 68 67 64
+  first-10 after-GC (baseline): 24 47 47 27 43 43 62 68 67 64
+  Full GCs 2: after-GC MiB 62 64; pause s 0.1 0.1
+pauses 10; STW share over last 60 s of GC log: 0%; GC log end at uptime 69.5 s
+to-space exhausted 0; humongous lines 6
+client cpu last sample: 
+dumps: none
+trigger: load_start 00:05:02; t_det -; t_trig -
+last Full GCs (no trigger):
+  GC(4) +-0.3 s Pause Full (Heap Inspection Initiated GC) 851M->62M 103 ms; regions after: Ede 0 Hum 0 Old 14 Sur 0; free regions 114
+  GC(7) +8.1 s Pause Full (Heap Inspection Initiated GC) 350M->64M 87 ms; regions after: Ede 0 Hum 0 Old 14 Sur 0; free regions 114
+stw: Traceback (most recent call last):
+  File "/mydata/s4/r20/harness/stw.py", line 24, in <module>
+    pts = [st + d for st, d in ev if t0 + 60 <= st + d <= t1]
+  File "/mydata/s4/r20/harness/stw.py", line 24, in <listcomp>
+    pts = [st + d for st, d in ev if t0 + 60 <= st + d <= t1]
+TypeError: unsupported operand type(s) for +: 'NoneType' and 'int'

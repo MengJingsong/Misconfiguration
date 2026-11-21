@@ -139,17 +139,34 @@ finished, and they wrote up at ≈ 21:30 with a dated clock-shift amendment (dea
   logged at `StorageProxy.java:2223`) filed as candidate **OC-578** with the new Agent value `phase-2 (R12)` (new lead
   source: playbook stage 2, stage-5 README and `FLOWCHART.md` updated); R12's A-4 stands; R10's next budget
   (heap 1,280 / direct 640 / container 2,560) is approved for V7.
-- **Left on the nodes (nothing running):** `pc99` `/mydata/s4/r10` 58 GB (generated sstables), `pc91` `/mydata/s4/r14`
-  18 GB (2 hprofs), `ms0611` `/mydata/r11` 4.9 GB (1 hprof), `ms0640` `/mydata/s4/r12-w5` 2.2 GB, `pc82`
-  `/mydata/s4/r15-w5` 1.8 GB, `ms0625` `/mydata/r11` 1.5 GB, `ms0617` `/mydata/r11` 1.2 GB, `pc75` `/mydata/s4/r16`
-  0.9 GB, `ms0604` `/mydata/s4/r13-w1` 0.7 GB, `pc96` `/mydata/s4/r17` 0.4 GB, `/tmp/r12-dumps` 3.7 GB (2 hprofs),
-  `/mydata/r11-evidence` 0.1 GB. `ms0640` has only ≈ 17 GB free on `/mydata` (20 GB used outside `/mydata/s4`).
+- **Node data:** all wave-5 run folders were deleted on 2026-11-21 ≈ 01:50 (owner), except R10's sstables and R11's
+  golden state, which wave 5b reused and then deleted.
+
+**Wave 5b (2026-11-21 01:50 → 05:50 EST, owner-approved): the 5 open retry rows again.** Same procedure (one fresh design
+and one fresh verify agent per case, deadline 07:30 so the nodes are free for the 8 AM batch).
+
+| Case | Retry of | Node | Verdict | Deciding result |
+|---|---|---|---|---|
+| R18 | R10 / R5 | `pc99` | **true positive** (A and B) | container 2,560 / heap 1,280 / direct 640 (owner-approved): A parked summaries + default merge killed 3/3 in `CompactionExecutor`, P alone / merge alone / redistribution 0/3; B one default merge of 4 × 7 M-partition sstables killed 3/3, smaller merge and `min_index_interval` 512 0/3 |
+| R19 | R11 / R8 / B7 | `ms0611`+`ms0625`+`ms0617`, client `ms0604` | retry | CL=ALL calibration set the rate (4,700/s) below V's CL=ONE apply rate (> 5.2 k/s); E kept up, the frozen calibration stop ended it before any T/P arm |
+| R20 | R15 A / U6 | `pc82` | **true positive** | 4 GiB matched set: `#` QUERYs + 3 trigger QUERYs OOM 3/3 in the trigger's decode (messages 92.5 %, ≈ 88× counted); control and keep-first-message 0/3; 8 GiB 3/3, 16 GiB 1/1 |
+| R21 | R16 / B18 | `pc75` | **true positive** | stale `BTree.Updater.updateF` pins DISCARDED memtables: OOM 3/3 at 2 GiB (2.8–3.2 × C pinned, pool ≤ 0.87 × C); control 0/3; trunk's two-line `reset()` fix 0/3 despite the overshoot; 4 hot partitions 2/2 |
+| R22 | R17 / U11 | `pc72` | **true positive** | 15,872 MiB (cassandra-env default): forced RTL copy thrash queues 12 MiB local writes, OOM 3/3 at 446–580 s (≈ 890 queued blobs, 10.4 GiB); control and concurrency 1 0/3; 512 MiB service loss not reproduced |
+
+- **Filed:** retry list (R10, R15-A, R16, R17 closed true positive; R11 closed retry; new open row R19), candidate list (OC-22 →
+  R18; OC-200–202, 206, 368 → R22; OC-409/410 → R20), `_INDEX.md` rows. B18's cluster rows (OC-41, 46, 257, 266, 323, 367,
+  373) still read `retry (B18)`: they claim the CAS overshoot, which R21 shows is not what runs the heap out — owner to decide.
+- **Open owner items:** R21 — does trunk's unbackported fix (CASSANDRA-20780, 2025) make it `known-fixed`?; R21's unclaimed
+  lead (patched build at 15,872 MiB still held ≈ 6.8 GiB live after its flushes, no dump); R22's S512 service-loss secondary
+  and R20's 2 GiB matched set are possible follow-ups, not retry items.
+- **Node data:** all wave-5b run folders deleted 2026-11-21 ≈ 05:55 (owner); every node holds only `/mydata/s4/cassandra-base`.
+- **Next:** 8 AM 2026-11-21 batch of 10 candidate cases (OC-533, 504, 565, 509, 479, 104, 383, 147, 291, 404), scheduled.
 
 **Other open work:**
 - 372 candidate rows are `open` (OC-4 closed, OC-578 added). All of OC-63…577 are now triaged (2026-11-18 and 2026-11-20 files); the 11-18
   triage's §2 "not reachable at shipped defaults" and §3 "too slow / too much disk" lists were **not** closed (owner
   closed only the already-covered list), and the 11-20 triage's "covered" list is not closed either.
-- Retry list: 5 rows `open` (R10, R11, R15 condition A, R16, R17, each with its proposed change).
+- Retry list: 1 row `open` (R19, with its proposed change).
 - Hadoop: JIRA OOM report built; stage 5 runs with Yang's and Jingsong's batches (`hadoop/PROCEDURE.md` 5b);
   no Hadoop phase 2 yet. Jingsong's Hadoop stage-4 nodes `pc41`, `pc39`, `pc29` failed SSH host-key checks on
   2026-11-18 (probably reallocated): a new Hadoop stage-4 node needs `jingsong/setup-node.sh`.

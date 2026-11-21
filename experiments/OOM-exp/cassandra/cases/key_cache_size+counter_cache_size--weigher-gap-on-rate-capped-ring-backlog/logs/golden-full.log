@@ -1,0 +1,36 @@
+[02:09:38] golden full F=1600000
+[02:09:39] stopped V (none)
+[02:09:40] stopped R1 (674558)
+[02:09:41] stopped R2 (271626)
+[02:09:42] gen V xmx=2G build=/mydata/r19/run-orig
+[02:09:43] gen R1 xmx=2G build=/mydata/r19/run-orig
+[02:09:44] gen R2 xmx=2G build=/mydata/r19/run-orig
+[02:09:47] launched V pid=484541 unit=r19-V-1795244985 build=/mydata/r19/run-orig swap.max=0 memory.max=max
+[02:10:17] launched R2 pid=272040 unit=r19-R2-1795245015 build=/mydata/r19/run-orig swap.max=0 memory.max=max
+[02:10:17] launched R1 pid=674956 unit=r19-R1-1795245015 build=/mydata/r19/run-orig swap.max=0 memory.max=max
+[02:10:37] ring UN=3
+00:10:42 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+schema ok
+Schema Version:c7e01916-bf6a-3595-9ff9-63008f27d552
+TokenRange: 
+	TokenRange(start_token:-9223372036854775808, end_token:-3074457345618258603, endpoints:[10.10.1.1], rpc_endpoints:[10.10.1.1], endpoint_details:[EndpointDetails(host:10.10.1.1, datacenter:c, rack:r1)])
+	TokenRange(start_token:-3074457345618258603, end_token:3074457345618258602, endpoints:[10.10.1.5], rpc_endpoints:[10.10.1.5], endpoint_details:[EndpointDetails(host:10.10.1.5, datacenter:c, rack:r1)])
+	TokenRange(start_token:3074457345618258602, end_token:-9223372036854775808, endpoints:[10.10.1.4], rpc_endpoints:[10.10.1.4], endpoint_details:[EndpointDetails(host:10.10.1.4, datacenter:c, rack:r1)])
+[02:10:57] insert 1600000 kept kv keys
+RANGEOK kept=1000 rejected=1000 candidates=3245
+DONE mode=insert table=kv keyBytes=8 first=0 count=1600000 candidates=4799963 ok=1600000 err=0 rows=0 secs=66.2 ops/s=24157
+[02:12:12] insert took 75 s
+		SSTable count: 1
+		Old SSTable count: 0
+		Space used (live): 53205720
+		Number of partitions (estimate): 1614344
+[02:13:30] stopped V (484541)
+[02:13:33] stopped R1 (674956)
+[02:13:36] stopped R2 (272040)
+-rw-r--r-- 1 jason92 misconfiguration 46104149 Nov 21 00:13 /mydata/r19/golden-V.tgz
+52M	data
+-rw-r--r-- 1 jason92 misconfiguration 66949 Nov 21 00:13 /mydata/r19/golden-R1.tgz
+1.2M	data
+-rw-r--r-- 1 jason92 misconfiguration 67320 Nov 21 00:13 /mydata/r19/golden-R2.tgz
+1.2M	data
+[02:13:48] golden full done (total 171 s after insert start)

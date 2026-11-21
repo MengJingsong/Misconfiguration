@@ -1,0 +1,67 @@
+[02:18:55] args: name=ecal1 type=E V-build=orig N=0 rate=uncapped CL=ALL VX=2G RX=2G sess=8 loadcap=60 fill_small=0 platform=aarch64 client=ms0604
+[02:18:59] stopped V (none)
+[02:19:02] stopped R1 (none)
+[02:19:05] stopped R2 (none)
+[02:19:12] gen V xmx=2G build=/mydata/r19/run-orig
+[02:19:13] restored V from /mydata/r19/golden-V.tgz (52M data, saved_caches: 0 files)
+[02:19:14] gen R1 xmx=2G build=/mydata/r19/run-orig
+[02:19:15] restored R1 from /mydata/r19/golden-R1.tgz (1.2M data, saved_caches: 0 files)
+[02:19:15] gen R2 xmx=2G build=/mydata/r19/run-orig
+[02:19:16] restored R2 from /mydata/r19/golden-R2.tgz (1.2M data, saved_caches: 0 files)
+[02:19:19] launched V pid=489397 unit=r19-V-1795245557 build=/mydata/r19/run-orig swap.max=0 memory.max=max
+[02:20:29] launched R2 pid=273417 unit=r19-R2-1795245627 build=/mydata/r19/run-orig swap.max=0 memory.max=max
+[02:20:29] launched R1 pid=676395 unit=r19-R1-1795245627 build=/mydata/r19/run-orig swap.max=0 memory.max=max
+[02:20:49] ring UN=3
+V pid 489397 build /mydata/r19/run-orig jar md5 1becab414e5f
+V resolved: -XX:+UseG1GC -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M 
+V VM.flags: MaxDirectMemorySize=16642998272 MaxHeapSize=2147483648 
+V VM.uptime at 1795245654448: 98.225 s
+V cgroup: /sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/r19-V-1795245557.scope swap.max=0 memory.max=max
+2026-11-21T07:19:30,192 CacheService.java:121 - Initializing key cache with capacity of 100 MiBs.
+2026-11-21T07:19:30,227 CacheService.java:143 - Initializing row cache with capacity of 0 MiBs
+2026-11-21T07:19:30,232 CacheService.java:174 - Initializing counter cache with capacity of 50 MiBs
+V start info:
+Key Cache              : entries 25, size 2.05 KiB, capacity 100 MiB, 104 hits, 128 requests, 0.813 recent hit rate, 14400 save period in seconds
+Counter Cache          : entries 0, size 0 bytes, capacity 50 MiB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds
+[02:21:07] fill: read 1500000 kv
+RANGEOK kept=1000 rejected=1000 candidates=3245
+DONE mode=read table=kv keyBytes=8 first=0 count=1500000 candidates=4500841 ok=1500000 err=0 rows=1500000 secs=103.9 ops/s=14437
+[02:22:58] fill: counter 550000 ctr
+RANGEOK kept=1000 rejected=1000 candidates=3245
+DONE mode=counter table=ctr keyBytes=8 first=0 count=550000 candidates=1649894 ok=550000 err=0 rows=0 secs=46.3 ops/s=11867
+[02:24:08] after fill: key cache 100.00 MiB, counter cache 50.00 MiB
+[02:24:29] invalidated: key 0.00 MiB, counter 0.00 MiB
+== pre-burst nodetool info
+Heap Memory (MB)       : 687.63 / 2048.00
+Off Heap Memory (MB)   : 2.95
+Key Cache              : entries 1, size 80 bytes, capacity 100 MiB, 112 hits, 1501398 requests, 0.000 recent hit rate, 14400 save period in seconds
+Counter Cache          : entries 0, size 0 bytes, capacity 50 MiB, 0 hits, 550000 requests, 0.000 recent hit rate, 7200 save period in seconds
+== tablestats
+		Table: t_blob
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Table: ctr
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Table: kv
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+[02:24:41] pre-burst live heap (histogram total): Total        888317      128156336
+[02:24:51] burst start N=0 rate=uncapped CL=ALL loadcap=60 sess=8
+[02:26:18] client exited: FIRST_SEND epochMs=1795245897762 FINAL sent=266857 ok=266250 err=607 firstOkMs=1795245897839 lastOkMs=1795245959503 total=9223372036854775807 stop=false endMs=1795245959504 WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ALL (3 replica were required but only 1 acknowledged the write) 
+[02:26:19] observation: DRAINED (1795245979 ALIVE last=0 max30=323 n30=150)
+V_ALIVE
+VmSwap:	       0 kB
+Heap Memory (MB)       : 1494.79 / 2048.00
+Off Heap Memory (MB)   : 5.37
+Key Cache              : entries 210, size 16.41 KiB, capacity 100 MiB, 129 hits, 1501624 requests, 0.000 recent hit rate, 14400 save period in seconds
+Counter Cache          : entries 0, size 0 bytes, capacity 50 MiB, 0 hits, 550000 requests, 0.000 recent hit rate, 7200 save period in seconds
+R1_ALIVE
+R2_ALIVE
+[02:26:44] stopped V (489397)
+[02:26:58] stopped R1 (676395)
+[02:27:11] stopped R2 (273417)
+[02:27:18] ecal1 V: type=E N=0 rate=uncapped xmx=2G 0 OOMError lines | pauses=66 max_after_any=2010MiB(98.1%) full_gcs=6 max_after_full=625MiB(30.5%) ReportJavaOutOfMemory=0 | full>95%: n=0 window=0s pause=0s (0%) service_loss=not met | pauses=66 total_pause=5s max60=4% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=none | obs=DRAINED | client: FINAL sent=266857 ok=266250 err=607 firstOkMs=1795245897839 lastOkMs=1795245959503 total=9223372036854775807 stop=false endMs=1795245959504 WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ALL (3 replica were required but only 1 acknowledged the write)  | hstop: h_stop=- (no TOTAL_REACHED) max_after_any=2010 max_after_full=625 n_full=5 oom_mark_after_send=- oom_mark_after_stop=- | R1: ecal1 R1: type=E N=0 rate=uncapped xmx=2G 0 OOMError lines | pauses=37 max_after_any=2047MiB(100.0%) full_gcs=4 max_after_full=335MiB(16.4%) ReportJavaOutOfMemory=0  | R2: ecal1 R2: type=E N=0 rate=uncapped xmx=2G 0 OOMError lines | pauses=35 max_after_any=2048MiB(100.0%) full_gcs=4 max_after_full=422MiB(20.6%) ReportJavaOutOfMemory=0 

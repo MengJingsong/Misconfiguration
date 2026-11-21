@@ -1,0 +1,72 @@
+endpoint: daemon-exit oom:java.lang.OutOfMemoryError: Java heap space
+stdout: java.lang.OutOfMemoryError: Java heap space
+stdout: Dumping heap to /mydata/s4/r20/runs/T8-3/cassandra-1795250053-pid329192.hprof ...
+stdout: Heap dump file created [10979058336 bytes in 60.402 secs]
+stdout: # java.lang.OutOfMemoryError: Java heap space
+stdout: #   Executing /bin/sh -c "kill -9 329192"...
+driver: 2026-11-21T01:35:14.761-0700 baseline done; client start N=6 k=3 --trig-at gc:/mydata/s4/r20/cassandra/logs/gc.log:8192 --trig-max 600 --trig-max 600 --trig2-n 3 --trig2-at sat:/mydata/s4/r20/cassandra/logs/gc.log:8192:128
+driver: 2026-11-21T01:40:03.605-0700 daemon gone while client running
+resolved: MaxDirectMemorySize=15872M ; org.apache.cassandra.db:type=StorageService|NativeTransportMaxConcurrentRequestsInBytes|858993459 ; org.apache.cassandra.db:type=StorageService|NativeTransportMaxConcurrentRequestsInBytesPerIp|214748364 ; max_mutation_size=null; ; native_transport_max_frame_size=16MiB; ; native_transport_max_message_size=null; ; native_transport_max_threads=128; ; 
+client: body 16777207 B, established at 1795250115107
+  resp p0 t+288.3s conn 5 latency 288284 ms io_error - [Errno_104]_Connection_reset_by_peer
+  resp p0 t+288.3s conn 4 latency 288284 ms io_error - [Errno_104]_Connection_reset_by_peer
+  resp p0 t+288.3s conn 3 latency 288284 ms io_error - [Errno_104]_Connection_reset_by_peer
+  resp p0 t+288.3s conn 0 latency 288285 ms io_error - [Errno_104]_Connection_reset_by_peer
+  resp p0 t+288.3s conn trig1 latency 71982 ms io_error - [Errno_104]_Connection_reset_by_peer
+  resp p0 t+288.3s conn trig0 latency 71982 ms io_error - [Errno_104]_Connection_reset_by_peer
+  resp p0 t+288.3s conn trig2 latency 71982 ms io_error - [Errno_104]_Connection_reset_by_peer
+  resp p0 t+288.3s conn 1 latency 288285 ms io_error - [Errno_104]_Connection_reset_by_peer
+  resp p0 t+288.3s conn 2 latency 288285 ms io_error - [Errno_104]_Connection_reset_by_peer
+client outstanding max 6; K_client max 100663242
+jmx samples 63
+K_server RequestsSize max 134217656; last 134217656
+PausedConnections max 0
+NTR active max 6; NTR pending max 0
+direct MemoryUsed max 48 MiB
+last jmx row: 1795250405098,,ERR,,ERR,,ERR,,ERR,,ERR,,ERR
+threads samples 24: max NTR 6, lex 6, syntaxError 3, parse 0, prepare 0, measure 0
+  lex series: 0 0 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 0 0 0 | last sample: 0 0 0 0 0 0
+RssAnon max 9399 MiB
+heap_info used max 8097 MiB
+GCs 206; heap after GC max 8172 MiB; last 8 after-GC: 8031 8048 8064 8144 8096 8158 8096 8096
+  first-10 after-GC (baseline): 24 48 48 28 44 44 827 1208 1594 1988
+  Full GCs 94: after-GC MiB 7868 7868 7878 7878 7878 7878 7892 7916 8031 8096 8096 8096; pause s 2.1 1.9 2.0 2.0 1.8 1.9 2.2 2.5 2.3 2.4 2.3 2.2
+pauses 206; STW share over last 60 s of GC log: 99%; GC log end at uptime 287.5 s
+to-space exhausted 94; humongous lines 202
+client cpu last sample: 1795250385  330010  0.2 194844;
+dumps: cassandra-1795250053-pid329192.hprof (10470 MiB)
+trigger: load_start 01:35:15; t_det +186.2 s; t_trig +216.3 s
+  # trigger connections 3 established at 1795250114954; trigger payload C query 16777200 body 16777207 frame 16777216
+  # wave-2 trigger connections 3 established at 1795250115005; payload C frame 16777216, pre-sent 16777215 at +10 s
+  trig2-2 presend 1795250125159 bytes 16777215 done 1795250125833
+  trig2-1 presend 1795250125137 bytes 16777215 done 1795250125834
+  trig2-0 presend 1795250125178 bytes 16777215 done 1795250125838
+    fired by: [2026-11-21T01:38:17.000-0700][243.080s][329192][329319][info ] GC(185) Pause Full (G1 Evacuation Pause) 7958M->7799M(8192M) 2024.215ms
+    fired by: [2026-11-21T01:38:19.246-0700][245.326s][329192][329319][info ] GC(187) Pause Full (G1 Evacuation Pause) 8167M->7832M(8192M) 2025.866ms
+    fired by: [2026-11-21T01:38:21.049-0700][247.128s][329192][329319][info ] GC(190) Pause Full (G1 Evacuation Pause) 7960M->7842M(8192M) 1722.535ms
+  trig0 send 1795250331410
+  trig2 send 1795250331411
+  trig1 send 1795250331410
+  trig1 response 1795250403393 latency_ms 71982 io_error - [Errno_104]_Connection_reset_by_peer
+  trig0 response 1795250403393 latency_ms 71982 io_error - [Errno_104]_Connection_reset_by_peer
+  trig2 response 1795250403394 latency_ms 71983 io_error - [Errno_104]_Connection_reset_by_peer
+  # all load connections ended at 1795250403605 before wave 2
+OOM line seen at +227.2 s after load start; t_OOM - t_trig = 10.9 s
+last Full GCs before t_trig (89 Full GCs before it):
+  GC(219) +209.9 s Pause Full (G1 Evacuation Pause) 7910M->7878M 1823 ms; regions after: Ede 0 Hum 30 Old 480 Sur 0; free regions 2
+  GC(221) +211.8 s Pause Full (G1 Evacuation Pause) 7910M->7878M 1850 ms; regions after: Ede 0 Hum 30 Old 472 Sur 0; free regions 10
+  GC(223) +214.1 s Pause Full (G1 Evacuation Pause) 8038M->7892M 2160 ms; regions after: Ede 0 Hum 30 Old 465 Sur 0; free regions 17
+GCs after t_trig (11):
+  GC(225) +216.7 s Pause Full (G1 Evacuation Pause) 8164M->7916M 2476 ms; regions after: Ede 0 Hum 30 Old 466 Sur 0; free regions 16
+  GC(227) +216.8 s Pause Young (Concurrent Start) (G1 Humongous Allocation) 8036M->7924M 17 ms; regions after: Ede 0 Hum 30 Old 466 Sur 1; free regions 15
+  GC(229) +216.9 s Pause Young (Normal) (G1 Evacuation Pause) 8164M->8164M 48 ms; regions after: Ede 0 Hum 36 Old 476 Sur 0; free regions 0
+  GC(230) +219.3 s Pause Full (G1 Evacuation Pause) 8164M->8031M 2335 ms; regions after: Ede 0 Hum 36 Old 468 Sur 0; free regions 8
+  GC(231) +219.3 s Pause Young (Concurrent Start) (G1 Humongous Allocation) 8105M->8048M 8 ms; regions after: Ede 0 Hum 37 Old 468 Sur 1; free regions 6
+  GC(233) +219.3 s Pause Young (Normal) (G1 Humongous Allocation) 8112M->8064M 8 ms; regions after: Ede 0 Hum 38 Old 468 Sur 1; free regions 5
+  GC(234) +219.3 s Pause Young (Normal) (G1 Evacuation Pause) 8144M->8144M 10 ms; regions after: Ede 0 Hum 40 Old 472 Sur 0; free regions 0
+  GC(235) +221.8 s Pause Full (G1 Evacuation Pause) 8144M->8096M 2446 ms; regions after: Ede 0 Hum 40 Old 468 Sur 0; free regions 4
+  GC(236) +221.8 s Pause Young (Normal) (G1 Humongous Allocation) 8158M->8158M 6 ms; regions after: Ede 0 Hum 40 Old 472 Sur 0; free regions 0
+  GC(237) +224.1 s Pause Full (G1 Humongous Allocation) 8158M->8096M 2292 ms; regions after: Ede 0 Hum 40 Old 468 Sur 0; free regions 4
+  GC(238) +226.3 s Pause Full (G1 Humongous Allocation) 8096M->8096M 2231 ms; regions after: Ede 0 Hum 40 Old 468 Sur 0; free regions 4
+stw: client interval 289 s; max 60-s STW share 99% (window end +174 s); first >=90% window end at +110 s; windows >=90%: 118 of 165 GC ends; span first..last >=90%: 178 s
+(R20 excerpt: 6 load-response lines, first 20 kept)

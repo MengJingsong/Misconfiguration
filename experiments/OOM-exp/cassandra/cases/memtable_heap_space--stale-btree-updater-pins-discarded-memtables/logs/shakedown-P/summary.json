@@ -1,0 +1,151 @@
+{
+ "label": "shakedown-P",
+ "mode": "shakedown",
+ "args": [
+  "shakedown",
+  "P"
+ ],
+ "cotenancy": {
+  "daemons": "none",
+  "MemAvailable_MiB": 127067
+ },
+ "start": {
+  "pid": 82511,
+  "up_s": 40,
+  "unit": "r21-shakedown-p-1795244865",
+  "cgroup": "/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/r21-shakedown-p-1795244865.scope",
+  "memory.max": "max",
+  "swap.max": "0",
+  "scope_ok": true,
+  "flags": {
+   "-XX:+UseG1GC": true,
+   "-XX:G1HeapRegionSize=16m": true,
+   "-XX:+HeapDumpOnOutOfMemoryError": true,
+   "-XX:OnOutOfMemoryError=kill -9 %p": true,
+   "-Xmx2G": true,
+   "-XX:G1NewSizePercent=50": true,
+   "-XX:MaxGCPauseMillis=300": true
+  },
+  "flags_ok": true,
+  "MaxDirectMemorySize": [
+   "-XX:MaxDirectMemorySize=15872M"
+  ],
+  "HeapDumpPath": [
+   "-XX:HeapDumpPath=/mydata/s4/r21/run/dump/cassandra-1795244865-pid82511.hprof"
+  ],
+  "xmx": [
+   "-Xmx2G"
+  ],
+  "xms": [
+   "-Xms2G"
+  ],
+  "xmn": []
+ },
+ "build": {
+  "build": "P",
+  "tree": "/mydata/s4/r21/cassandra-p",
+  "jar_sha256": "5817c26b8fbb4af726a56816f746699f9007f083c7230f42ee47c5120ee2d609",
+  "reset_putfields": [
+   "13: putfield      #14                 // Field comparator:Ljava/util/Comparator;",
+   "18: putfield      #13                 // Field updateF:Lorg/apache/cassandra/utils/btree/UpdateFunction;"
+  ],
+  "reset_nulls_updateF": true,
+  "reset_nulls_comparator": true
+ },
+ "settings": {
+  "values": {
+   "memtable_allocation_type": "heap_buffers",
+   "memtable_heap_space": "512MiB",
+   "memtable_offheap_space": "512MiB",
+   "memtable_cleanup_threshold": "0.33333334",
+   "memtable_flush_writers": "2",
+   "concurrent_writes": "32",
+   "concurrent_counter_writes": "32",
+   "native_transport_max_request_data_in_flight": "214748364B",
+   "native_transport_max_request_data_in_flight_per_ip": "53687091B",
+   "native_transport_max_message_size": "16777216B",
+   "write_request_timeout": "2000ms",
+   "max_mutation_size": "16384KiB",
+   "commitlog_segment_size": "32MiB",
+   "commitlog_total_space": "8192MiB",
+   "native_transport_throw_on_overload": "false",
+   "hinted_handoff_enabled": "true",
+   "key_cache_size": "100MiB",
+   "batch_size_fail_threshold": "50KiB",
+   "native_transport_timeout": "12s"
+  },
+  "expected": {
+   "memtable_allocation_type": "heap_buffers",
+   "memtable_heap_space": "512MiB",
+   "concurrent_writes": "32",
+   "write_request_timeout": "2000ms",
+   "commitlog_segment_size": "32MiB"
+  },
+  "ok": true
+ },
+ "schema": {
+  "cmd": "schema",
+  "args": [],
+  "start_ms": 1795244907445,
+  "agreement": true,
+  "tables": [
+   "t"
+  ],
+  "seconds": 0.29
+ },
+ "shakedown_client_ips": [
+  "127.0.0.11",
+  "127.0.0.12",
+  "127.0.0.13",
+  "127.0.0.14"
+ ],
+ "client_end": {
+  "ms": 1795244934501,
+  "req_ok": 3609,
+  "rows_ok": 230976,
+  "errs": [
+   150,
+   0,
+   0,
+   0,
+   0
+  ],
+  "conn": 4,
+  "gated_now": 0,
+  "gate_waits": 150,
+  "gate_wait_ms": 381199,
+  "gate_polls": 903,
+  "gate_poll_err": 0,
+  "retired": 0
+ },
+ "hotgen_out": "Running scope as unit: r21c-shakedown-p-1795244907.scope\n{\"hotgen\":\"done\",\"stopped\":\"end\",\"requests\":3609,\"rows\":230976,\"errors\":150,\"payload_bytes\":1892155392,\"gate_waits\":150,\"gate_first_poll\":0,\"gate_max_polls\":13,\"gate_polls\":903,\"retired\":0,\"selftest\":false}",
+ "sampler_last": {
+  "ms": "1795244935156",
+  "heap_used": "984179960",
+  "old_used": "665412856",
+  "old_coll_used": "665412856",
+  "young_n": "13",
+  "young_ms": "326",
+  "old_n": "3",
+  "old_ms": "525",
+  "K": "20383",
+  "K_t": "0",
+  "blocked": "160",
+  "pending_flush": "2",
+  "mut_active": "0",
+  "mut_pending": "0",
+  "mut_completed": "3105",
+  "mut_dropped": "21",
+  "write_timeouts": "151"
+ },
+ "reach_timing": {
+  "seconds": 7.5,
+  "bytes": 318525635,
+  "out": "{\"file\": \"/mydata/s4/r21/run/dump/end.hprof\", \"objects\": 843551, \"regions_in_dump\": 191, \"shallow_bytes_in_dump\": 287397648, \"btree_updaters_with_updateF\": 0, \"btree_updaters\": 65, \"sep_workers\": 71, \"slab_allocators\": 50, \"tinypools\": 152, \"reachable\": {\"regions\": 191, \"region_MiB\": 191.0, \"shallow_MiB\": 261.1}, \"reachable_without_updateF\": {\"regions\": 191, \"region_MiB\": 191.0, \"shallow_MiB\": 261.1}, \"reachable_without_tinypool\": {\"regions\": 191, \"region_MiB\": 191.0, \"shallow_MiB\": 261.0}, \"regions_only_via_updateF\": 0, \"regions_only_via_tinypool\": 0, \"slab_allocators_reachable\": 50, \"slab_allocators_only_via_updateF\": []}\n"
+ },
+ "system_log_errors": [],
+ "end": {
+  "daemons_left": "none"
+ },
+ "DONE": true
+}

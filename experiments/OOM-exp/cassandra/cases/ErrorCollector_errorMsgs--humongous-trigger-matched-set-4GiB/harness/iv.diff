@@ -1,0 +1,23 @@
+--- /tmp/r20-ErrorCollector.java.orig	2026-11-21 00:00:26.897457755 -0700
++++ src/java/org/apache/cassandra/cql3/ErrorCollector.java	2026-11-21 00:00:26.901457824 -0700
+@@ -78,7 +78,9 @@
+         if (recognizer instanceof Parser)
+             appendQuerySnippet((Parser) recognizer, builder);
+ 
+-        errorMsgs.add(builder.toString());
++        String m = builder.toString();
++        if (errorMsgs.isEmpty()) // U6 intervention (diagnostic build only): keep only the message that is thrown
++            errorMsgs.add(m);
+     }
+ 
+     /**
+@@ -87,7 +89,8 @@
+     @Override
+     public void syntaxError(BaseRecognizer recognizer, String errorMsg)
+     {
+-        errorMsgs.add(errorMsg);
++        if (errorMsgs.isEmpty()) // U6 intervention: keep only the message that is thrown
++            errorMsgs.add(errorMsg);
+     }
+ 
+     /**

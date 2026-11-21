@@ -1,0 +1,15 @@
+[02:04:52] golden-ring start
+[02:04:53] stopped V (none)
+[02:04:53] stopped R1 (none)
+[02:04:54] stopped R2 (none)
+[02:04:55] gen R1 xmx=2G build=/mydata/r19/run-orig
+[02:04:56] gen R2 xmx=2G build=/mydata/r19/run-orig
+[02:04:57] gen V xmx=2G build=/mydata/r19/run-orig
+[02:04:58] restored V from /mydata/r19/golden-V.tgz (53M data, saved_caches: 0 files)
+[02:05:02] launched V pid=480737 unit=r19-V-1795244699 build=/mydata/r19/run-orig swap.max=0 memory.max=max
+[02:06:12] launched R1 pid=674558 unit=r19-R1-1795244769 build=/mydata/r19/run-orig swap.max=0 memory.max=max
+[02:06:12] launched R2 pid=271626 unit=r19-R2-1795244769 build=/mydata/r19/run-orig swap.max=0 memory.max=max
+# R1 (ms0625) system.log at 07:06:26 UTC (same on R2), read before the instance was wiped:
+# ERROR [main] 2026-11-21T07:06:26,970 CassandraDaemon.java:887 - Exception encountered during startup
+# java.lang.RuntimeException: A node with address /10.10.1.1:7000 already exists, cancelling join. Use cassandra.replace_address if you want to replace this node.
+# nodetool status on V at 02:09: DN 10.10.1.1 / DN 10.10.1.5 (R11 host IDs), UN 10.10.1.4. Script stopped at 02:09:25, V stopped; fallback golden.sh full.

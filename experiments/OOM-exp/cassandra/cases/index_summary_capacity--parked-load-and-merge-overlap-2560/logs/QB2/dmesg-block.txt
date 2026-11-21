@@ -1,0 +1,79 @@
+[237830.459484] CompactionExecu invoked oom-killer: gfp_mask=0xcc0(GFP_KERNEL), order=0, oom_score_adj=0
+[237830.459495] CPU: 26 PID: 1478270 Comm: CompactionExecu Tainted: G           OE     5.15.0-203-generic #213-Ubuntu
+[237830.459498] Hardware name: Dell Inc. PowerEdge R620/01W23F, BIOS 2.9.0 12/06/2019
+[237830.459501] Call Trace:
+[237830.459504]  <TASK>
+[237830.459507]  show_stack+0x52/0x5c
+[237830.459513]  dump_stack_lvl+0x4a/0x63
+[237830.459517]  dump_stack+0x10/0x16
+[237830.459518]  dump_header+0x53/0x23c
+[237830.459523]  oom_kill_process.cold+0xb/0x10
+[237830.459525]  out_of_memory+0x106/0x2e0
+[237830.459531]  mem_cgroup_out_of_memory+0x13f/0x160
+[237830.459537]  try_charge_memcg+0x687/0x740
+[237830.459540]  charge_memcg+0x45/0xb0
+[237830.459541]  __mem_cgroup_charge+0x2d/0x90
+[237830.459543]  do_anonymous_page+0x114/0x3c0
+[237830.459547]  handle_pte_fault+0x20a/0x240
+[237830.459549]  __handle_mm_fault+0x405/0x6f0
+[237830.459551]  handle_mm_fault+0xd8/0x2c0
+[237830.459553]  do_user_addr_fault+0x1c9/0x640
+[237830.459558]  exc_page_fault+0x77/0x170
+[237830.459562]  asm_exc_page_fault+0x27/0x30
+[237830.459567] RIP: 0033:0x7f0e147dd67a
+[237830.459570] Code: c5 fa 6f 44 d7 c8 c5 fa 7f 44 d1 c8 c5 fa 6f 4c d7 d8 c5 fa 7f 4c d1 d8 c5 fa 6f 54 d7 e8 c5 fa 7f 54 d1 e8 c5 fa 6f 5c d7 f8 <c5> fa 7f 5c d1 f8 48 83 c2 08 7e ca 48 83 ea 04 7f 1c c5 fa 6f 44
+[237830.459572] RSP: 002b:00007f0e0228bc80 EFLAGS: 00010282
+[237830.459575] RAX: 00007f0382ec14d0 RBX: 0000000800392f00 RCX: 00007f0196fcb4c8
+[237830.459576] RDX: ffffffffffbbd368 RSI: 00007f018bb0f010 RDI: 00007f0382ec14c8
+[237830.459578] RBP: 00007f0e0228bc80 R08: 0000000000000000 R09: 00007f018bb0f010
+[237830.459578] R10: 00007f0e147de3c0 R11: 00007f0e1c88a1f0 R12: 0000000000000000
+[237830.459579] R13: 00000000b0003558 R14: 00007f0e0228bde8 R15: 00005565c978a8a0
+[237830.459582]  </TASK>
+[237830.459583] memory: usage 2621440kB, limit 2621440kB, failcnt 2599390
+[237830.459584] swap: usage 0kB, limit 0kB, failcnt 0
+[237830.459585] Memory cgroup stats for /user.slice/user-20001.slice/user@20001.service/app.slice/r18-QB2-1795254592.scope:
+[237830.459597] anon 2446917632
+                file 178827264
+                kernel_stack 1736704
+                pagetables 13504512
+                percpu 0
+                sock 0
+                shmem 0
+                file_mapped 178753536
+                file_dirty 0
+                file_writeback 0
+                swapcached 0
+                anon_thp 0
+                file_thp 0
+                shmem_thp 0
+                inactive_anon 735854592
+                active_anon 0
+                inactive_file 24576
+                active_file 0
+                unevictable 1889816576
+                slab_reclaimable 42122952
+                slab_unreclaimable 1122576
+                slab 43245528
+                workingset_refault_anon 0
+                workingset_refault_file 160
+                workingset_activate_anon 0
+                workingset_activate_file 160
+                workingset_restore_anon 0
+                workingset_restore_file 0
+                workingset_nodereclaim 45169
+                pgfault 1342640
+                pgmajfault 2647
+                pgrefill 40558
+                pgscan 6667171
+                pgsteal 6601790
+                pgactivate 46220
+                pgdeactivate 40555
+                pglazyfree 0
+                pglazyfreed 0
+                thp_fault_alloc 0
+                thp_collapse_alloc 0
+[237830.459600] Tasks state (memory values in pages):
+[237830.459601] [  pid  ]   uid  tgid total_vm      rss pgtables_bytes swapents oom_score_adj name
+[237830.459603] [1452239] 20001 1452239 13859037   641513 13520896        0             0 java
+[237830.459607] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0-1,oom_memcg=/user.slice/user-20001.slice/user@20001.service/app.slice/r18-QB2-1795254592.scope,task_memcg=/user.slice/user-20001.slice/user@20001.service/app.slice/r18-QB2-1795254592.scope,task=java,pid=1452239,uid=20001
+[237830.459836] Memory cgroup out of memory: Killed process 1452239 (java) total-vm:55436148kB, anon-rss:2386640kB, file-rss:179412kB, shmem-rss:0kB, UID:20001 pgtables:13204kB oom_score_adj:0

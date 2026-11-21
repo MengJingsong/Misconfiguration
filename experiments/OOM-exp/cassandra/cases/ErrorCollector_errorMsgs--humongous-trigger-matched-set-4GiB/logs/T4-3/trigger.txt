@@ -1,0 +1,13 @@
+# trigger connections 3 established at 1795247686885; trigger payload C query 16777200 body 16777207 frame 16777216
+load_start 1795247686986 (last of 3 load connections sent its first request)
+t_det 1795247796750 (+109.8 s after load start); rule: 3 consecutive Pause Full with after >= 3891 MiB
+  fired by: [2026-11-21T00:56:33.354-0700][167.488s][289085][289208][info ] GC(124) Pause Full (G1 Evacuation Pause) 3981M->3894M(4096M) 1589.319ms
+  fired by: [2026-11-21T00:56:34.805-0700][168.940s][289085][289208][info ] GC(127) Pause Full (G1 Evacuation Pause) 3958M->3899M(4096M) 1373.848ms
+  fired by: [2026-11-21T00:56:36.261-0700][170.395s][289085][289208][info ] GC(129) Pause Full (G1 Evacuation Pause) 3963M->3903M(4096M) 1384.733ms
+t_trig 1795247826793 (+139.8 s after load start) rule gc:/mydata/s4/r20/cassandra/logs/gc.log:4096 k=3
+trig0 send 1795247826793
+trig1 send 1795247826793
+trig2 send 1795247826793
+trig2 response 1795247865196 latency_ms 38402 io_error - [Errno_104]_Connection_reset_by_peer
+trig1 response 1795247865196 latency_ms 38403 io_error - [Errno_104]_Connection_reset_by_peer
+trig0 response 1795247865196 latency_ms 38403 io_error - [Errno_104]_Connection_reset_by_peer

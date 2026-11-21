@@ -1,0 +1,26 @@
+# rid build heap payload N k1 trig-spec hold histo len tmax k2 trig2-spec diag   (case file section 2.5; t_max from S0)
+T4-1 base 4G H 3 3 gc 600 histo - 300 0 - -
+C4-1 base 4G C 3 3 fixedfrom:T4-1 holdfrom:T4-1 - - 300 0 - -
+I4-1 iv 4G H 3 3 fixedfrom:T4-1 holdfrom:T4-1 - - 300 0 - -
+T4-2 base 4G H 3 3 gc 600 - - 300 0 - -
+C4-2 base 4G C 3 3 fixedfrom:T4-2 holdfrom:T4-2 - - 300 0 - -
+I4-2 iv 4G H 3 3 fixedfrom:T4-2 holdfrom:T4-2 - - 300 0 - -
+T4-3 base 4G H 3 3 gc 600 - - 300 0 - -
+C4-3 base 4G C 3 3 fixedfrom:T4-3 holdfrom:T4-3 - - 300 0 - -
+I4-3 iv 4G H 3 3 fixedfrom:T4-3 holdfrom:T4-3 - - 300 0 - -
+T8-1 base 8G H 6 3 gc 600 histo - 600 3 sat:128 diag
+SKIPIF-SURVIVED T8-1
+T8-2 base 8G H 6 3 gc 600 - - 600 3 sat:128 diag
+T8-3 base 8G H 6 3 gc 600 - - 600 3 sat:128 diag
+ENDSKIP
+SKIPIF-OOM T8-1
+T6-1 base 6G H 4 2 gc 600 histo - 600 3 sat:128 diag
+SKIPIF-SURVIVED T6-1
+T6-2 base 6G H 4 2 gc 600 - - 600 3 sat:128 diag
+T6-3 base 6G H 4 2 gc 600 - - 600 3 sat:128 diag
+ENDSKIP
+P2-1 base 2G H 2 0 none 300 histo - 300 1 gc diag
+SKIPIF-FEWOOM 2 T8-1 T8-2 T8-3
+SKIPIF-AFTER 0610
+T16-1 base 16G H 12 3 gc 600 - - 600 3 sat:128 diag
+ENDSKIP

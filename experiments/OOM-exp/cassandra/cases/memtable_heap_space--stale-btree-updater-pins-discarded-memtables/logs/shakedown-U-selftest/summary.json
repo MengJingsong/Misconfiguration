@@ -1,0 +1,144 @@
+{
+ "label": "shakedown-U-selftest",
+ "mode": "shakedown",
+ "args": [
+  "shakedown",
+  "U",
+  "selftest"
+ ],
+ "cotenancy": {
+  "daemons": "none",
+  "MemAvailable_MiB": 127076
+ },
+ "start": {
+  "pid": 83482,
+  "up_s": 40,
+  "unit": "r21-shakedown-u-selftest-1795244952",
+  "cgroup": "/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/r21-shakedown-u-selftest-1795244952.scope",
+  "memory.max": "max",
+  "swap.max": "0",
+  "scope_ok": true,
+  "flags": {
+   "-XX:+UseG1GC": true,
+   "-XX:G1HeapRegionSize=16m": true,
+   "-XX:+HeapDumpOnOutOfMemoryError": true,
+   "-XX:OnOutOfMemoryError=kill -9 %p": true,
+   "-Xmx2G": true,
+   "-XX:G1NewSizePercent=50": true,
+   "-XX:MaxGCPauseMillis=300": true
+  },
+  "flags_ok": true,
+  "MaxDirectMemorySize": [
+   "-XX:MaxDirectMemorySize=15872M"
+  ],
+  "HeapDumpPath": [
+   "-XX:HeapDumpPath=/mydata/s4/r21/run/dump/cassandra-1795244952-pid83482.hprof"
+  ],
+  "xmx": [
+   "-Xmx2G"
+  ],
+  "xms": [
+   "-Xms2G"
+  ],
+  "xmn": []
+ },
+ "build": {
+  "build": "U",
+  "tree": "/mydata/s4/r21/cassandra-u",
+  "jar_sha256": "570b5249d9b9a43f6809eb3da562737492192026f974b2edbd20e94bea90176e",
+  "reset_putfields": [],
+  "reset_nulls_updateF": false,
+  "reset_nulls_comparator": false
+ },
+ "settings": {
+  "values": {
+   "memtable_allocation_type": "heap_buffers",
+   "memtable_heap_space": "512MiB",
+   "memtable_offheap_space": "512MiB",
+   "memtable_cleanup_threshold": "0.33333334",
+   "memtable_flush_writers": "2",
+   "concurrent_writes": "32",
+   "concurrent_counter_writes": "32",
+   "native_transport_max_request_data_in_flight": "214748364B",
+   "native_transport_max_request_data_in_flight_per_ip": "53687091B",
+   "native_transport_max_message_size": "16777216B",
+   "write_request_timeout": "2000ms",
+   "max_mutation_size": "16384KiB",
+   "commitlog_segment_size": "32MiB",
+   "commitlog_total_space": "8192MiB",
+   "native_transport_throw_on_overload": "false",
+   "hinted_handoff_enabled": "true",
+   "key_cache_size": "100MiB",
+   "batch_size_fail_threshold": "50KiB",
+   "native_transport_timeout": "12s"
+  },
+  "expected": {
+   "memtable_allocation_type": "heap_buffers",
+   "memtable_heap_space": "512MiB",
+   "concurrent_writes": "32",
+   "write_request_timeout": "2000ms",
+   "commitlog_segment_size": "32MiB"
+  },
+  "ok": true
+ },
+ "schema": {
+  "cmd": "schema",
+  "args": [],
+  "start_ms": 1795244993935,
+  "agreement": true,
+  "tables": [
+   "t"
+  ],
+  "seconds": 0.29
+ },
+ "shakedown_client_ips": [
+  "127.0.0.11",
+  "127.0.0.12",
+  "127.0.0.13",
+  "127.0.0.14"
+ ],
+ "client_end": {
+  "ms": 1795245023193,
+  "req_ok": 3663,
+  "rows_ok": 234432,
+  "errs": [
+   107,
+   0,
+   0,
+   0,
+   0
+  ],
+  "conn": 4,
+  "gated_now": 0,
+  "gate_waits": 457,
+  "gate_wait_ms": 407666,
+  "gate_polls": 1249,
+  "gate_poll_err": 0,
+  "retired": 0
+ },
+ "hotgen_out": "Running scope as unit: r21c-shakedown-u-selftest-1795244994.scope\n{\"hotgen\":\"done\",\"stopped\":\"end\",\"requests\":3663,\"rows\":234432,\"errors\":107,\"payload_bytes\":1920466944,\"gate_waits\":457,\"gate_first_poll\":351,\"gate_max_polls\":15,\"gate_polls\":1249,\"retired\":0,\"selftest\":true}",
+ "sampler_last": {
+  "ms": "1795245023137",
+  "heap_used": "1262526416",
+  "old_used": "792764368",
+  "old_coll_used": "792764368",
+  "young_n": "12",
+  "young_ms": "300",
+  "old_n": "3",
+  "old_ms": "412",
+  "K": "168674847",
+  "K_t": "168653168",
+  "blocked": "192",
+  "pending_flush": "0",
+  "mut_active": "0",
+  "mut_pending": "0",
+  "mut_completed": "3117",
+  "mut_dropped": "17",
+  "write_timeouts": "108"
+ },
+ "system_log_errors": [],
+ "end": {
+  "daemons_left": "none"
+ },
+ "DONE": true
+}

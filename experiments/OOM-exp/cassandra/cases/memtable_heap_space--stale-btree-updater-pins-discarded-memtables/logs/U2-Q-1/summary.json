@@ -1,0 +1,293 @@
+{
+ "label": "U2-Q-1",
+ "mode": "life",
+ "args": [
+  "life",
+  "U2-Q-1",
+  "U",
+  "Q",
+  "2G"
+ ],
+ "cotenancy": {
+  "daemons": "none",
+  "MemAvailable_MiB": 127122
+ },
+ "start": {
+  "pid": 125913,
+  "up_s": 40,
+  "unit": "r21-u2-q-1-1795251507",
+  "cgroup": "/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/r21-u2-q-1-1795251507.scope",
+  "memory.max": "max",
+  "swap.max": "0",
+  "scope_ok": true,
+  "flags": {
+   "-XX:+UseG1GC": true,
+   "-XX:G1HeapRegionSize=16m": true,
+   "-XX:+HeapDumpOnOutOfMemoryError": true,
+   "-XX:OnOutOfMemoryError=kill -9 %p": true,
+   "-Xmx2G": true,
+   "-XX:G1NewSizePercent=50": true,
+   "-XX:MaxGCPauseMillis=300": true
+  },
+  "flags_ok": true,
+  "MaxDirectMemorySize": [
+   "-XX:MaxDirectMemorySize=15872M"
+  ],
+  "HeapDumpPath": [
+   "-XX:HeapDumpPath=/mydata/s4/r21/run/dump/cassandra-1795251507-pid125913.hprof"
+  ],
+  "xmx": [
+   "-Xmx2G"
+  ],
+  "xms": [
+   "-Xms2G"
+  ],
+  "xmn": []
+ },
+ "build": {
+  "build": "U",
+  "tree": "/mydata/s4/r21/cassandra-u",
+  "jar_sha256": "570b5249d9b9a43f6809eb3da562737492192026f974b2edbd20e94bea90176e",
+  "reset_putfields": [],
+  "reset_nulls_updateF": false,
+  "reset_nulls_comparator": false
+ },
+ "settings": {
+  "values": {
+   "memtable_allocation_type": "heap_buffers",
+   "memtable_heap_space": "512MiB",
+   "memtable_offheap_space": "512MiB",
+   "memtable_cleanup_threshold": "0.33333334",
+   "memtable_flush_writers": "2",
+   "concurrent_writes": "32",
+   "concurrent_counter_writes": "32",
+   "native_transport_max_request_data_in_flight": "214748364B",
+   "native_transport_max_request_data_in_flight_per_ip": "53687091B",
+   "native_transport_max_message_size": "16777216B",
+   "write_request_timeout": "2000ms",
+   "max_mutation_size": "16384KiB",
+   "commitlog_segment_size": "32MiB",
+   "commitlog_total_space": "8192MiB",
+   "native_transport_throw_on_overload": "false",
+   "hinted_handoff_enabled": "true",
+   "key_cache_size": "100MiB",
+   "batch_size_fail_threshold": "50KiB",
+   "native_transport_timeout": "12s"
+  },
+  "expected": {
+   "memtable_allocation_type": "heap_buffers",
+   "memtable_heap_space": "512MiB",
+   "concurrent_writes": "32",
+   "write_request_timeout": "2000ms",
+   "commitlog_segment_size": "32MiB"
+  },
+  "ok": true
+ },
+ "schema": {
+  "cmd": "schema",
+  "args": [],
+  "start_ms": 1795251549321,
+  "agreement": true,
+  "tables": [
+   "t"
+  ],
+  "seconds": 0.26
+ },
+ "hist s0": {
+  "h1_total": 67987352,
+  "total": 67987808,
+  "bb": 16024648,
+  "bn": 100567,
+  "K": 19023,
+  "ms": 1795251567096
+ },
+ "L0": {
+  "h1_total": 67987352,
+  "total": 67987808,
+  "bb": 16024648,
+  "bn": 100567,
+  "K": 19023,
+  "ms": 1795251567096
+ },
+ "workload_start": {
+  "ms": 1795251577473,
+  "mode": "quad",
+  "R": 160,
+  "S_MiB": 1.25,
+  "secs": 240,
+  "rate": 0
+ },
+ "first_trigger": {
+  "req_ok": 1129,
+  "max_mut_active": 32,
+  "need_active": 24,
+  "client_ips": [
+   "127.0.0.11",
+   "127.0.0.12",
+   "127.0.0.13",
+   "127.0.0.14"
+  ],
+  "at_s": 21,
+  "sampler_workload_samples": 42,
+  "ok": true,
+  "deferred_to_dump": false
+ },
+ "workload_outcome": {
+  "outcome": "node_gone",
+  "at_s": 125,
+  "client": {
+   "ms": 1795251702545,
+   "req_ok": 4525,
+   "rows_ok": 724000,
+   "errs": [
+    732,
+    0,
+    0,
+    0,
+    0
+   ],
+   "conn": 4,
+   "gated_now": 1,
+   "gate_waits": 732,
+   "gate_wait_ms": 1339813,
+   "gate_polls": 3302,
+   "gate_poll_err": 0,
+   "retired": 0
+  },
+  "gated_max": 36
+ },
+ "oom": {
+  "stdout_lines": [
+   "CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V",
+   "INFO  [main] 2026-11-21T08:58:31,019 CassandraDaemon.java:619 - JVM Arguments: [-ea, -da:net.openhft..., -XX:+UseThreadPriorities, -XX:+HeapDumpOnOutOfMemoryError, -Xss256k, -XX:+AlwaysPreTouch, -XX:+UseTLAB, -XX:+ResizeTLAB, -XX:+UseNUMA, -XX:+PerfDisableSharedMem, -Djava.net.preferIPv4Stack=true, -Dchronicle.analytics.disable=true, -XX:-UseBiasedLocking, -XX:+UseG1GC, -XX:+ParallelRefProcEnabled, -XX:MaxTenuringThreshold=2, -XX:G1HeapRegionSize=16m, -XX:+UnlockExperimentalVMOptions, -XX:G1NewSizePercent=50, -XX:G1RSetUpdatingPauseTimePercent=5, -XX:MaxGCPauseMillis=300, -XX:InitiatingHeapOccupancyPercent=70, -Djdk.attach.allowAttachSelf=true, --add-exports=java.base/jdk.internal.misc=ALL-UNNAMED, --add-exports=java.base/jdk.internal.ref=ALL-UNNAMED, --add-exports=java.base/jdk.internal.util=ALL-UNNAMED, --add-exports=java.base/sun.nio.ch=ALL-UNNAMED, --add-exports=java.management.rmi/com.sun.jmx.remote.internal.rmi=ALL-UNNAMED, --add-exports=java.rmi/sun.rmi.registry=ALL-UNNAMED, --add-exports=java.rmi/sun.rmi.server=ALL-UNNAMED, --add-exports=java.sql/java.sql=ALL-UNNAMED, --add-opens=java.base/java.lang.module=ALL-UNNAMED, --add-opens=java.base/jdk.internal.loader=ALL-UNNAMED, --add-opens=java.base/jdk.internal.ref=ALL-UNNAMED, --add-opens=java.base/jdk.internal.reflect=ALL-UNNAMED, --add-opens=java.base/jdk.internal.math=ALL-UNNAMED, --add-opens=java.base/jdk.internal.module=ALL-UNNAMED, --add-opens=java.base/jdk.internal.util.jar=ALL-UNNAMED, --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED, -Dio.netty.tryReflectionSetAccessible=true, -Dio.netty.allocator.useCacheForAllThreads=true, -Dio.netty.allocator.maxOrder=11, -Xlog:gc=info,heap*=trace,age*=debug,safepoint=info,promotion*=trace:file=/mydata/s4/r21/run/logs/gc.log:time,uptime,pid,tid,level:filecount=10,filesize=10485760, -Xms2G, -Xmx2G, -XX:MaxDirectMemorySize=15872M, -XX:ParallelGCThreads=40, -XX:ConcGCThreads=40, -XX:CompileCommandFile=/mydata/s4/r21/run/conf/hotspot_compiler, -javaagent:/mydata/s4/r21/cassandra-u/bin/../lib/jamm-0.4.0.jar, -XX:HeapDumpPath=/mydata/s4/r21/run/dump/cassandra-1795251507-pid125913.hprof, -Dcassandra.jmx.local.port=7199, -Dcom.sun.management.jmxremote.authenticate=false, -Dcom.sun.management.jmxremote.password.file=/etc/cassandra/jmxremote.password, -Djava.library.path=/mydata/s4/r21/cassandra-u/bin/../lib/sigar-bin, -XX:OnOutOfMemoryError=kill -9 %p, -Dlogback.configurationFile=logback.xml, -Dcassandra.logdir=/mydata/s4/r21/run/logs, -Dcassandra.storagedir=/mydata/s4/r21/cassandra-u/bin/../data, -Dcassandra-pidfile=/mydata/s4/r21/run/cassandra.pid, -Dcassandra-foreground=yes]",
+   "java.lang.OutOfMemoryError: Java heap space",
+   "Dumping heap to /mydata/s4/r21/run/dump/cassandra-1795251507-pid125913.hprof ...",
+   "Heap dump file created [2078063628 bytes in 3.710 secs]",
+   "# java.lang.OutOfMemoryError: Java heap space",
+   "# -XX:OnOutOfMemoryError=\"kill -9 %p\"",
+   "#   Executing /bin/sh -c \"kill -9 125913\"...",
+   "Killed"
+  ],
+  "dumps": [
+   {
+    "file": "cassandra-1795251507-pid125913.hprof",
+    "birth_s": "1795251701",
+    "mtime_s": "1795251705",
+    "bytes": "2078063628"
+   }
+  ],
+  "exit": 137,
+  "since_workload_s": 149
+ },
+ "flush_lines": [
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:39,828 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='ks', ColumnFamily='t') to free up room. Used total: 0.34/0.00, live: 0.34/0.00, flushing: 0.00/0.00, this: 0.34/0.00",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:39,830 ColumnFamilyStore.java:1055 - Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT, Usage: 182.785MiB (36%) on-heap, 0B (0%) off-heap",
+  "[PerDiskMemtableFlushWriter_0:2] 2026-11-21T08:59:39,905 Flushing.java:153 - Writing Memtable-t@1197634752(91.751MiB serialized bytes, 11680 ops, 229.444MiB (45%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:39,994 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='ks', ColumnFamily='t') to free up room. Used total: 0.78/0.00, live: 0.33/0.00, flushing: 0.45/0.00, this: 0.33/0.00",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:39,994 ColumnFamilyStore.java:1055 - Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT, Usage: 171.399MiB (33%) on-heap, 0B (0%) off-heap",
+  " [PerDiskMemtableFlushWriter_0:1] 2026-11-21T08:59:40,045 Flushing.java:153 - Writing Memtable-t@215102327(96.779MiB serialized bytes, 12320 ops, 183.341MiB (36%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "tableFlushWriter_0:2] 2026-11-21T08:59:40,686 Flushing.java:179 - Completed flushing /mydata/s4/r21/run/data/ks/t-d058d940e58911f1b631019348137153/nb-1-big-Data.db (91.422MiB) for commitlog position CommitLogPosition(segmentId=1795251511528, position=30184538)",
+  "tableFlushWriter_0:1] 2026-11-21T08:59:40,707 Flushing.java:179 - Completed flushing /mydata/s4/r21/run/data/ks/t-d058d940e58911f1b631019348137153/nb-2-big-Data.db (96.438MiB) for commitlog position CommitLogPosition(segmentId=1795251511531, position=32809278)",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:40,772 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='ks', ColumnFamily='t') to free up room. Used total: 0.70/0.00, live: 0.34/0.00, flushing: 0.36/0.00, this: 0.34/0.00",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:40,772 ColumnFamilyStore.java:1055 - Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT, Usage: 182.307MiB (36%) on-heap, 0B (0%) off-heap",
+  " [PerDiskMemtableFlushWriter_0:2] 2026-11-21T08:59:40,794 Flushing.java:153 - Writing Memtable-t@712500529(90.494MiB serialized bytes, 11520 ops, 288.181MiB (56%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:40,895 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='ks', ColumnFamily='t') to free up room. Used total: 0.90/0.00, live: 0.34/0.00, flushing: 0.56/0.00, this: 0.34/0.00",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:40,895 ColumnFamilyStore.java:1055 - Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT, Usage: 175.038MiB (34%) on-heap, 0B (0%) off-heap",
+  "PerDiskMemtableFlushWriter_0:1] 2026-11-21T08:59:40,954 Flushing.java:153 - Writing Memtable-t@1498560080(126.944MiB serialized bytes, 16160 ops, 196.860MiB (38%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "tableFlushWriter_0:2] 2026-11-21T08:59:41,359 Flushing.java:179 - Completed flushing /mydata/s4/r21/run/data/ks/t-d058d940e58911f1b631019348137153/nb-3-big-Data.db (90.175MiB) for commitlog position CommitLogPosition(segmentId=1795251511534, position=28872176)",
+  "ableFlushWriter_0:1] 2026-11-21T08:59:41,554 Flushing.java:179 - Completed flushing /mydata/s4/r21/run/data/ks/t-d058d940e58911f1b631019348137153/nb-4-big-Data.db (126.493MiB) for commitlog position CommitLogPosition(segmentId=1795251511538, position=30184538)",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:42,538 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='ks', ColumnFamily='t') to free up room. Used total: 0.73/0.00, live: 0.34/0.00, flushing: 0.38/0.00, this: 0.34/0.00",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:42,739 ColumnFamilyStore.java:1055 - Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT, Usage: 195.200MiB (38%) on-heap, 0B (0%) off-heap",
+  " [PerDiskMemtableFlushWriter_0:2] 2026-11-21T08:59:42,773 Flushing.java:153 - Writing Memtable-t@1283620008(64.100MiB serialized bytes, 8160 ops, 218.510MiB (43%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:42,838 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='ks', ColumnFamily='t') to free up room. Used total: 0.77/0.00, live: 0.34/0.00, flushing: 0.43/0.00, this: 0.34/0.00",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:42,838 ColumnFamilyStore.java:1055 - Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT, Usage: 174.355MiB (34%) on-heap, 0B (0%) off-heap",
+  "[PerDiskMemtableFlushWriter_0:1] 2026-11-21T08:59:42,895 Flushing.java:153 - Writing Memtable-t@774997311(109.347MiB serialized bytes, 13920 ops, 187.515MiB (37%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "tableFlushWriter_0:2] 2026-11-21T08:59:43,161 Flushing.java:179 - Completed flushing /mydata/s4/r21/run/data/ks/t-d058d940e58911f1b631019348137153/nb-6-big-Data.db (63.873MiB) for commitlog position CommitLogPosition(segmentId=1795251511540, position=31496924)",
+  "ableFlushWriter_0:1] 2026-11-21T08:59:43,396 Flushing.java:179 - Completed flushing /mydata/s4/r21/run/data/ks/t-d058d940e58911f1b631019348137153/nb-7-big-Data.db (108.961MiB) for commitlog position CommitLogPosition(segmentId=1795251511544, position=14436098)",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:45,063 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='ks', ColumnFamily='t') to free up room. Used total: 0.72/0.00, live: 0.35/0.00, flushing: 0.37/0.00, this: 0.35/0.00",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:45,066 ColumnFamilyStore.java:1055 - Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT, Usage: 222.112MiB (43%) on-heap, 0B (0%) off-heap",
+  "PerDiskMemtableFlushWriter_0:2] 2026-11-21T08:59:45,102 Flushing.java:153 - Writing Memtable-t@2112666502(104.320MiB serialized bytes, 13280 ops, 294.898MiB (58%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:45,429 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='ks', ColumnFamily='t') to free up room. Used total: 0.91/0.00, live: 0.34/0.00, flushing: 0.58/0.00, this: 0.34/0.00",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:45,429 ColumnFamilyStore.java:1055 - Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT, Usage: 175.824MiB (34%) on-heap, 0B (0%) off-heap",
+  "PerDiskMemtableFlushWriter_0:1] 2026-11-21T08:59:45,535 Flushing.java:153 - Writing Memtable-t@2026828033(157.108MiB serialized bytes, 20000 ops, 181.616MiB (35%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "ableFlushWriter_0:2] 2026-11-21T08:59:45,656 Flushing.java:179 - Completed flushing /mydata/s4/r21/run/data/ks/t-d058d940e58911f1b631019348137153/nb-8-big-Data.db (103.952MiB) for commitlog position CommitLogPosition(segmentId=1795251511547, position=24935058)",
+  "ableFlushWriter_0:1] 2026-11-21T08:59:46,136 Flushing.java:179 - Completed flushing /mydata/s4/r21/run/data/ks/t-d058d940e58911f1b631019348137153/nb-9-big-Data.db (156.554MiB) for commitlog position CommitLogPosition(segmentId=1795251511552, position=24935058)",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:48,950 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='ks', ColumnFamily='t') to free up room. Used total: 0.71/0.00, live: 0.35/0.00, flushing: 0.35/0.00, this: 0.35/0.00",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:48,951 ColumnFamilyStore.java:1055 - Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT, Usage: 194.544MiB (38%) on-heap, 0B (0%) off-heap",
+  " [PerDiskMemtableFlushWriter_0:2] 2026-11-21T08:59:50,221 Flushing.java:153 - Writing Memtable-t@1443482482(70.385MiB serialized bytes, 8960 ops, 224.974MiB (44%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:50,254 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='ks', ColumnFamily='t') to free up room. Used total: 0.79/0.00, live: 0.35/0.00, flushing: 0.44/0.00, this: 0.35/0.00",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:50,255 ColumnFamilyStore.java:1055 - Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT, Usage: 191.324MiB (37%) on-heap, 0B (0%) off-heap",
+  "[PerDiskMemtableFlushWriter_0:1] 2026-11-21T08:59:50,796 Flushing.java:153 - Writing Memtable-t@189802423(110.604MiB serialized bytes, 14080 ops, 298.861MiB (58%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "ableFlushWriter_0:2] 2026-11-21T08:59:50,964 Flushing.java:179 - Completed flushing /mydata/s4/r21/run/data/ks/t-d058d940e58911f1b631019348137153/nb-10-big-Data.db (70.133MiB) for commitlog position CommitLogPosition(segmentId=1795251511554, position=32809278)",
+  "bleFlushWriter_0:1] 2026-11-21T08:59:51,209 Flushing.java:179 - Completed flushing /mydata/s4/r21/run/data/ks/t-d058d940e58911f1b631019348137153/nb-11-big-Data.db (110.212MiB) for commitlog position CommitLogPosition(segmentId=1795251511558, position=17060838)",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:53,436 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='ks', ColumnFamily='t') to free up room. Used total: 0.92/0.00, live: 0.33/0.00, flushing: 0.58/0.00, this: 0.33/0.00",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:53,437 ColumnFamilyStore.java:1055 - Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT, Usage: 176.141MiB (34%) on-heap, 0B (0%) off-heap",
+  " [PerDiskMemtableFlushWriter_0:2] 2026-11-21T08:59:53,457 Flushing.java:153 - Writing Memtable-t@1119064930(50.275MiB serialized bytes, 6400 ops, 189.282MiB (37%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:53,810 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='ks', ColumnFamily='t') to free up room. Used total: 0.71/0.00, live: 0.34/0.00, flushing: 0.37/0.00, this: 0.34/0.00",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:53,811 ColumnFamilyStore.java:1055 - Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT, Usage: 182.930MiB (36%) on-heap, 0B (0%) off-heap",
+  "PerDiskMemtableFlushWriter_0:1] 2026-11-21T08:59:53,893 Flushing.java:153 - Writing Memtable-t@1586656381(145.797MiB serialized bytes, 18560 ops, 217.503MiB (42%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "tableFlushWriter_0:2] 2026-11-21T08:59:53,998 Flushing.java:179 - Completed flushing /mydata/s4/r21/run/data/ks/t-d058d940e58911f1b631019348137153/nb-13-big-Data.db (50.096MiB) for commitlog position CommitLogPosition(segmentId=1795251511560, position=3937138)",
+  "bleFlushWriter_0:1] 2026-11-21T08:59:54,463 Flushing.java:179 - Completed flushing /mydata/s4/r21/run/data/ks/t-d058d940e58911f1b631019348137153/nb-14-big-Data.db (145.283MiB) for commitlog position CommitLogPosition(segmentId=1795251511564, position=24935058)",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:55,551 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='ks', ColumnFamily='t') to free up room. Used total: 0.77/0.00, live: 0.34/0.00, flushing: 0.42/0.00, this: 0.34/0.00",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:55,552 ColumnFamilyStore.java:1055 - Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT, Usage: 188.622MiB (37%) on-heap, 0B (0%) off-heap",
+  "PerDiskMemtableFlushWriter_0:2] 2026-11-21T08:59:56,010 Flushing.java:153 - Writing Memtable-t@1702426987(110.604MiB serialized bytes, 14080 ops, 280.102MiB (55%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:56,250 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='ks', ColumnFamily='t') to free up room. Used total: 0.89/0.00, live: 0.34/0.00, flushing: 0.55/0.00, this: 0.34/0.00",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:56,251 ColumnFamilyStore.java:1055 - Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT, Usage: 186.402MiB (36%) on-heap, 0B (0%) off-heap",
+  "  [PerDiskMemtableFlushWriter_0:1] 2026-11-21T08:59:56,693 Flushing.java:153 - Writing Memtable-t@312468767(65.357MiB serialized bytes, 8320 ops, 239.813MiB (47%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "ableFlushWriter_0:2] 2026-11-21T08:59:56,919 Flushing.java:179 - Completed flushing /mydata/s4/r21/run/data/ks/t-d058d940e58911f1b631019348137153/nb-15-big-Data.db (110.212MiB) for commitlog position CommitLogPosition(segmentId=1795251511568, position=9186618)",
+  "ableFlushWriter_0:1] 2026-11-21T08:59:57,091 Flushing.java:179 - Completed flushing /mydata/s4/r21/run/data/ks/t-d058d940e58911f1b631019348137153/nb-16-big-Data.db (65.127MiB) for commitlog position CommitLogPosition(segmentId=1795251511570, position=11811358)",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:58,391 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='ks', ColumnFamily='t') to free up room. Used total: 0.81/0.00, live: 0.34/0.00, flushing: 0.47/0.00, this: 0.34/0.00",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:58,391 ColumnFamilyStore.java:1055 - Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT, Usage: 178.561MiB (35%) on-heap, 0B (0%) off-heap",
+  "O  [PerDiskMemtableFlushWriter_0:2] 2026-11-21T08:59:58,413 Flushing.java:153 - Writing Memtable-t@16734239(50.275MiB serialized bytes, 6400 ops, 198.036MiB (39%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:58,802 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='ks', ColumnFamily='t') to free up room. Used total: 0.72/0.00, live: 0.33/0.00, flushing: 0.39/0.00, this: 0.33/0.00",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:58,803 ColumnFamilyStore.java:1055 - Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT, Usage: 172.711MiB (34%) on-heap, 0B (0%) off-heap",
+  "PerDiskMemtableFlushWriter_0:1] 2026-11-21T08:59:58,876 Flushing.java:153 - Writing Memtable-t@1142259363(162.136MiB serialized bytes, 20640 ops, 199.293MiB (39%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "ableFlushWriter_0:2] 2026-11-21T08:59:58,952 Flushing.java:179 - Completed flushing /mydata/s4/r21/run/data/ks/t-d058d940e58911f1b631019348137153/nb-18-big-Data.db (50.094MiB) for commitlog position CommitLogPosition(segmentId=1795251511571, position=31496916)",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:59,830 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='ks', ColumnFamily='t') to free up room. Used total: 0.73/0.00, live: 0.34/0.00, flushing: 0.39/0.00, this: 0.34/0.00",
+  "INFO  [SlabPoolCleaner] 2026-11-21T08:59:59,831 ColumnFamilyStore.java:1055 - Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT, Usage: 187.884MiB (37%) on-heap, 0B (0%) off-heap",
+  "ableFlushWriter_0:1] 2026-11-21T09:00:00,247 Flushing.java:179 - Completed flushing /mydata/s4/r21/run/data/ks/t-d058d940e58911f1b631019348137153/nb-19-big-Data.db (161.563MiB) for commitlog position CommitLogPosition(segmentId=1795251511577, position=3937138)",
+  "PerDiskMemtableFlushWriter_0:2] 2026-11-21T09:00:00,321 Flushing.java:153 - Writing Memtable-t@1046370965(114.375MiB serialized bytes, 14560 ops, 317.747MiB (62%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "bleFlushWriter_0:2] 2026-11-21T09:00:00,903 Flushing.java:179 - Completed flushing /mydata/s4/r21/run/data/ks/t-d058d940e58911f1b631019348137153/nb-20-big-Data.db (113.970MiB) for commitlog position CommitLogPosition(segmentId=1795251511580, position=24935058)",
+  "INFO  [SlabPoolCleaner] 2026-11-21T09:00:07,478 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='ks', ColumnFamily='t') to free up room. Used total: 0.97/0.00, live: 0.34/0.00, flushing: 0.62/0.00, this: 0.34/0.00",
+  "INFO  [SlabPoolCleaner] 2026-11-21T09:00:07,478 ColumnFamilyStore.java:1055 - Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT, Usage: 182.175MiB (36%) on-heap, 0B (0%) off-heap",
+  "  [PerDiskMemtableFlushWriter_0:1] 2026-11-21T09:00:07,484 Flushing.java:153 - Writing Memtable-t@270770293(49.018MiB serialized bytes, 6240 ops, 194.242MiB (38%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "ableFlushWriter_0:1] 2026-11-21T09:00:07,699 Flushing.java:179 - Completed flushing /mydata/s4/r21/run/data/ks/t-d058d940e58911f1b631019348137153/nb-21-big-Data.db (48.841MiB) for commitlog position CommitLogPosition(segmentId=1795251511582, position=10498996)",
+  "INFO  [SlabPoolCleaner] 2026-11-21T09:00:08,218 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='ks', ColumnFamily='t') to free up room. Used total: 0.34/0.00, live: 0.34/0.00, flushing: 0.00/0.00, this: 0.34/0.00",
+  "INFO  [SlabPoolCleaner] 2026-11-21T09:00:08,219 ColumnFamilyStore.java:1055 - Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT, Usage: 177.763MiB (35%) on-heap, 0B (0%) off-heap",
+  "PerDiskMemtableFlushWriter_0:2] 2026-11-21T09:00:08,262 Flushing.java:153 - Writing Memtable-t@1972964469(136.998MiB serialized bytes, 17440 ops, 204.701MiB (40%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "INFO  [SlabPoolCleaner] 2026-11-21T09:00:08,454 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='ks', ColumnFamily='t') to free up room. Used total: 0.73/0.00, live: 0.33/0.00, flushing: 0.40/0.00, this: 0.33/0.00",
+  "INFO  [SlabPoolCleaner] 2026-11-21T09:00:08,454 ColumnFamilyStore.java:1055 - Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT, Usage: 172.976MiB (34%) on-heap, 0B (0%) off-heap",
+  "[PerDiskMemtableFlushWriter_0:1] 2026-11-21T09:00:08,657 Flushing.java:153 - Writing Memtable-t@464384697(119.402MiB serialized bytes, 15200 ops, 185.352MiB (36%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))",
+  "bleFlushWriter_0:1] 2026-11-21T09:00:09,390 Flushing.java:179 - Completed flushing /mydata/s4/r21/run/data/ks/t-d058d940e58911f1b631019348137153/nb-24-big-Data.db (118.980MiB) for commitlog position CommitLogPosition(segmentId=1795251511590, position=15748468)",
+  "bleFlushWriter_0:2] 2026-11-21T09:00:09,432 Flushing.java:179 - Completed flushing /mydata/s4/r21/run/data/ks/t-d058d940e58911f1b631019348137153/nb-23-big-Data.db (136.511MiB) for commitlog position CommitLogPosition(segmentId=1795251511586, position=22310318)"
+ ],
+ "client_end": {
+  "ms": 1795251725553,
+  "req_ok": 4525,
+  "rows_ok": 724000,
+  "errs": [
+   732,
+   0,
+   35,
+   0,
+   0
+  ],
+  "conn": 0,
+  "gated_now": 1,
+  "gate_waits": 732,
+  "gate_wait_ms": 1339813,
+  "gate_polls": 3340,
+  "gate_poll_err": 39,
+  "retired": 0
+ },
+ "dump_queued oom": {
+  "file": "/mydata/s4/r21/dumps/U2-Q-1--oom.hprof",
+  "bytes": 2078063628,
+  "refs": true,
+  "scanonly": false
+ },
+ "end": {
+  "daemons_left": "none"
+ },
+ "DONE": true
+}

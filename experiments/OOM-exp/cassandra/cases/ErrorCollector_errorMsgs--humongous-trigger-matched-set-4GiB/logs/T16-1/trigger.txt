@@ -1,0 +1,25 @@
+# trigger connections 3 established at 1795250834893; trigger payload C query 16777200 body 16777207 frame 16777216
+# wave-2 trigger connections 3 established at 1795250834962; payload C frame 16777216, pre-sent 16777215 at +10 s
+load_start 1795250835067 (last of 12 load connections sent its first request)
+trig2-0 presend 1795250845080 bytes 16777215 done 1795250845144
+trig2-1 presend 1795250845097 bytes 16777215 done 1795250845147
+trig2-2 presend 1795250845111 bytes 16777215 done 1795250845148
+t_det 1795250947589 (+112.5 s after load start); rule: 3 consecutive Pause Full with after >= 15565 MiB
+  fired by: [2026-11-21T01:49:00.802-0700][166.941s][339693][339833][info ] GC(86) Pause Full (G1 Evacuation Pause) 15971M->15576M(16384M) 2074.120ms
+  fired by: [2026-11-21T01:49:05.307-0700][171.446s][339693][339833][info ] GC(91) Pause Full (G1 Evacuation Pause) 16045M->15648M(16384M) 2078.072ms
+  fired by: [2026-11-21T01:49:07.411-0700][173.550s][339693][339833][info ] GC(93) Pause Full (G1 Evacuation Pause) 15904M->15668M(16384M) 2002.142ms
+t_trig 1795250977639 (+142.6 s after load start) rule gc:/mydata/s4/r20/cassandra/logs/gc.log:16384 k=3
+trig1 send 1795250977639
+trig0 send 1795250977639
+trig2 send 1795250977640
+trig1 response 1795251108555 latency_ms 130916 ERROR 0x1001 Query_timed_out_before_it_could_start
+trig0 response 1795251255270 latency_ms 277630 ERROR 0x2000 line_0:-1_no_viable_alternative_at_input_'<EOF>'
+trig2 response 1795251255270 latency_ms 277629 ERROR 0x2000 line_0:-1_no_viable_alternative_at_input_'<EOF>'
+undetected2 by cap (+442.6 s); firing wave 2 at the cap
+t_trig2 1795251277983 (+442.9 s after load start) rule sat:/mydata/s4/r20/cassandra/logs/gc.log:16384:128 k2=3
+trig2-0 send 1795251277983 (last byte)
+trig2-2 send 1795251277984 (last byte)
+trig2-1 send 1795251277984 (last byte)
+trig2-1 response 1795251418575 latency_ms 140591 io_error - [Errno_104]_Connection_reset_by_peer
+trig2-2 response 1795251418575 latency_ms 140591 io_error - [Errno_104]_Connection_reset_by_peer
+trig2-0 response 1795251418576 latency_ms 140592 io_error - [Errno_104]_Connection_reset_by_peer

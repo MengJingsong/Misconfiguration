@@ -1,0 +1,61 @@
+MaxHintsInProgress=1024
+K_rt <- org.apache.cassandra.metrics:type=Table,keyspace=r22,scope=rt,name=MemtableOnHeapDataSize
+sw_rt <- org.apache.cassandra.metrics:type=Table,keyspace=r22,scope=rt,name=MemtableSwitchCount
+wl_rt <- org.apache.cassandra.metrics:type=Table,keyspace=r22,scope=rt,name=WriteLatency
+K_blob <- org.apache.cassandra.metrics:type=Table,keyspace=r22,scope=blob,name=MemtableOnHeapDataSize
+sw_blob <- org.apache.cassandra.metrics:type=Table,keyspace=r22,scope=blob,name=MemtableSwitchCount
+wl_blob <- org.apache.cassandra.metrics:type=Table,keyspace=r22,scope=blob,name=WriteLatency
+K_all <- org.apache.cassandra.metrics:type=Table,name=AllMemtablesOnHeapDataSize
+active <- org.apache.cassandra.metrics:type=ThreadPools,path=request,scope=MutationStage,name=ActiveTasks
+pending <- org.apache.cassandra.metrics:type=ThreadPools,path=request,scope=MutationStage,name=PendingTasks
+completed <- org.apache.cassandra.metrics:type=ThreadPools,path=request,scope=MutationStage,name=CompletedTasks
+ntr_active <- org.apache.cassandra.metrics:type=ThreadPools,path=transport,scope=Native-Transport-Requests,name=ActiveTasks
+ntr_pending <- org.apache.cassandra.metrics:type=ThreadPools,path=transport,scope=Native-Transport-Requests,name=PendingTasks
+ntr_completed <- org.apache.cassandra.metrics:type=ThreadPools,path=transport,scope=Native-Transport-Requests,name=CompletedTasks
+hints_inprog <- org.apache.cassandra.metrics:type=Storage,name=TotalHintsInProgress
+hints_total <- org.apache.cassandra.metrics:type=Storage,name=TotalHints
+dropped_mut <- org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION_REQ,name=Dropped
+wr_timeouts <- org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Timeouts
+cl_size <- org.apache.cassandra.metrics:type=CommitLog,name=TotalCommitLogSize
+Exception in thread "main" java.lang.reflect.UndeclaredThrowableException
+	at com.sun.proxy.$Proxy0.getUsage(Unknown Source)
+	at Poll.main(Poll.java:74)
+	Suppressed: java.rmi.ConnectException: Connection refused to host: 127.0.0.1; nested exception is: 
+	java.net.ConnectException: Connection refused (Connection refused)
+		at java.rmi/sun.rmi.transport.tcp.TCPEndpoint.newSocket(TCPEndpoint.java:623)
+		at java.rmi/sun.rmi.transport.tcp.TCPChannel.createConnection(TCPChannel.java:209)
+		at java.rmi/sun.rmi.transport.tcp.TCPChannel.newConnection(TCPChannel.java:196)
+		at java.rmi/sun.rmi.server.UnicastRef.invoke(UnicastRef.java:132)
+		at jdk.remoteref/jdk.jmx.remote.internal.rmi.PRef.invoke(Unknown Source)
+		at java.management.rmi/javax.management.remote.rmi.RMIConnectionImpl_Stub.close(Unknown Source)
+		at java.management.rmi/javax.management.remote.rmi.RMIConnector.close(RMIConnector.java:506)
+		at java.management.rmi/javax.management.remote.rmi.RMIConnector.close(RMIConnector.java:446)
+		at Poll.main(Poll.java:50)
+	Caused by: java.net.ConnectException: Connection refused (Connection refused)
+		at java.base/java.net.PlainSocketImpl.socketConnect(Native Method)
+		at java.base/java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:412)
+		at java.base/java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:255)
+		at java.base/java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:237)
+		at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:416)
+		at java.base/java.net.Socket.connect(Socket.java:609)
+		at java.base/java.net.Socket.connect(Socket.java:558)
+		at java.base/java.net.Socket.<init>(Socket.java:454)
+		at java.base/java.net.Socket.<init>(Socket.java:231)
+		at java.rmi/sun.rmi.transport.tcp.TCPDirectSocketFactory.createSocket(TCPDirectSocketFactory.java:40)
+		at java.rmi/sun.rmi.transport.tcp.TCPEndpoint.newSocket(TCPEndpoint.java:617)
+		... 8 more
+Caused by: java.rmi.UnmarshalException: Error unmarshaling return header; nested exception is: 
+	java.io.EOFException
+	at java.rmi/sun.rmi.transport.StreamRemoteCall.executeCall(StreamRemoteCall.java:254)
+	at java.rmi/sun.rmi.server.UnicastRef.invoke(UnicastRef.java:164)
+	at jdk.remoteref/jdk.jmx.remote.internal.rmi.PRef.invoke(Unknown Source)
+	at java.management.rmi/javax.management.remote.rmi.RMIConnectionImpl_Stub.getAttribute(Unknown Source)
+	at java.management.rmi/javax.management.remote.rmi.RMIConnector$RemoteMBeanServerConnection.getAttribute(RMIConnector.java:904)
+	at java.management/com.sun.jmx.mbeanserver.MXBeanProxy$GetHandler.invoke(MXBeanProxy.java:122)
+	at java.management/com.sun.jmx.mbeanserver.MXBeanProxy.invoke(MXBeanProxy.java:167)
+	at java.management/javax.management.MBeanServerInvocationHandler.invoke(MBeanServerInvocationHandler.java:258)
+	... 2 more
+Caused by: java.io.EOFException
+	at java.base/java.io.DataInputStream.readByte(DataInputStream.java:272)
+	at java.rmi/sun.rmi.transport.StreamRemoteCall.executeCall(StreamRemoteCall.java:240)
+	... 9 more

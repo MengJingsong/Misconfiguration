@@ -1,0 +1,39 @@
+[2026-11-21 01:13:29.955] arm KQ2 heap 1280 L 2560 P 0 Q Q4 redistribute 0 alter 0 sets ' Q1 Q2 Q3 Q4' hard 960 noq_end 620 script 42a274d3c568
+[2026-11-21 01:13:30.023] pre: load 0.43 0.69 0.88; mem used=649 avail=127400; disk 628G free; daemons: 0; java procs: 0; EST 03:13:30
+[2026-11-21 01:13:30.917] staged: Q1 summary=31627032 cinfo=2013711 data=314704592; Q2 summary=31627032 cinfo=2013711 data=314756395; Q3 summary=31627032 cinfo=2013711 data=316587638; Q4 summary=31627032 cinfo=2013711 data=314764721; 
+[2026-11-21 01:13:31.191] dropped page cache
+[2026-11-21 01:13:31.381] yaml diff lines: 11 (environment only)
+[2026-11-21 01:14:20.894] up after 49 s: pid 1020634 unit r18-KQ2-1795248811 cg /sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/r18-KQ2-1795248811.scope memory.max 2684354560 swap.max 0
+[2026-11-21 01:14:20.902] readback: -XX:+AlwaysPreTouch -XX:+UseG1GC -Xms1280M -Xmx1280M -XX:MaxDirectMemorySize=640M -XX:ParallelGCThreads=32 -XX:ConcGCThreads=32 -Dcassandra.jmx.local.port=7199 -XX:ParallelGCThreads=16 -XX:ConcGCThreads=16 -Dcassandra.jmx.local.port=27299 
+[2026-11-21 01:14:20.909] readback log: compaction_throughput=64MiB/s|concurrent_compactors=null|disk_access_mode=legacy|disk_access_mode=mmap_index_only|file_cache_enabled=false|Global buffer pool limit is 320.000MiB |index_summary_capacity=null|index_summary_resize_interval=60m|memory pool size of 64 MB and a resize interval of 60 minutes|memtable_allocation_type=heap_buffers|networking_cache_size=null|row_cache_size=0MiB|sstable_preemptive_open_interval=50MiB|storage_compatibility_mode=CASSANDRA_4|
+[2026-11-21 01:14:22.991] readback compactors: Current concurrent compactors in the system is:  2  throughput: Current compaction throughput: 64 MB/s 
+[2026-11-21 01:14:22.995] affinity: 0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30
+[2026-11-21 01:14:24.476] cqlsh attempts 1
+[2026-11-21 01:15:25.848] rss idle: VmHWM: 1932676 kB VmRSS: 1932408 kB RssAnon: 1752352 kB RssFile: 180056 kB  cg: cur=2100330496 anon 1799041024 file 287105024 kernel_stack 1687552 pagetables 4050944 sock 0 file_mapped 179412992 slab 8266768  ev: max 0 oom 0 oom_kill 0 
+[2026-11-21 01:15:27.028] tablestats idle:  SSTable count: 0| Old SSTable count: 0| Off heap memory used (total): 0| Bloom filter off heap memory used: 0| Index summary off heap memory used: 0| Compression metadata off heap memory used: 0|
+[2026-11-21 01:15:28.284] is idle: ATTRS 1795248928242 pool_size_bytes=316 capacity_mb=64 avg_interval=128.0 resize_min=60 own_bytes=0
+[2026-11-21 01:15:28.588] nmt idle: Total: reserved=2975MB, committed=1733MB|Java Heap committed=1280MB)|Class committed=63MB)|Thread committed=55MB)|Code committed=29MB)|GC committed=114MB)|Internal committed=1MB)|Other committed=163MB)|Symbol committed=12MB)|Native Memory Tracking committed=3MB)|Arena Chunk committed=1MB)|
+[2026-11-21 01:15:28.595] I0 (median RssAnon last 30 s) = 1752104 kB = 1711 MiB
+[2026-11-21 01:15:28.608] memstat idle (last row): 1795248928552,2100572160,1799127040,287105024,182018048,1720320,4050944,8275520,0
+[2026-11-21 01:18:02.033] import Q start 1795249082031: nodetool import -q r10 isx /mydata/s4/r18/stage_node/Q1 /mydata/s4/r18/stage_node/Q2 /mydata/s4/r18/stage_node/Q3 /mydata/s4/r18/stage_node/Q4
+[2026-11-21 01:18:03.596] import Q end 1795249083592 rc 0 dur 1 s: Doing a quick import - skipping sstable verification and row cache invalidation 
+[2026-11-21 01:19:21.028] compaction started: INFO  [CompactionExecutor:3] 2026-11-21T08:19:20,255 CompactionTask.java:175 - Compacting (404eb5e0-e584-11f1-bde6-19d8acd2bec4) [/mydata/s4/r18/arms/KQ2/data/r10/isx-8fddcbb0e58311f1bde619d8acd2bec4/nb-4-big-Data.db:level=0, /mydata/s4/r18/arms/KQ2/data/r10/isx-8fddcbb0e58311f1bde619d8acd2bec4/nb-1-big-Data.db:level=0, /mydata/s4/r18/arms/KQ2/data/r10/isx-8fddcbb0e58311f1bde619d8acd2bec4/nb-3-big
+[2026-11-21 01:24:18.275] compaction done: INFO  [CompactionExecutor:3] 2026-11-21T08:24:17,934 CompactionTask.java:274 - Compacted (404eb5e0-e584-11f1-bde6-19d8acd2bec4) 4 sstables to [/mydata/s4/r18/arms/KQ2/data/r10/isx-8fddcbb0e58311f1bde619d8acd2bec4/nb-5-big,] to level=0.  1.174GiB to 1.215GiB (~103% of original) in 297,672ms.  Read Throughput = 4.039MiB/s, Write Throughput = 4.181MiB/s, Row Throughput = ~107,382/s.  16,000,000 total partitions merged to 16,000,000.  Partition merge counts were {1:16000000, }. Time spent writing keys = 297,232ms
+[2026-11-21 01:24:28.315] rss +10: VmHWM: 2365096 kB VmRSS: 2239512 kB RssAnon: 2059560 kB RssFile: 179952 kB  cg: cur=2553290752 anon 2112266240 file 385622016 kernel_stack 1785856 pagetables 4734976 sock 0 file_mapped 179355648 slab 48375416  ev: max 82138 oom 0 oom_kill 0 
+[2026-11-21 01:24:29.484] tablestats +10:  SSTable count: 1| Old SSTable count: 0| Off heap memory used (total): 154736376| Bloom filter off heap memory used: 20205160| Index summary off heap memory used: 126500000| Compression metadata off heap memory used: 8031216|
+[2026-11-21 01:24:29.876] is +10: ATTRS 1795249469830 pool_size_bytes=126500316 capacity_mb=64 avg_interval=128.0 resize_min=60 own_bytes=126500000
+[2026-11-21 01:24:30.067] nmt +10: Total: reserved=2979MB, committed=1744MB|Java Heap committed=1280MB)|Class committed=65MB)|Thread committed=55MB)|Code committed=38MB)|GC committed=114MB)|Internal committed=1MB)|Other committed=164MB)|Symbol committed=12MB)|Native Memory Tracking committed=3MB)|Arena Chunk committed=1MB)|
+[2026-11-21 01:24:49.131] rss +30: VmHWM: 2365096 kB VmRSS: 2239512 kB RssAnon: 2059560 kB RssFile: 179952 kB  cg: cur=2553212928 anon 2112462848 file 385634304 kernel_stack 1785856 pagetables 4734976 sock 0 file_mapped 181305344 slab 48376912  ev: max 82138 oom 0 oom_kill 0 
+[2026-11-21 01:24:50.298] tablestats +30:  SSTable count: 1| Old SSTable count: 0| Off heap memory used (total): 154736376| Bloom filter off heap memory used: 20205160| Index summary off heap memory used: 126500000| Compression metadata off heap memory used: 8031216|
+[2026-11-21 01:24:50.697] is +30: ATTRS 1795249490650 pool_size_bytes=126500316 capacity_mb=64 avg_interval=128.0 resize_min=60 own_bytes=126500000
+[2026-11-21 01:24:50.699] end reason: normal
+[2026-11-21 01:24:50.706] peak RssAnon 2182220 kB; dRssAnon(peak - I0) = 420 MiB
+[2026-11-21 01:24:50.709] cgroup last rows: 1795249490403,2059560,2239512,179952,2553090048,2112528384,385634304,82138,0,0 1795249490613,2059560,2239512,179952,2553225216,2112528384,385634304,82138,0,0 
+[2026-11-21 01:24:50.714] memstat last live rows: 1795249489302,2553192448,2112462848,385634304,181325824,1785856,4734976,48377128,0 1795249490308,2553122816,2112528384,385634304,180482048,1785856,4734976,48382288,0 
+[2026-11-21 01:24:50.715] alive at end: 1
+[2026-11-21 01:24:57.811] scope gone: inactive
+[2026-11-21 01:24:57.890] dmesg: 
+[2026-11-21 01:24:57.928] log: redistributions: 0+0; errors: 0
+[2026-11-21 01:24:57.932] import order: stage_node/Q2 stage_node/Q1 stage_node/Q4 stage_node/Q3 
+[2026-11-21 01:24:57.948] data dir after: 3310 44 51 169 51 7960 3856 51 289 120 51 51 98 1305092500 102 3872 7703 701 50 385 366 362  summaries: nb-1-big-Summary.db=76 nb-2-big-Summary.db=53 nb-1-big-Summary.db=76 nb-1-big-Summary.db=76 nb-1-big-Summary.db=76 nb-5-big-Summary.db=69 nb-5-big-Summary.db=69 nb-1-big-Summary.db=76 nb-6-big-Summary.db=53 nb-5-big-Summary.db=69 nb-1-big-Summary.db=76 nb-1-big-Summary.db=76 nb-1-big-Summary.db=76 nb-5-big-Summary.db=126502032 nb-1-big-Summary.db=71 nb-1-big-Summary.db=69 nb-1-big-Summary.db=69 nb-8-big-Summary.db=59 nb-9-big-Summary.db=59 nb-1-big-Summary.db=125 nb-1-big-Summary.db=92 nb-1-big-Summary.db=118 
+[2026-11-21 01:24:58.257] done arm KQ2

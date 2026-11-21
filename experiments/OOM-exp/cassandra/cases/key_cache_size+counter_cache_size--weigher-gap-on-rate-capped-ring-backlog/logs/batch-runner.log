@@ -1,0 +1,125 @@
+[03:11:54] start D3 E N=200000 rate=6000 CL=ONE 2G 2G
+[03:11:54] args: name=D3 type=E V-build=orig N=200000 rate=6000 CL=ONE VX=2G RX=2G sess=8 loadcap=94 fill_small=0 platform=aarch64 client=ms0604
+[03:13:51] ring UN=3
+[03:14:08] fill: read 1500000 kv
+[03:16:01] fill: counter 550000 ctr
+[03:17:11] after fill: key cache 100.00 MiB, counter cache 50.00 MiB
+[03:17:32] invalidated: key 0.00 MiB, counter 0.00 MiB
+[03:17:45] pre-burst live heap (histogram total): Total        887900      127208152
+[03:17:55] burst start N=200000 rate=6000 CL=ONE loadcap=94 sess=8
+[03:18:58] client exited: TOTAL_REACHED t=37683 sent=200000 ok=197986 epochMs=1795249118851 FIRST_SEND epochMs=1795249081168 FINAL sent=200000 ok=200000 err=0 firstOkMs=1795249081198 lastOkMs=1795249119635 total=200000 stop=false endMs=1795249119635  
+[03:19:23] observation: DRAINED (1795249163 ALIVE last=0 max30=0 n30=150)
+V_ALIVE
+R1_ALIVE
+R2_ALIVE
+[03:20:25] D3 V: type=E N=200000 rate=6000 xmx=2G 0 OOMError lines | pauses=75 max_after_any=1998MiB(97.6%) full_gcs=17 max_after_full=1932MiB(94.3%) ReportJavaOutOfMemory=0 | full>95%: n=0 window=0s pause=0s (0%) service_loss=not met | pauses=75 total_pause=12s max60=15% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=none | obs=DRAINED | client: TOTAL_REACHED t=37683 sent=200000 ok=197986 epochMs=1795249118851 FINAL sent=200000 ok=200000 err=0 firstOkMs=1795249081198 lastOkMs=1795249119635 total=200000 stop=false endMs=1795249119635   | hstop: h_stop=1994 (pause +4.6 s from STOP) stop_s=37.7 max_after_any=1994 max_after_full=1932 n_full=15 oom_mark_after_send=- oom_mark_after_stop=- | R1: D3 R1: type=E N=200000 rate=6000 xmx=2G 0 OOMError lines | pauses=25 max_after_any=2047MiB(100.0%) full_gcs=3 max_after_full=531MiB(25.9%) ReportJavaOutOfMemory=0  | R2: D3 R2: type=E N=200000 rate=6000 xmx=2G 0 OOMError lines | pauses=25 max_after_any=2048MiB(100.0%) full_gcs=3 max_after_full=518MiB(25.3%) ReportJavaOutOfMemory=0 
+| `D3` | E | 6000 | 200,000 | survive (drained) | 37.7 s, 5,307/s | 200,000 / 200,000 / 0 | 56,589 | 101,899 / 5,786 | 121 | 80 bytes / 0 bytes | 9 / 1 / 0 | 1994 | 1994 / 1932 (15) | 15 % | - / - | 168 | 1,557, 100.0 %; 4,631, 100.0 % | — |
+[03:20:28] end D3 rc=0
+[03:20:28] BATCH DONE
+[02:53:06] start D1 E N=200000 rate=uncapped CL=ONE 2G 2G
+[02:53:06] args: name=D1 type=E V-build=orig N=200000 rate=uncapped CL=ONE VX=2G RX=2G sess=8 loadcap=120 fill_small=0 platform=aarch64 client=ms0604
+[02:55:02] ring UN=3
+[02:55:20] fill: read 1500000 kv
+[02:57:13] fill: counter 550000 ctr
+[02:58:24] after fill: key cache 100.00 MiB, counter cache 50.00 MiB
+[02:58:45] invalidated: key 0.00 MiB, counter 0.00 MiB
+[02:58:58] pre-burst live heap (histogram total): Total        888501      127174752
+[02:59:08] burst start N=200000 rate=uncapped CL=ONE loadcap=120 sess=8
+[03:02:15] client exited: FIRST_SEND epochMs=1795247954273 FINAL sent=155603 ok=153547 err=2056 firstOkMs=1795247954308 lastOkMs=1795247989945 total=200000 stop=false endMs=1795248113724 TransportException: [/10.10.1.4:9042] Connection has been closed 
+[03:02:16] observation: DEAD (1795248135 DEAD)
+V_DEAD
+R1_ALIVE
+R2_ALIVE
+[03:03:17] D1 V: type=E N=200000 rate=uncapped xmx=2G 0 OOMError lines | pauses=466 max_after_any=2044MiB(99.8%) full_gcs=280 max_after_full=2031MiB(99.2%) ReportJavaOutOfMemory=1 | full>95%: n=267 window=127s pause=118s (93%) service_loss=MET | pauses=466 total_pause=130s max60=99% longest>=90%win=137s 365-502s (124s paused) service_loss(all STW)=MET oom_marks=ReportJavaOutOfMemory@502.050s,HeapDumper@469.029s | obs=DEAD | client: FINAL sent=155603 ok=153547 err=2056 firstOkMs=1795247954308 lastOkMs=1795247989945 total=200000 stop=false endMs=1795248113724 TransportException: [/10.10.1.4:9042] Connection has been closed  | hstop: h_stop=- (no TOTAL_REACHED) max_after_any=2044 max_after_full=2031 n_full=279 oom_mark_after_send=125.5 oom_mark_after_stop=- | R1: D1 R1: type=E N=200000 rate=uncapped xmx=2G 0 OOMError lines | pauses=20 max_after_any=2048MiB(100.0%) full_gcs=2 max_after_full=496MiB(24.2%) ReportJavaOutOfMemory=0  | R2: D1 R2: type=E N=200000 rate=uncapped xmx=2G 0 OOMError lines | pauses=23 max_after_any=2048MiB(100.0%) full_gcs=1 max_after_full=489MiB(23.9%) ReportJavaOutOfMemory=0 
+| `D1` | E | uncapped | 200,000 | **heap OOM** | — | 155,603 / 153,547 / 2,056 | 59,919 | 81,778 / 35,270 | 121 | 80 bytes / 0 bytes | 9 / 1 / 0 | - | 2044 / 2031 (279) | 99 % | 125.5 / - | 168 | 4,887, 100.0 %; 10,709, 100.0 % | — |
+[03:03:19] end D1 rc=0
+[03:03:19] start D2 E N=200000 rate=5200 CL=ONE 2G 2G
+[03:03:19] args: name=D2 type=E V-build=orig N=200000 rate=5200 CL=ONE VX=2G RX=2G sess=8 loadcap=99 fill_small=0 platform=aarch64 client=ms0604
+[03:05:18] ring UN=3
+[03:05:36] fill: read 1500000 kv
+[03:07:25] fill: counter 550000 ctr
+[03:08:37] after fill: key cache 100.00 MiB, counter cache 50.00 MiB
+[03:08:57] invalidated: key 0.00 MiB, counter 0.00 MiB
+[03:09:10] pre-burst live heap (histogram total): Total        880586      125827320
+[03:09:20] burst start N=200000 rate=5200 CL=ONE loadcap=99 sess=8
+[03:10:28] client exited: TOTAL_REACHED t=38405 sent=200000 ok=199564 epochMs=1795248605085 FIRST_SEND epochMs=1795248566680 FINAL sent=200000 ok=200000 err=0 firstOkMs=1795248566704 lastOkMs=1795248605793 total=200000 stop=false endMs=1795248605793  
+[03:10:46] observation: DRAINED (1795248646 ALIVE last=0 max30=0 n30=150)
+V_ALIVE
+R1_ALIVE
+R2_ALIVE
+[03:11:49] D2 V: type=E N=200000 rate=5200 xmx=2G 0 OOMError lines | pauses=60 max_after_any=1991MiB(97.2%) full_gcs=9 max_after_full=1361MiB(66.5%) ReportJavaOutOfMemory=0 | full>95%: n=0 window=0s pause=0s (0%) service_loss=not met | pauses=60 total_pause=8s max60=7% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=none | obs=DRAINED | client: TOTAL_REACHED t=38405 sent=200000 ok=199564 epochMs=1795248605085 FINAL sent=200000 ok=200000 err=0 firstOkMs=1795248566704 lastOkMs=1795248605793 total=200000 stop=false endMs=1795248605793   | hstop: h_stop=928 (pause +3.9 s from STOP) stop_s=38.4 max_after_any=1991 max_after_full=1361 n_full=8 oom_mark_after_send=- oom_mark_after_stop=- | R1: D2 R1: type=E N=200000 rate=5200 xmx=2G 0 OOMError lines | pauses=24 max_after_any=2048MiB(100.0%) full_gcs=3 max_after_full=554MiB(27.1%) ReportJavaOutOfMemory=0  | R2: D2 R2: type=E N=200000 rate=5200 xmx=2G 0 OOMError lines | pauses=26 max_after_any=2047MiB(100.0%) full_gcs=3 max_after_full=559MiB(27.3%) ReportJavaOutOfMemory=0 
+| `D2` | E | 5200 | 200,000 | survive (drained) | 38.4 s, 5,208/s | 200,000 / 200,000 / 0 | 41,484 | 70,791 / 14 | 120 | 80 bytes / 0 bytes | 9 / 1 / 0 | 928 | 1991 / 1361 (8) | 7 % | - / - | 170 | 96, 100.0 %; 3,996, 100.0 % | — |
+[03:11:52] end D2 rc=0
+[03:11:52] BATCH DONE
+[02:18:55] start ecal1 E N=0 rate=uncapped CL=ALL 2G 2G
+[02:18:55] args: name=ecal1 type=E V-build=orig N=0 rate=uncapped CL=ALL VX=2G RX=2G sess=8 loadcap=60 fill_small=0 platform=aarch64 client=ms0604
+[02:20:49] ring UN=3
+[02:21:07] fill: read 1500000 kv
+[02:22:58] fill: counter 550000 ctr
+[02:24:08] after fill: key cache 100.00 MiB, counter cache 50.00 MiB
+[02:24:29] invalidated: key 0.00 MiB, counter 0.00 MiB
+[02:24:41] pre-burst live heap (histogram total): Total        888317      128156336
+[02:24:51] burst start N=0 rate=uncapped CL=ALL loadcap=60 sess=8
+[02:26:18] client exited: FIRST_SEND epochMs=1795245897762 FINAL sent=266857 ok=266250 err=607 firstOkMs=1795245897839 lastOkMs=1795245959503 total=9223372036854775807 stop=false endMs=1795245959504 WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ALL (3 replica were required but only 1 acknowledged the write) 
+[02:26:19] observation: DRAINED (1795245979 ALIVE last=0 max30=323 n30=150)
+V_ALIVE
+R1_ALIVE
+R2_ALIVE
+[02:27:18] ecal1 V: type=E N=0 rate=uncapped xmx=2G 0 OOMError lines | pauses=66 max_after_any=2010MiB(98.1%) full_gcs=6 max_after_full=625MiB(30.5%) ReportJavaOutOfMemory=0 | full>95%: n=0 window=0s pause=0s (0%) service_loss=not met | pauses=66 total_pause=5s max60=4% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=none | obs=DRAINED | client: FINAL sent=266857 ok=266250 err=607 firstOkMs=1795245897839 lastOkMs=1795245959503 total=9223372036854775807 stop=false endMs=1795245959504 WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ALL (3 replica were required but only 1 acknowledged the write)  | hstop: h_stop=- (no TOTAL_REACHED) max_after_any=2010 max_after_full=625 n_full=5 oom_mark_after_send=- oom_mark_after_stop=- | R1: ecal1 R1: type=E N=0 rate=uncapped xmx=2G 0 OOMError lines | pauses=37 max_after_any=2047MiB(100.0%) full_gcs=4 max_after_full=335MiB(16.4%) ReportJavaOutOfMemory=0  | R2: ecal1 R2: type=E N=0 rate=uncapped xmx=2G 0 OOMError lines | pauses=35 max_after_any=2048MiB(100.0%) full_gcs=4 max_after_full=422MiB(20.6%) ReportJavaOutOfMemory=0 
+| `ecal1` | E | uncapped | 0 | survive (drained) | — | 266,857 / 266,250 / 607 | 323 | 121 / 533 | 122 | 80 bytes / 0 bytes | 9 / 1 / 0 | - | 2010 / 625 (5) | 4 % | - / - | 170 | 170, 100.0 %; 224, 100.0 % | — |
+[02:27:21] end ecal1 rc=0
+[02:27:21] BATCH DONE
+[02:27:33] start ecal2 E N=140000 rate=4700 CL=ONE 2G 2G
+[02:27:33] args: name=ecal2 type=E V-build=orig N=140000 rate=4700 CL=ONE VX=2G RX=2G sess=8 loadcap=90 fill_small=0 platform=aarch64 client=ms0604
+[02:29:29] ring UN=3
+[02:29:47] fill: read 1500000 kv
+[02:31:39] fill: counter 550000 ctr
+[02:32:50] after fill: key cache 100.00 MiB, counter cache 50.00 MiB
+[02:33:11] invalidated: key 0.00 MiB, counter 0.00 MiB
+[02:33:24] pre-burst live heap (histogram total): Total        893199      126240768
+[02:33:34] burst start N=140000 rate=4700 CL=ONE loadcap=90 sess=8
+[02:34:34] client exited: TOTAL_REACHED t=29672 sent=140000 ok=139878 epochMs=1795246449925 FIRST_SEND epochMs=1795246420253 FINAL sent=140000 ok=140000 err=0 firstOkMs=1795246420279 lastOkMs=1795246453908 total=140000 stop=false endMs=1795246453909  
+[02:34:40] observation: DRAINED (1795246480 ALIVE last=0 max30=90 n30=150)
+V_ALIVE
+R1_ALIVE
+R2_ALIVE
+[02:35:45] ecal2 V: type=E N=140000 rate=4700 xmx=2G 0 OOMError lines | pauses=49 max_after_any=1991MiB(97.2%) full_gcs=4 max_after_full=860MiB(42.0%) ReportJavaOutOfMemory=0 | full>95%: n=0 window=0s pause=0s (0%) service_loss=not met | pauses=49 total_pause=5s max60=3% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=none | obs=DRAINED | client: TOTAL_REACHED t=29672 sent=140000 ok=139878 epochMs=1795246449925 FINAL sent=140000 ok=140000 err=0 firstOkMs=1795246420279 lastOkMs=1795246453908 total=140000 stop=false endMs=1795246453909   | hstop: h_stop=686 (pause -0.3 s from STOP) stop_s=29.7 max_after_any=1991 max_after_full=860 n_full=3 oom_mark_after_send=- oom_mark_after_stop=- | R1: ecal2 R1: type=E N=140000 rate=4700 xmx=2G 0 OOMError lines | pauses=18 max_after_any=2048MiB(100.0%) full_gcs=1 max_after_full=424MiB(20.7%) ReportJavaOutOfMemory=0  | R2: ecal2 R2: type=E N=140000 rate=4700 xmx=2G 0 OOMError lines | pauses=21 max_after_any=2048MiB(100.0%) full_gcs=1 max_after_full=348MiB(17.0%) ReportJavaOutOfMemory=0 
+| `ecal2` | E | 4700 | 140,000 | survive (drained) | 29.7 s, 4,718/s | 140,000 / 140,000 / 0 | 21,036 | 14,930 / 74 | 120 | 80 bytes / 0 bytes | 9 / 1 / 0 | 686 | 1991 / 860 (3) | 3 % | - / - | 170 | 8, 100.0 %; 17, 100.0 % | — |
+[02:35:48] end ecal2 rc=0
+[02:35:48] BATCH DONE
+[02:35:58] start ecal3 E N=170000 rate=4700 CL=ONE 2G 2G
+[02:35:58] args: name=ecal3 type=E V-build=orig N=170000 rate=4700 CL=ONE VX=2G RX=2G sess=8 loadcap=97 fill_small=0 platform=aarch64 client=ms0604
+[02:37:54] ring UN=3
+[02:38:12] fill: read 1500000 kv
+[02:39:59] fill: counter 550000 ctr
+[02:41:10] after fill: key cache 100.00 MiB, counter cache 50.00 MiB
+[02:41:30] invalidated: key 0.00 MiB, counter 0.00 MiB
+[02:41:43] pre-burst live heap (histogram total): Total        884595      126028504
+[02:41:53] burst start N=170000 rate=4700 CL=ONE loadcap=97 sess=8
+[02:42:57] client exited: TOTAL_REACHED t=36032 sent=170000 ok=169997 epochMs=1795246955894 FIRST_SEND epochMs=1795246919862 FINAL sent=170000 ok=170000 err=0 firstOkMs=1795246919898 lastOkMs=1795246955896 total=170000 stop=false endMs=1795246955896  
+[02:43:04] observation: DRAINED (1795246984 ALIVE last=0 max30=1 n30=150)
+V_ALIVE
+R1_ALIVE
+R2_ALIVE
+[02:44:07] ecal3 V: type=E N=170000 rate=4700 xmx=2G 0 OOMError lines | pauses=50 max_after_any=2007MiB(98.0%) full_gcs=4 max_after_full=716MiB(35.0%) ReportJavaOutOfMemory=0 | full>95%: n=0 window=0s pause=0s (0%) service_loss=not met | pauses=50 total_pause=5s max60=3% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=none | obs=DRAINED | client: TOTAL_REACHED t=36032 sent=170000 ok=169997 epochMs=1795246955894 FINAL sent=170000 ok=170000 err=0 firstOkMs=1795246919898 lastOkMs=1795246955896 total=170000 stop=false endMs=1795246955896   | hstop: h_stop=857 (pause -0.3 s from STOP) stop_s=36.0 max_after_any=2007 max_after_full=716 n_full=3 oom_mark_after_send=- oom_mark_after_stop=- | R1: ecal3 R1: type=E N=170000 rate=4700 xmx=2G 0 OOMError lines | pauses=21 max_after_any=2048MiB(100.0%) full_gcs=2 max_after_full=439MiB(21.4%) ReportJavaOutOfMemory=0  | R2: ecal3 R2: type=E N=170000 rate=4700 xmx=2G 0 OOMError lines | pauses=21 max_after_any=2048MiB(100.0%) full_gcs=2 max_after_full=468MiB(22.9%) ReportJavaOutOfMemory=0 
+| `ecal3` | E | 4700 | 170,000 | survive (drained) | 36.0 s, 4,718/s | 170,000 / 170,000 / 0 | 6,213 | 0 / 0 | 120 | 80 bytes / 0 bytes | 9 / 1 / 0 | 857 | 2007 / 716 (3) | 3 % | - / - | 170 | 22, 100.0 %; 4, 100.0 % | — |
+[02:44:10] end ecal3 rc=0
+[02:44:10] BATCH DONE
+[02:44:16] start ecal4 E N=200000 rate=4700 CL=ONE 2G 2G
+[02:44:16] args: name=ecal4 type=E V-build=orig N=200000 rate=4700 CL=ONE VX=2G RX=2G sess=8 loadcap=103 fill_small=0 platform=aarch64 client=ms0604
+[02:46:11] ring UN=3
+[02:46:29] fill: read 1500000 kv
+[02:48:21] fill: counter 550000 ctr
+[02:49:31] after fill: key cache 100.00 MiB, counter cache 50.00 MiB
+[02:49:52] invalidated: key 0.00 MiB, counter 0.00 MiB
+[02:50:05] pre-burst live heap (histogram total): Total        887428      127168888
+[02:50:15] burst start N=200000 rate=4700 CL=ONE loadcap=103 sess=8
+[02:51:22] client exited: TOTAL_REACHED t=42392 sent=200000 ok=199996 epochMs=1795247463521 FIRST_SEND epochMs=1795247421129 FINAL sent=200000 ok=200000 err=0 firstOkMs=1795247421164 lastOkMs=1795247463522 total=200000 stop=false endMs=1795247463522  
+[02:51:23] observation: DRAINED (1795247483 ALIVE last=0 max30=45 n30=150)
+V_ALIVE
+R1_ALIVE
+R2_ALIVE
+[02:52:28] ecal4 V: type=E N=200000 rate=4700 xmx=2G 0 OOMError lines | pauses=59 max_after_any=1993MiB(97.3%) full_gcs=4 max_after_full=622MiB(30.4%) ReportJavaOutOfMemory=0 | full>95%: n=0 window=0s pause=0s (0%) service_loss=not met | pauses=59 total_pause=5s max60=3% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=none | obs=DRAINED | client: TOTAL_REACHED t=42392 sent=200000 ok=199996 epochMs=1795247463521 FINAL sent=200000 ok=200000 err=0 firstOkMs=1795247421164 lastOkMs=1795247463522 total=200000 stop=false endMs=1795247463522   | hstop: h_stop=927 (pause -1.5 s from STOP) stop_s=42.4 max_after_any=1993 max_after_full=622 n_full=3 oom_mark_after_send=- oom_mark_after_stop=- | R1: ecal4 R1: type=E N=200000 rate=4700 xmx=2G 0 OOMError lines | pauses=22 max_after_any=2047MiB(100.0%) full_gcs=2 max_after_full=434MiB(21.2%) ReportJavaOutOfMemory=0  | R2: ecal4 R2: type=E N=200000 rate=4700 xmx=2G 0 OOMError lines | pauses=23 max_after_any=2047MiB(100.0%) full_gcs=2 max_after_full=346MiB(16.9%) ReportJavaOutOfMemory=0 
+| `ecal4` | E | 4700 | 200,000 | survive (drained) | 42.4 s, 4,718/s | 200,000 / 200,000 / 0 | 6,393 | 0 / 0 | 121 | 80 bytes / 0 bytes | 9 / 1 / 0 | 927 | 1993 / 622 (3) | 3 % | - / - | 164 | 2,448, 100.0 %; 2,020, 100.0 % | — |
+[02:52:31] end ecal4 rc=0
+[02:52:31] BATCH DONE
