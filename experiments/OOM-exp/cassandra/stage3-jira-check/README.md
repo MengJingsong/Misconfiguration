@@ -1,6 +1,6 @@
-# Cassandra — stage 3 JIRA check (snapshot 2026-11-23)
+# Cassandra — stage 3-a JIRA check (snapshot 2026-11-23)
 
-Rules: [`../../oom-agent-playbook.md`](../../oom-agent-playbook.md#stage-3--jira-check) (added 2026-11-23). Every Cassandra
+Rules: [`../../oom-agent-playbook.md`](../../oom-agent-playbook.md#stage-3-a--jira-check) (added 2026-11-23). Every Cassandra
 **true positive** of stage 2 (30 cases; false positives and retries excluded by the owner) was checked read-only against
 Apache JIRA (`project = CASSANDRA`, REST API, requests ≥ 2 s apart, 340 JQL queries in all, each logged with its hit count
 in the case's file). Fix commits were tested against `cassandra-5.0.9` in a blobless clone of apache/cassandra (trunk to

@@ -60,13 +60,14 @@ shared memory budget under reachable workloads and configurations.
 
 ## Pipeline (redesigned 2026-11-17)
 
-Phase 2 has **one agent role, the OOM agent, and three stages** (stage 3 added 2026-11-23) ([`oom-agent-playbook.md`](oom-agent-playbook.md)):
+Phase 2 has **one agent role, the OOM agent, and three stages** (stage 3 added 2026-11-23, split into 3-a and 3-b) ([`oom-agent-playbook.md`](oom-agent-playbook.md)):
 
 | Stage | What the OOM agent does | Output |
 |---|---|---|
 | **Stage 1 — pick and design** | Reads (a) the **phase 1 OOM candidate list** (`../capacity-enforcement-exp/<system>/stage5-oom-clue-find/phase1-oom-candidates.md`) and (b) the **phase 2 retry list** (`<system>/phase2-retry-list.md`), picks candidates, and writes a case file for each: the corresponding phase-1 case file, a frozen design solution that should lead to OOM, and a conclusion left `pending` | a case file from [`_TEMPLATE-case.md`](_TEMPLATE-case.md) |
 | **Stage 2 — verify** | A fresh OOM-agent session follows the frozen design on real nodes, builds the harness, records the runs and adds the conclusion | the verdict: **true positive** (leads to OOM; V1–V7 met), **false positive** (does not), or **retry** (no final conclusion; back to the retry list) |
-| **Stage 3 — JIRA check** *(added 2026-11-23)* | A fresh session checks each **true positive** against the system's Apache JIRA (read only): match level (exact / partial / related / none), issue state, whether a fix is in the pinned version, and whether the shipped docs already warn (source labelled) | `<system>/stage3-jira-check/<case ID>.md`, the `_INDEX.md` JIRA column, counts in `<system>/stage3-jira-check/README.md` |
+| **Stage 3-a — JIRA check** *(added 2026-11-23)* | A fresh session checks each **true positive** against the system's Apache JIRA (read only): match level (exact / partial / related / none), issue state, whether a fix is in the pinned version, and whether the shipped docs already warn (source labelled) | `<system>/stage3-jira-check/<case ID>.md`, the `_INDEX.md` JIRA column, counts in `<system>/stage3-jira-check/README.md` |
+| **Stage 3-b — client trigger check** *(added 2026-11-23)* | A fresh session checks each **true positive** against a client threat model (a Cassandra user, not an admin or developer; authentication on, native protocol only): lowest privilege that triggers it (pre-auth / data role / DDL role / admin only), conditions outside the client's control, blast radius on other users; optional confirm runs | `<system>/stage3b-client-trigger/<case ID>.md`, the `_INDEX.md` Client column, counts in `<system>/stage3b-client-trigger/README.md` |
 
 **Scope rule (owner, 2026-11-23): default constraints only.** Cases where users change a constraint (capacity setting)
 from its default are not considered: stage 1 skips them, and an OOM reached only that way is a false positive. Memory
@@ -74,7 +75,7 @@ budgets (heap, direct limit, container) still follow V7; control and interventio
 [`verification-protocol.md`](verification-protocol.md), "Default constraints only".
 
 Every picked candidate counts as estimated positive after stage 1, so the verdicts give each phase-1
-agent's true-positive rate. JIRA is read in stage 1 for prior art and in stage 3 to check every true positive (2026-11-23); nothing is posted. The verdicts
+agent's true-positive rate. JIRA is read in stage 1 for prior art and in stage 3-a to check every true positive (2026-11-23); nothing is posted. The verdicts
 of cases filed before 2026-11-17 were mapped from their protocol status
 ([`cassandra/cases/_INDEX.md`](cassandra/cases/_INDEX.md)). **Retired 2026-11-17:** the lead sources
 (capacity-enforcement inventory, JIRA mining — moved to phase 1's stage 5 —, data-flow tracing), the

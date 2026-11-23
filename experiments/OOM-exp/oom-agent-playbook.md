@@ -1,4 +1,4 @@
-# OOM agent playbook — phase 2, stages 1, 2 and 3
+# OOM agent playbook — phase 2, stages 1, 2, 3-a and 3-b
 
 *Written 2026-11-17 (owner's redesign).* Phase 2 has one agent role, the **OOM agent**, and two stages.
 Stage 1 picks a candidate and writes its case file with a design that should lead to OOM; stage 2
@@ -11,8 +11,9 @@ follows that design on real nodes and adds the conclusion. Every picked candidat
 | **false positive** | it does not lead to OOM: a valid run of the design reached its target load, and the measurements show the endpoint cannot be reached at defaults and an acceptable budget (see "False positive or retry") |
 | **retry** | no final conclusion: worth another try with a better design. The case goes to the retry list |
 
-*Stage 3 added 2026-11-23 (owner):* every **true positive** then gets a read-only **JIRA check** (below): is the verified
-mechanism already reported in the system's Apache JIRA, and in what state.
+*Stage 3 added 2026-11-23 (owner):* every **true positive** then gets two checks: **3-a, JIRA check** (read only: is the
+verified mechanism already reported in the system's Apache JIRA, and in what state) and **3-b, client trigger check**
+(could an ordinary user, not an admin or developer, trigger the OOM and so affect other users).
 
 Evidence rules, measurement, budgets and statuses are in [`verification-protocol.md`](verification-protocol.md);
 this playbook does not restate them. The protocol's finer statuses stay in the case file as detail
@@ -83,7 +84,9 @@ fit the readings.
      `phase 2: <case ID>` and the date.
 6. Stop every process the run started and say what is left on the nodes.
 
-## Stage 3 — JIRA check
+## Stage 3-a — JIRA check
+
+*Called stage 3 until 2026-11-23; results stay in `<system>/stage3-jira-check/`.*
 
 *Added 2026-11-23 (owner).* Input: every case whose verdict is **true positive** (false positives and retries are not
 checked). Run by a **fresh** session that did not design or verify the case. **Read only**: nothing is posted, commented or
@@ -125,9 +128,52 @@ voted on in JIRA, and nothing is reported upstream (README, owner 2026-11-17).
    and the issue key(s), for example `known-open (exact: CASSANDRA-11082)`.
 7. **Write back:** the case's stage-3 file `<system>/stage3-jira-check/<case ID>.md` (mechanism checked, queries and hits,
    closest issues table with match level, state and fix-in-pinned result, documented source, label, one-paragraph
-   reason, snapshot date); the case's `_INDEX.md` **JIRA (stage 3)** cell; and the counts in
+   reason, snapshot date); the case's `_INDEX.md` **JIRA (stage 3-a)** cell; and the counts in
    `<system>/stage3-jira-check/README.md` (true positives checked; mentioned = exact + partial, split by state; new;
    documented).
+
+## Stage 3-b — client trigger check
+
+*Added 2026-11-23 (owner).* Input: every **true positive** (as 3-a). Question: could a **client** — a Cassandra user, not
+an admin or developer — trigger this OOM, so that a malicious user takes down the node(s) and affects other users? Run by a
+**fresh** session that did not design or verify the case. Two parts: **3-b analysis** (every case, from the case file and
+the code) and **3-b confirm** (optional, on nodes, for `client-triggerable` cases, on the owner's word). Nothing is reported
+upstream (README).
+
+1. **Threat model.**
+   - **Authentication on:** `PasswordAuthenticator` + `CassandraAuthorizer` (security settings, not capacity constraints;
+     5.0.9 ships `AllowAllAuthenticator`, under which anyone who reaches the native port is effectively a superuser —
+     record that as the default exposure). All capacity constraints at their defaults (scope rule).
+   - **Interface:** the native CQL protocol only, through any client: drivers, cqlsh, or hand-crafted protocol frames.
+     Any number of connections and any request rate (connection limits and rate limiting ship off). **Not** a client:
+     internode ports, JMX/nodetool, sstableloader, the config or data files.
+   - **Privilege levels** (lowest that triggers counts):
+     - **pre-auth** — network access to the native port only; the OOM is reached before or during authentication;
+     - **data role** — SELECT/MODIFY on tables someone else created (schema as an admin made it);
+     - **DDL role** — may create its own keyspaces/tables/indexes/types (a shared, multi-tenant cluster);
+     - **admin only** — needs superuser, JMX/nodetool, a config change or file access: not client-triggerable.
+2. **Conditions outside the client's control.** Some cases need an operator-side or environmental condition (a replica
+   down, a restart with commit-log replay, a flush or compaction stall, a compaction backlog). Classify **reach** as:
+   - **alone** — the client's own requests (and schema, at DDL role) are enough;
+   - **given <condition>** — name the condition and how common it is in operation (routine, occasional, rare);
+   - **not client-triggerable** — a step no client can take (or admin only).
+3. **Blast radius ("affects other users").** Which node dies (the coordinator the attacker connects to; replicas it can
+   steer to by choosing keys; any node), whether the attacker can repeat it across nodes to take down a replica set or the
+   cluster, and what other tenants see (unavailable or timed-out requests at their consistency level, lost hints, restart
+   time). Note anything an operator could see beforehand or use to attribute it (warnings, guardrail logs, audit).
+4. **Each step of the verified test arm** is checked against the threat model: schema (who must create it), data (can the
+   client write it), requests (protocol, consistency level, concurrency), environment (topology, faults, budgets), and
+   any diagnostic aid (the step a client cannot take is named). Budgets follow V7 as in stage 2.
+5. **Label** (one): `client-triggerable · <privilege>` (alone), `client-triggerable given <condition> · <privilege>`, or
+   `not client-triggerable (<the step>)`. Add the blast radius in a few words, e.g. `client-triggerable · data role;
+   coordinator, repeatable on every node`.
+6. **3-b confirm (optional).** Re-run the verified test arm with authentication on, as a non-superuser role holding only
+   the labelled privilege, plus a second **victim** client on another role measuring its own success rate and latency.
+   Same rules as stage 2 (one victim node at a time, defaults, budgets per V7, everything stopped after). A confirmed
+   label is marked `(confirmed)`.
+7. **Write back:** `<system>/stage3b-client-trigger/<case ID>.md` (threat-model walk of every step, label, privilege,
+   condition, blast radius, the code lines that decide, confirm-run evidence if any); the case's `_INDEX.md` **Client
+   (stage 3-b)** cell; counts in `<system>/stage3b-client-trigger/README.md` (by privilege and reach; blast radius).
 
 ## False positive or retry
 

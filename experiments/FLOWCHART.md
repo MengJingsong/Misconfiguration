@@ -19,7 +19,8 @@ could lead to OOM** and writes them as **OOM candidates** (stage 5).
 **Phase 2, [`OOM-exp/`](OOM-exp/README.md)** (Target 3; Cassandra so far). An **OOM agent** picks
 candidates (and earlier cases worth a retry), writes a case file with a design that should lead to OOM
 (stage 1), then a fresh OOM-agent session runs that design and concludes **true positive**, **false
-positive** or **retry** (stage 2). Every true positive is then checked read-only against Apache JIRA (stage 3).
+positive** or **retry** (stage 2). Every true positive is then checked read-only against Apache JIRA (stage 3-a) and
+for whether an ordinary client could trigger it (stage 3-b).
 Only default constraints are considered (rule 2026-11-23).
 
 ## 2. Phase 1 — functionality
@@ -47,9 +48,10 @@ Only default constraints are considered (rule 2026-11-23).
 | Stage 2 — verify (fresh OOM agent) | Runs the frozen design, records harness and runs, adds the conclusion | oom-agent playbook, [`verification-protocol.md`](OOM-exp/verification-protocol.md) |
 | Verdict | **true positive** (OOM, V1–V7 met) / **false positive** (a valid design cannot reach OOM, or OOM only with a non-default constraint) / **retry** | oom-agent playbook "False positive or retry" |
 | Scope rule (2026-11-23) | Default constraints only: stage 1 skips a candidate that needs a non-default constraint; budgets follow V7; control/intervention arms may change one | [`verification-protocol.md`](OOM-exp/verification-protocol.md) "Default constraints only" |
-| Stage 3 — JIRA check (fresh session, 2026-11-23) | Each true positive checked read-only against Apache JIRA: match level, issue state, fix in the pinned version, documented source; one label per case | oom-agent playbook, `OOM-exp/<system>/stage3-jira-check/` |
+| Stage 3-a — JIRA check (fresh session, 2026-11-23) | Each true positive checked read-only against Apache JIRA: match level, issue state, fix in the pinned version, documented source; one label per case | oom-agent playbook, `OOM-exp/<system>/stage3-jira-check/` |
+| Stage 3-b — client trigger check (fresh session, 2026-11-23) | Each true positive checked against a client threat model (authenticated non-admin user, native protocol only): lowest privilege, conditions outside the client's control, blast radius; optional confirm runs | oom-agent playbook, `OOM-exp/<system>/stage3b-client-trigger/` |
 | Phase 2 retry list | Cases worth another try, with what a better design should change | `OOM-exp/<system>/phase2-retry-list.md` |
-| Case index | Every case with its verdict, phase-1 case file and stage-3 JIRA label | [`OOM-exp/cassandra/cases/_INDEX.md`](OOM-exp/cassandra/cases/_INDEX.md) |
+| Case index | Every case with its verdict, phase-1 case file, stage 3-a JIRA label and stage 3-b client label | [`OOM-exp/cassandra/cases/_INDEX.md`](OOM-exp/cassandra/cases/_INDEX.md) |
 
 ## 4. Links between the experiments
 
@@ -93,8 +95,10 @@ flowchart TD
     TP["True positive"]
     FP["False positive"]
     RT["Retry"]
-    O3["Stage 3: JIRA check"]
-    JC[("Stage-3 JIRA check files")]
+    O3["Stage 3-a: JIRA check"]
+    JC[("Stage 3-a JIRA check files")]
+    O3B["Stage 3-b: client trigger check"]
+    CT[("Stage 3-b client trigger files")]
   end
 
   S1 --> S2
@@ -124,8 +128,10 @@ flowchart TD
   TP -.->|new pattern| CPAT
   TP --> O3
   O3 --> JC
+  TP --> O3B
+  O3B --> CT
 
-  class CF,JR,CPAT,CL,RL,CASE,JC store
+  class CF,JR,CPAT,CL,RL,CASE,JC,CT store
   class TP verdict
 ```
 
@@ -145,3 +151,4 @@ Notes on the chart:
 | 2026-11-18 | Candidate list status vocabulary gains `closed: covered by <case ID> (<verdict>)` (owner); no step or arrow changed |
 | 2026-11-20 | New lead source (owner): stage 2 may propose a holder its runs revealed but did not claim; with approval it becomes a candidate row with Agent `phase-2 (<case ID>)` (first: OC-578 from R12). §4 row and a dotted `new holder` arrow O2 → CL added |
 | 2026-11-23 | Phase 2 gains **stage 3, JIRA check** (owner): every true positive checked read-only against Apache JIRA; new chart nodes O3 and JC; case index gains a JIRA column. Scope rule (owner): default constraints only, an OOM needing a non-default constraint is a false positive and stage 1 skips such candidates (verdict row and new scope row) |
+| 2026-11-23 | Stage 3 split (owner): the JIRA check becomes **3-a**; new **3-b, client trigger check** (could an ordinary authenticated user trigger the OOM and affect other users); chart nodes O3B and CT; case index gains a Client column |
