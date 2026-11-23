@@ -201,6 +201,11 @@ describe the mechanism → R21 `known-fixed (not in 5.0.9)` (CASSANDRA-20780), w
 as filed. Cassandra history clone for fix checks: `~/jira-s3/cassandra-history.git`
 on the local node (`/mydata/j1` is gone). Hadoop: no phase-2 cases yet, so no stage 3.
 
+**Stage 3-b — client trigger check (added and analysed 2026-11-23, owner).** Could an ordinary authenticated user
+(native protocol, defaults) trigger each true positive? Analysis of the 30 Cassandra true positives, nothing run: 22
+client-triggerable alone (2 pre-auth, 15 data role, 5 DDL role), 7 given an outside condition, 1 not (R18). Results in
+`OOM-exp/cassandra/stage3b-client-trigger/` and the `_INDEX.md` Client (stage 3-b) column. Open: optional confirm runs.
+
 **Other open work:**
 - 342 candidate rows are `open` (2026-11-23, after wave 6 and OC-579). All of OC-63…577 are now triaged (2026-11-18 and 2026-11-20 files); the 11-18
   triage's §2 "not reachable at shipped defaults" and §3 "too slow / too much disk" lists were **not** closed (owner
