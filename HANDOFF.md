@@ -180,10 +180,11 @@ runs finished; on 2026-11-23 a fresh agent per case wrote §3–§4 from the nod
 | U14 | OC-404 (+401–403) | `pc99` | **true positive**: 2 GiB OOM 3/3 at ≈ 3,976 empty tables (0.48 MiB/table); control and guardrail 0/3; 4 GiB stopped for service loss at 8,027, not OOM |
 
 - **Filed:** 10 `_INDEX.md` rows, retry-list row B22, candidate-list statuses (the picked rows plus their covered duplicates).
-- **Open owner items:** the rulings in the table above; B23 — E2/E3 placement as `deployment`, B4G run 1 counted as an
-  OOM (JVM self-kill late under full-GC thrash), and whether OC-19/77/145 close fully (their local-write part is S2/R22's);
-  OC-148/332 stay open (timeout/expiry hint path not driven); U14 — OC-400 left `open` (many-keyspaces variant not run),
-  optional 4 GiB ×3 rerun without the service-loss stop; harness bug: OOM grep matches the JVM's startup `CompileCommand` line.
+- **Owner rulings (2026-11-23):** B23 — E2/E3 placement counts as `deployment`; B4G run 1 accepted as an OOM (JVM
+  self-kill late under full-GC thrash); OC-19/77/145 close fully; OC-148/332 stay open (timeout/expiry hint path not
+  driven). U14 — OC-400 stays `open` (many-keyspaces variant not run); 4 GiB ×3 rerun without the service-loss stop
+  approved (H4-T-2…4 on pc99, harness OOM grep fixed: it matched the JVM's startup `CompileCommand` line).
+- **Open owner items:** the B19, B21, U13 and U15 rulings in the table above.
 - **Node data:** every wave-6 run folder is still on its node (`/mydata/s4/<case>`; B23 keeps a 2.2 GB dump, U14 a 2.5 GB
   dump); delete on the owner's word.
 

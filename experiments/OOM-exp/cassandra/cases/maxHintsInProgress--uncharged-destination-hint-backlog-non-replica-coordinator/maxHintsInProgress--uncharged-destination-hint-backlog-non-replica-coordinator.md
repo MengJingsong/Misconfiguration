@@ -8,7 +8,7 @@
 | System / pinned source | Cassandra 5.0.9 (`systems/cassandra/source/`), build `/mydata/s4/cassandra-base` on `pc75` (`apache-cassandra-5.0.9-SNAPSHOT.jar`), OpenJDK 11.0.33, G1 as shipped |
 | Stage 1 (design) | OOM-agent stage-1 session, 2026-11-21 ≈ 08:00–09:00 America/New_York, repository HEAD `08f0194a3` |
 | Stage 2 (verify) | phase-2 OOM agent, stage 2 (fresh session, Claude Opus 5.5): runs 2026-11-21 08:16–10:30 America/New_York on `pc75` (session cut off before the write-up); §3–§4 written 2026-11-23 by a second stage-2 session (Claude Opus 5.5) from the node's logs, nothing re-run; harness `harness/`, excerpts `logs/`, raw data `pc75:/mydata/s4/b23/` |
-| Verdict | **true positive** (`verified-OOM · deployment`, bypass · enforcement failure) |
+| Verdict | **true positive** (`verified-OOM · deployment`, bypass · enforcement failure; deployment label and B4G confirmed by the owner 2026-11-23) |
 
 ## Summary
 
@@ -593,7 +593,7 @@ tasks, not bytes" point of OC-147/OC-493 confirmed at defaults; it is a sizing g
 from the counter defect, and is not used for V1–V4.
 
 **Limits of attribution and caveats.**
-- **Topology (deployment label; owner to confirm).** Three instances on one host stand in for a cluster with N > RF and
+- **Topology (deployment label; confirmed by the owner 2026-11-23).** Three instances on one host stand in for a cluster with N > RF and
   a non-token-aware client; `num_tokens: 1` with `initial_token` (E2) makes practically every write take the
   non-replica-coordinator path. With the default 16 vnodes and token-aware clients only a fraction of writes would,
   and the hint rate needed to outrun the disk would need a larger λ. These are topology choices recorded in the frozen
@@ -616,3 +616,12 @@ from the counter defect, and is not used for V1–V4.
   fire), CP-5 (accepting queue in front of a stalled consumer: the parked hint writer) and CP-2 (task count, not bytes:
   condition X). No new clue pattern is needed.
 - **New holder:** none. Every dump is dominated by the claimed holder.
+
+**Owner rulings (2026-11-23):**
+1. The single-token placement (E2), the tmpfs peers (E3) and the non-token-aware client count as **deployment**:
+   the status stays `verified-OOM · deployment`.
+2. B4G (4 GiB run 1) is **accepted as an OOM run** (`OutOfMemoryError` raised, full dump written, JVM self-kill
+   delayed by full-GC thrash), so 4 GiB counts as 3/3.
+3. OC-19, OC-77 and OC-145 **close fully** as covered by B23; their "local writes" part is not kept open (it is
+   S2/R22's path).
+4. OC-148 and OC-332 **stay open**: their timeout/failure/expiry hint path was not driven.
