@@ -1,0 +1,14 @@
+HOSTGONE
+SUMMARY secs=35 ok=0 err_readfail=5 err_timeout=0 err_invalid=0 err_other=17 inflight_left=0 rows=0 vbytes=0
+== one:T:1000:100:3:0
+  T limit=1000 fetch=100: n=3 ok=0 errs={'ReadFailureException': 3} ms=[2015, 1124, 900] rows=[] pages=[] warns=[] vbytes_ok=0 MiB | heap max 1262 MiB, old-postGC max 62 MiB, NTR act max 1, RS act max 1, direct max 50 MiB, lm pending max 0 MiB, lm completed +0 MiB, lm overload drops +0
+     err: ReadFailureException: Cassandra failure during read query at consistency ONE (1 responses were required but only 0 replica responded, 1 failed)
+     err: ReadFailureException: Cassandra failure during read query at consistency ONE (1 responses were required but only 0 replica responded, 1 failed)
+     err: ReadFailureException: Cassandra failure during read query at consistency ONE (1 responses were required but only 0 replica responded, 1 failed)
+== idle:20000
+== run:T:1000:100:12/120
+  T limit=1000 fetch=100: n=19 ok=0 errs={'ReadFailureException': 2, 'TransportException': 12, 'NoHostAvailableException': 5} ms=(1, 10933, 10949) rows=[] pages=[] warns=[] vbytes_ok=0 MiB | heap max 1602 MiB, old-postGC max 1390 MiB, NTR act max 12, RS act max 12, direct max 51 MiB, lm pending max 0 MiB, lm completed +-0 MiB, lm overload drops +-1
+     err: ReadFailureException: Cassandra failure during read query at consistency ONE (1 responses were required but only 0 replica responded, 1 failed)
+     err: ReadFailureException: Cassandra failure during read query at consistency ONE (1 responses were required but only 0 replica responded, 1 failed)
+     err: TransportException: [/127.0.0.1:9042] Connection has been closed
+  run c=12: 11 s ok=0 q/s=0.00 value MiB/s=0.0 step errs(rf,to,inv,oth)=[5, 0, 0, 17] inflight med=12 | heap max 1602 MiB, old-postGC max 1390 MiB, NTR act max 12, RS act max 12, direct max 51 MiB, lm pending max 0 MiB, lm completed +-0 MiB, lm overload drops +-1

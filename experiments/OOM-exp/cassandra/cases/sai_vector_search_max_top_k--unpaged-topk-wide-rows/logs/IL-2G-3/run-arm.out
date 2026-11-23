@@ -1,0 +1,34 @@
+[2026-11-21 09:09:13 EST] ARM IL-2G-3 arm=A heap=2G spec=one:T:250:100:3:0;idle:20000;run:T:250:100:12/120 hist=0 noverify
+[2026-11-21 09:09:16 EST] started IL-2G-3 pid 452138 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b21-IL-2G-3-1795270154.scope
+[2026-11-21 09:09:36 EST] ready IL-2G-3
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/b21/runs/IL-2G-3/cassandra-1795270155-pid452138.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-21 09:09:42 EST] GC.run IL-2G-3
+1795270185,base,rssKB=2685860,rssAnonKB=2518676,scopeCurB=2606080000,scopeOomKill=0,1795270184188,98768648,65214216,65214216,0,0,-1,-1,-1,44391389,-1,-1,-1,-1,-1,-1,163,127
+[2026-11-21 09:09:45 EST] client pid 452537
+STEPEND c=12 ok=222 rf=0 to=1663 inv=0 oth=0
+SUMMARY secs=145 ok=228 err_readfail=0 err_timeout=1671 err_invalid=0 err_other=0 inflight_left=0 rows=57000 vbytes=7004160000
+	at com.datastax.driver.core.Cluster.connectAsync(Cluster.java:368)
+	at com.datastax.driver.core.Cluster.connect(Cluster.java:313)
+	at B21Load.main(B21Load.java:189)
+[2026-11-21 09:12:19 EST] GC.run IL-2G-3
+[2026-11-21 09:12:22 EST] OOM/GC check
+CompileCommand: dontinline org/apache/cassandra/io/util/RebufferingInputStream.readPrimitiveSlowly(I)J
+CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.address()J
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.length()I
+CompileCommand: inline org/apache/cassandra/db/rows/UnfilteredSerializer.serializeRowBody(Lorg/apache/cassandra/db/rows/Row;ILorg/apache/cassandra/db/rows/SerializationHelper;Lorg/apache/cassandra/io/util/DataOutputPlus;)V
+CompileCommand: inline org/apache/cassandra/io/util/Memory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/SafeMemory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/TrackedDataInputPlus.checkCanRead(I)V
+CompileCommand: inline org/apache/cassandra/net/FrameDecoderWith8bHeader.decode(Ljava/util/Collection;Lorg/apache/cassandra/net/ShareableBytes;I)V
+CompileCommand: inline org/apache/cassandra/service/reads/repair/RowIteratorMergeListener.applyToPartition(ILjava/util/function/Consumer;)V
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.selectBoundary(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;II)I
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.strictnessOfLessThan(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;)I
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.indexes(Lorg/apache/cassandra/utils/IFilter/FilterKey;)[J
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.setIndexes(JJIJ[J)V
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare(Ljava/nio/ByteBuffer;[B)I
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare([BLjava/nio/ByteBuffer;)I
+pauses=757 full_gcs=57 total_pause=21s max60=19% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=none
+[2026-11-21 09:12:40 EST] stopped IL-2G-3
+SURVIVED overload_drop_lines=4 oversized=0
+[2026-11-21 09:12:40 EST] END IL-2G-3 SURVIVED overload_drop_lines=4 oversized=0

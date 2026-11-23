@@ -1,0 +1,87 @@
+### m4-512-2 (full logs: ms0617:/mydata/s4/u13/m4-512-2/logs, NMT: /mydata/s4/u13/m4-512-2/nmt)
+--- analyze.py
+resolved MaxDirectMemorySize=512 MiB MaxHeapSize=4096 MiB
+load {"why":"stopfile","batches_issued":54380,"batches_ok":53924,"rows_ok":539240,"errors":456,"write_timeouts":441,"elapsed_s":71.302,"rows_per_s":7562.761212869204,"last_error":"com.datastax.driver.core.exceptions.TransportException: [/127.0.0.1:9042] Connection has been closed"}
+u13.t flushes: 2 started, 0 completed
+  start 14:01:48.4 PerDiskMemtableFlushWriter_0:2   175.979MiB serialized  176580 rows on-heap 341.376MiB
+  start 14:01:57.9 PerDiskMemtableFlushWriter_0:1   179.268MiB serialized  179880 rows on-heap 341.564MiB
+B0 (direct_used just before first u13.t flush) = 44.4 MiB
+peak direct_used = 429.1 MiB at 14:02:17.6 (count 226); last sample 14:02:27.0 429.0 MiB
+  step 14:01:52.8     +8.0 MiB ->    60.5 MiB count 193  t_onheap 163 MiB sw 2 pend 1 old_n 0
+  step 14:01:55.0    +16.0 MiB ->    76.5 MiB count 194  t_onheap 231 MiB sw 2 pend 1 old_n 0
+  step 14:02:00.0    +32.0 MiB ->   117.1 MiB count 220  t_onheap 57 MiB sw 3 pend 2 old_n 0
+  step 14:02:00.8     +8.0 MiB ->   125.1 MiB count 221  t_onheap 82 MiB sw 3 pend 2 old_n 0
+  step 14:02:02.6    +16.0 MiB ->   141.1 MiB count 222  t_onheap 149 MiB sw 3 pend 2 old_n 0
+  step 14:02:06.2    +32.0 MiB ->   173.1 MiB count 223  t_onheap 321 MiB sw 3 pend 2 old_n 0
+  step 14:02:06.8    +64.0 MiB ->   237.1 MiB count 224  t_onheap 341 MiB sw 3 pend 2 old_n 0
+  step 14:02:11.8    +64.0 MiB ->   301.1 MiB count 225  t_onheap 341 MiB sw 3 pend 2 old_n 0
+  step 14:02:17.6   +128.0 MiB ->   429.1 MiB count 226  t_onheap 341 MiB sw 3 pend 2 old_n 0
+heap_used max 2739 MiB; old GCs 2
+NMT Other max committed = 525 MiB at 14:02:22.2
+System.gc() full GCs: 1
+  [2026-11-21T07:02:23.722-0700][119.566s][309593][309739][info ] GC(8) Pause Full (System.gc()) 2750M->1775M(4096M) 1069.407ms
+FIRST OOM (system.log line 409): java.lang.OutOfMemoryError: Direct buffer memory
+--- driver.log
+1795269623.377 09:00:23 start label=m4-512-2 heap=4G direct=512M arm=M maxload=720
+1795269676.005 09:01:16 native up=1 pid=309593
+-XX:NativeMemoryTracking=summary -Xms4G -Xmx4G -XX:MaxDirectMemorySize=512M -XX:HeapDumpPath=/mydata/s4/u13/dump-m4-512-2/cassandra-1795269623-pid309593.hprof 
+ConcGCThreads=8 MaxDirectMemorySize=536870912 MaxHeapSize=4294967296 ParallelGCThreads=8 
+index t t_v {class_name=sai, target=v}
+1795269689.478 09:01:29 load started pid=310227
+1795269744.298 09:02:24 load stop: OOM after 55 s (oom_at=55)
+1795269763.450 09:02:43 after OOM wait: alive=1
+{"why":"stopfile","batches_issued":54380,"batches_ok":53924,"rows_ok":539240,"errors":456,"write_timeouts":441,"elapsed_s":71.302,"rows_per_s":7562.761212869204,"last_error":"com.datastax.driver.core.exceptions.TransportException: [/127.0.0.1:9042] Connection has been closed"}
+1795269769.127 09:02:49 node stopped
+401M	/mydata/s4/u13/m4-512-2/data
+523M	/mydata/s4/u13/m4-512-2/commitlog
+1795269769.673 09:02:49 dump deleted (histogram printed in system.log): cassandra-1795269623-pid309593.hprof 2122071087
+1795269770.681 09:02:50 done why=OOM oom_at=55
+--- vmflags
+MaxDirectMemorySize=536870912 MaxHeapSize=4294967296 
+--- first OOM (system.log from line 408)
+ERROR [PerDiskMemtableFlushWriter_0:1] 2026-11-21T14:02:24,235 StorageAttachedIndexWriter.java:143 - [u13.t.*] Failed to record a row during an index build
+java.lang.OutOfMemoryError: Direct buffer memory
+	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+	at org.apache.cassandra.io.compress.BufferType$2.allocate(BufferType.java:35)
+	at org.apache.cassandra.db.tries.InMemoryTrie.allocateBlock(InMemoryTrie.java:151)
+	at org.apache.cassandra.db.tries.InMemoryTrie.createNewChainNode(InMemoryTrie.java:451)
+	at org.apache.cassandra.db.tries.InMemoryTrie.expandOrCreateChainNode(InMemoryTrie.java:471)
+	at org.apache.cassandra.db.tries.InMemoryTrie$ApplyState.attachChild(InMemoryTrie.java:728)
+	at org.apache.cassandra.db.tries.InMemoryTrie$ApplyState.attachAndMoveToParentState(InMemoryTrie.java:789)
+	at org.apache.cassandra.db.tries.InMemoryTrie.apply(InMemoryTrie.java:837)
+	at org.apache.cassandra.db.tries.InMemoryTrie.putSingleton(InMemoryTrie.java:866)
+	at org.apache.cassandra.index.sai.disk.RowMapping.add(RowMapping.java:158)
+	at org.apache.cassandra.index.sai.disk.StorageAttachedIndexWriter.addRow(StorageAttachedIndexWriter.java:280)
+	at org.apache.cassandra.index.sai.disk.StorageAttachedIndexWriter.nextUnfilteredCluster(StorageAttachedIndexWriter.java:139)
+	at org.apache.cassandra.io.sstable.format.SortedTableWriter.lambda$onRow$3(SortedTableWriter.java:273)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1541)
+	at java.base/java.util.Collections$UnmodifiableCollection.forEach(Collections.java:1085)
+	at org.apache.cassandra.io.sstable.format.SortedTableWriter.notifyObservers(SortedTableWriter.java:286)
+	at org.apache.cassandra.io.sstable.format.SortedTableWriter.onRow(SortedTableWriter.java:273)
+	at org.apache.cassandra.io.sstable.format.SortedTableWriter.addRow(SortedTableWriter.java:216)
+	at org.apache.cassandra.io.sstable.format.SortedTableWriter.addUnfiltered(SortedTableWriter.java:203)
+	at org.apache.cassandra.io.sstable.format.SortedTableWriter.append(SortedTableWriter.java:149)
+	at org.apache.cassandra.io.sstable.SimpleSSTableMultiWriter.append(SimpleSSTableMultiWriter.java:49)
+	at org.apache.cassandra.db.memtable.Flushing$FlushRunnable.writeSortedContents(Flushing.java:171)
+	at org.apache.cassandra.db.memtable.Flushing$FlushRunnable.call(Flushing.java:191)
+	at org.apache.cassandra.db.memtable.Flushing$FlushRunnable.call(Flushing.java:130)
+	at org.apache.cassandra.concurrent.FutureTask.call(FutureTask.java:61)
+	at org.apache.cassandra.concurrent.FutureTask.run(FutureTask.java:71)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+WARN  [PerDiskMemtableFlushWriter_0:1] 2026-11-21T14:02:24,241 MemtableIndexWriter.java:117 - [u13.t.t_v] Aborting index memtable flush for /mydata/s4/u13/m4-512-2/data/u13/t-087fc020e5b411f1a71a97134c05f859/nb-2-big...
+java.lang.OutOfMemoryError: Direct buffer memory
+	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+	at org.apache.cassandra.io.compress.BufferType$2.allocate(BufferType.java:35)
+	at org.apache.cassandra.db.tries.InMemoryTrie.allocateBlock(InMemoryTrie.java:151)
+	at org.apache.cassandra.db.tries.InMemoryTrie.createNewChainNode(InMemoryTrie.java:451)
+	at org.apache.cassandra.db.tries.InMemoryTrie.expandOrCreateChainNode(InMemoryTrie.java:471)
+	at org.apache.cassandra.db.tries.InMemoryTrie$ApplyState.attachChild(InMemoryTrie.java:728)
+	at org.apache.cassandra.db.tries.InMemoryTrie$ApplyState.attachAndMoveToParentState(InMemoryTrie.java:789)
+	at org.apache.cassandra.db.tries.InMemoryTrie.apply(InMemoryTrie.java:837)

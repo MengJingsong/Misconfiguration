@@ -1,0 +1,28 @@
+== stdout.txt (OOM lines and tail)
+88946:java.lang.OutOfMemoryError: Java heap space
+88947:Dumping heap to /mydata/s4/u14/dumps/H2-T-3/cassandra-1795271478-pid1728921.hprof ...
+88948:Heap dump file created [2546564516 bytes in 24.308 secs]
+88950:# java.lang.OutOfMemoryError: Java heap space
+88951:# -XX:OnOutOfMemoryError="kill -9 %p"
+88952:#   Executing /bin/sh -c "kill -9 1728921"...
+== system.log last GCInspector lines
+INFO  [Service Thread] 2026-11-21T14:48:08,362 GCInspector.java:286 - G1 Old Generation GC in 540ms.  G1 Old Gen: 2122886496 -> 2109485712; 
+INFO  [Service Thread] 2026-11-21T14:48:08,885 GCInspector.java:286 - G1 Old Generation GC in 508ms.  G1 Old Gen: 2126262928 -> 2109819296; 
+INFO  [Service Thread] 2026-11-21T14:48:09,399 GCInspector.java:286 - G1 Old Generation GC in 495ms.  G1 Old Gen: 2126596512 -> 2110289544; 
+== client.csv first/last
+1795271573354,1,create,93.4,ok,1
+1795271573416,2,create,61.2,ok,1
+1795272454964,3974,create,10098.5,ok,1
+1795272466497,3975,create,11533.6,ok,1
+1795272487807,3976,create,21309.6,ok,1
+1795272536168,3977,create,48360.7,error,"ConnectionShutdown('Connection to 127.0.14.1:9042 was closed')"
+== memory.events
+low 0
+high 0
+max 0
+oom 0
+oom_kill 0
+== MaxDirectMemorySize / heap
+-Xms2G
+-Xmx2G
+-XX:MaxDirectMemorySize=15872M

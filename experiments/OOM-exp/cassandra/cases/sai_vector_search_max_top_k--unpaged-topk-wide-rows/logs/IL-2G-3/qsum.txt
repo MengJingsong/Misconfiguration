@@ -1,0 +1,12 @@
+SUMMARY secs=145 ok=228 err_readfail=0 err_timeout=1671 err_invalid=0 err_other=0 inflight_left=0 rows=57000 vbytes=7004160000
+== one:T:250:100:3:0
+  T limit=250 fetch=100: n=3 ok=3 errs={} ms=[1853, 886, 762] rows=[250] pages=[1] warns=[1] vbytes_ok=88 MiB | heap max 446 MiB, old-postGC max 62 MiB, NTR act max 1, RS act max 1, direct max 98 MiB, lm pending max 29 MiB, lm completed +59 MiB, lm overload drops +1
+     warn: Top-K queries do not support paging and the page size is set to 100, which is less than LIMIT 250. The page size has been set to 250 to match the LIMIT.
+== idle:20000
+== run:T:250:100:12/120
+  T limit=250 fetch=100: n=1896 ok=225 errs={'ReadTimeoutException': 1671} ms=(174, 490, 4799) rows=[250] pages=[1] warns=[1] vbytes_ok=6592 MiB | heap max 1928 MiB, old-postGC max 1862 MiB, NTR act max 12, RS act max 12, direct max 115 MiB, lm pending max 117 MiB, lm completed +6479 MiB, lm overload drops +1667
+     err: ReadTimeoutException: Cassandra timeout during read query at consistency ONE (1 responses were required but only 0 replica responded). In case this was generated during read repair, the consistency level is not representat
+     err: ReadTimeoutException: Cassandra timeout during read query at consistency ONE (1 responses were required but only 0 replica responded). In case this was generated during read repair, the consistency level is not representat
+     err: ReadTimeoutException: Cassandra timeout during read query at consistency ONE (1 responses were required but only 0 replica responded). In case this was generated during read repair, the consistency level is not representat
+     warn: Top-K queries do not support paging and the page size is set to 100, which is less than LIMIT 250. The page size has been set to 250 to match the LIMIT.
+  run c=12: 120 s ok=219 q/s=1.82 value MiB/s=53.5 step errs(rf,to,inv,oth)=[0, 1663, 0, 0] inflight med=12 | heap max 1928 MiB, old-postGC max 1862 MiB, NTR act max 12, RS act max 12, direct max 115 MiB, lm pending max 117 MiB, lm completed +6421 MiB, lm overload drops +1660

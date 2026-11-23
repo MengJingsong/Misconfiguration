@@ -1,0 +1,42 @@
+### int8-1 (full logs: ms0617:/mydata/s4/u13/int8-1/logs, NMT: /mydata/s4/u13/int8-1/nmt)
+--- analyze.py
+resolved MaxDirectMemorySize=1024 MiB MaxHeapSize=8192 MiB
+load {"why":"stopfile","batches_issued":346507,"batches_ok":346507,"rows_ok":3465070,"errors":0,"write_timeouts":0,"elapsed_s":122.786,"rows_per_s":28220.399719837766,"last_error":""}
+u13.t flushes: 8 started, 8 completed
+  start 13:34:48.5 PerDiskMemtableFlushWriter_0:2   459.511MiB serialized  461080 rows on-heap 682.869MiB
+  start 13:35:05.1 PerDiskMemtableFlushWriter_0:1   465.511MiB serialized  467100 rows on-heap 682.885MiB
+  start 13:35:20.2 PerDiskMemtableFlushWriter_0:2   482.572MiB serialized  484220 rows on-heap 682.790MiB
+  start 13:35:36.4 PerDiskMemtableFlushWriter_0:1   527.509MiB serialized  529310 rows on-heap 682.698MiB
+  start 13:35:52.5 PerDiskMemtableFlushWriter_0:2   522.048MiB serialized  523830 rows on-heap 682.779MiB
+  start 13:36:07.9 PerDiskMemtableFlushWriter_0:1   458.624MiB serialized  460190 rows on-heap 682.676MiB
+  start 13:36:24.6 PerDiskMemtableFlushWriter_0:2   477.908MiB serialized  479540 rows on-heap 682.878MiB
+  start 13:36:38.3 PerDiskMemtableFlushWriter_0:2    59.597MiB serialized   59800 rows on-heap 95.288MiB
+  done  13:34:58.8 PerDiskMemtableFlushWriter_0:2
+  done  13:35:13.4 PerDiskMemtableFlushWriter_0:1
+  done  13:35:28.7 PerDiskMemtableFlushWriter_0:2
+  done  13:35:45.5 PerDiskMemtableFlushWriter_0:1
+  done  13:36:02.6 PerDiskMemtableFlushWriter_0:2
+  done  13:36:16.7 PerDiskMemtableFlushWriter_0:1
+  done  13:36:31.6 PerDiskMemtableFlushWriter_0:2
+  done  13:36:39.2 PerDiskMemtableFlushWriter_0:2
+B0 (direct_used just before first u13.t flush) = 43.0 MiB
+peak direct_used = 44.5 MiB at 13:36:24.7 (count 128); last sample 13:36:31.1 44.5 MiB
+heap_used max 8160 MiB; old GCs 1
+NMT Other max committed = 220 MiB at 13:35:53.8
+System.gc() full GCs: 0
+stdout OOM lines: 1 ['CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V\n']
+no OutOfMemoryError in system.log
+--- driver.log
+1795267993.495 08:33:13 start label=int8-1 heap=8G direct=1G arm=INT maxload=720
+1795268046.119 08:34:06 native up=1 pid=289958
+-XX:NativeMemoryTracking=summary -Xms8G -Xmx8G -XX:MaxDirectMemorySize=1G -XX:HeapDumpPath=/mydata/s4/u13/dump-int8-1/cassandra-1795267993-pid289958.hprof 
+ConcGCThreads=8 MaxDirectMemorySize=1073741824 MaxHeapSize=8589934592 ParallelGCThreads=8 
+1795268060.063 08:34:20 load started pid=290542
+1795268185.239 08:36:25 load stop: 6 flushes after 125 s (oom_at=)
+{"why":"stopfile","batches_issued":346507,"batches_ok":346507,"rows_ok":3465070,"errors":0,"write_timeouts":0,"elapsed_s":122.786,"rows_per_s":28220.399719837766,"last_error":""}
+1795268206.318 08:36:46 node stopped
+3.4G	/mydata/s4/u13/int8-1/data
+8.0K	/mydata/s4/u13/int8-1/commitlog
+1795268207.294 08:36:47 done why=6 flushes oom_at=
+--- vmflags
+MaxDirectMemorySize=1073741824 MaxHeapSize=8589934592 

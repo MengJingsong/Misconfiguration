@@ -1,0 +1,9 @@
+# B20 arm I (intervention, design §2.8): bound the index-build page to what the 32 MiB target gives for this
+# partition's own 1 MiB rows. Diagnostic; the unmodified build is what T runs. <run dir> is replaced by run-arm.sh.
+RULE b20 intervention: bound the index-build page to the 32 MiB target for 1 MiB rows
+CLASS org.apache.cassandra.index.SecondaryIndexManager
+METHOD calculateIndexingPageSize
+AT EXIT
+IF $! > 32
+DO traceOpen("b20", "<run dir>/btm.txt"); traceln("b20", "B20I original=" + $! + " returned=32"); return 32
+ENDRULE

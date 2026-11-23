@@ -1,0 +1,19 @@
+06:36:27 ERROR c.d.d.c.SchemaParser - Error parsing schema for table b21.docs: Cluster.getMetadata().getKeyspace("b21").getTable("docs") will be missing or incomplete
+java.lang.IllegalArgumentException: Could not parse type name vector<float, 16>
+	at com.datastax.driver.core.DataTypeCqlNameParser.parse(DataTypeCqlNameParser.java:235)
+	at com.datastax.driver.core.TableMetadata.build(TableMetadata.java:313)
+	at com.datastax.driver.core.SchemaParser.buildTables(SchemaParser.java:304)
+	at com.datastax.driver.core.SchemaParser.buildKeyspaces(SchemaParser.java:205)
+	at com.datastax.driver.core.SchemaParser.refresh(SchemaParser.java:111)
+	at com.datastax.driver.core.ControlConnection.refreshSchema(ControlConnection.java:419)
+	at com.datastax.driver.core.ControlConnection.tryConnect(ControlConnection.java:326)
+	at com.datastax.driver.core.ControlConnection.reconnectInternal(ControlConnection.java:237)
+	at com.datastax.driver.core.ControlConnection.connect(ControlConnection.java:111)
+	at com.datastax.driver.core.Cluster$Manager.negotiateProtocolVersionAndConnect(Cluster.java:1815)
+	at com.datastax.driver.core.Cluster$Manager.init(Cluster.java:1728)
+	at com.datastax.driver.core.Cluster.init(Cluster.java:216)
+	at com.datastax.driver.core.Cluster.connectAsync(Cluster.java:389)
+	at com.datastax.driver.core.Cluster.connectAsync(Cluster.java:368)
+	at com.datastax.driver.core.Cluster.connect(Cluster.java:313)
+	at B21Load.main(B21Load.java:189)
+06:37:12 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds

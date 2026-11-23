@@ -1,0 +1,1 @@
+-rw-------  1 jason92 misconfiguration 1931902581 Nov 21 06:49 cassandra-1795268882-pid440937.hprof

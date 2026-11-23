@@ -1,0 +1,16 @@
+trace query=M rows=5000 valueBytes=10240000 ms=278 rowTokenMin=-9223358624281578765 rowTokenMax=-9129989547647516796
+  ev 279us /127.0.0.1 [Native-Transport-Requests-2] Parsing SELECT * FROM c10.t WHERE b >= 0 ALLOW FILTERING
+  ev 939us /127.0.0.1 [Native-Transport-Requests-2] Preparing statement
+  ev 3134us /127.0.0.1 [Native-Transport-Requests-2] Computing ranges to query
+  ev 3685us /127.0.0.1 [Native-Transport-Requests-2] Submitting range requests on 49 ranges with a concurrency of 1 (18410.4 rows per range expected)
+  ev 3998us /127.0.0.1 [Native-Transport-Requests-2] Enqueuing request to Full(/127.0.0.3:7000,(9030338924407868514,-9048061957674907783])
+  ev 4124us /127.0.0.1 [Native-Transport-Requests-2] Submitted 1 concurrent range requests
+  ev 4222us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 118 bytes
+  ev 39us /127.0.0.3 [Messaging-EventLoop-3-5] RANGE_REQ message received from /127.0.0.1:7000
+  ev 450us /127.0.0.3 [ReadStage-2] Executing seq scan across 2 sstables for (min(-9223372036854775808), max(-9048061957674907783)]
+  ev 80437us /127.0.0.3 [ReadStage-2] Read 5000 live rows and 0 tombstone cells
+  ev 80877us /127.0.0.3 [ReadStage-2] Enqueuing response to /127.0.0.1:7000
+  ev 81267us /127.0.0.3 [Messaging-OUT-/127.0.0.3:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414759 bytes
+  ev 97960us /127.0.0.1 [Messaging-EventLoop-3-12] RANGE_RSP message received from /127.0.0.3:7000
+  ev 102282us /127.0.0.1 [RequestResponseStage-1] Processing response from /127.0.0.3:7000
+trace duration_us=176798

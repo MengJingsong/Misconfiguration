@@ -1,0 +1,15 @@
+=== T4-3
+label=T4-3 arm=T set=T heap=4G direct=2048M opt=nodump
+pre_compactionstats: concurrent compactors            2            active=0
+baseline_histo_total: Total        697225       60143248
+trigger_epoch=1795271021.447431932
+endpoint_seconds=186.9
+outcome=OOM
+trigger: rc=0 
+first_oom: /mydata/s4/b20/runs/T4-3/stdout.log:485:# java.lang.OutOfMemoryError: Java heap space
+syslog: INFO  [SecondaryIndexManagement:1] 2026-11-21T14:22:58,532 SecondaryIndexManager.java:1880 - Index [PaxosUncommittedIndex] became queryable after successful build.
+syslog: INFO  [SecondaryIndexManagement:1] 2026-11-21T14:23:45,041 CassandraIndex.java:704 - Submitting index build of t_ck for data in BigTableReader:big(path='/mydata/s4/b20/work/data/ks/t-8c678220e5ae11f1b871af1b910229f6/nb-9-big-Data.db'), BigTableReader:big(path=
+baseline_used=361 MiB  peak_sampled_used_after_trigger=3833 MiB  peak_rssAnon_after_trigger=4645 MiB
+gc_after_trigger: pauses=17 full=6 max_post_gc=4023 MiB last=(184.9715678691864, 'Full', 3856, 3856, 4096, 829.221)
+last_index_build_progress: t+175.8s completed=66673410 total=4295379372 (1.6%)
+gcwin: pauses=27 full_gcs=7 total_pause=8s max60=12% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=ReportJavaOutOfMemory@240.909s

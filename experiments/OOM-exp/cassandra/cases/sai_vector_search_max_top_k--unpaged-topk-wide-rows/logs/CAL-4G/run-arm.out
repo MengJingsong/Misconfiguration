@@ -1,0 +1,49 @@
+[2026-11-21 08:52:01 EST] ARM CAL-4G arm=A heap=4G spec=run:T:1000:100:8/45,10/45,13/45,16/45,24/45,32/45 hist=0 noverify
+[2026-11-21 08:52:04 EST] started CAL-4G pid 443541 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b21-CAL-4G-1795269123.scope
+[2026-11-21 08:52:28 EST] ready CAL-4G
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms4G -Xmx4G -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/b21/runs/CAL-4G/cassandra-1795269123-pid443541.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-21 08:52:34 EST] GC.run CAL-4G
+1795269157,base,rssKB=4861096,rssAnonKB=4693896,scopeCurB=4837920768,scopeOomKill=0,1795269156626,115546336,65214688,65214688,0,0,-1,-1,-1,44391389,-1,-1,-1,-1,-1,-1,180,138
+[2026-11-21 08:52:38 EST] client pid 444000
+[2026-11-21 08:57:06 EST] VICTIM DEAD at +268s
+STEPEND c=8 ok=10 rf=0 to=120 inv=0 oth=0
+STEPEND c=10 ok=23 rf=0 to=292 inv=0 oth=0
+STEPEND c=13 ok=35 rf=0 to=485 inv=0 oth=0
+STEPEND c=16 ok=43 rf=0 to=680 inv=0 oth=0
+STEPEND c=24 ok=44 rf=0 to=856 inv=0 oth=0
+HOSTGONE
+SUMMARY secs=265 ok=44 err_readfail=0 err_timeout=929 err_invalid=0 err_other=41 inflight_left=0 rows=44000 vbytes=5406720000
+	at com.datastax.driver.core.Cluster.connect(Cluster.java:313)
+	at B21Load.main(B21Load.java:189)
+06:57:05 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+[2026-11-21 08:57:10 EST] OOM/GC check
+CompileCommand: dontinline org/apache/cassandra/io/util/RebufferingInputStream.readPrimitiveSlowly(I)J
+CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.address()J
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.length()I
+CompileCommand: inline org/apache/cassandra/db/rows/UnfilteredSerializer.serializeRowBody(Lorg/apache/cassandra/db/rows/Row;ILorg/apache/cassandra/db/rows/SerializationHelper;Lorg/apache/cassandra/io/util/DataOutputPlus;)V
+CompileCommand: inline org/apache/cassandra/io/util/Memory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/SafeMemory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/TrackedDataInputPlus.checkCanRead(I)V
+CompileCommand: inline org/apache/cassandra/net/FrameDecoderWith8bHeader.decode(Ljava/util/Collection;Lorg/apache/cassandra/net/ShareableBytes;I)V
+CompileCommand: inline org/apache/cassandra/service/reads/repair/RowIteratorMergeListener.applyToPartition(ILjava/util/function/Consumer;)V
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.selectBoundary(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;II)I
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.strictnessOfLessThan(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;)I
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.indexes(Lorg/apache/cassandra/utils/IFilter/FilterKey;)[J
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.setIndexes(JJIJ[J)V
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare(Ljava/nio/ByteBuffer;[B)I
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare([BLjava/nio/ByteBuffer;)I
+--
+INFO  [Service Thread] 2026-11-21T13:56:52,028 GCInspector.java:286 - G1 Old Generation GC in 561ms.  G1 Old Gen: 3981244496 -> 3620220408; G1 Survivor Space: 50331648 -> 0; 
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /mydata/s4/b21/runs/CAL-4G/cassandra-1795269123-pid443541.hprof ...
+Heap dump file created [3974404098 bytes in 11.378 secs]
+#
+# java.lang.OutOfMemoryError: Java heap space
+# -XX:OnOutOfMemoryError="kill -9 %p"
+#   Executing /bin/sh -c "kill -9 443541"...
+-rw-------  1 jason92 misconfiguration 3974404098 Nov 21 06:57 cassandra-1795269123-pid443541.hprof
+pauses=937 full_gcs=132 total_pause=72s max60=50% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=HeapDumper@288.874s,ReportJavaOutOfMemory@300.257s
+[2026-11-21 08:57:12 EST] stopped CAL-4G
+OOM type="java.lang.OutOfMemoryError: Java heap space" at+268s overload_drop_lines=9 oversized=0 last=[Q {"start":1795269425875,"end":1795269425875,"ms":0,"Q":"T","limit":1000,"fetch":100,"thread":24,"arg":"v0=0.3447242","rows":0,"pages":0,"more":false,"vbytes":0,"warns":0,"warn":"","err":"NoHostAvaila]
+[2026-11-21 08:57:12 EST] END CAL-4G OOM type="java.lang.OutOfMemoryError: Java heap space" at+268s overload_drop_lines=9 oversized=0 last=[Q {"start":1795269425875,"end":1795269425875,"ms":0,"Q":"T","limit":1000,"fetch":100,"thread":24,"arg":"v0=0.3447242","rows":0,"pages":0,"more":false,"vbytes":0,"warns":0,"warn":"","err":"NoHostAvaila]

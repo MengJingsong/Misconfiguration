@@ -1,0 +1,57 @@
+parsed: 797050 instances, 93394 object arrays, 9073 byte[] >= 100 KiB, 5093 roots
+reached 1132487 objects
+  big 117MiB: root frame UnfilteredSerializer.deserializeRowBody:635 [UnfilteredSerializer.deserializeRowBody:635 < UnfilteredSerializer.deserializeOne:482 < UnfilteredSerializer.deserialize:438 < VectorTopKProcessor.consumeSortByScoreAndTakeTopK:95] | DataInputBuffer
+  big 120MiB: root frame UnfilteredRowIteratorSerializer.serialize:120 [ReadResponse$LocalDataResponse.build:201 < ReadResponse$LocalDataResponse.<init>:186 < ReadCommandVerbHandler.doVerb:95 < InboundMessageHandler$ProcessMessage.run:430] | DataOutputBuffer
+  big 120MiB: root frame BufferedDataOutputStreamPlus.write:135 [Message$Serializer.serialize:741 < OutboundConnection$LargeMessageDelivery.doRun:983 < OutboundConnection$Delivery.run:691 < OutboundConnection$LargeMessageDelivery.run:958] | 
+  big 120MiB: root frame AbstractType.writeValue:537 [ReadResponse$LocalDataResponse.build:201 < ReadResponse$LocalDataResponse.<init>:186 < ReadCommandVerbHandler.doVerb:95 < InboundMessageHandler$ProcessMessage.run:430] | DataOutputBuffer
+  big 60MiB: root frame DataOutputBuffer.expandToFit:178 [DataOutputBuffer.expandToFit:178 < DataOutputBuffer.doFlush:138 < ReadResponse$LocalDataResponse.build:201 < ReadResponse$LocalDataResponse.<init>:186] | DataOutputBuffer
+  big 120MiB: root frame AbstractType.writeValue:537 [ReadResponse$LocalDataResponse.build:201 < ReadResponse$LocalDataResponse.<init>:186 < ReadCommandVerbHandler.doVerb:95 < InboundMessageHandler$ProcessMessage.run:430] | DataOutputBuffer
+targets reached: 9051 arrays, 1717.3 MiB; unreachable (garbage): 0 arrays, 0.0 MiB
+    285.0 MiB   2432 value  | root: frame UnfilteredPartitionIterators$Serializer.serialize:339 [ReadResponse$LocalDataResponse.build:201 < ReadResponse$LocalDataResponse.<init>:186 < ReadCommandVerbHandler.doVerb:95 < InboundMessageHandler$ProcessMessage.run:430]
+                        chain: UnfilteredPartitions > InMemoryUnfilteredPartitionIterator > TreeMap$EntryIterator > TreeMap > TreeMap$Entry > TreeSet > TreeMap > TreeMap$Entry > RowWithSource > BTreeRow > Object;[] > ArrayCell
+    268.6 MiB   2292 value  | root: frame StorageAttachedIndexSearcher$ScoreOrderedResultRetriever.readAndValidatePartition:771 [Cell$Serializer.deserialize:337 < UnfilteredSerializer.lambda$deserializeRowBody$2:617 < UnfilteredSerializer.deserializeRowBody:613 < StorageAttachedIndexSearcher$ScoreOrderedResultRetriever.readAndValidatePartition:771]
+                        chain: StorageAttachedIndexSearcher$ScoreOrderedResultRetriever > ArrayDeque > Object;[] > StorageAttachedIndexSearcher$SinglePartitionIterator > ArrayList$Itr > ArrayList > Object;[] > RowWithSource > BTreeRow > Object;[] > ArrayCell
+    240.1 MiB      2 big>=8MiB | root: frame AbstractType.writeValue:537 [ReadResponse$LocalDataResponse.build:201 < ReadResponse$LocalDataResponse.<init>:186 < ReadCommandVerbHandler.doVerb:95 < InboundMessageHandler$ProcessMessage.run:430]
+                        chain: DataOutputBuffer
+    120.0 MiB      1 big>=8MiB | root: frame UnfilteredRowIteratorSerializer.serialize:120 [ReadResponse$LocalDataResponse.build:201 < ReadResponse$LocalDataResponse.<init>:186 < ReadCommandVerbHandler.doVerb:95 < InboundMessageHandler$ProcessMessage.run:430]
+                        chain: DataOutputBuffer
+    120.0 MiB      1 big>=8MiB | root: frame BufferedDataOutputStreamPlus.write:135 [Message$Serializer.serialize:741 < OutboundConnection$LargeMessageDelivery.doRun:983 < OutboundConnection$Delivery.run:691 < OutboundConnection$LargeMessageDelivery.run:958]
+                        chain: 
+    117.3 MiB      1 big>=8MiB | root: frame UnfilteredSerializer.deserializeRowBody:635 [UnfilteredSerializer.deserializeRowBody:635 < UnfilteredSerializer.deserializeOne:482 < UnfilteredSerializer.deserialize:438 < VectorTopKProcessor.consumeSortByScoreAndTakeTopK:95]
+                        chain: DataInputBuffer
+    102.3 MiB    873 value  | root: frame UnfilteredPartitionIterators$Serializer.serialize:339 [DataOutputBuffer.expandToFit:180 < DataOutputBuffer.doFlush:138 < ReadResponse$LocalDataResponse.build:201 < ReadResponse$LocalDataResponse.<init>:186]
+                        chain: UnfilteredPartitions > InMemoryUnfilteredPartitionIterator > TreeMap$EntryIterator > TreeMap > TreeMap$Entry > TreeSet > TreeMap > TreeMap$Entry > RowWithSource > BTreeRow > Object;[] > ArrayCell
+     87.4 MiB    746 value  | root: frame VectorTopKProcessor.consumeSortByScoreAndTakeTopK:95 [UnfilteredSerializer.deserializeRowBody:635 < UnfilteredSerializer.deserializeOne:482 < UnfilteredSerializer.deserialize:438 < VectorTopKProcessor.consumeSortByScoreAndTakeTopK:95]
+                        chain: PriorityQueue > Object;[] > BTreeRow > Object;[] > ArrayCell
+     87.1 MiB    743 value  | root: frame UnfilteredPartitionIterators$Serializer.serialize:339 [DataOutputBuffer.expandToFit:178 < DataOutputBuffer.doFlush:138 < ReadResponse$LocalDataResponse.build:201 < ReadResponse$LocalDataResponse.<init>:186]
+                        chain: UnfilteredPartitions > InMemoryUnfilteredPartitionIterator > TreeMap$EntryIterator > TreeMap$Entry > TreeSet > TreeMap > TreeMap$Entry > RowWithSource > BTreeRow > Object;[] > ArrayCell
+     79.7 MiB    680 value  | root: frame VectorTopKProcessor.takeTopKThenSortByPrimaryKey:179 [VectorTopKProcessor.processSingleRowPartition:200 < VectorTopKProcessor.takeTopKThenSortByPrimaryKey:179 < StorageAttachedIndexSearcher.search:148 < ReadCommand.executeLocally:452]
+                        chain: StorageAttachedIndexSearcher$ScoreOrderedResultRetriever > ArrayDeque > Object;[] > StorageAttachedIndexSearcher$SinglePartitionIterator > ArrayList$Itr > ArrayList > Object;[] > RowWithSource > BTreeRow > Object;[] > ArrayCell
+     66.2 MiB    565 value  | root: frame UnfilteredPartitionIterators$Serializer.serialize:339 [ReadResponse$LocalDataResponse.build:201 < ReadResponse$LocalDataResponse.<init>:186 < ReadCommandVerbHandler.doVerb:95 < InboundMessageHandler$ProcessMessage.run:430]
+                        chain: UnfilteredPartitions > InMemoryUnfilteredPartitionIterator > TreeMap$EntryIterator > TreeMap$Entry > TreeSet > TreeMap > TreeMap$Entry > RowWithSource > BTreeRow > Object;[] > ArrayCell
+     60.0 MiB      1 big>=8MiB | root: frame DataOutputBuffer.expandToFit:178 [DataOutputBuffer.expandToFit:178 < DataOutputBuffer.doFlush:138 < ReadResponse$LocalDataResponse.build:201 < ReadResponse$LocalDataResponse.<init>:186]
+                        chain: DataOutputBuffer
+     30.0 MiB    256 value  | root: frame TreeMap.put:550 [VectorTopKProcessor.processSingleRowPartition:200 < VectorTopKProcessor.takeTopKThenSortByPrimaryKey:179 < StorageAttachedIndexSearcher.search:148 < ReadCommand.executeLocally:452]
+                        chain: TreeMap > TreeMap$Entry > TreeSet > TreeMap > TreeMap$Entry > RowWithSource > BTreeRow > Object;[] > ArrayCell
+     30.0 MiB    256 value  | root: frame UnfilteredPartitionIterators$Serializer.serialize:339 [DataOutputBuffer.expandToFit:178 < DataOutputBuffer.doFlush:138 < ReadResponse$LocalDataResponse.build:201 < ReadResponse$LocalDataResponse.<init>:186]
+                        chain: UnfilteredPartitions > InMemoryUnfilteredPartitionIterator > TreeMap$EntryIterator > TreeMap > TreeMap$Entry > TreeSet > TreeMap > TreeMap$Entry > RowWithSource > BTreeRow > Object;[] > ArrayCell
+     14.8 MiB    126 value  | root: frame UnfilteredPartitionIterators$Serializer.serialize:339 [DataOutputBuffer.expandToFit:180 < DataOutputBuffer.doFlush:138 < ReadResponse$LocalDataResponse.build:201 < ReadResponse$LocalDataResponse.<init>:186]
+                        chain: UnfilteredPartitions > InMemoryUnfilteredPartitionIterator > TreeMap$EntryIterator > TreeMap$Entry > TreeSet > TreeMap > TreeMap$Entry > RowWithSource > BTreeRow > Object;[] > ArrayCell
+      7.4 MiB     63 value  | root: frame TreeMap.put:550 [VectorTopKProcessor.processSingleRowPartition:200 < VectorTopKProcessor.takeTopKThenSortByPrimaryKey:179 < StorageAttachedIndexSearcher.search:148 < ReadCommand.executeLocally:452]
+                        chain: TreeMap$Entry > TreeSet > TreeMap > TreeMap$Entry > RowWithSource > BTreeRow > Object;[] > ArrayCell
+      0.4 MiB      4 value  | root: sticky
+                        chain: static ZipFile$Source > HashMap > HashMap$Node;[] > HashMap$Node > ZipFile$Source
+      0.2 MiB      2 value  | root: frame BTree.applyLeaf:1773 [ReadResponse$LocalDataResponse.build:201 < ReadResponse$LocalDataResponse.<init>:186 < ReadCommandVerbHandler.doVerb:95 < InboundMessageHandler$ProcessMessage.run:430]
+                        chain: Object;[] > ArrayCell
+      0.2 MiB      2 value  | root: frame UnfilteredSerializer.readSimpleColumn:652 [Cell$Serializer.deserialize:337 < UnfilteredSerializer.lambda$deserializeRowBody$2:617 < UnfilteredSerializer.deserializeRowBody:613 < StorageAttachedIndexSearcher$ScoreOrderedResultRetriever.readAndValidatePartition:771]
+                        chain: BTreeRow$Builder > BTree$Builder > Object;[] > ArrayCell
+      0.1 MiB      1 value  | root: frame BufferedDataOutputStreamPlus.write:112 [DataOutputBuffer.expandToFit:178 < DataOutputBuffer.doFlush:138 < ReadResponse$LocalDataResponse.build:201 < ReadResponse$LocalDataResponse.<init>:186]
+                        chain: 
+      0.1 MiB      1 value  | root: frame BufferedDataOutputStreamPlus.write:112 [DataOutputBuffer.expandToFit:180 < DataOutputBuffer.doFlush:138 < ReadResponse$LocalDataResponse.build:201 < ReadResponse$LocalDataResponse.<init>:186]
+                        chain: 
+      0.1 MiB      1 value  | root: frame BaseRows.hasNext:141 [ReadResponse$LocalDataResponse.build:201 < ReadResponse$LocalDataResponse.<init>:186 < ReadCommandVerbHandler.doVerb:95 < InboundMessageHandler$ProcessMessage.run:430]
+                        chain: UnfilteredRows > InMemoryUnfilteredPartitionIterator$InMemoryUnfilteredRowIterator > TreeMap$KeyIterator > TreeMap$Entry > RowWithSource > BTreeRow > Object;[] > ArrayCell
+      0.1 MiB      1 value  | root: frame VectorTopKProcessor.processSingleRowPartition:200 [VectorTopKProcessor.processSingleRowPartition:200 < VectorTopKProcessor.takeTopKThenSortByPrimaryKey:179 < StorageAttachedIndexSearcher.search:148 < ReadCommand.executeLocally:452]
+                        chain: StorageAttachedIndexSearcher$SinglePartitionIterator > RowWithSource > BTreeRow > Object;[] > ArrayCell
+      0.1 MiB      1 value  | root: frame BTreeRow$Builder.build:933 [UnfilteredSerializer.deserializeRowBody:635 < UnfilteredSerializer.deserializeOne:482 < UnfilteredSerializer.deserialize:438 < VectorTopKProcessor.consumeSortByScoreAndTakeTopK:95]
+                        chain: BTreeRow$Builder > BTree$Builder > Object;[] > ArrayCell

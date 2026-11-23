@@ -1,0 +1,22 @@
+--- a/src/java/org/apache/cassandra/cql3/statements/ModificationStatement.java
++++ b/src/java/org/apache/cassandra/cql3/statements/ModificationStatement.java
+@@ -571,6 +571,7 @@
+                     type.isUpdate()? "updates" : "deletions");
+ 
+         Clustering<?> clustering = Iterables.getOnlyElement(createClustering(options, clientState));
++        clustering.validate(); // U15 intervention: same check as the row path (:815)
+         CQL3CasRequest request = new CQL3CasRequest(metadata(), key, conditionColumns(), updatesRegularRows(), updatesStaticRow());
+ 
+         addConditions(clustering, request, options);
+@@ -762,6 +763,11 @@
+         if (hasSlices())
+         {
+             Slices slices = createSlices(options);
++            for (Slice slice : slices) // U15 intervention: validate slice bounds like clusterings (:815)
++            {
++                slice.start().validate();
++                slice.end().validate();
++            }
+ 
+             // If all the ranges were invalid we do not need to do anything.
+             if (slices.isEmpty())

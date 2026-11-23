@@ -1,0 +1,22 @@
+SUMMARY secs=134 ok=54 err_readfail=0 err_timeout=2 err_invalid=1 err_other=0 inflight_left=0 rows=53010 vbytes=6513868800
+== one:T:10:100:1:0
+  T limit=10 fetch=100: n=1 ok=1 errs={} ms=[517] rows=[10] pages=[1] warns=[0] vbytes_ok=1 MiB | no samples
+== one:T:1000:100:1:0
+  T limit=1000 fetch=100: n=1 ok=1 errs={} ms=[4930] rows=[1000] pages=[1] warns=[1] vbytes_ok=117 MiB | heap max 5326 MiB, old-postGC max 62 MiB, NTR act max 1, RS act max 1, direct max 172 MiB, lm pending max 117 MiB, lm completed +117 MiB, lm overload drops +0
+     warn: Top-K queries do not support paging and the page size is set to 100, which is less than LIMIT 1000. The page size has been set to 1000 to match the LIMIT.
+== one:T:1001:100:1:0
+  T limit=1001 fetch=100: n=1 ok=0 errs={'InvalidQueryException': 1} ms=[19] rows=[] pages=[] warns=[] vbytes_ok=0 MiB | heap max 5326 MiB, old-postGC max 62 MiB, NTR act max 0, RS act max 0, direct max 171 MiB, lm pending max 0 MiB, lm completed +0 MiB, lm overload drops +0
+     err: InvalidQueryException: Use of ANN OF in an ORDER BY clause requires a LIMIT that is not greater than 1000. LIMIT was 1001
+== one:M:1000:100:1:0
+  M limit=1000 fetch=100: n=1 ok=1 errs={} ms=[1225] rows=[1000] pages=[10] warns=[0] vbytes_ok=117 MiB | heap max 5774 MiB, old-postGC max 62 MiB, NTR act max 1, RS act max 0, direct max 171 MiB, lm pending max 0 MiB, lm completed +0 MiB, lm overload drops +0
+== idle:5000
+== one:T:1000:100:5:10000
+  T limit=1000 fetch=100: n=5 ok=5 errs={} ms=[4023, 3849, 3425, 3296, 3293] rows=[1000] pages=[1] warns=[1] vbytes_ok=586 MiB | heap max 3324 MiB, old-postGC max 62 MiB, NTR act max 1, RS act max 1, direct max 261 MiB, lm pending max 117 MiB, lm completed +586 MiB, lm overload drops +0
+     warn: Top-K queries do not support paging and the page size is set to 100, which is less than LIMIT 1000. The page size has been set to 1000 to match the LIMIT.
+== run:T:1000:100:2/30,4/30
+  T limit=1000 fetch=100: n=48 ok=46 errs={'ReadTimeoutException': 2} ms=(780, 4374, 4657) rows=[1000] pages=[1] warns=[1] vbytes_ok=5391 MiB | heap max 7950 MiB, old-postGC max 62 MiB, NTR act max 3, RS act max 2, direct max 260 MiB, lm pending max 117 MiB, lm completed +5395 MiB, lm overload drops +1
+     err: ReadTimeoutException: Cassandra timeout during read query at consistency ONE (1 responses were required but only 0 replica responded). In case this was generated during read repair, the consistency level is not representat
+     err: ReadTimeoutException: Cassandra timeout during read query at consistency ONE (1 responses were required but only 0 replica responded). In case this was generated during read repair, the consistency level is not representat
+     warn: Top-K queries do not support paging and the page size is set to 100, which is less than LIMIT 1000. The page size has been set to 1000 to match the LIMIT.
+  run c=2: 30 s ok=16 q/s=0.53 value MiB/s=62.5 step errs(rf,to,inv,oth)=[0, 1, 1, 0] inflight med=2 | heap max 7932 MiB, old-postGC max 62 MiB, NTR act max 2, RS act max 1, direct max 257 MiB, lm pending max 117 MiB, lm completed +1994 MiB, lm overload drops +0
+  run c=4: 30 s ok=26 q/s=0.87 value MiB/s=101.6 step errs(rf,to,inv,oth)=[0, 1, 0, 0] inflight med=4 | heap max 7950 MiB, old-postGC max 62 MiB, NTR act max 3, RS act max 2, direct max 260 MiB, lm pending max 117 MiB, lm completed +3049 MiB, lm overload drops +0

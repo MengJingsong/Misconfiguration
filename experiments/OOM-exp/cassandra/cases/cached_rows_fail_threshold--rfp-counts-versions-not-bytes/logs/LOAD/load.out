@@ -1,0 +1,56 @@
+24K	/mydata/s4/b22/n1 24K	/mydata/s4/b22/n2 
+[2026-11-21 08:19:57 EST] started LOAD n1 pid 352366 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b22-LOAD-n1-1795267196.scope
+[2026-11-21 08:20:37 EST] ready LOAD n1
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms8G -Xmx8G -XX:MaxDirectMemorySize=15872M -javaagent:/mydata/s4/b22/tree/bin/../lib/jamm-0.4.0.jar -XX:HeapDumpPath=/mydata/s4/b22/runs/LOAD/n1/cassandra-1795267196-pid352366.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-21 08:20:38 EST] started LOAD n2 pid 352904 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b22-LOAD-n2-1795267237.scope
+[2026-11-21 08:21:16 EST] ready LOAD n2
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms16G -Xmx16G -XX:MaxDirectMemorySize=15872M -javaagent:/mydata/s4/b22/tree/bin/../lib/jamm-0.4.0.jar -XX:HeapDumpPath=/mydata/s4/b22/runs/LOAD/n2/cassandra-1795267237-pid352904.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-21 08:21:18 EST] ring: 2 UN in node 1's view
+13:21:19 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+schema ok, agreement=true
+load ok table=wide rows=6000 size=20480 errors=0
+
+real	0m6.140s
+user	0m13.581s
+sys	0m1.084s
+load ok table=small rows=6000 size=2048 errors=0
+
+real	0m5.584s
+user	0m12.273s
+sys	0m0.810s
+== n1
+		Table: small
+		SSTable count: 1
+		Old SSTable count: 0
+		Space used (live): 12469776
+		Number of partitions (estimate): 1
+		Compacted partition maximum bytes: 14530764
+		Table: wide
+		SSTable count: 1
+		Old SSTable count: 0
+		Space used (live): 123668779
+		Number of partitions (estimate): 1
+		Compacted partition maximum bytes: 129557750
+== n2
+		Table: small
+		SSTable count: 1
+		Old SSTable count: 0
+		Space used (live): 12469776
+		Number of partitions (estimate): 1
+		Compacted partition maximum bytes: 14530764
+		Table: wide
+		SSTable count: 1
+		Old SSTable count: 0
+		Space used (live): 123668779
+		Number of partitions (estimate): 1
+		Compacted partition maximum bytes: 129557750
+count wide CL ALL = 6000
+count small CL ALL = 6000
+n1 hints: 0
+n2 hints: 0
+[2026-11-21 08:22:05 EST] stopped LOAD n1
+[2026-11-21 08:22:14 EST] stopped LOAD n2
+/mydata/s4/b22/runs/LOAD/n1/logs/system.log:1
+/mydata/s4/b22/runs/LOAD/n2/logs/system.log:1
+132M	/mydata/s4/b22/template-n1
+132M	/mydata/s4/b22/template-n2

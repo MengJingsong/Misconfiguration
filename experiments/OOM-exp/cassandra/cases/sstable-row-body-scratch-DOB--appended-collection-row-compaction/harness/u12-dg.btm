@@ -1,0 +1,32 @@
+# U12 arm Dg (diagnostic, optional; design §2.6 Dg): exact growth sequence of the thread-local scratch DataOutputBuffer.
+# Template: phase-1 dob-ledger.btm. No behaviour change. Output file: -Du12.dg.out. Only buffers >= 1 MiB are logged.
+#   req   size=<requested bytes>            DataOutputBuffer$1$1.allocate(int) ENTRY (logged even when the allocation throws)
+#   grow  old=<capacity> new=<capacity>     DataOutputBuffer.expandToFit AT INVOKE setBuffer (both buffers live here)
+#   close cap=<capacity>                    DataOutputBuffer$1$1.close ENTRY
+
+RULE u12 req
+CLASS org.apache.cassandra.io.util.DataOutputBuffer$1$1
+METHOD allocate(int)
+AT ENTRY
+IF $1 >= 1048576
+DO traceOpen("u12", java.lang.System.getProperty("u12.dg.out", "dg.txt"));
+   traceln("u12", "req name=" + java.lang.Thread.currentThread().getName() + " size=" + $1 + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE u12 grow
+CLASS org.apache.cassandra.io.util.DataOutputBuffer
+METHOD expandToFit
+AT INVOKE setBuffer
+IF $0.getClass().getName().endsWith("DataOutputBuffer$1$1") && $0.buffer.capacity() >= 1048576
+DO traceOpen("u12", java.lang.System.getProperty("u12.dg.out", "dg.txt"));
+   traceln("u12", "grow name=" + java.lang.Thread.currentThread().getName() + " old=" + $0.buffer.capacity() + " new=" + $1.capacity() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE u12 close
+CLASS org.apache.cassandra.io.util.DataOutputBuffer$1$1
+METHOD close
+AT ENTRY
+IF $0.buffer != null && $0.buffer.capacity() >= 1048576
+DO traceOpen("u12", java.lang.System.getProperty("u12.dg.out", "dg.txt"));
+   traceln("u12", "close name=" + java.lang.Thread.currentThread().getName() + " cap=" + $0.buffer.capacity() + " pos=" + $0.buffer.position() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

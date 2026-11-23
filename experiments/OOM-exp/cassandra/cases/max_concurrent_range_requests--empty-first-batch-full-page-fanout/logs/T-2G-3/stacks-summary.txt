@@ -1,0 +1,17 @@
+request threads in awaitResults: 3
+--- thread serial 59, 41 frames
+  jdk.internal.misc.Unsafe.park(Unsafe.java:-3)
+  java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:357)
+  org.apache.cassandra.utils.concurrent.WaitQueue$Standard$AbstractSignal.awaitUntil(WaitQueue.java:351)
+  org.apache.cassandra.utils.concurrent.Awaitable$AsyncAwaitable.awaitUntil(Awaitable.java:314)
+  org.apache.cassandra.utils.concurrent.Awaitable$AsyncAwaitable.awaitUntil(Awaitable.java:346)
+  org.apache.cassandra.service.reads.ReadCallback.awaitUntil(ReadCallback.java:120)
+  org.apache.cassandra.service.reads.ReadCallback.await(ReadCallback.java:100)
+  org.apache.cassandra.service.reads.ReadCallback.awaitResults(ReadCallback.java:130)
+  org.apache.cassandra.service.reads.range.SingleRangeResponse.waitForResponse(SingleRangeResponse.java:58)
+  org.apache.cassandra.service.reads.range.SingleRangeResponse.computeNext(SingleRangeResponse.java:65)
+  org.apache.cassandra.service.reads.range.SingleRangeResponse.computeNext(SingleRangeResponse.java:31)
+  org.apache.cassandra.utils.AbstractIterator.hasNext(AbstractIterator.java:47)
+  org.apache.cassandra.db.transform.BaseIterator.tryGetMoreContents(BaseIterator.java:165)
+  org.apache.cassandra.db.transform.BaseIterator.hasMoreContents(BaseIterator.java:132)
+--- thread serial 62, 41 frames

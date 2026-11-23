@@ -1,0 +1,61 @@
+1795267360.002 08:22:40 start label=K1 n1heap=2G arm=T N=200000 size=64000 threads=200 extra=0 n1home=/mydata/s4/cassandra-base
+               total        used        free      shared  buff/cache   available
+Mem:          128850         874      124876           4        3099      127020
+Swap:           8192           0        8192
+Filesystem                   1M-blocks  Used Available Use% Mounted on
+tmpfs                            64426     0     64426   0% /dev/shm
+/dev/mapper/emulab-node3--bs    770477   841    730427   1% /mydata
+1795267378.417 08:22:58 n2 native up=1 pid=142024
+1795267439.473 08:23:59 n3 native up=1 pid=142420
+1795267500.581 08:25:00 n1 native up=1 pid=143256
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address     Load        Tokens  Owns (effective)  Host ID                               Rack 
+UN  127.0.0.31  79.71 KiB   1       0.0%              7d5b50ad-f98d-4df7-b129-a34db3f3fd38  rack1
+UN  127.0.0.32  119.47 KiB  1       100.0%            39e80eac-c3c8-4675-bd76-c1b73985c039  rack1
+UN  127.0.0.33  79.71 KiB   1       100.0%            07425ae6-5c39-4dc7-9b61-1202738741f6  rack1
+
+-XX:+UseG1GC -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/b23/K1/dump/cassandra-1795267439-pid143256.hprof 
+G1HeapRegionSize=16777216 MaxDirectMemorySize=16642998272 MaxHeapSize=2147483648 ParallelGCThreads=40 
+0::/user.slice/user-20001.slice/user@20001.service/app.slice/run-r8d7ff1d351bc42648243392e1ef995a7.scope
+1795267502.436 08:25:02 schema: stress write n=1000
+type                                               total ops,    op/s,    pk/s,   row/s,    mean,     med,     .95,     .99,    .999,     max,   time,   stderr, errors,  gc: #,  max ms,  sum ms,  sdv ms,      mb
+Op rate                   :    1,142 op/s  [WRITE: 1,142 op/s]
+Total partitions          :      1,000 [WRITE: 1,000]
+Total errors              :          0 [WRITE: 0]
+1795267512.978 08:25:12 stopping n3 (nodetool stopdaemon)
+Cassandra has shutdown.
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address     Load        Tokens  Owns (effective)  Host ID                               Rack 
+UN  127.0.0.31  114.51 KiB  1       0.0%              7d5b50ad-f98d-4df7-b129-a34db3f3fd38  rack1
+UN  127.0.0.32  119.47 KiB  1       100.0%            39e80eac-c3c8-4675-bd76-c1b73985c039  rack1
+DN  127.0.0.33  114.51 KiB  1       100.0%            07425ae6-5c39-4dc7-9b61-1202738741f6  rack1
+
+1795267527.207 08:25:27 n1 hints dir before load: 4096 B, files 0
+1795267530.224 08:25:30 MaxHintsInProgress: MaxHintsInProgress=5120
+1795267530.229 08:25:30 load start N=200000
+1795267530.737 08:25:30 stress pids 145386
+1795267541.419 08:25:41 jstack at L+10 K=8534
+1795267542.036 08:25:42 histogram at L+10 K=8534
+1795267542.068 08:25:42 L+10 K=8534 pending=11863 old=1512333992 unavail=0 wr_done=33490
+1795267550.251 08:25:50 L+20 K=15165 pending=15133 old=2044030336 unavail=0 wr_done=43065
+1795267560.472 08:26:00 L+30 K=15165 pending=15133 old=2044030336 unavail=0 wr_done=43065
+1795267570.697 08:26:10 L+40 K=15165 pending=15133 old=2044030336 unavail=0 wr_done=43065
+1795267580.900 08:26:20 L+50 K=15165 pending=15133 old=2044030336 unavail=0 wr_done=43065
+1795267590.104 08:26:30 L+60 K=15165 pending=15133 old=2044030336 unavail=0 wr_done=43065
+1795267600.321 08:26:40 L+70 K=15165 pending=15133 old=2044030336 unavail=0 wr_done=43065
+1795267610.531 08:26:50 L+80 K=15165 pending=15133 old=2044030336 unavail=0 wr_done=43065
+1795267620.701 08:27:00 stop: n1 death at L+90 valid=1
+1795267633.732 08:27:13 all nodes stopped
+1795267633.768 08:27:13 OOM lines: 2; first: /mydata/s4/b23/K1/n1/logs/stdout.txt:421:java.lang.OutOfMemoryError: Java heap space
+1795267633.783 08:27:13 n1 hints dir at end: 1634378821 B; n1 data 354863 B; shm 2837208891 B
+total 2120532
+drwxr-xr-x 2 jason92 misconfiguration       4096 Nov 21 06:25 .
+drwxr-xr-x 8 jason92 misconfiguration       4096 Nov 21 06:25 ..
+-rw------- 1 jason92 misconfiguration 2171411606 Nov 21 06:26 cassandra-1795267439-pid143256.hprof
+1795267634.076 08:27:14 done alive=0 why=n1 death at L+90 valid=1

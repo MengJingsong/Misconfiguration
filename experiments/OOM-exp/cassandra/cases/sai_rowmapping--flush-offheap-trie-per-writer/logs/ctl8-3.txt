@@ -1,0 +1,50 @@
+### ctl8-3 (full logs: ms0617:/mydata/s4/u13/ctl8-3/logs, NMT: /mydata/s4/u13/ctl8-3/nmt)
+--- analyze.py
+resolved MaxDirectMemorySize=1024 MiB MaxHeapSize=8192 MiB
+load {"why":"stopfile","batches_issued":273866,"batches_ok":273847,"rows_ok":2738470,"errors":19,"write_timeouts":19,"elapsed_s":117.563,"rows_per_s":23293.638304568613,"last_error":"com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)"}
+u13.t flushes: 8 started, 8 completed
+  start 13:52:08.7 PerDiskMemtableFlushWriter_0:2   374.108MiB serialized  365590 rows on-heap 684.130MiB
+  start 13:52:22.8 PerDiskMemtableFlushWriter_0:1   377.690MiB serialized  369090 rows on-heap 682.896MiB
+  start 13:52:37.2 PerDiskMemtableFlushWriter_0:2   358.319MiB serialized  350160 rows on-heap 682.802MiB
+  start 13:52:49.6 PerDiskMemtableFlushWriter_0:1   379.348MiB serialized  370710 rows on-heap 682.733MiB
+  start 13:53:03.0 PerDiskMemtableFlushWriter_0:2   409.883MiB serialized  400550 rows on-heap 682.833MiB
+  start 13:53:21.1 PerDiskMemtableFlushWriter_0:1   399.169MiB serialized  390080 rows on-heap 682.815MiB
+  start 13:53:36.2 PerDiskMemtableFlushWriter_0:2   354.594MiB serialized  346520 rows on-heap 682.735MiB
+  start 13:53:55.5 PerDiskMemtableFlushWriter_0:2   149.361MiB serialized  145960 rows on-heap 288.034MiB
+  done  13:52:21.9 PerDiskMemtableFlushWriter_0:2
+  done  13:52:35.0 PerDiskMemtableFlushWriter_0:1
+  done  13:52:47.5 PerDiskMemtableFlushWriter_0:2
+  done  13:53:00.9 PerDiskMemtableFlushWriter_0:1
+  done  13:53:20.0 PerDiskMemtableFlushWriter_0:2
+  done  13:53:36.4 PerDiskMemtableFlushWriter_0:1
+  done  13:53:48.4 PerDiskMemtableFlushWriter_0:2
+  done  13:53:58.7 PerDiskMemtableFlushWriter_0:2
+B0 (direct_used just before first u13.t flush) = 44.4 MiB
+peak direct_used = 117.9 MiB at 13:53:08.6 (count 266); last sample 13:53:44.6 94.3 MiB
+  step 13:52:18.1     +8.0 MiB ->    60.5 MiB count 194  t_onheap 448 MiB sw 2 pend 1 old_n 0
+  step 13:52:44.5     +8.0 MiB ->    92.7 MiB count 225  t_onheap 453 MiB sw 4 pend 1 old_n 0
+  step 13:52:57.4     +8.0 MiB ->   108.7 MiB count 241  t_onheap 457 MiB sw 5 pend 1 old_n 0
+  step 13:53:12.4    -63.8 MiB ->    54.2 MiB count 205  t_onheap 382 MiB sw 6 pend 1 old_n 1
+  step 13:53:14.4     +8.0 MiB ->    62.2 MiB count 206  t_onheap 477 MiB sw 6 pend 1 old_n 1
+  step 13:53:32.0     +8.0 MiB ->    78.3 MiB count 223  t_onheap 435 MiB sw 7 pend 2 old_n 2
+  step 13:53:42.4     +8.0 MiB ->    94.3 MiB count 239  t_onheap 288 MiB sw 8 pend 2 old_n 2
+heap_used max 8012 MiB; old GCs 2
+NMT Other max committed = 285 MiB at 13:53:02.5
+System.gc() full GCs: 0
+stdout OOM lines: 1 ['CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V\n']
+no OutOfMemoryError in system.log
+--- driver.log
+1795269033.244 08:50:33 start label=ctl8-3 heap=8G direct=1G arm=CTL maxload=720
+1795269085.863 08:51:25 native up=1 pid=302167
+-XX:NativeMemoryTracking=summary -Xms8G -Xmx8G -XX:MaxDirectMemorySize=1G -XX:HeapDumpPath=/mydata/s4/u13/dump-ctl8-3/cassandra-1795269033-pid302167.hprof 
+ConcGCThreads=8 MaxDirectMemorySize=1073741824 MaxHeapSize=8589934592 ParallelGCThreads=8 
+index t t_v {class_name=sai, target=v}
+1795269100.279 08:51:40 load started pid=302854
+1795269220.544 08:53:40 load stop: 6 flushes after 120 s (oom_at=)
+{"why":"stopfile","batches_issued":273866,"batches_ok":273847,"rows_ok":2738470,"errors":19,"write_timeouts":19,"elapsed_s":117.563,"rows_per_s":23293.638304568613,"last_error":"com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)"}
+1795269243.642 08:54:03 node stopped
+2.7G	/mydata/s4/u13/ctl8-3/data
+8.0K	/mydata/s4/u13/ctl8-3/commitlog
+1795269244.623 08:54:04 done why=6 flushes oom_at=
+--- vmflags
+MaxDirectMemorySize=1073741824 MaxHeapSize=8589934592 

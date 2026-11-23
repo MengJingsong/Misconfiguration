@@ -1,0 +1,60 @@
+1795269383.798 08:56:23 start label=I1 n1heap=2G arm=I N=200000 size=64000 threads=200 extra=0 n1home=/mydata/s4/b23/cassandra-fix
+               total        used        free      shared  buff/cache   available
+Mem:          128850         832      122489           4        5529      127043
+Swap:           8192           0        8192
+Filesystem                   1M-blocks  Used Available Use% Mounted on
+tmpfs                            64426     0     64426   0% /dev/shm
+/dev/mapper/emulab-node3--bs    770477  3202    728066   1% /mydata
+1795269403.120 08:56:43 n2 native up=1 pid=190086
+1795269464.900 08:57:44 n3 native up=1 pid=190473
+1795269526.003 08:58:46 n1 native up=1 pid=191402
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address     Load        Tokens  Owns (effective)  Host ID                               Rack 
+UN  127.0.0.31  79.7 KiB    1       0.0%              91195673-4eff-4585-a542-2e846452e44d  rack1
+UN  127.0.0.32  119.47 KiB  1       100.0%            ebadc9a1-55ef-4fe9-ae7c-d7e4466bc64d  rack1
+UN  127.0.0.33  79.7 KiB    1       100.0%            e94f0adb-61a1-4ad9-9e39-d7f27fd3ab8b  rack1
+
+-XX:+UseG1GC -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/b23/I1/dump/cassandra-1795269465-pid191402.hprof 
+G1HeapRegionSize=16777216 MaxDirectMemorySize=16642998272 MaxHeapSize=2147483648 ParallelGCThreads=40 
+0::/user.slice/user-20001.slice/user@20001.service/app.slice/run-rfebb14f86b364302839310997c793ef1.scope
+1795269527.859 08:58:47 schema: stress write n=1000
+type                                               total ops,    op/s,    pk/s,   row/s,    mean,     med,     .95,     .99,    .999,     max,   time,   stderr, errors,  gc: #,  max ms,  sum ms,  sdv ms,      mb
+Op rate                   :    2,876 op/s  [WRITE: 2,876 op/s]
+Total partitions          :      1,000 [WRITE: 1,000]
+Total errors              :          0 [WRITE: 0]
+1795269538.442 08:58:58 stopping n3 (nodetool stopdaemon)
+Cassandra has shutdown.
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address     Load        Tokens  Owns (effective)  Host ID                               Rack 
+UN  127.0.0.31  114.5 KiB   1       0.0%              91195673-4eff-4585-a542-2e846452e44d  rack1
+UN  127.0.0.32  119.47 KiB  1       100.0%            ebadc9a1-55ef-4fe9-ae7c-d7e4466bc64d  rack1
+DN  127.0.0.33  114.49 KiB  1       100.0%            e94f0adb-61a1-4ad9-9e39-d7f27fd3ab8b  rack1
+
+1795269552.700 08:59:12 n1 hints dir before load: 4096 B, files 0
+1795269555.719 08:59:15 MaxHintsInProgress: MaxHintsInProgress=5120
+1795269555.724 08:59:15 load start N=200000
+1795269556.231 08:59:16 stress pids 193747
+1795269565.464 08:59:25 L+10 K=4368 pending=4294 old=360524792 unavail=0 wr_done=20701
+1795269575.667 08:59:35 L+20 K=5121 pending=5081 old=757275640 unavail=77892 wr_done=123930
+1795269585.894 08:59:45 L+30 K=5121 pending=5089 old=1796850760 unavail=165541 wr_done=234154
+1795269589.968 08:59:49 stress done at L+34 K=0
+1795269595.098 08:59:55 L+40 K=0 pending=0 old=755158200 unavail=178208 wr_done=251250
+1795269605.330 09:00:05 L+50 K=0 pending=0 old=755158200 unavail=178208 wr_done=251250
+1795269615.551 09:00:15 L+60 K=0 pending=0 old=755158200 unavail=178208 wr_done=251250
+1795269625.768 09:00:25 L+70 K=0 pending=0 old=755158200 unavail=178208 wr_done=251250
+1795269635.985 09:00:35 L+80 K=0 pending=0 old=755158200 unavail=178208 wr_done=251250
+1795269645.189 09:00:45 L+90 K=0 pending=0 old=755158200 unavail=178208 wr_done=251250
+1795269649.269 09:00:49 stop: stress done + 60 s valid=1
+1795269669.307 09:01:09 all nodes stopped
+1795269669.343 09:01:09 OOM lines: 0; first: 
+1795269669.358 09:01:09 n1 hints dir at end: 4599942851 B; n1 data 399647 B; shm 4333750051 B
+total 8
+drwxr-xr-x 2 jason92 misconfiguration 4096 Nov 21 06:56 .
+drwxr-xr-x 8 jason92 misconfiguration 4096 Nov 21 06:59 ..
+1795269669.882 09:01:09 done alive=1 why=stress done + 60 s valid=1

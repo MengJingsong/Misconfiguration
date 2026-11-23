@@ -1,0 +1,23 @@
+--- cassandra/src/java/org/apache/cassandra/db/rows/UnfilteredSerializer.java	2026-11-04 09:32:02.000000000 -0700
++++ cassandra-patched/src/java/org/apache/cassandra/db/rows/UnfilteredSerializer.java	2026-11-21 06:14:45.640775256 -0700
+@@ -192,16 +192,10 @@
+ 
+         if (header.isForSSTable())
+         {
+-            try (DataOutputBuffer dob = DataOutputBuffer.scratchBuffer.get())
+-            {
+-                serializeRowBody(row, flags, helper, dob);
+-
+-                out.writeUnsignedVInt(dob.position() + TypeSizes.sizeofUnsignedVInt(previousUnfilteredSize));
+-                // We write the size of the previous unfiltered to make reverse queries more efficient (and simpler).
+-                // This is currently not used however and using it is tbd.
+-                out.writeUnsignedVInt(previousUnfilteredSize);
+-                out.write(dob.unsafeGetBufferAndFlip());
+-            }
++            // U12 intervention: no whole-row scratch copy; size computed up front (as for markers, :289-293)
++            out.writeUnsignedVInt(serializedRowBodySize(row, helper, previousUnfilteredSize, version));
++            out.writeUnsignedVInt(previousUnfilteredSize);
++            serializeRowBody(row, flags, helper, out);
+         }
+         else
+         {

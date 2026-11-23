@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Client JVM on cores 6-7: cli.sh [-Dprop=..] <mode> ...
+exec taskset -c 6-7 java -Xmx2g ${JOPTS:-} -cp /mydata/s4/cassandra-base/lib/lz4-java-1.10.1.jar:/mydata/s4/B19/cls2 B19Client "$@"

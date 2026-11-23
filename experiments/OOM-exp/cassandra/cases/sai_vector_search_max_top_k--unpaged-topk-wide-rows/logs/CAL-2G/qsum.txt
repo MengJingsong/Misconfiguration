@@ -1,0 +1,18 @@
+HOSTGONE
+SUMMARY secs=312 ok=169 err_readfail=0 err_timeout=283 err_invalid=0 err_other=18 inflight_left=0 rows=169000 vbytes=20766720000
+== one:T:1000:100:3:0
+  T limit=1000 fetch=100: n=3 ok=3 errs={} ms=[5651, 4303, 3876] rows=[1000] pages=[1] warns=[1] vbytes_ok=352 MiB | heap max 1790 MiB, old-postGC max 62 MiB, NTR act max 1, RS act max 1, direct max 171 MiB, lm pending max 117 MiB, lm completed +352 MiB, lm overload drops +1
+     warn: Top-K queries do not support paging and the page size is set to 100, which is less than LIMIT 1000. The page size has been set to 1000 to match the LIMIT.
+== run:T:1000:100:1/30,2/45,3/45,4/45,6/45,8/45,12/45,16/45
+  T limit=1000 fetch=100: n=467 ok=166 errs={'ReadTimeoutException': 283, 'TransportException': 12, 'NoHostAvailableException': 6} ms=(3, 3378, 17764) rows=[1000] pages=[1] warns=[1] vbytes_ok=19453 MiB | heap max 1987 MiB, old-postGC max 1787 MiB, NTR act max 12, RS act max 11, direct max 263 MiB, lm pending max 117 MiB, lm completed +19585 MiB, lm overload drops +283
+     err: ReadTimeoutException: Cassandra timeout during read query at consistency ONE (1 responses were required but only 0 replica responded). In case this was generated during read repair, the consistency level is not representat
+     err: ReadTimeoutException: Cassandra timeout during read query at consistency ONE (1 responses were required but only 0 replica responded). In case this was generated during read repair, the consistency level is not representat
+     err: ReadTimeoutException: Cassandra timeout during read query at consistency ONE (1 responses were required but only 0 replica responded). In case this was generated during read repair, the consistency level is not representat
+     warn: Top-K queries do not support paging and the page size is set to 100, which is less than LIMIT 1000. The page size has been set to 1000 to match the LIMIT.
+  run c=1: 30 s ok=8 q/s=0.27 value MiB/s=31.2 step errs(rf,to,inv,oth)=[0, 0, 0, 0] inflight med=1 | heap max 1931 MiB, old-postGC max 1278 MiB, NTR act max 1, RS act max 1, direct max 256 MiB, lm pending max 117 MiB, lm completed +1055 MiB, lm overload drops +0
+  run c=2: 45 s ok=25 q/s=0.56 value MiB/s=65.1 step errs(rf,to,inv,oth)=[0, 1, 0, 0] inflight med=2 | heap max 1960 MiB, old-postGC max 1546 MiB, NTR act max 2, RS act max 1, direct max 263 MiB, lm pending max 117 MiB, lm completed +3049 MiB, lm overload drops +1
+  run c=3: 45 s ok=33 q/s=0.73 value MiB/s=85.9 step errs(rf,to,inv,oth)=[0, 0, 0, 0] inflight med=3 | heap max 1945 MiB, old-postGC max 1574 MiB, NTR act max 2, RS act max 1, direct max 203 MiB, lm pending max 117 MiB, lm completed +3987 MiB, lm overload drops +0
+  run c=4: 45 s ok=39 q/s=0.87 value MiB/s=101.6 step errs(rf,to,inv,oth)=[0, 2, 0, 0] inflight med=4 | heap max 1987 MiB, old-postGC max 1626 MiB, NTR act max 2, RS act max 1, direct max 262 MiB, lm pending max 117 MiB, lm completed +4574 MiB, lm overload drops +1
+  run c=6: 45 s ok=31 q/s=0.69 value MiB/s=80.7 step errs(rf,to,inv,oth)=[0, 75, 0, 0] inflight med=6 | heap max 1896 MiB, old-postGC max 1582 MiB, NTR act max 5, RS act max 4, direct max 261 MiB, lm pending max 117 MiB, lm completed +3636 MiB, lm overload drops +75
+  run c=8: 45 s ok=22 q/s=0.49 value MiB/s=57.3 step errs(rf,to,inv,oth)=[0, 122, 0, 0] inflight med=8 | heap max 1935 MiB, old-postGC max 1787 MiB, NTR act max 8, RS act max 7, direct max 257 MiB, lm pending max 117 MiB, lm completed +2346 MiB, lm overload drops +121
+  run c=12: 42 s ok=8 q/s=0.19 value MiB/s=22.3 step errs(rf,to,inv,oth)=[0, 83, 0, 18] inflight med=12 | heap max 1977 MiB, old-postGC max 1516 MiB, NTR act max 12, RS act max 11, direct max 255 MiB, lm pending max 117 MiB, lm completed +821 MiB, lm overload drops +82

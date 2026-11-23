@@ -1,0 +1,51 @@
+### ctl8-1 (full logs: ms0617:/mydata/s4/u13/ctl8-1/logs, NMT: /mydata/s4/u13/ctl8-1/nmt)
+--- analyze.py
+resolved MaxDirectMemorySize=1024 MiB MaxHeapSize=8192 MiB
+load {"why":"stopfile","batches_issued":263703,"batches_ok":263699,"rows_ok":2636990,"errors":4,"write_timeouts":4,"elapsed_s":119.852,"rows_per_s":22002.05253145546,"last_error":"com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)"}
+u13.t flushes: 8 started, 8 completed
+  start 13:31:17.5 PerDiskMemtableFlushWriter_0:2   381.333MiB serialized  372650 rows on-heap 684.194MiB
+  start 13:31:35.2 PerDiskMemtableFlushWriter_0:1   400.376MiB serialized  391260 rows on-heap 683.273MiB
+  start 13:31:50.7 PerDiskMemtableFlushWriter_0:2   363.793MiB serialized  355510 rows on-heap 682.840MiB
+  start 13:32:03.5 PerDiskMemtableFlushWriter_0:1   379.726MiB serialized  371080 rows on-heap 682.795MiB
+  start 13:32:15.9 PerDiskMemtableFlushWriter_0:2   372.737MiB serialized  364250 rows on-heap 682.815MiB
+  start 13:32:33.5 PerDiskMemtableFlushWriter_0:1   382.121MiB serialized  373420 rows on-heap 682.933MiB
+  start 13:32:46.7 PerDiskMemtableFlushWriter_0:2   370.087MiB serialized  361660 rows on-heap 682.745MiB
+  start 13:33:02.4 PerDiskMemtableFlushWriter_0:2    48.300MiB serialized   47200 rows on-heap 86.597MiB
+  done  13:31:32.0 PerDiskMemtableFlushWriter_0:2
+  done  13:31:48.3 PerDiskMemtableFlushWriter_0:1
+  done  13:32:01.1 PerDiskMemtableFlushWriter_0:2
+  done  13:32:13.9 PerDiskMemtableFlushWriter_0:1
+  done  13:32:31.0 PerDiskMemtableFlushWriter_0:2
+  done  13:32:44.6 PerDiskMemtableFlushWriter_0:1
+  done  13:32:57.8 PerDiskMemtableFlushWriter_0:2
+  done  13:33:03.3 PerDiskMemtableFlushWriter_0:2
+B0 (direct_used just before first u13.t flush) = 44.1 MiB
+peak direct_used = 118.1 MiB at 13:32:22.3 (count 269); last sample 13:32:55.3 78.2 MiB
+  step 13:31:27.3     +8.0 MiB ->    60.4 MiB count 191  t_onheap 335 MiB sw 2 pend 1 old_n 0
+  step 13:31:44.0     +8.0 MiB ->    76.6 MiB count 206  t_onheap 350 MiB sw 3 pend 2 old_n 0
+  step 13:31:57.9     +8.0 MiB ->    92.5 MiB count 221  t_onheap 453 MiB sw 4 pend 1 old_n 0
+  step 13:32:10.5     +8.0 MiB ->   108.5 MiB count 237  t_onheap 405 MiB sw 5 pend 1 old_n 0
+  step 13:32:26.4    -56.0 MiB ->    62.1 MiB count 200  t_onheap 441 MiB sw 6 pend 1 old_n 1
+  step 13:32:39.9     +8.0 MiB ->    78.2 MiB count 216  t_onheap 405 MiB sw 7 pend 1 old_n 1
+  step 13:32:47.4    -16.0 MiB ->    63.7 MiB count 223  t_onheap 87 MiB sw 8 pend 2 old_n 2
+  step 13:32:55.1     +8.0 MiB ->    78.2 MiB count 216  t_onheap 87 MiB sw 8 pend 1 old_n 2
+heap_used max 8160 MiB; old GCs 2
+NMT Other max committed = 289 MiB at 13:32:17.5
+System.gc() full GCs: 0
+stdout OOM lines: 1 ['CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V\n']
+no OutOfMemoryError in system.log
+--- driver.log
+1795267774.105 08:29:34 start label=ctl8-1 heap=8G direct=1G arm=CTL maxload=720
+1795267832.841 08:30:32 native up=1 pid=287397
+-XX:NativeMemoryTracking=summary -Xms8G -Xmx8G -XX:MaxDirectMemorySize=1G -XX:HeapDumpPath=/mydata/s4/u13/dump-ctl8-1/cassandra-1795267774-pid287397.hprof 
+ConcGCThreads=8 MaxDirectMemorySize=1073741824 MaxHeapSize=8589934592 ParallelGCThreads=8 
+index t t_v {class_name=sai, target=v}
+1795267847.570 08:30:47 load started pid=288060
+1795267967.371 08:32:47 load stop: 6 flushes after 120 s (oom_at=)
+{"why":"stopfile","batches_issued":263703,"batches_ok":263699,"rows_ok":2636990,"errors":4,"write_timeouts":4,"elapsed_s":119.852,"rows_per_s":22002.05253145546,"last_error":"com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)"}
+1795267987.469 08:33:07 node stopped
+2.6G	/mydata/s4/u13/ctl8-1/data
+8.0K	/mydata/s4/u13/ctl8-1/commitlog
+1795267988.461 08:33:08 done why=6 flushes oom_at=
+--- vmflags
+MaxDirectMemorySize=1073741824 MaxHeapSize=8589934592 

@@ -1,0 +1,38 @@
+[2026-11-21 08:57:12 EST] ARM CAL-8G arm=A heap=8G spec=run:T:1000:100:16/45,24/45,32/45,48/45,64/45 hist=0 noverify
+[2026-11-21 08:57:15 EST] started CAL-8G pid 445939 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b21-CAL-8G-1795269434.scope
+[2026-11-21 08:57:37 EST] ready CAL-8G
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms8G -Xmx8G -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/b21/runs/CAL-8G/cassandra-1795269435-pid445939.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-21 08:57:44 EST] GC.run CAL-8G
+1795269467,base,rssKB=8944728,rssAnonKB=8920644,scopeCurB=9175126016,scopeOomKill=0,1795269466103,132322080,65213216,65213216,0,0,-1,-1,-1,44391389,-1,-1,-1,-1,-1,-1,208,153
+[2026-11-21 08:57:47 EST] client pid 446411
+STEPEND c=16 ok=8 rf=0 to=137 inv=0 oth=0
+STEPEND c=24 ok=9 rf=0 to=355 inv=0 oth=0
+STEPEND c=32 ok=9 rf=0 to=590 inv=0 oth=0
+STEPEND c=48 ok=9 rf=0 to=840 inv=0 oth=0
+STEPEND c=64 ok=9 rf=0 to=1131 inv=0 oth=0
+SUMMARY secs=234 ok=9 err_readfail=0 err_timeout=1195 err_invalid=0 err_other=0 inflight_left=0 rows=9000 vbytes=1105920000
+	at com.datastax.driver.core.Cluster.connectAsync(Cluster.java:368)
+	at com.datastax.driver.core.Cluster.connect(Cluster.java:313)
+	at B21Load.main(B21Load.java:189)
+[2026-11-21 09:01:55 EST] GC.run CAL-8G
+[2026-11-21 09:01:58 EST] OOM/GC check
+CompileCommand: dontinline org/apache/cassandra/io/util/RebufferingInputStream.readPrimitiveSlowly(I)J
+CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.address()J
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.length()I
+CompileCommand: inline org/apache/cassandra/db/rows/UnfilteredSerializer.serializeRowBody(Lorg/apache/cassandra/db/rows/Row;ILorg/apache/cassandra/db/rows/SerializationHelper;Lorg/apache/cassandra/io/util/DataOutputPlus;)V
+CompileCommand: inline org/apache/cassandra/io/util/Memory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/SafeMemory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/TrackedDataInputPlus.checkCanRead(I)V
+CompileCommand: inline org/apache/cassandra/net/FrameDecoderWith8bHeader.decode(Ljava/util/Collection;Lorg/apache/cassandra/net/ShareableBytes;I)V
+CompileCommand: inline org/apache/cassandra/service/reads/repair/RowIteratorMergeListener.applyToPartition(ILjava/util/function/Consumer;)V
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.selectBoundary(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;II)I
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.strictnessOfLessThan(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;)I
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.indexes(Lorg/apache/cassandra/utils/IFilter/FilterKey;)[J
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.setIndexes(JJIJ[J)V
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare(Ljava/nio/ByteBuffer;[B)I
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare([BLjava/nio/ByteBuffer;)I
+pauses=554 full_gcs=47 total_pause=49s max60=26% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=none
+[2026-11-21 09:02:16 EST] stopped CAL-8G
+SURVIVED overload_drop_lines=8 oversized=0
+[2026-11-21 09:02:16 EST] END CAL-8G SURVIVED overload_drop_lines=8 oversized=0

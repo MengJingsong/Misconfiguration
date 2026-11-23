@@ -1,0 +1,18 @@
+=== C2-1
+label=C2-1 arm=C set=C heap=2G direct=1024M opt=
+pre_compactionstats: concurrent compactors            2            active=0
+baseline_histo_total: Total        691152       59859256
+trigger_epoch=1795268389.879531253
+endpoint_seconds=16.4
+outcome=COMPLETED
+trigger: rc=0 
+useful_ck1: {"cql": "SELECT count(*) FROM ks.t WHERE ck = 1", "rows": [["1"]], "seconds": 0.1}
+trace: TRACE [SecondaryIndexExecutor:1] 2026-11-21T13:39:53,447 SecondaryIndexManager.java:1172 - Calculated page size 32 for indexing ks.t (4.966933177E9/4768/4768/1041722.5622902685)
+syslog: INFO  [SecondaryIndexManagement:1] 2026-11-21T13:39:02,691 SecondaryIndexManager.java:1880 - Index [PaxosUncommittedIndex] became queryable after successful build.
+syslog: INFO  [SecondaryIndexManagement:1] 2026-11-21T13:39:53,441 CassandraIndex.java:704 - Submitting index build of t_ck for data in BigTableReader:big(path='/mydata/s4/b20/work/data/ks/t-8c678220e5ae11f1b871af1b910229f6/nb-8-big-Data.db')
+syslog: INFO  [SecondaryIndexManagement:1] 2026-11-21T13:40:05,952 CassandraIndex.java:716 - Index build of t_ck complete
+syslog: INFO  [SecondaryIndexManagement:1] 2026-11-21T13:40:05,953 SecondaryIndexManager.java:1880 - Index [t_ck] became queryable after successful build.
+baseline_used=312 MiB  peak_sampled_used_after_trigger=1033 MiB  peak_rssAnon_after_trigger=2484 MiB
+gc_after_trigger: pauses=4 full=0 max_post_gc=71 MiB last=(15.384468793869019, 'Young', 1265, 69, 2048, 9.962)
+last_index_build_progress: t+4.8s completed=0 total=4194383872 (0.0%)
+gcwin: pauses=14 full_gcs=1 total_pause=0s max60=0% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=none

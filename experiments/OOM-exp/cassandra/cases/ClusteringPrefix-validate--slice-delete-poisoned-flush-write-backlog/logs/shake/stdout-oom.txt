@@ -1,0 +1,30 @@
+72-INFO  [main] 2026-11-21T13:19:58,225 CassandraDaemon.java:615 - G1 Survivor Space Heap memory: init = 0(0K) used = 16777216(16384K) committed = 16777216(16384K) max = -1(-1K)
+73-INFO  [main] 2026-11-21T13:19:58,225 CassandraDaemon.java:615 - CodeHeap 'non-profiled nmethods' Non-heap memory: init = 2555904(2496K) used = 1608832(1571K) committed = 2555904(2496K) max = 122912768(120032K)
+74-INFO  [main] 2026-11-21T13:19:58,225 CassandraDaemon.java:617 - Classpath: /mydata/s4/u15/shake/conf:/mydata/s4/u15/cassandra/bin/../build/apache-cassandra-5.0.9-SNAPSHOT.jar:/mydata/s4/u15/cassandra/bin/../lib/HdrHistogram-2.1.12.jar:/mydata/s4/u15/cassandra/bin/../lib/ST4-4.0.8.jar:/mydata/s4/u
+76-INFO  [main] 2026-11-21T13:19:58,641 NativeLibrary.java:186 - JNA mlockall successful
+77-INFO  [main] 2026-11-21T13:19:58,659 MonotonicClock.java:209 - Scheduling approximate time conversion task with an interval of 10000 milliseconds
+78-INFO  [main] 2026-11-21T13:19:58,660 MonotonicClock.java:345 - Scheduling approximate time-check task with a precision of 2 milliseconds
+79-WARN  [main] 2026-11-21T13:19:58,894 StartupChecks.java:262 - jemalloc shared library could not be preloaded to speed up memory allocations
+80-WARN  [main] 2026-11-21T13:19:58,895 StartupChecks.java:320 - JMX is not enabled to receive remote connections. Please see cassandra-env.sh for more info.
+81-INFO  [main] 2026-11-21T13:19:58,896 SigarLibrary.java:47 - Initializing SIGAR library
+82-WARN  [main] 2026-11-21T13:19:58,906 SigarLibrary.java:173 - Cassandra server running in degraded mode. Is swap disabled? : false,  Address space adequate? : true,  nofile limit adequate? : true, nproc limit adequate? : true 
+83-WARN  [main] 2026-11-21T13:19:58,907 StartupChecks.java:555 - Maximum number of memory map areas per process (vm.max_map_count) 65530 is too low, recommended value: 1048575, you can change it with sysctl.
+--
+463-	at java.base/java.lang.Thread.run(Thread.java:829)
+464-INFO  [Service Thread] 2026-11-21T13:21:29,185 GCInspector.java:286 - G1 Old Generation GC in 223ms.  Compressed Class Space: 7277336 -> 7276776; G1 Old Gen: 2024783272 -> 1608176192; Metaspace: 60262408 -> 60260576
+465-INFO  [Service Thread] 2026-11-21T13:21:35,487 GCInspector.java:286 - G1 Old Generation GC in 248ms.  G1 Old Gen: 1993003824 -> 1928314152; 
+466:java.lang.OutOfMemoryError: Java heap space
+467-Dumping heap to /dev/shm/u15/dump-shake/cassandra-1795267194-pid234235.hprof ...
+468-Heap dump file created [2055344260 bytes in 3.125 secs]
+469-ERROR [Native-Transport-Requests-97] 2026-11-21T13:21:41,379 JVMStabilityInspector.java:123 - OutOfMemory error letting the JVM handle the error:
+470:java.lang.OutOfMemoryError: Java heap space
+471-	at java.base/java.util.concurrent.ConcurrentSkipListMap.doPut(ConcurrentSkipListMap.java:651)
+472-	at java.base/java.util.concurrent.ConcurrentSkipListMap.putIfAbsent(ConcurrentSkipListMap.java:1786)
+473-	at org.apache.cassandra.concurrent.SEPWorker.doWaitSpin(SEPWorker.java:302)
+474-	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:107)
+475-	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+476-	at java.base/java.lang.Thread.run(Thread.java:829)
+477-#
+478:# java.lang.OutOfMemoryError: Java heap space
+479:# -XX:OnOutOfMemoryError="kill -9 %p"
+480-#   Executing /bin/sh -c "kill -9 234235"...

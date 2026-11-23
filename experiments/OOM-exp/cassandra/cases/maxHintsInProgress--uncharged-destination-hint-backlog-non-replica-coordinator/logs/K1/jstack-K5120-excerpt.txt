@@ -1,0 +1,15 @@
+	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.lang.Thread.run(java.base@11.0.33/Thread.java:829)
+
+"MutationStage-81" #194 daemon prio=5 os_prio=0 cpu=104.88ms elapsed=5.45s tid=0x00007f5638602fc0 nid=0x2399c waiting on condition  [0x00007f55c47af000]
+   java.lang.Thread.State: WAITING (parking)
+	at jdk.internal.misc.Unsafe.park(java.base@11.0.33/Native Method)
+	- parking to wait for  <0x0000000080bac6f0> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(java.base@11.0.33/LockSupport.java:194)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(java.base@11.0.33/AbstractQueuedSynchronizer.java:2081)
+	at java.util.concurrent.LinkedBlockingQueue.take(java.base@11.0.33/LinkedBlockingQueue.java:433)
+	at org.apache.cassandra.hints.HintsBufferPool.switchCurrentBuffer(HintsBufferPool.java:118)
+	- locked <0x0000000080bac660> (a org.apache.cassandra.hints.HintsBufferPool)
+
+threads BLOCKED waiting to lock HintsBufferPool: 31
