@@ -7,8 +7,8 @@
 | Phase-1 case file | [`table_name_length-validatetablename-name_length--autonomous`](../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/table_name_length-validatetablename-name_length--autonomous.md) (also, for OC-400/OC-403, [`schemaconstants_name_length-validatekeyspacename-keyspacename--autonomous`](../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/schemaconstants_name_length-validatekeyspacename-keyspacename--autonomous.md)); stage-4 result: [`results/table_name_length-validatetablename-name_length--autonomous.md`](../../../../capacity-enforcement-exp/cassandra/stage4-runtime-verification/results/table_name_length-validatetablename-name_length--autonomous.md) |
 | System / pinned source | Cassandra 5.0.9 (`systems/cassandra/source/`, `build.xml:36` `base.version` 5.0.9); on pc99 `/mydata/s4/cassandra-base` (built tree, no `.git`; jar `build/apache-cassandra-5.0.9-SNAPSHOT.jar` sha256 `570b5249d9b9a43f6809eb3da562737492192026f974b2edbd20e94bea90176e`, read 2026-11-21 08:04), OpenJDK 11.0.33 |
 | Stage 1 (design) | OOM-agent stage-1 session (subagent), 2026-11-21 08:02–≈ 08:50 America/New_York; nothing run (read-only check of pc99 only) |
-| Stage 2 (verify) | runs: stage-2 OOM-agent session, 2026-11-21 08:18–11:18 EST on pc99 (12 lifetimes; the session was cut off before the write-up); analysis and write-up: a fresh stage-2 session (Claude Opus 5.5, `claude-opus-5-5`), 2026-11-23, from the node logs, no new runs |
-| Verdict | **true positive** — `verified-OOM · deployment` (unprotected: configuration, `tables_fail_threshold` −1; accumulation, no byte bound); largest failing heap 2 GiB (3/3), 4 GiB service loss without OOM in 1 lifetime stopped early (§4) |
+| Stage 2 (verify) | runs: stage-2 OOM-agent session, 2026-11-21 08:18–11:18 EST on pc99 (12 lifetimes; the session was cut off before the write-up); analysis and write-up: a fresh stage-2 session (Claude Opus 5.5, `claude-opus-5-5`), 2026-11-23, from the node logs, no new runs; owner-approved follow-up (4 GiB ×3, `H4-T-2..4`): a stage-2 session (Claude Opus 5.5, `claude-opus-5-5`), 2026-11-23 11:45–15:07 EST on pc99 (§3.5) |
+| Verdict | **true positive** — `verified-OOM · deployment` (unprotected: configuration, `tables_fail_threshold` −1; accumulation, no byte bound); largest failing heap **4 GiB (3/3**, follow-up 2026-11-23; 2 GiB 3/3; 8 GiB not run) (§4) |
 
 ## Summary
 
@@ -17,8 +17,9 @@
   `OutOfMemoryError: Java heap space` 3/3 at 3,975–3,978 tables, without writing a row (live heap +0.480 MiB per table,
   98 % of the heap live at the end, 85 % of the dump in per-table metrics/JMX/name classes). The same CREATEs with a DROP 500
   behind stayed at 0.16 × heap (0/3); the shipped `tables_fail_threshold` set to 1,900 stopped it at 0.45 × heap (0/3).
-  Short names OOM at 5,736 tables (0.336 MiB per table). At 4 GiB the one lifetime reached 8,027 tables in GC service loss
-  (0.95–0.98 × heap live) but was stopped by the harness before an OOM; largest failing heap: 2 GiB.
+  Short names OOM at 5,736 tables (0.336 MiB per table). At 4 GiB (owner-approved follow-up, 2026-11-23) the same workload
+  killed the node 3/3 at 8,137 / 8,187 / 8,225 tables after 45–85 min of DDL (the first 4 GiB lifetime, on 2026-11-21, had been
+  stopped by the harness at 8,027 tables in GC service loss); largest failing heap: **4 GiB**.
 - **Root cause (claimed):** every table a node loads carries eager heap state that no budget counts: `TableMetrics` registers ≈ 112
   metrics twice (a `Table` and a `ColumnFamily` alias name), each with its own `MetricName` strings, JMX `ObjectName` and, for
   histograms and timers, two `AtomicLongArray`s of ≈ 2.6 KB each; every name string embeds the keyspace and table name, so the
@@ -436,7 +437,7 @@ sha256 of §1–§2 at freeze: `968539d5b819ac35d781ff90ecd46328fc68f42ca49d2e72
 ## 3. Runs (stage 2)
 
 All lifetimes ran on 2026-11-21 08:18–11:18 EST on `pc99`, by the stage-2 session of that day, which was cut off before
-writing up. This section and §4 were written on 2026-11-23 by a fresh stage-2 session (Claude Opus 5.5, `claude-opus-5-5`)
+writing up (except the owner-approved 4 GiB follow-up `H4-T-2..4` of 2026-11-23, §3.5). This section and §4 were written on 2026-11-23 by a fresh stage-2 session (Claude Opus 5.5, `claude-opus-5-5`)
 from the node's logs. That session ran nothing, started no process and deleted nothing on `pc99`. Freeze hash checked
 2026-11-23: the lines of §1–§2 hash to `968539d5…1dee8e2f`, equal to the frozen value. The case file's last change before
 the runs was at 08:12:53 EST (file mtime), and the first lifetime started at 08:18:43 EST, so the design predates every
@@ -501,6 +502,10 @@ written 08:40 before `H2-C-1`).
 | H2-I-3 | I | 2G | 48/222 | 10:01–10:06 | **1,900**, 2,078 rejected | end | 64.7 / 516.8 / – / – / 741.6 | 0.451 / 0.451 | 925.2 MiB = 0.452; K 1,900 | ok |
 | H4-T-1 | T (budget search) | 4G | 48/222 | 10:05–10:53 | **8,027** (8,026 open at the end dump) | **service-loss stop by the harness**: 10 min ≥ 90 % GC at 10:51:54 (44.6 min of DDL). Then end checkpoint, `jcmd` dump, **SIGTERM**. **No OOM** | 64.9 / 517.0 / 969.0 / 1,529.9 / 3,983.1 @8,000 | 0.483 / 0.484 | U_end 3,884.5 MiB = 0.948 (n8000: 0.972); old-gen after GC max 4,020.5 MiB = 0.98 | ok (§3.4) |
 | S8-1 | dial (short names) | 2G | 2/6 | 10:53–11:18 | **5,736** (11:16:34) | **heap OOM** (dump 2.70 GB) | 64.7 / 381.5 / 698.8 / 1,009.2 / 1,871.2 @5,500 | **0.336** / 0.339 | 2,008.9 MiB = **0.981** | ok |
+| *owner-approved follow-up (2026-11-23), §3.5:* | | | | | | | | | | |
+| H4-T-2 | T (budget search) | 4G | 48/222 | 11-23 11:45–12:33 | **8,137** (12:31:38) | **heap OOM** (dump 5.09 GB, `kill -9`) | 64.9 / 517.0 / 968.9 / 1,531.8 / 3,812.3 @8,000 | 0.478 / 0.479 | old-gen after GC 4,048.1 MiB = **0.988** | ok |
+| H4-T-3 | T (budget search) | 4G | 48/222 | 11-23 12:34–14:01 | **8,187** (13:41:09) | **heap OOM** (dump 5.08 GB) at 14:00:09 | 64.9 / 517.0 / 969.0 / 1,530.5 / 3,880.5 @8,000 | 0.480 / 0.481 | 4,048.2 MiB = **0.988** | ok |
+| H4-T-4 | T (budget search) | 4G | 48/222 | 11-23 14:01–15:07 | **8,225** (15:04:43) | **heap OOM** (dump 5.07 GB) | 64.9 / 517.0 / 969.0 / 1,530.5 / 3,856.5 @8,000 | 0.477 / 0.478 | 4,047.3 MiB = **0.988** | ok |
 
 Every lifetime: K (`count(*)` in `system_schema.tables`) equals the client's ok count at every checkpoint. C holds K = 500
 from 500 tables on. `memory.events` `oom_kill 0` and `oom 0` in all twelve, and `max 0` in all but H4-T-1 (§3.4). RssAnon
@@ -624,16 +629,18 @@ strings per table, ≈ 152 KB shorter.
 - **The service-loss stop also applied at 4 GiB.** §2.7 lists "service-loss criterion held for 10 min" only for T at
   2 GiB. For 4 GiB it lists OOM, M_max 12,000, or 50 min of DDL. `run.py`'s monitor applied it to every arm. H4-T-1 was
   stopped by it at 44.6 min of DDL, 5.4 min before its DDL cap, so the 4 GiB lifetime did not run its full stopping budget.
-  Whether it would have ended in an OOM within the remaining 5.4 min is unknown.
+  Whether it would have ended in an OOM within the remaining 5.4 min is unknown. *(2026-11-23: the owner approved three more
+  4 GiB lifetimes without this stop and with a 120-min DDL cap; all three ended in a heap OOM, §3.5.)*
 - **The H4 client was not stopped.** The monitor's `p.kill()` killed the `sh -c` wrapper, not `client.py`, so the client
   kept one CREATE (8,027) in flight through the end checkpoint and the dump. It was acknowledged at 10:52:42, after the
   SIGTERM, and the client then logged the shutdown errors. The end readings therefore correspond to 8,026–8,027 tables.
+  *(Fixed 2026-11-23, §3.5.)*
 - **H4-T-1 `memory.events` `max 4543`.** The 10 GiB safety scope reached `memory.max` only between 10:52:29 and 10:52:37
   (`rss.csv` `cg_current`), while `jcmd` wrote the 4.88 GB end dump through the page cache. That was after the workload
   had stopped; RssAnon was 4.88 GiB at that moment, with `oom 0` and `oom_kill 0`. No reading is affected.
 - **`run.py`'s OOM-line grep** also matches the startup `CompileCommand … OutOfMemoryError` line, so the `oom.stdout_lines` of
   the T and S8 summaries list it first. The real lines follow it. This analysis uses the real lines only, from `grep -n
-  "^java.lang.OutOfMemoryError"`.
+  "^java.lang.OutOfMemoryError"`. *(Fixed 2026-11-23, §3.5.)*
 - **Schedule:** the runs took place 08:18–11:18 EST, earlier than the 09:00–14:00 plan of §2.9. No lifetime started after
   13:15, and S8-1 started after H4-T-1 had ended, as §2.9 requires. The 2,000-table template fallback was not needed:
   `H2-T-1`'s DDL took 15.7 min.
@@ -642,6 +649,79 @@ strings per table, ≈ 152 KB shorter.
 - **Checkpoint histograms:** in `H2-T-1` at n2500 (and H4 at n2500), the first of the two histograms read more than the
   second (1,685.6 vs 1,247.2 MB). L is the second one by definition (§2.6), so no reading changes.
 - **Write-up** by a different session two days after the runs, from logs only (see the top of §3). No run was repeated.
+
+### 3.5 Owner-approved follow-up (2026-11-23): 4 GiB budget search ×3 without the service-loss stop
+
+**Approval and scope.** On 2026-11-23 the owner approved three more lifetimes of the 4 GiB budget-search arm (`H4-T-2`,
+`H4-T-3`, `H4-T-4`), because `H4-T-1` had been stopped by a rule the design sets only for 2 GiB (§3.4). Changes against
+`H4-T-1`, all owner-approved: **no service-loss stop** at 4 GiB; **DDL cap 120 min** per lifetime (was 50 min); M_max 12,000
+unchanged; every other stop rule kept (OOM / node death, M_max, the wall cap = DDL cap + 15 min, node stopped on any exit).
+Workload, names, build, configuration, scope (10 GiB, swap 0) and shipped OOM flags (`HeapDumpOnOutOfMemoryError`,
+`OnOutOfMemoryError=kill -9 %p`) as `H4-T-1`. Run by a stage-2 session (Claude Opus 5.5, `claude-opus-5-5`), sequentially,
+one lifetime at a time, under `setsid nohup` (`plan.sh harness/plan-h4-followup.txt`, log `logs/plan-h4-followup.out`).
+The 13:15 no-start rule of §2.9 was the time plan of 2026-11-21 and was not applied. §1–§2 are unchanged.
+
+**Harness changes** (`harness/NOTE-2026-11-23.txt`; `run.py`, `excerpts.sh`; new `tailmin.py`, `gcshare.py`,
+`plan-h4-followup.txt`): (1) the service-loss stop applies only to T at 2 GiB, as §2.7 lists it; (2) T at 4 GiB DDL cap 7,200 s,
+wall cap 8,100 s; (3) **bug (a) fixed**: OOM lines are matched only as a real `java.lang.OutOfMemoryError` line at runtime
+(`^java.lang.OutOfMemoryError:`, `# java.lang.OutOfMemoryError:`, `Exception in thread … java.lang.OutOfMemoryError`), never
+a line containing `CompileCommand`; the summaries carry `real_oom` / `first_real_oom` (all three: `real_oom: true`, first line
+`java.lang.OutOfMemoryError: Java heap space`; the startup `CompileCommand` lines are no longer listed); (4) **bug (b) fixed**:
+the client is started without a shell in its own session and a monitor stop kills its whole process group (`os.killpg`,
+checked on pc99 with a child process before the runs). No monitor stop fired in these lifetimes (each ended by node death),
+so fix (b) was not exercised in a lifetime.
+
+**Environment and validity.** Before the runs (2026-11-23 09:44 MST): no `java` process on pc99, load 0.00, `/mydata` 710 GiB
+free, `/dev/shm` empty; the harness's co-tenancy check read `daemons: none` and `MemAvailable` 127,170–127,196 MiB before each
+lifetime. Every lifetime: settings read-back `ok` (`memtable_heap_space 1024MiB`, `prepared_statements_cache_size 16MiB`,
+guardrails −1, `PasswordAuthenticator` / `AllowAllAuthorizer`), `flags_ok`, `scope_ok` (10 GiB, swap 0), `u14` not a
+superuser, `shm: false`; K = the client's ok count at all 16 checkpoints (500 … 8,000); 214 MBeans per table (1,724,073 at
+8,000 tables). `memory.events`: `oom 0`, `oom_kill 0`; `max` 7,065 / 4,480 / 4,092, all reached 23–44 s **after** the heap dump
+file was created, while the 5 GB dump was written through the page cache (as in `H4-T-1`, §3.4); RssAnon peak 4.9–5.0 GiB.
+The lifetimes that died have no name read-back; their dumps carry the marker (below).
+
+**Readings** (`logs/H4-T-{2,3,4}-*`, `logs/hist/H4-T-{2,3,4}-*`, `analyze.jsonl` lines 13–15; times EST):
+
+| | H4-T-2 | H4-T-3 | H4-T-4 |
+|---|---|---|---|
+| Endpoint | **heap OOM** (`java.lang.OutOfMemoryError: Java heap space` → dump → `kill -9`, exit 137) | **heap OOM** | **heap OOM** |
+| N_OOM (last ok CREATE before the dump) | **8,137** | **8,187** | **8,225** |
+| first CREATE → dump file | 11:47:22 → 12:32:45 = **45.4 min** (47.0 from JVM launch) | 12:35:34 → 14:00:09 = **84.6 min** (86.2) | 14:03:00 → 15:06:03 = **63.0 min** (64.6) |
+| client DDL time; last ok → dump | 2,712 s; 67 s | 5,051 s; **1,139 s** (19 min without progress, 9 timeouts of 120 s) | 3,761 s; 80 s |
+| b (MiB per table, all / from 500) | 0.478 / 0.479 | 0.480 / 0.481 | 0.477 / 0.478 |
+| L(n) at 0 / 4,000 / 8,000 (MiB) | 64.9 / 1,992.4 / 3,812.3 | 64.9 / 1,991.1 / 3,880.5 | 64.9 / 1,991.0 / 3,856.5 |
+| f: L(8,000) / heap; old gen after GC at the last sample | 0.931; 4,048.1 MiB = **0.988** | 0.947; 0.988 | 0.942; 0.988 |
+| DDL latency (median first / last 200 CREATEs) | 44 / 1,467 ms | 45 / 3,508 ms | 45 / 3,006 ms |
+| GC (sampler, per minute) | 45–58 % from 12:13, 87–95 % 12:22–12:24, 95–102 % 12:30–12:32 | 50–75 % from 13:03, **79–99 % every minute 13:13–13:41**, then sampler gaps and readings > 100 % (JMX starved) until the OOM | 84–95 % from 14:41, 74–101 % to 15:05 |
+| GC (shipped `gc.log*`, which rotate and cover only the last ≈ 5 min) | 96 / 98 / 99 % STW in 12:30–12:32 | **99–100 % STW in 13:55–13:59** | 96 / 98 / 98 % STW in 15:03–15:05 |
+| last GCInspector lines | `G1 Old Generation GC in 39,295 ms. G1 Old Gen: 4,201,263,896 -> 4,184,539,176` | `… GC in 104,285 ms. G1 Old Gen: 4,192,877,768 -> 4,133,360,168` | `… GC in 45,844 ms. G1 Old Gen: 4,235,303,192 -> 4,185,535,224` |
+| D3 max (`AllMemtablesOnHeapDataSize`) | 341.8 MiB | 341.6 MiB | 341.7 MiB (memtable cleaner threshold 1,024 / 3) |
+| dump total (shallow) | 4,046.9 MiB | 4,046.7 MiB | 4,044.2 MiB |
+| `TableMetrics` / `ColumnFamilyStore` | 8,185 = **8,137 + 48** | 8,235 = **8,187 + 48** | 8,273 = **8,225 + 48** |
+| marker `byte[]` (name text) | 4,448,940 arrays, 1,629.2 MiB = **40.3 %** (0.200 MiB per table) | 1,641.4 MiB = **40.6 %** (0.200) | 1,639.8 MiB = **40.5 %** (0.199) |
+| `long[]` (of which `long[330]`) | 1,107.5 MiB (373.7) | 1,112.2 MiB (376.0) | 1,117.4 MiB (377.7) |
+| per-table classes (`byte[]`, `long[]`, `String`, `ObjectName`, `ObjectName$Property` and `[]`, `NamedObject`, `StandardMBeanSupport`, `LongAdder`, `HashMap$Node`, `ConcurrentHashMap$Node`) | **86.2 %** | **86.6 %** | **86.8 %** |
+| memtable classes (`HeapByteBuffer`, `BufferCell`, `BTreeRow`) | 137.5 MiB | 143.1 MiB | 133.8 MiB |
+| throwing thread (the dump trace with `OutOfMemoryError.<init>`) | a Netty `FastThreadLocalRunnable` thread in `FastThreadLocal.removeAll:65` (thread exit) | none of the dump's traces carries `OutOfMemoryError.<init>` (as `H2-T-1`) | `SizeEstimatesRecorder.run:103` → `SystemKeyspace.updateSizeEstimates:1617` → `Mutation.apply` → `SkipListMemtable.put` → `RangeTombstoneList.grow:713` |
+| `.hprof` | scanned in full, then deleted by `plan.sh` | same | same |
+
+`CassandraMetricsRegistry$MetricName` is again 0 in every dump. The same 11-class share computed on `H4-T-1`'s end dump gives
+87.4 %, so these shares are comparable with §3.3 (87.2 % there). Per-class histogram slopes from s0 to 8,000 tables total
+491–497 KB per table (`analyze.jsonl`), as at 2 GiB.
+
+**Readings against the 2026-11-21 stop rules.** Under `H4-T-1`'s 50-min DDL cap, `H4-T-2` (45.2 min of DDL) would still
+have reached its OOM, while `H4-T-3` (84.2 min) and `H4-T-4` (62.7 min) would have been stopped first. The 10-min
+service-loss stop (sampler GC fraction ≥ 0.9 over 600 s, `run.py`'s rule, recomputed from `sampler.csv`) would not have
+fired in `H4-T-2` (maximum 0.831), and would have stopped `H4-T-3` at 13:19:15 (41 min before its OOM) and `H4-T-4` at
+14:56:56 (9 min before); `H4-T-1` reached 0.903 at 10:51:53 and was stopped. Without these stops every lifetime ended in the
+OOM, after a GC-bound stretch of ≈ 3 min (`H4-T-2`) to ≈ 45 min (`H4-T-3`).
+
+**Deviations (follow-up).** The changes above are owner-approved amendments to the stopping budget of the 4 GiB arm only. The
+dumps were deleted after their full scans (as on 2026-11-21; now allowed by the owner), so no dominator analysis exists. The
+`gc.log*` files cover only the last ≈ 5 min of each lifetime (shipped rotation, 10 files, with `heap*=trace`); the longer GC
+history comes from the sampler's JMX `CollectionTime`, which reads above 100 % for some minutes when JMX itself is starved
+(`H4-T-3` 13:40–14:00). The H4-T-3 dump birth (14:00:09) is 19 min after its last ok CREATE; N_OOM is the table count, not
+a time.
 
 ## 4. Conclusion (stage 2)
 
@@ -656,7 +736,8 @@ accumulation (no byte bound covers the per-table metrics, JMX and schema state).
 | T: empty tables created one by one, guardrail −1 | **heap OOM 3/3** at **3,978 / 3,975 / 3,976** tables, f = 0.980–0.983 |
 | C: same CREATEs plus DROP 500 behind (≤ 500 live) | 0/3; U_end 0.157–0.158 × heap, slope 0.009 MiB per pair |
 | I: `tables_fail_threshold` = 1,900 | 0/3; 1,900 ok, 2,078 rejected, U_end 0.452 × heap |
-| T at **4 GiB** (budget search, 1 lifetime) | **no OOM**: GC service loss (87–98 % GC per minute for ≈ 10 min) at 7,916–8,027 tables, live 0.95–0.98 × heap; stopped by the harness's service-loss monitor at 44.6 of 50 min of DDL (§3.4) |
+| T at **4 GiB** (budget search), `H4-T-1` (2026-11-21) | **no OOM**: GC service loss (87–98 % GC per minute for ≈ 10 min) at 7,916–8,027 tables, live 0.95–0.98 × heap; stopped by the harness's service-loss monitor at 44.6 of 50 min of DDL (§3.4) |
+| T at **4 GiB**, `H4-T-2..4` (owner-approved follow-up, 2026-11-23: no service-loss stop, 120-min DDL cap, §3.5) | **heap OOM 3/3** at **8,137 / 8,187 / 8,225** tables, 45.4 / 84.6 / 63.0 min after the first CREATE; old gen after GC 0.988 × heap; dumps 86–87 % per-table classes |
 | S8: T at 2 GiB with short names (`ks`, `t00001`) | heap OOM 1/1 at **5,736** tables |
 
 **Predictions against readings (frozen §2.7):**
@@ -668,7 +749,7 @@ accumulation (no byte bound covers the per-table metrics, JMX and schema state).
 | P3 | `TableMetrics` = `ColumnFamilyStore` = N_OOM + system tables; per-table classes ≥ 70 % of live heap; marker `byte[]` ≥ 0.08 MiB per table, name share ≥ 15 % | 4,026 / 4,023 / 4,024 = N_OOM + 48 exactly; per-table classes **84.7–84.8 %**; marker `byte[]` **0.198 MiB per table, 39.2–39.4 %** | **met** (dump scans; dominators not available, §3.4) |
 | P4 | C: no OOM 3/3, U_end ≤ 0.25 × heap, slope after 500 ≤ 0.02 MiB per pair | 0/3, 0.157–0.158, 0.0091–0.0095 | **met** |
 | P5 | I: no OOM 3/3, exactly X created, the rest rejected, U_end ≈ L(X) ≤ 0.6 × heap | 0/3, 1,900 + 2,078 rejected, 0.452 | **met** |
-| P6 | 4 GiB: OOM at 7,180–9,410 | **no OOM** in 1 lifetime; service loss at 7,916–8,027 (inside the range), stopped early by the harness | **not met** as an OOM; inconclusive (stop rule deviation) |
+| P6 | 4 GiB: OOM at 7,180–9,410 | 2026-11-21: **no OOM** in 1 lifetime; service loss at 7,916–8,027, stopped early by the harness. **2026-11-23 follow-up: heap OOM 3/3 at 8,137 / 8,187 / 8,225** (b = 0.477–0.480, f = 0.988) | **met** (3/3, near the central 8,230; owner-approved follow-up, §3.5) |
 | P7 | S8: OOM at 5,500–6,170; b_long − b_short = 0.12–0.15 MiB | OOM at **5,736**; 0.480 − 0.336 = **0.143** (0.487 − 0.339 = 0.148) | **met** |
 
 **V1–V7 (condition: stock 5.0.9, 2 GiB heap, defaults, long names, one DDL client):**
@@ -682,6 +763,13 @@ accumulation (no byte bound covers the per-table metrics, JMX and schema state).
 | V5 Initiating failure | first error `java.lang.OutOfMemoryError: Java heap space` in stdout 3/3, then the dump and the shipped `kill -9`. Throwing thread: memtable flush writer (`SortedTableWriter.append:148` ← `Flushing$FlushRunnable`) in T-2 and T-3; not identified in T-1's dump. Holder at failure: dumps with 4,026 `TableMetrics`, marker `byte[]` 39 %, per-table classes 85 % |
 | V6 Default constraints | `tables_*` and `keyspaces_*` guardrails −1, `columns_per_table_*` −1, name caps 222 / 48 (compile-time), memtable pool 512 MiB (heap/4), caches auto (100 / 50 / 10 MiB), all read back. `tables_fail_threshold` differs only in arm I |
 | V7 Acceptable budget | 2 GiB heap, the ideal, and what `cassandra-env.sh` resolves on a 4 GiB-RAM host; ≥ 512 MiB under the standing rule. Direct limit 15,872 MiB, as resolved on `pc99` and not involved. The 8 GiB scope (10 GiB at 4 GiB heap) is a safety guard only (`oom_kill 0`) |
+
+**At 4 GiB (follow-up, 2026-11-23).** The same condition at a 4 GiB heap (what `cassandra-env.sh` resolves on an 8 GiB host)
+meets V1 (heap OOM 3/3 from clean starts, `H4-T-2..4`), V3 (L(n) and dump scans, K = ok count), V5 (first error
+`java.lang.OutOfMemoryError: Java heap space` 3/3, dumps with `TableMetrics` = N_OOM + 48, marker `byte[]` 40 %), V6 and V7
+(≥ 512 MiB). Its matched control and intervention (V2, V4) were run at 2 GiB only; the 4 GiB endpoint is the same mechanism
+at the same per-table slope (b = 0.477–0.480 against 0.480), so it is reported as the budget-search result of the verified
+condition, not as a separately verified condition.
 
 **Deployment label.** Every setting is a default or an accepted, documented value (`PasswordAuthenticator`, the documented
 production authenticator, used in every arm so that the guardrail applies to an ordinary role, §2.3). There is no patch and
@@ -700,13 +788,16 @@ same 3,978 CREATEs with a DROP 500 behind never passed 0.16 × heap (0/3), and e
 tables stopped the growth at 0.45 × heap (0/3). The failure therefore follows the number of live tables, which nothing
 bounds at defaults, and not the DDL traffic.
 
-**Budget search.** The largest budget that reached the endpoint is **2 GiB (3/3)**. At **4 GiB** the one lifetime reached the
-predicted multiplicity (8,027 tables, inside 7,180–9,410) and sustained GC service loss: ≥ 87 % GC per minute for ≈ 10 min,
-over 100 full GCs per minute, and live 0.95–0.98 × heap. It ended without an OOM, because the harness's 10-minute
-service-loss stop ended it 5.4 min before its 50-min DDL cap (§3.4). At 4 GiB the result is therefore a service loss (1/1,
-`verified-gap · service-loss` conditions except V1), not a negative. Whether 4 GiB ends in an OOM is not settled. Under
-C6's and this case's slope, a 4 GiB heap needs ≈ 8,000 long-named tables and the DDL slows to seconds per CREATE before the
-heap is gone. 8 GiB was not planned (§2.8).
+**Budget search (updated 2026-11-23).** The largest budget that reached the endpoint is **4 GiB (3/3)**; 2 GiB also 3/3.
+On 2026-11-21 the one 4 GiB lifetime (`H4-T-1`) reached 8,027 tables in sustained GC service loss and was stopped by the
+harness's service-loss rule, which the design sets only for 2 GiB (§3.4). In the owner-approved follow-up of 2026-11-23
+(no service-loss stop at 4 GiB, DDL cap 120 min, §3.5) the same workload ended in `OutOfMemoryError: Java heap space` in
+**3/3** lifetimes at **8,137 / 8,187 / 8,225** tables (P6: 7,180–9,410, central 8,230), **45–85 min** after the first CREATE,
+each after a GC-bound stretch of ≈ 3 to ≈ 45 min (≥ 79 % GC per minute, 96–100 % STW in the last minutes). The time to OOM
+varies more than N_OOM does: the end is decided by GC thrash on a heap that is 0.99 live, and two of the three lifetimes
+would not have reached it under `H4-T-1`'s 50-min DDL cap. 8 GiB was not planned (§2.8; ≈ 16,000 tables at ≈ 0.48 MiB, with
+the DDL already at seconds per CREATE near 8,000 tables), so the upper boundary of the failing budgets is not established;
+4 GiB is the largest **tested** failing budget.
 
 **The name-length dial (OC-402 / OC-403).** Short names (`ks`, 6-character tables) cost **0.336 MiB per table** and failed at
 **5,736** tables. Long names cost **0.480**, and the difference of **0.143 MiB per table** for 216 + 46 = 262 more
@@ -723,15 +814,25 @@ names (0.34 MiB) agrees with C6's D2 (0.316–0.342).
 - D3 (the size-estimates memtables, which also grow with the table count) holds ≈ 125–170 MiB at the endpoint. It is bounded
   by `memtable_heap_space` and flushed at its cleaner threshold, and it is not claimed. It supplies the last allocations in
   T-2, T-3 and S8 (flush writer, `SizeEstimatesRecorder`).
-- The 4 GiB result is a single lifetime stopped by a rule the design did not set for that heap.
+- The 4 GiB result is 3/3 OOM (follow-up, 2026-11-23) plus `H4-T-1`, which was stopped by a rule the design did not set for
+  that heap. No control or intervention lifetime was run at 4 GiB, and 8 GiB was not run.
 - The C residual (≈ 10 KB per CREATE+DROP pair, queued `AbstractAllocatorMemtable$1` tasks and dropped tables' metadata) is
   noted only.
 - Covered duplicates: OC-402 (name text, measured by S8 and the marker scan) and OC-403 (keyspace-name text, in every long
   arm) fully. OC-401 covers the empty-table part only; its slab part is C6's. OC-400 is covered partly: the per-table cost
   with the table guardrail off is covered, but its many-keyspaces variant was not run.
+- **Owner's ruling (2026-11-23): OC-400 stays `open`** in the phase 1 candidate list, since its many-keyspaces variant
+  (`KeyspaceMetrics` per keyspace, `keyspaces_*` guardrails) was not run here.
 
 **What is left on `pc99`** (checked 2026-11-23 09:23 MST): no Cassandra, Java or harness process, and no `/dev/shm/u14`.
 `/mydata/s4/u14/` holds `cassandra/` (the build copy), `harness/`, `jmxcls/`, `excerpts/`, `logs/` (full logs of all twelve
 lifetimes, ≈ 1.4 GB, mostly `gc.log*` and `stdout.txt`), `dumps/` (empty folders except `H2-T-1`'s 2.54 GB `.hprof`) and
 empty `*.out` files. The `run/` directory is gone. Nothing was deleted by this write-up. The `H2-T-1` dump and the tree are
 for the owner to remove.
+
+**Updated after the follow-up** (checked 2026-11-23 13:12 MST): no Cassandra, Java, client, `run.py` or `plan.sh` process, no
+`u14-*` systemd scope, no `/dev/shm/u14`, no `run/`. `/mydata/s4/u14/` now also holds `logs/H4-T-{2,3,4}/` (285 / 731 / 584 MB,
+full logs), `logs/plan-h4-followup.out` and `logs/H4-T-*.out`, `excerpts-2026-11-23/` (the excerpts copied here), and the
+updated `harness/`. The three follow-up `.hprof` files (5.07–5.09 GB) were deleted after their scans; the only dump left is
+still `H2-T-1`'s. Disk: `cassandra/` 419 MB, `dumps/` 2.4 GB, `logs/` 3.2 GB, the rest < 1 MB, ≈ 6.0 GB in all; `/mydata`
+708 GiB free.

@@ -1,0 +1,22 @@
+U14 harness changes, 2026-11-23 (owner-approved follow-up: H4-T-2, H4-T-3, H4-T-4; case file §3.5)
+
+run.py
+- Service-loss stop ("criterion held 10 min", 600 s window >= 0.9 GC) now applies only to T at 2 GiB (SL_STOP = {('T','2G')}),
+  as frozen §2.7 lists it. On 2026-11-21 the monitor applied it to every arm and stopped H4-T-1 at 44.6 min (deviation §3.4).
+- From 2026-11-23: T at 4 GiB DDL cap 120 min (7,200 s; owner), wall cap 8,100 s (DDL cap + 15 min, as before); M_max 12,000
+  unchanged (plan line). The 13:15 New York no-start rule (time plan of 2026-11-21) no longer applies.
+- Bug (b) fixed: the workload client is started without a shell (argv list) in its own session (start_new_session=True), and a
+  monitor stop kills its whole process group with SIGKILL (os.killpg); the summary records 'client_killed'. On 2026-11-21
+  p.kill() killed only the 'sh -c' wrapper and client.py kept a CREATE in flight through the end checkpoint and dump.
+- Bug (a) fixed: OOM lines are matched with OOM_RE (a line starting with java.lang.OutOfMemoryError, '# java.lang.OutOfMemoryError'
+  or 'Exception in thread ... java.lang.OutOfMemoryError', followed by ':' or end of line), never a line containing 'CompileCommand'
+  (HotSpot's startup line "CompileCommand: exclude ...forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V", printed in every
+  lifetime). The kill line is matched as 'Executing /bin/sh -c "kill -9'. summary.json 'oom' gains 'real_oom' and
+  'first_real_oom'; a surviving lifetime records 'real_oom_in_stdout'. (The OOM path itself is entered on node death, as before.)
+- Unchanged: shipped OOM flags (HeapDumpOnOutOfMemoryError, OnOutOfMemoryError=kill -9 %p), checkpoints every 500 CREATEs,
+  wall cap, node-death detection, dump scan (HprofScan) on OOM, plan.sh deleting a lifetime's .hprof after run.py's scan.
+
+New: plan-h4-followup.txt (the three lifetimes), gcshare.py (per-minute STW share from the rotated gc.log*, which cover only the
+last ≈ 5 min of a 4 GiB lifetime), tailmin.py (per-minute tail of sampler.csv, the logs/*-tail-per-minute.txt
+format). excerpts.sh also writes the shutdown lines, tail-per-minute, gcshare, trimmed histograms (top 50), session.log (lines cut to
+1,500 chars) and summary.json.

@@ -177,16 +177,17 @@ runs finished; on 2026-11-23 a fresh agent per case wrote §3–§4 from the nod
 | C10 | OC-509 | `pc91` | **true positive** |
 | B22 | OC-479 | `pc82` | retry (retry-list row added) |
 | B23 | OC-147 (+13) | `pc75` | **true positive**: 2 GiB OOM 3/3 at K ≈ 15.3 k, 0 refusals; control and LoadingCache fix 0/3; 4 / 8 / 15,872 MiB 3/3 each |
-| U14 | OC-404 (+401–403) | `pc99` | **true positive**: 2 GiB OOM 3/3 at ≈ 3,976 empty tables (0.48 MiB/table); control and guardrail 0/3; 4 GiB stopped for service loss at 8,027, not OOM |
+| U14 | OC-404 (+401–403) | `pc99` | **true positive**: 2 GiB OOM 3/3 at ≈ 3,976 empty tables (0.48 MiB/table); control and guardrail 0/3; 4 GiB OOM 3/3 at 8,137–8,225 (owner-approved rerun 2026-11-23, H4-T-2…4) |
 
 - **Filed:** 10 `_INDEX.md` rows, retry-list row B22, candidate-list statuses (the picked rows plus their covered duplicates).
 - **Owner rulings (2026-11-23):** B23 — E2/E3 placement counts as `deployment`; B4G run 1 accepted as an OOM (JVM
   self-kill late under full-GC thrash); OC-19/77/145 close fully; OC-148/332 stay open (timeout/expiry hint path not
   driven). U14 — OC-400 stays `open` (many-keyspaces variant not run); 4 GiB ×3 rerun without the service-loss stop
-  approved (H4-T-2…4 on pc99, harness OOM grep fixed: it matched the JVM's startup `CompileCommand` line).
+  done: OOM 3/3 at 8,137–8,225 tables, P6 met, largest failing heap 4 GiB (harness OOM grep fixed: it matched the JVM's
+  startup `CompileCommand` line; stop now kills the client's process group).
 - **Open owner items:** the B19, B21, U13 and U15 rulings in the table above.
-- **Node data:** every wave-6 run folder is still on its node (`/mydata/s4/<case>`; B23 keeps a 2.2 GB dump, U14 a 2.5 GB
-  dump); delete on the owner's word.
+- **Node data:** every wave-6 run folder is still on its node (`/mydata/s4/<case>`; B23 keeps a 2.2 GB dump, U14 ≈ 6 GB incl.
+  a 2.4 GB dump); delete on the owner's word.
 
 **Other open work:**
 - 341 candidate rows are `open` (2026-11-23, after wave 6). All of OC-63…577 are now triaged (2026-11-18 and 2026-11-20 files); the 11-18

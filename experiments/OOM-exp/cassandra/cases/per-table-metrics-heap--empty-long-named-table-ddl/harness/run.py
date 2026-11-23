@@ -11,7 +11,7 @@ usage:
 Output: /mydata/s4/u14/logs/<label>/ (session.log, summary.json, client.csv, checkpoints.jsonl, hist-*.txt, sampler.csv,
 rss.csv, system.log, debug.log, gc.log*, stdout.txt, scan-*.json, yaml.diff, env.diff, jvm-cmdline.txt, limits.txt,
 memory.events). Dumps: /mydata/s4/u14/dumps/<label>/."""
-import json, os, re, shutil, subprocess, sys, threading, time
+import json, os, re, shutil, signal, subprocess, sys, threading, time
 
 W = '/mydata/s4/u14'
 C = W + '/cassandra'
@@ -40,6 +40,17 @@ UU = ('u14', 'u14pw')
 # stopping budget (design §2.7): DDL seconds cap and wall cap of the workload phase
 CAPS = {('T', '2G'): (2400, 3300), ('C', '2G'): (1800, 2400), ('I', '2G'): (1200, 1800), ('T', '4G'): (3000, 3900)}
 NO_START_AFTER = (13, 15)   # New York wall clock
+# ---- 2026-11-23 owner-approved follow-up (H4-T-2..4; see the case file §3.5) ----
+# (1) The service-loss stop ("criterion held 10 min") applies only to T at 2 GiB, as §2.7 lists it; on 2026-11-21 it was
+#     applied to every arm and stopped H4-T-1 (deviation). (2) T at 4 GiB: DDL cap 120 min (owner, 2026-11-23), wall cap
+#     DDL cap + 15 min as before; M_max 12,000 unchanged. (3) The 13:15 no-start rule was the time plan of 2026-11-21 only.
+SL_STOP = {('T', '2G')}
+if time.strftime('%F') >= '2026-11-23':
+    CAPS[('T', '4G')] = (7200, 8100)
+    NO_START_AFTER = None
+# a real OutOfMemoryError thrown at runtime: HotSpot's OOM report lines or an uncaught-exception trace. Never the startup
+# line "CompileCommand: exclude ...forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V" that every lifetime prints.
+OOM_RE = re.compile(r'^(?:Exception in thread .*?)?(?:# )?java\.lang\.OutOfMemoryError(?::|$)')
 
 args = sys.argv[1:]
 if not args or args[0] not in ('shake', 'life', 'down'):
@@ -383,13 +394,15 @@ def gc_fraction(window_s):
     return gc / (t_end - int(first[0]))
 
 
-def workload(ks, names, first, last, pid, ddl_cap, wall_cap, W_=None):
-    """runs the client as u14 under a monitor: node death, wall cap, service-loss criterion held 10 min (T)"""
-    cmd = (f'python3 -I {HARNESS}/client.py {ADDR} {UU[0]} {UU[1]} create {ks} {names} {first} {last} {LOGS} {pid} {ddl_cap}'
-           + (f' {W_}' if W_ is not None else ''))
-    log('+ ' + cmd)
+def workload(ks, names, first, last, pid, ddl_cap, wall_cap, W_=None, sl_stop=True):
+    """runs the client as u14 under a monitor: node death, wall cap, service-loss criterion held 10 min (only if sl_stop).
+    2026-11-23: the client is started without a shell, in its own session, and a monitor stop kills its whole process group
+    (on 2026-11-21 p.kill() hit only the 'sh -c' wrapper and the client kept a CREATE in flight)."""
+    argv = ['python3', '-I', f'{HARNESS}/client.py', ADDR, UU[0], UU[1], 'create', ks, names, str(first), str(last), LOGS,
+            str(pid), str(ddl_cap)] + ([str(W_)] if W_ is not None else [])
+    log('+ ' + ' '.join(argv) + f'  (service-loss stop: {sl_stop})')
     outf = open(f'{LOGS}/client.out', 'a')
-    p = subprocess.Popen(cmd, shell=True, stdout=outf, stderr=outf, env=cenv(), cwd='/')
+    p = subprocess.Popen(argv, stdout=outf, stderr=outf, env=cenv(), cwd='/', start_new_session=True)
     t0 = time.time()
     why = None
     while p.poll() is None:
@@ -397,14 +410,18 @@ def workload(ks, names, first, last, pid, ddl_cap, wall_cap, W_=None):
         if time.time() - t0 > wall_cap:
             why = 'wall_cap'
             break
-        f = gc_fraction(600)
+        f = gc_fraction(600) if sl_stop else None
         if f is not None and f >= 0.9:
             why = f'service_loss_10min ({f:.3f})'
             break
     if why:
-        log(f'monitor stop: {why}; killing client pid {p.pid}')
-        p.kill()
+        log(f'monitor stop: {why}; killing client process group {p.pid}')
+        try:
+            os.killpg(p.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
         p.wait()
+        note('client_killed', {'pid': p.pid, 'alive_after': os.path.exists(f'/proc/{p.pid}')})
     outf.close()
     lines = [l for l in open(f'{LOGS}/client.out') if l.startswith('{"cmd"')]
     r = json.loads(lines[-1]) if lines else {'stopped': why or 'client_no_output'}
@@ -419,15 +436,17 @@ def oom_path(t_client_end):
     wait_death(240)
     stop_samplers()
     out = readf(RD + '/stdout.txt') or ''
-    oom_lines = [l for l in out.splitlines() if 'OutOfMemoryError' in l or 'Dumping heap' in l or 'Heap dump file' in l
-                 or 'kill -9' in l or 'Killed' in l]
+    oom_lines = [l for l in out.splitlines() if (OOM_RE.search(l) or 'Dumping heap' in l or 'Heap dump file' in l
+                 or 'Executing /bin/sh -c "kill -9' in l or 'Killed' in l) and 'CompileCommand' not in l]
     dumps = [f for f in os.listdir(DUMPS) if f.endswith('.hprof')] if os.path.isdir(DUMPS) else []
     dinfo = []
     for d in dumps:
         p = f'{DUMPS}/{d}'
         st = sh(f'stat -c "%W %Y %s" {p}', check=False, quiet=True)[1].split()
         dinfo.append({'file': d, 'birth_s': st[0], 'mtime_s': st[1], 'bytes': st[2]})
-    note('oom', {'stdout_lines': oom_lines[:20], 'dumps': dinfo, 'exit': NODE['popen'].poll() if NODE['popen'] else None})
+    real = [l for l in out.splitlines() if OOM_RE.search(l) and 'CompileCommand' not in l]
+    note('oom', {'stdout_lines': oom_lines[:20], 'real_oom': bool(real), 'first_real_oom': real[0] if real else None,
+                 'dumps': dinfo, 'exit': NODE['popen'].poll() if NODE['popen'] else None})
     collect()
     for d in dumps:
         scan_dump(f'{DUMPS}/{d}', 'oom')
@@ -447,7 +466,7 @@ def setup_user(ks, pid):
 
 def lifetime_begin(heap, X, names):
     h, m = ny_now()
-    if (h, m) > NO_START_AFTER:
+    if NO_START_AFTER is not None and (h, m) > NO_START_AFTER:
         note('not_started', f'{h:02d}:{m:02d} New York is after 13:15')
         sys.exit(2)
     extra = [f'tables_fail_threshold: {X}'] if X is not None else []
@@ -465,7 +484,7 @@ def mode_life(arm, heap, names, N, X):
     checkpoint(ks, pid, 's0')
     time.sleep(10)
     ddl_cap, wall_cap = CAPS.get((arm, heap), (1800, 2400))
-    r = workload(ks, names, 1, N, pid, ddl_cap, wall_cap, 500 if arm == 'C' else None)
+    r = workload(ks, names, 1, N, pid, ddl_cap, wall_cap, 500 if arm == 'C' else None, sl_stop=(arm, heap) in SL_STOP)
     alive = pid_of() is not None
     if alive and arm == 'T' and r.get('stopped') != 'end' and r.get('stopped') != 'ddl_cap' and not r.get('monitor_stop'):
         log('client stopped with the node alive: wait <= 300 s for an OOM')
@@ -475,6 +494,8 @@ def mode_life(arm, heap, names, N, X):
         finish()
         return
     # surviving lifetime
+    so = readf(RD + '/stdout.txt') or ''
+    note('real_oom_in_stdout', [l for l in so.splitlines() if OOM_RE.search(l) and 'CompileCommand' not in l][:5])
     nc = client(SU, 'namecheck', ks, quiet=True)
     note('namecheck', nc)
     time.sleep(10)

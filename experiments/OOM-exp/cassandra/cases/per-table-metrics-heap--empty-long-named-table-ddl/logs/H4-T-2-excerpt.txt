@@ -1,0 +1,29 @@
+== stdout.txt (OOM lines and tail)
+297674:java.lang.OutOfMemoryError: Java heap space
+297675:Dumping heap to /mydata/s4/u14/dumps/H4-T-2/cassandra-1795452346-pid1754889.hprof ...
+297676:Heap dump file created [5088135572 bytes in 42.416 secs]
+297678:# java.lang.OutOfMemoryError: Java heap space
+297679:# -XX:OnOutOfMemoryError="kill -9 %p"
+297680:#   Executing /bin/sh -c "kill -9 1754889"...
+== system.log last GCInspector lines
+WARN  [Service Thread] 2026-11-23T17:30:34,232 GCInspector.java:284 - G1 Old Generation GC in 1093ms.  G1 Old Gen: 4270473848 -> 4172152496; 
+WARN  [Service Thread] 2026-11-23T17:31:09,094 GCInspector.java:284 - G1 Old Generation GC in 33315ms.  G1 Old Gen: 4188929712 -> 4172119520; 
+WARN  [Service Thread] 2026-11-23T17:31:50,102 GCInspector.java:284 - G1 Old Generation GC in 39295ms.  G1 Old Gen: 4201263896 -> 4184539176; 
+== system.log shutdown (SIGTERM by the harness, if any)
+== client.csv first/last
+1795452442689,1,create,95.8,ok,1
+1795452442755,2,create,66.3,ok,1
+1795455059076,8136,create,22024.6,ok,1
+1795455098240,8137,create,39163.6,ok,1
+1795455202531,8138,create,104291.3,error,"ConnectionShutdown('errors=Connection heartbeat timeout after 30 seconds, last_host=127.0.14.1:9042')"
+1795455202534,8138,create,0.3,nohost,"('Unable to complete the operation against any hosts', {})"
+== memory.events
+low 0
+high 0
+max 7065
+oom 0
+oom_kill 0
+== MaxDirectMemorySize / heap
+-Xms4G
+-Xmx4G
+-XX:MaxDirectMemorySize=15872M
