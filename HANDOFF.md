@@ -192,11 +192,13 @@ runs finished; on 2026-11-23 a fresh agent per case wrote §3–§4 from the nod
 **Stage 3 — JIRA check (added and run 2026-11-23, owner).** New phase-2 stage (`OOM-exp/oom-agent-playbook.md`): every
 true positive is checked read-only against Apache JIRA (match level exact / partial / related / none; issue state; fix in
 the pinned version or not; shipped docs that warn, source labelled). Cassandra, 30 true positives (false positives and
-retries excluded): **14 mentioned** (6 exact, 8 partial: 10 open, 3 fixed only after 5.0.9, 1 fixed in 5.0.9 = B8's
-incomplete fix), 3 documented only, **13 new**. Results: `OOM-exp/cassandra/stage3-jira-check/` (README counts, one file
-per case with its query log) and the `_INDEX.md` JIRA (stage 3) column. Owner calls listed in that README (B8 label, R13
-match level, B19 T vs T2, R21, U12, C9, R1-V). R21's open item is answered there: CASSANDRA-20780 fixes it on 6.0/trunk
-incidentally (not in 5.0.9), no issue reports it. Cassandra history clone for fix checks: `~/jira-s3/cassandra-history.git`
+retries excluded), after the owner's rulings of 2026-11-23: **13 mentioned** (6 exact, 7 partial: 10 open, 2 fixed only
+after 5.0.9, 1 `known-fixed (incomplete)` = B8), R21 fixed incidentally in 6.0 (known-fixed, not mentioned), 3 documented
+only, **13 new**. Results: `OOM-exp/cassandra/stage3-jira-check/` (README counts, one file
+per case with its query log) and the `_INDEX.md` JIRA (stage 3) column. Owner rulings (2026-11-23): B8 `known-fixed (incomplete)`
+(new label); R13's issue rated related → `new`; a fix in a newer version counts as known-fixed even if its issue does not
+describe the mechanism → R21 `known-fixed (not in 5.0.9)` (CASSANDRA-20780), which closes wave 5b's R21 item; B19 and U12
+as filed. Cassandra history clone for fix checks: `~/jira-s3/cassandra-history.git`
 on the local node (`/mydata/j1` is gone). Hadoop: no phase-2 cases yet, so no stage 3.
 
 **Other open work:**

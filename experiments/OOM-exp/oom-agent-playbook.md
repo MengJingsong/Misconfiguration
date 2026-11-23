@@ -112,10 +112,14 @@ voted on in JIRA, and nothing is reported upstream (README, owner 2026-11-17).
    (Cassandra: `cassandra-5.0.9`):
    - fix **not** in the pinned version → **fixed upstream, not in <pinned version>** (name the fix versions);
    - fix **in** the pinned version → **regression** (the mechanism came back) or the case's root cause is wrong: say which.
+   - fix in the pinned version that does **not cover** the mechanism (for example it bounds a different unit) → **known-fixed
+     (incomplete)** (owner, 2026-11-23);
+   - a fix in a newer version counts as **known-fixed** even when its issue does not describe the mechanism (fixed
+     incidentally); the match level still records what the issue reports (owner, 2026-11-23).
 5. **Documented.** Check whether the shipped docs warn about the behaviour (Cassandra: `conf/cassandra.yaml`,
    `conf/cassandra-env.sh`, `conf/jvm*-server.options`, `NEWS.txt`, `CHANGES.txt`, `doc/`, at the pinned source).
    If so, the case is also **documented**, with the **source labelled** (file and line, and the quoted sentence).
-6. **Case label** (one): `known-open`, `known-fixed (not in <pinned>)`, `known-wontfix / by design`, `regression`,
+6. **Case label** (one): `known-open`, `known-fixed (not in <pinned>)`, `known-fixed (incomplete)`, `known-wontfix / by design`, `regression`,
    `documented only` (no issue, but the docs warn), or `new` (no exact or partial issue and no doc). Add the match level
    and the issue key(s), for example `known-open (exact: CASSANDRA-11082)`.
 7. **Write back:** the case's stage-3 file `<system>/stage3-jira-check/<case ID>.md` (mechanism checked, queries and hits,
