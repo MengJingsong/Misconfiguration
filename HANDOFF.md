@@ -189,6 +189,16 @@ runs finished; on 2026-11-23 a fresh agent per case wrote §3–§4 from the nod
 - **Node data:** every wave-6 run folder is still on its node (`/mydata/s4/<case>`; B23 keeps a 2.2 GB dump, U14 ≈ 6 GB incl.
   a 2.4 GB dump); delete on the owner's word.
 
+**Stage 3 — JIRA check (added and run 2026-11-23, owner).** New phase-2 stage (`OOM-exp/oom-agent-playbook.md`): every
+true positive is checked read-only against Apache JIRA (match level exact / partial / related / none; issue state; fix in
+the pinned version or not; shipped docs that warn, source labelled). Cassandra, 30 true positives (false positives and
+retries excluded): **14 mentioned** (6 exact, 8 partial: 10 open, 3 fixed only after 5.0.9, 1 fixed in 5.0.9 = B8's
+incomplete fix), 3 documented only, **13 new**. Results: `OOM-exp/cassandra/stage3-jira-check/` (README counts, one file
+per case with its query log) and the `_INDEX.md` JIRA (stage 3) column. Owner calls listed in that README (B8 label, R13
+match level, B19 T vs T2, R21, U12, C9, R1-V). R21's open item is answered there: CASSANDRA-20780 fixes it on 6.0/trunk
+incidentally (not in 5.0.9), no issue reports it. Cassandra history clone for fix checks: `~/jira-s3/cassandra-history.git`
+on the local node (`/mydata/j1` is gone). Hadoop: no phase-2 cases yet, so no stage 3.
+
 **Other open work:**
 - 341 candidate rows are `open` (2026-11-23, after wave 6). All of OC-63…577 are now triaged (2026-11-18 and 2026-11-20 files); the 11-18
   triage's §2 "not reachable at shipped defaults" and §3 "too slow / too much disk" lists were **not** closed (owner

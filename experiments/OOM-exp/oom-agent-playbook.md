@@ -1,4 +1,4 @@
-# OOM agent playbook — phase 2, stages 1 and 2
+# OOM agent playbook — phase 2, stages 1, 2 and 3
 
 *Written 2026-11-17 (owner's redesign).* Phase 2 has one agent role, the **OOM agent**, and two stages.
 Stage 1 picks a candidate and writes its case file with a design that should lead to OOM; stage 2
@@ -10,6 +10,9 @@ follows that design on real nodes and adds the conclusion. Every picked candidat
 | **true positive** | it leads to OOM: the verification protocol's V1–V7 hold (status `verified-OOM`) |
 | **false positive** | it does not lead to OOM: a valid run of the design reached its target load, and the measurements show the endpoint cannot be reached at defaults and an acceptable budget (see "False positive or retry") |
 | **retry** | no final conclusion: worth another try with a better design. The case goes to the retry list |
+
+*Stage 3 added 2026-11-23 (owner):* every **true positive** then gets a read-only **JIRA check** (below): is the verified
+mechanism already reported in the system's Apache JIRA, and in what state.
 
 Evidence rules, measurement, budgets and statuses are in [`verification-protocol.md`](verification-protocol.md);
 this playbook does not restate them. The protocol's finer statuses stay in the case file as detail
@@ -78,6 +81,48 @@ fit the readings.
      `../capacity-enforcement-exp/stage5-oom-clue-find/oom-clue-patterns.md` with source
      `phase 2: <case ID>` and the date.
 6. Stop every process the run started and say what is left on the nodes.
+
+## Stage 3 — JIRA check
+
+*Added 2026-11-23 (owner).* Input: every case whose verdict is **true positive** (false positives and retries are not
+checked). Run by a **fresh** session that did not design or verify the case. **Read only**: nothing is posted, commented or
+voted on in JIRA, and nothing is reported upstream (README, owner 2026-11-17).
+
+1. **What is checked.** The case's verified mechanism as stated in its §4 (holder, trigger, the control that fails or is
+   missing), not the phase-1 clue wording. Read the case file's Summary, §1 (stage 1's JIRA prior art) and §4.
+2. **Search (reproducible).** The system's JIRA REST API (`https://issues.apache.org/jira/rest/api/2/search`, Cassandra:
+   `project = CASSANDRA`; Hadoop: `project in (HADOOP, HDFS, YARN, MAPREDUCE)`), requests ≥ 2 s apart. Search by
+   - code identifiers: class, method, field and config names on the path (`text ~ "…"`);
+   - symptom: `OutOfMemoryError` / OOM / heap / direct memory together with the component;
+   - links: read the closest issues in full (`/rest/api/2/issue/<KEY>?fields=summary,description,comment,resolution,fixVersions,issuelinks,status,created,updated`)
+     and follow their issue links and duplicates.
+   Log **every JQL query with its hit count** and the snapshot date in the case's stage-3 file.
+3. **Match level** of the closest issue(s):
+
+   | Level | Meaning | Counts as "mentioned" |
+   |---|---|---|
+   | **exact** | same holder and same trigger (or the same root cause that the trigger exercises) | yes |
+   | **partial** | same holder with a different trigger, or the OOM symptom reported with this holder but no root cause | yes |
+   | **related** | same component or control only; a different holder or root cause | no |
+   | **none** | nothing on point | no |
+
+4. **Issue state** of each exact/partial issue: `open` (unresolved, any workflow state), `won't fix`, `by design` (closed
+   as intended behaviour, not a problem, invalid), `duplicate` (follow to the target), `cannot reproduce`, or `fixed`.
+   For `fixed`, read the fix commit(s) in the history clone and test `git merge-base --is-ancestor <fix> <pinned tag>`
+   (Cassandra: `cassandra-5.0.9`):
+   - fix **not** in the pinned version → **fixed upstream, not in <pinned version>** (name the fix versions);
+   - fix **in** the pinned version → **regression** (the mechanism came back) or the case's root cause is wrong: say which.
+5. **Documented.** Check whether the shipped docs warn about the behaviour (Cassandra: `conf/cassandra.yaml`,
+   `conf/cassandra-env.sh`, `conf/jvm*-server.options`, `NEWS.txt`, `CHANGES.txt`, `doc/`, at the pinned source).
+   If so, the case is also **documented**, with the **source labelled** (file and line, and the quoted sentence).
+6. **Case label** (one): `known-open`, `known-fixed (not in <pinned>)`, `known-wontfix / by design`, `regression`,
+   `documented only` (no issue, but the docs warn), or `new` (no exact or partial issue and no doc). Add the match level
+   and the issue key(s), for example `known-open (exact: CASSANDRA-11082)`.
+7. **Write back:** the case's stage-3 file `<system>/stage3-jira-check/<case ID>.md` (mechanism checked, queries and hits,
+   closest issues table with match level, state and fix-in-pinned result, documented source, label, one-paragraph
+   reason, snapshot date); the case's `_INDEX.md` **JIRA (stage 3)** cell; and the counts in
+   `<system>/stage3-jira-check/README.md` (true positives checked; mentioned = exact + partial, split by state; new;
+   documented).
 
 ## False positive or retry
 
