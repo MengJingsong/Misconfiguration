@@ -202,10 +202,12 @@ as filed. Cassandra history clone for fix checks: `~/jira-s3/cassandra-history.g
 on the local node (`/mydata/j1` is gone). Hadoop: no phase-2 cases yet, so no stage 3.
 
 **Other open work:**
-- 341 candidate rows are `open` (2026-11-23, after wave 6). All of OC-63…577 are now triaged (2026-11-18 and 2026-11-20 files); the 11-18
+- 342 candidate rows are `open` (2026-11-23, after wave 6 and OC-579). All of OC-63…577 are now triaged (2026-11-18 and 2026-11-20 files); the 11-18
   triage's §2 "not reachable at shipped defaults" and §3 "too slow / too much disk" lists were **not** closed (owner
   closed only the already-covered list), and the 11-20 triage's "covered" list is not closed either.
-- Retry list: 2 rows `open` (R19, with its proposed change; B22 from wave 6).
+- Retry list: 3 rows `open` (R19, with its proposed change; B22 from wave 6; B8, a true positive re-opened on
+  2026-11-23 for a deployment-level OOM).
+- Candidate list: OC-579 (vector literal write path, follow-up of U8) added 2026-11-23, `open`.
 - Hadoop: JIRA OOM report built; stage 5 runs with Yang's and Jingsong's batches (`hadoop/PROCEDURE.md` 5b);
   no Hadoop phase 2 yet. Jingsong's Hadoop stage-4 nodes `pc41`, `pc39`, `pc29` failed SSH host-key checks on
   2026-11-18 (probably reallocated): a new Hadoop stage-4 node needs `jingsong/setup-node.sh`.
