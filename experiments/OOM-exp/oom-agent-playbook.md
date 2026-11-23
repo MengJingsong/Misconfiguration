@@ -36,6 +36,7 @@ on 2026-11-17; JIRA now feeds phase 1's clue patterns).
    "what to change" is concrete. Before picking, check JIRA for prior art (read only; nothing is posted
    to JIRA or reported upstream): a known-fixed bug is picked only as a positive control. For each row
    you pass over on purpose, write `skipped: <reason>` in its Status (disk-only, needs corrupt input,
+   needs non-default constraint (rule 2026-11-23),
    overshoot of one item already capped, small heap-derived cap, duplicate). Rows you simply did not get
    to stay `open`.
 2. **Mark it.** Candidate list: Status `picked: <case ID>`. Retry list: Status `picked again: <case ID>`.
@@ -139,9 +140,11 @@ A run that does not reach OOM is a **false positive** only when all of these hol
   budget;
 - no realistic fault, multiplicity or overlap named in the design is left untried.
 
-A gap without OOM (`verified-gap`: an overshoot, a leak or service loss) and an OOM only with raised
-capacities or a tightened budget (`reproduced-OOM`) are **retry**: the mechanism is real but the design
-has not reached OOM at defaults.
+A gap without OOM (`verified-gap`: an overshoot, a leak or service loss) and an OOM only with a tightened
+budget (`reproduced-OOM`) are **retry**: the mechanism is real but the design has not reached OOM at
+defaults. **Default constraints only (owner, 2026-11-23):** an OOM reached only with a constraint changed from
+its default in the test arm is a **false positive**, not a retry; OOM-exp does not consider such cases
+([`verification-protocol.md`](verification-protocol.md), "Default constraints only").
 
 ## The phase 2 retry list format
 

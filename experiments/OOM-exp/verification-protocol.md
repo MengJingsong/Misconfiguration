@@ -231,6 +231,29 @@ Example Status cells: `verified-gap · service-loss · deployment`,
 written to its row of the phase 1 OOM candidate list; if no OOM clue pattern covers its shape, a pattern is
 added ([`oom-agent-playbook.md`](oom-agent-playbook.md), stage 2 step 5).
 
+### Default constraints only (rule, owner 2026-11-23)
+
+OOM-exp does **not consider cases where users change a constraint from its default value**. This makes V6 a scope
+rule, not only a condition of `verified`:
+
+- **What is a constraint:** the capacity settings of V6 (pools, caches, queues, size/count thresholds, guardrails: the
+  rows of a protection map). Every one stays at its shipped default, resolved for the node and heap used, in the test
+  arm. A guardrail or limit that ships disabled stays disabled in the test arm.
+- **Not constraints, still allowed:** non-capacity settings chosen as a documented deployment choice (topology,
+  `num_tokens`/token placement, compaction strategy, client behaviour, schema and workload), labelled in the design
+  as today; and the **memory budget** (heap, JVM direct limit, container limit), which is set per V7 (≥ 512 MiB,
+  2 GiB ideal, search upward). An explicit direct limit chosen as a budget (as U13's) is a budget, not a constraint.
+- **Control and intervention arms** may still change a constraint (V6's existing exception), for example enabling a
+  guardrail or applying a fix.
+- **Stage 1:** a candidate or retry whose endpoint needs a non-default constraint is not designed: Status
+  `skipped: needs non-default constraint`.
+- **Stage 2:** if the endpoint is reached only with a non-default constraint in the test arm, the verdict is **false
+  positive** (not retry); `reproduced-OOM` / `reproduced-gap` caused by a custom constraint no longer lead to a retry.
+  `reproduced-*` caused only by a tightened budget is still a retry (V7: search upward).
+- **Earlier records:** the custom-regime cases (R1, C1 runs before run 4, R2–R4, the commitlog + hints and row cache +
+  index summary runs) are already superseded, closed or skipped; no true positive depends on a non-default
+  constraint. They stay as history.
+
 ### Defaults and acceptable budget (amended 2026-11-11)
 
 New evidence: the R1–R4 recheck (Cassandra, 2026-11-11) met V1–V5 for four

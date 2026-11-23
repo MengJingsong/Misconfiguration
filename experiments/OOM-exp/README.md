@@ -68,6 +68,11 @@ Phase 2 has **one agent role, the OOM agent, and three stages** (stage 3 added 2
 | **Stage 2 — verify** | A fresh OOM-agent session follows the frozen design on real nodes, builds the harness, records the runs and adds the conclusion | the verdict: **true positive** (leads to OOM; V1–V7 met), **false positive** (does not), or **retry** (no final conclusion; back to the retry list) |
 | **Stage 3 — JIRA check** *(added 2026-11-23)* | A fresh session checks each **true positive** against the system's Apache JIRA (read only): match level (exact / partial / related / none), issue state, whether a fix is in the pinned version, and whether the shipped docs already warn (source labelled) | `<system>/stage3-jira-check/<case ID>.md`, the `_INDEX.md` JIRA column, counts in `<system>/stage3-jira-check/README.md` |
 
+**Scope rule (owner, 2026-11-23): default constraints only.** Cases where users change a constraint (capacity setting)
+from its default are not considered: stage 1 skips them, and an OOM reached only that way is a false positive. Memory
+budgets (heap, direct limit, container) still follow V7; control and intervention arms may change a constraint. See
+[`verification-protocol.md`](verification-protocol.md), "Default constraints only".
+
 Every picked candidate counts as estimated positive after stage 1, so the verdicts give each phase-1
 agent's true-positive rate. JIRA is read in stage 1 for prior art and in stage 3 to check every true positive (2026-11-23); nothing is posted. The verdicts
 of cases filed before 2026-11-17 were mapped from their protocol status

@@ -19,7 +19,8 @@ could lead to OOM** and writes them as **OOM candidates** (stage 5).
 **Phase 2, [`OOM-exp/`](OOM-exp/README.md)** (Target 3; Cassandra so far). An **OOM agent** picks
 candidates (and earlier cases worth a retry), writes a case file with a design that should lead to OOM
 (stage 1), then a fresh OOM-agent session runs that design and concludes **true positive**, **false
-positive** or **retry** (stage 2).
+positive** or **retry** (stage 2). Every true positive is then checked read-only against Apache JIRA (stage 3).
+Only default constraints are considered (rule 2026-11-23).
 
 ## 2. Phase 1 — functionality
 
@@ -44,9 +45,11 @@ positive** or **retry** (stage 2).
 | Stage 1 — pick and design (OOM agent) | Picks from the candidate list and the retry list (JIRA prior-art check, skips recorded); writes the case file: the phase-1 case file, a frozen design solution, conclusion `pending` | [`oom-agent-playbook.md`](OOM-exp/oom-agent-playbook.md), [`_TEMPLATE-case.md`](OOM-exp/_TEMPLATE-case.md) |
 | Technique notes | Convergence (custom / default), combo, bypass: shapes for a design | [`custom-convergence`](OOM-exp/custom-convergence-playbook.md), [`default-convergence`](OOM-exp/default-convergence-playbook.md), [`combo`](OOM-exp/combo-playbook.md), [`bypass`](OOM-exp/bypass-playbook.md) |
 | Stage 2 — verify (fresh OOM agent) | Runs the frozen design, records harness and runs, adds the conclusion | oom-agent playbook, [`verification-protocol.md`](OOM-exp/verification-protocol.md) |
-| Verdict | **true positive** (OOM, V1–V7 met) / **false positive** (a valid design cannot reach OOM) / **retry** | oom-agent playbook "False positive or retry" |
+| Verdict | **true positive** (OOM, V1–V7 met) / **false positive** (a valid design cannot reach OOM, or OOM only with a non-default constraint) / **retry** | oom-agent playbook "False positive or retry" |
+| Scope rule (2026-11-23) | Default constraints only: stage 1 skips a candidate that needs a non-default constraint; budgets follow V7; control/intervention arms may change one | [`verification-protocol.md`](OOM-exp/verification-protocol.md) "Default constraints only" |
+| Stage 3 — JIRA check (fresh session, 2026-11-23) | Each true positive checked read-only against Apache JIRA: match level, issue state, fix in the pinned version, documented source; one label per case | oom-agent playbook, `OOM-exp/<system>/stage3-jira-check/` |
 | Phase 2 retry list | Cases worth another try, with what a better design should change | `OOM-exp/<system>/phase2-retry-list.md` |
-| Case index | Every case with its verdict and phase-1 case file | [`OOM-exp/cassandra/cases/_INDEX.md`](OOM-exp/cassandra/cases/_INDEX.md) |
+| Case index | Every case with its verdict, phase-1 case file and stage-3 JIRA label | [`OOM-exp/cassandra/cases/_INDEX.md`](OOM-exp/cassandra/cases/_INDEX.md) |
 
 ## 4. Links between the experiments
 
@@ -90,6 +93,8 @@ flowchart TD
     TP["True positive"]
     FP["False positive"]
     RT["Retry"]
+    O3["Stage 3: JIRA check"]
+    JC[("Stage-3 JIRA check files")]
   end
 
   S1 --> S2
@@ -117,8 +122,10 @@ flowchart TD
   O2 -.->|verdict| CL
   O2 -.->|new holder| CL
   TP -.->|new pattern| CPAT
+  TP --> O3
+  O3 --> JC
 
-  class CF,JR,CPAT,CL,RL,CASE store
+  class CF,JR,CPAT,CL,RL,CASE,JC store
   class TP verdict
 ```
 
@@ -137,3 +144,4 @@ Notes on the chart:
 | 2026-11-17 | **Redesign (owner):** the 2026-11-16/17 linking machinery and phase 2's lead sources removed; phase 1 gains stage 5 (OOM clue find: JIRA OOM reports → clue patterns; autonomous and guided agents → candidate list); phase 2 becomes the OOM agent's two stages with true positive / false positive / retry and a retry list; data-flow tracing dropped |
 | 2026-11-18 | Candidate list status vocabulary gains `closed: covered by <case ID> (<verdict>)` (owner); no step or arrow changed |
 | 2026-11-20 | New lead source (owner): stage 2 may propose a holder its runs revealed but did not claim; with approval it becomes a candidate row with Agent `phase-2 (<case ID>)` (first: OC-578 from R12). §4 row and a dotted `new holder` arrow O2 → CL added |
+| 2026-11-23 | Phase 2 gains **stage 3, JIRA check** (owner): every true positive checked read-only against Apache JIRA; new chart nodes O3 and JC; case index gains a JIRA column. Scope rule (owner): default constraints only, an OOM needing a non-default constraint is a false positive and stage 1 skips such candidates (verdict row and new scope row) |
