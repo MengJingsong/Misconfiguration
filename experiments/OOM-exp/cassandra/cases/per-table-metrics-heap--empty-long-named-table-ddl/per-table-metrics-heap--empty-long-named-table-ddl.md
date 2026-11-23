@@ -7,18 +7,28 @@
 | Phase-1 case file | [`table_name_length-validatetablename-name_length--autonomous`](../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/table_name_length-validatetablename-name_length--autonomous.md) (also, for OC-400/OC-403, [`schemaconstants_name_length-validatekeyspacename-keyspacename--autonomous`](../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/schemaconstants_name_length-validatekeyspacename-keyspacename--autonomous.md)); stage-4 result: [`results/table_name_length-validatetablename-name_length--autonomous.md`](../../../../capacity-enforcement-exp/cassandra/stage4-runtime-verification/results/table_name_length-validatetablename-name_length--autonomous.md) |
 | System / pinned source | Cassandra 5.0.9 (`systems/cassandra/source/`, `build.xml:36` `base.version` 5.0.9); on pc99 `/mydata/s4/cassandra-base` (built tree, no `.git`; jar `build/apache-cassandra-5.0.9-SNAPSHOT.jar` sha256 `570b5249d9b9a43f6809eb3da562737492192026f974b2edbd20e94bea90176e`, read 2026-11-21 08:04), OpenJDK 11.0.33 |
 | Stage 1 (design) | OOM-agent stage-1 session (subagent), 2026-11-21 08:02–≈ 08:50 America/New_York; nothing run (read-only check of pc99 only) |
-| Stage 2 (verify) | pending (a fresh OOM-agent session; planned 2026-11-21 ≈ 09:00–14:00 EST on pc99) |
-| Verdict | `pending` |
+| Stage 2 (verify) | runs: stage-2 OOM-agent session, 2026-11-21 08:18–11:18 EST on pc99 (12 lifetimes; the session was cut off before the write-up); analysis and write-up: a fresh stage-2 session (Claude Opus 5.5, `claude-opus-5-5`), 2026-11-23, from the node logs, no new runs |
+| Verdict | **true positive** — `verified-OOM · deployment` (unprotected: configuration, `tables_fail_threshold` −1; accumulation, no byte bound); largest failing heap 2 GiB (3/3), 4 GiB service loss without OOM in 1 lifetime stopped early (§4) |
 
 ## Summary
 
-- **Conclusion:** pending (stage 2).
+- **Conclusion:** true positive, `verified-OOM · deployment`. On a stock 5.0.9 node with a 2 GiB heap and every constraint at its
+  default, an ordinary role creating empty tables with 222-character names (48-character keyspace) killed the node with
+  `OutOfMemoryError: Java heap space` 3/3 at 3,975–3,978 tables, without writing a row (live heap +0.480 MiB per table,
+  98 % of the heap live at the end, 85 % of the dump in per-table metrics/JMX/name classes). The same CREATEs with a DROP 500
+  behind stayed at 0.16 × heap (0/3); the shipped `tables_fail_threshold` set to 1,900 stopped it at 0.45 × heap (0/3).
+  Short names OOM at 5,736 tables (0.336 MiB per table). At 4 GiB the one lifetime reached 8,027 tables in GC service loss
+  (0.95–0.98 × heap live) but was stopped by the harness before an OOM; largest failing heap: 2 GiB.
 - **Root cause (claimed):** every table a node loads carries eager heap state that no budget counts: `TableMetrics` registers ≈ 112
   metrics twice (a `Table` and a `ColumnFamily` alias name), each with its own `MetricName` strings, JMX `ObjectName` and, for
   histograms and timers, two `AtomicLongArray`s of ≈ 2.6 KB each; every name string embeds the keyspace and table name, so the
   cost grows by ≈ 570 B per name character per table. The only control on the table count, `tables_fail_threshold`, ships
   disabled (−1), and the 222-character name cap bounds one name, not the sum. So ≈ 0.45–0.5 MiB of heap per empty
   long-named table accumulates with the table count until the heap is gone.
+- **Root cause (measured, stage 2):** confirmed, at 0.480 MiB per long-named table (0.336 with short names; ≈ 574 B per name
+  character per table). The state is 214 MBeans per table: `ObjectName`/property strings carrying the names (`byte[]` ≈ 205 KB
+  per table) and reservoir/histogram `long[]` (≈ 138 KB per table). The `MetricName` objects themselves are not retained (0 live).
+  The guardrail at −1 lets the count reach heap / b.
 - **Design in one line:** on a stock 5.0.9 node with a 2 GiB heap, an ordinary role creates empty tables with 222-character
   names in a keyspace with a 48-character name, one at a time, without writing any row; expect a Java heap OOM after
   ≈ 3,500–4,600 tables (3/3). Matched control = the same CREATE sequence with a DROP 500 tables behind (live tables ≤ 500, 3/3,
@@ -425,8 +435,303 @@ sha256 of §1–§2 at freeze: `968539d5b819ac35d781ff90ecd46328fc68f42ca49d2e72
 
 ## 3. Runs (stage 2)
 
-pending
+All lifetimes ran on 2026-11-21 08:18–11:18 EST on `pc99`, by the stage-2 session of that day, which was cut off before
+writing up. This section and §4 were written on 2026-11-23 by a fresh stage-2 session (Claude Opus 5.5, `claude-opus-5-5`)
+from the node's logs. That session ran nothing, started no process and deleted nothing on `pc99`. Freeze hash checked
+2026-11-23: the lines of §1–§2 hash to `968539d5…1dee8e2f`, equal to the frozen value. The case file's last change before
+the runs was at 08:12:53 EST (file mtime), and the first lifetime started at 08:18:43 EST, so the design predates every
+reading. Times are America/New_York. The node logs are in MST (two hours behind), and the Cassandra logs are in UTC.
+
+### 3.1 Environment
+
+- **Node `pc99`** = `node4.jason92-326665` (UMass, x86_64, 32 cores, 125 GiB RAM, swap kept at 0 for the JVM by
+  `MemorySwapMax=0`, cgroup v2), OpenJDK 11.0.33. Before every lifetime, the harness checked for other JVMs: `cotenancy:
+  {"daemons": "none"}` for all twelve, with `MemAvailable` 127,173–127,263 MiB. One measured node at a time; the client ran
+  on the same node. Re-checked 2026-11-23 09:23 MST: no `java` process, no `/dev/shm/u14`, `/mydata` 710 GiB free.
+- **Build:** `/mydata/s4/u14/cassandra` (copy of `/mydata/s4/cassandra-base`), `build.xml` `base.version` 5.0.9, jar
+  `apache-cassandra-5.0.9-SNAPSHOT.jar` sha256 `570b5249…a90176e` (re-read 2026-11-23, equal to §2.3). Unmodified: no
+  agents, no patches.
+- **Configuration (every lifetime, `summary.json` → `settings`, `start`):** read back `authenticator
+  PasswordAuthenticator`, `authorizer AllowAllAuthorizer`, `role_manager CassandraRoleManager`, `tables_warn_threshold -1`,
+  `tables_fail_threshold -1` (I: `1900`; S0's second start: `1050`), `keyspaces_fail_threshold -1`,
+  `columns_per_table_fail_threshold -1`, `memtable_allocation_type heap_buffers`, `memtable_heap_space 512MiB` (4 GiB:
+  `1024MiB`), `key_cache_size 100MiB`, `counter_cache_size 50MiB`, `prepared_statements_cache_size 10MiB` (4 GiB:
+  `16MiB`), `auto_snapshot true`, `num_tokens 16`: `ok: true` in all twelve. JVM flags checked in every lifetime
+  (`flags_ok: true`): `-Xms = -Xmx` 2G (4G), `-XX:MaxDirectMemorySize=15872M`, G1 with `G1HeapRegionSize=16m`,
+  `AlwaysPreTouch`, `HeapDumpOnOutOfMemoryError`, `OnOutOfMemoryError=kill -9 %p`. Scope `memory.max` 8 GiB (2 GiB heap)
+  and 10 GiB (4 GiB heap), `memory.swap.max` 0. Roles: `u14` has `superuser = false` in every lifetime. Data was kept on
+  `/mydata` by the §2.5 disk rule: S0's fit was t(n) = 40.9 ms + 28.2 ms per 1,000 tables, so Σ to 4,600 tables is 8.1 min,
+  under 25 min, and `shm: false` in every lifetime.
+- **Harness** (`harness/`, identical to `/mydata/s4/u14/harness/`, all files diffed 2026-11-23): `run.py` (one lifetime),
+  `client.py`, `Jmx.java` (the §2.5 sampler: fixed ObjectNames, `getMBeanCount()`), `HprofScan.java` (the §2.5 scanner,
+  written in Java as §2.5 allows), `instrument-check.sh` + `Hold.java`, `analyze.py`, `excerpts.sh`, `plan.sh` +
+  `plan-main.txt` (the sequence after `H2-T-1`). Instrument check passed (`logs/instrument-summary.txt`: 1,001 marker
+  `byte[]` ≥ 1,000, exactly 500 `long[330]`).
+- **Logs:** full logs on `pc99:/mydata/s4/u14/logs/<label>/`. Excerpts in `logs/`: `<label>-summary.json`,
+  `-session.log`, `-checkpoints.jsonl` (histogram totals, K, MBeans per checkpoint), `-excerpt.txt` (OOM lines, last GC
+  lines, client first/last rows, `memory.events`, heap flags), `-scan-oom.json` / `-scan-end.json` (HprofScan of the dump),
+  `-tail-per-minute.txt` (the last 15 min of the sampler for T, H4, S8), `hist/` (top 50 classes of the s0, last and end
+  class histograms), `analyze.jsonl` (`analyze.py` over all twelve lifetimes, re-run 2026-11-23; the ten earlier lines
+  are unchanged), `plan-main.out` (the sequence log), `instrument-*.{txt,json}`.
+- **Dumps:** `plan.sh` deleted each lifetime's `.hprof` right after `run.py` had scanned it. The design kept them until the
+  write-up (§2.5), so this is a deviation (§3.4). Only `H2-T-1`'s dump is left
+  (`pc99:/mydata/s4/u14/dumps/H2-T-1/cassandra-1795267330-pid1712692.hprof`, 2.54 GB). Each dump was scanned in full
+  before it was deleted. P3 therefore comes from the five dump scans (T-1..3 and S8-1 at the OOM; H4-T-1, C-1 and I-1 at
+  the end), plus the class histograms.
+
+### 3.2 Runs (in order)
+
+Shakedown **S0** (not a reading, 08:18–08:22): 1,000 long-named tables created at 2 GiB. L = 64.7 → 290.9 → 516.8 MiB at
+0 / 500 / 1,000 tables, b = 0.452 MiB per table, 214 MBeans per table, names read back 48 / 222. After a restart with
+`tables_fail_threshold: 1050`, `create 1001 1100` as `u14` gave **50 ok + 50 `rejected`** ("Guardrail tables violated:
+Cannot have more than 1050 tables"), and `tablecount` read 1,050. So the intervention path works and `u14` is an ordinary
+user. `H2-T-1` then fixed **N_ctl = 3,978** and **X = floor(0.5 × 3,978 / 100) × 100 = 1,900** (`harness/plan-main.txt`,
+written 08:40 before `H2-C-1`).
+
+| Label | Arm | Heap | Names | EST (life) | Tables created (ok) | Stop reason | L(n) checkpoints (MiB at 0 / 1,000 / 2,000 / 3,000 / last) | b MiB/table (all / from 500) | End reading | Validity |
+|---|---|---|---|---|---|---|---|---|---|---|
+| H2-T-1 | T | 2G | 48/222 | 08:22–08:40 | **3,978** (last ok 08:38:57) | **heap OOM** (`java.lang.OutOfMemoryError: Java heap space`, dump 2.54 GB, `kill -9`) | 64.7 / 516.8 / 965.4 / 1,519.9 / 1,745.6 @3,500 | 0.480 / 0.487 | old-gen after GC 2,009.7 MiB = **0.981** × heap | ok |
+| H2-C-1 | C | 2G | 48/222 | 08:40–08:53 | 3,978 + 3,478 DROPs | end of plan (all 3,978) | 64.7 / 292.8 / 303.5 / 312.6 / 317.7 @3,500 | 0.046 / **0.0094** | U_end 321.7 MiB = 0.157; K 500 | ok |
+| H2-I-1 | I (X = 1,900) | 2G | 48/222 | 08:53–08:57 | **1,900**, 2,078 `rejected` | end of plan (3,978 attempts) | 64.7 / 516.8 / – / – / 741.6 @1,500 | 0.451 / 0.451 | U_end 925.3 MiB = 0.452; K 1,900 | ok |
+| H2-T-2 | T | 2G | 48/222 | 08:57–09:15 | **3,975** (09:14:08) | **heap OOM** (dump 2.54 GB) | 64.7 / 516.8 / 965.4 / 1,519.7 / 1,745.5 | 0.480 / 0.487 | 2,007.5 MiB = **0.980** | ok |
+| H2-C-2 | C | 2G | 48/222 | 09:15–09:27 | 3,978 + 3,478 DROPs | end | 64.7 / 289.8 / 302.6 / 311.8 / 316.8 | 0.046 / **0.0095** | 324.4 MiB = 0.158; K 500 | ok |
+| H2-I-2 | I | 2G | 48/222 | 09:27–09:31 | **1,900**, 2,078 rejected | end | 64.7 / 516.8 / – / – / 741.7 | 0.451 / 0.451 | 925.2 MiB = 0.452; K 1,900 | ok |
+| H2-T-3 | T | 2G | 48/222 | 09:31–09:49 | **3,976** (09:48:07) | **heap OOM** (dump 2.55 GB) | 64.7 / 516.8 / 965.4 / 1,520.1 / 1,745.9 | 0.480 / 0.487 | 2,012.5 MiB = **0.983** | ok |
+| H2-C-3 | C | 2G | 48/222 | 09:49–10:01 | 3,978 + 3,478 DROPs | end | 64.7 / 289.8 / 302.2 / 311.4 / 316.5 | 0.046 / **0.0091** | 320.8 MiB = 0.157; K 500 | ok |
+| H2-I-3 | I | 2G | 48/222 | 10:01–10:06 | **1,900**, 2,078 rejected | end | 64.7 / 516.8 / – / – / 741.6 | 0.451 / 0.451 | 925.2 MiB = 0.452; K 1,900 | ok |
+| H4-T-1 | T (budget search) | 4G | 48/222 | 10:05–10:53 | **8,027** (8,026 open at the end dump) | **service-loss stop by the harness**: 10 min ≥ 90 % GC at 10:51:54 (44.6 min of DDL). Then end checkpoint, `jcmd` dump, **SIGTERM**. **No OOM** | 64.9 / 517.0 / 969.0 / 1,529.9 / 3,983.1 @8,000 | 0.483 / 0.484 | U_end 3,884.5 MiB = 0.948 (n8000: 0.972); old-gen after GC max 4,020.5 MiB = 0.98 | ok (§3.4) |
+| S8-1 | dial (short names) | 2G | 2/6 | 10:53–11:18 | **5,736** (11:16:34) | **heap OOM** (dump 2.70 GB) | 64.7 / 381.5 / 698.8 / 1,009.2 / 1,871.2 @5,500 | **0.336** / 0.339 | 2,008.9 MiB = **0.981** | ok |
+
+Every lifetime: K (`count(*)` in `system_schema.tables`) equals the client's ok count at every checkpoint. C holds K = 500
+from 500 tables on. `memory.events` `oom_kill 0` and `oom 0` in all twelve, and `max 0` in all but H4-T-1 (§3.4). RssAnon
+peak 2.66–2.79 GiB at 2 GiB and 5.0 GiB at 4 GiB, Shmem ≤ 4 MiB. MBeans: 12,073 at s0 and **214 per table** in every T, I
+and S8 lifetime (`K_vs_ok`: 119,073 at 500 … 1,724,073 at 8,000 tables). Names 48 / 222 were read back
+(`system_schema.tables`) in S0, every C, every I and H4-T-1. The lifetimes that died have no read-back, but their dumps carry
+the marker (T) or lack it (S8, §3.3).
+
+### 3.3 Readings
+
+**T at 2 GiB (P1, P2).** L(n) is linear: 64.7 → 290.9 → 516.8 → 741.7 → 965.4 → 1,189.4 → 1,519.9 → 1,745.6 MiB at 0, 500,
+…, 3,500 tables, identical to ±0.4 MiB across the three repetitions. **b = 0.480 MiB per table** (0.487 from 500). The step of
++330 MiB between 2,500 and 3,000 tables, against +224 per 500 elsewhere, is the first five-minute `SizeEstimatesRecorder`
+pass. It fills the `system.size_estimates` / `table_estimates` memtables (histogram diff n2500 → n3000: `byte[]` +134,
+`HeapByteBuffer` +36, `BufferCell` +10 MiB). D3 (`AllMemtablesOnHeapDataSize`) then sits at **≤ 170.7 MiB**, which is the
+memtable cleaner threshold (512 MiB × 1/3; flushes logged `Reason: MEMTABLE_LIMIT`). DDL latency medians per 500 tables:
+48, 64, 81, 98, 115, 136, 162 ms, then 598 ms for 3,501–3,978. The last CREATEs took 12–47 s: the runs were GC-bound, with
+≥ 90 % of wall time in GC over 60 s for the last 0.5–0.8 min (gc 66 → 96 % per minute from ≈ 3,640 tables on,
+`logs/H2-T-*-tail-per-minute.txt`). Old-gen after collection at the last sample: 2,007.5–2,012.5 MiB of 2,048. The last
+`GCInspector` lines show full GCs recovering ≈ 10–20 MB (`G1 Old Gen: 2,119,831,864 -> 2,109,699,016`).
+
+**Initiating failure (V5).** In stdout of all three T lifetimes: `java.lang.OutOfMemoryError: Java heap space`, then
+`Dumping heap to …`, `Heap dump file created [2,540,062,295 / 2,542,044,136 / 2,546,564,516 bytes]`, then `Executing
+/bin/sh -c "kill -9 <pid>"` (`logs/H2-T-*-excerpt.txt`). Nothing reached `system.log`, because the kill came first. The
+throwing thread's stack is in the dump (the only trace with `OutOfMemoryError.<init>`):
+- T-2: `PerDiskMemtableFlushWriter`, `Slice.make` ← `RangeTombstoneList.rangeTombstone` ← `RowAndDeletionMergeIterator` ←
+  `SortedTableWriter.append:148` ← `Flushing$FlushRunnable.writeSortedContents:171`. This is a memtable flush. The last
+  log line before it is `Enqueuing flush of system.table_estimates, Reason: MEMTABLE_LIMIT, Usage: 93.530MiB`.
+- T-3: the same flush path (`Columns.inOrderInclusionTester` ← `BTreeRow.filter` ← `SortedTableWriter.append:148`).
+- T-1: no trace in its dump carries `OutOfMemoryError.<init>` (70 traces). The request thread is parked in
+  `SchemaKeyspace.flush:367` ← `SchemaKeyspace.applyChanges:1428` ← `AlterSchemaStatement.execute`, waiting on the
+  schema flush of CREATE 3,979.
+
+In every case, a background allocation failed after the heap had filled with the standing per-table state, which is the
+second outcome §2.1 predicted ("a GC-starved background thread").
+
+**Dumps at the OOM (P3)** (`logs/H2-T-*-scan-oom.json`):
+
+| | T-1 | T-2 | T-3 |
+|---|---|---|---|
+| `TableMetrics` / `ColumnFamilyStore` instances | 4,026 / 4,026 = **3,978 + 48** system tables | 4,023 = 3,975 + 48 | 4,024 = 3,976 + 48 |
+| total shallow (live dump) | 2,013.5 MiB | 2,014.1 MiB | 2,018.1 MiB |
+| marker `byte[]` (contain `x` × 64: strings carrying the table name) | 2,175,836 arrays, **789.4 MiB = 39.2 %** = 0.198 MiB per table | 794.1 MiB = 39.4 % | 794.3 MiB = 39.4 % |
+| `long[]` (reservoir and histogram buckets) | 551 MiB (of which `long[330]` 72,664 = 184.1 MiB) | 547 MiB | 549 MiB |
+| JMX and metric objects (`ObjectName` 863,371; `ObjectName$Property` 3.44 M; `NamedObject` / `StandardMBeanSupport` 863 k; `LongAdder`, `EWMA`, `JmxGauge`…; `String`, map nodes) | ≈ 370 MiB | ≈ 370 MiB | ≈ 370 MiB |
+| per-table classes (marker `byte[]` + `long[]` + JMX/metric/schema classes + `String` + map nodes) | **1,707.8 MiB = 84.8 %** | 84.8 % | 84.7 % |
+| memtable classes (`HeapByteBuffer`, `BufferCell`, `BTreeRow`…: D3) | 124.8 MiB (6.2 %) | 125.6 MiB | 127.1 MiB |
+
+Per-class slopes of the histograms from s0 to 3,500 tables (`analyze.jsonl`), in bytes per table and instances per table:
+
+| Class | B / table | instances / table |
+|---|---|---|
+| `byte[]` | 209,750 | 644 |
+| `long[]` | 141,288 | 69 |
+| `ObjectName$Property` | 20,496 | 854 |
+| `String` | 15,240 | 635 |
+| `ObjectName$Property[]` | 13,696 | 428 |
+| `HeapByteBuffer` (D3) | 11,795 | 246 |
+| `HashMap$Node` | 10,706 | 335 |
+| `ObjectName` | 6,848 | 214 |
+| `ConcurrentHashMap$Node` | 6,408 | 200 |
+| `LongAdder` | 6,112 | 191 |
+| `NamedObject` | 5,136 | 214 |
+| `StandardMBeanSupport` | 5,136 | 214 |
+| `EWMA` | 5,040 | 105 |
+
+The per-class slopes total 503.6 KB per table. `CassandraMetricsRegistry$MetricName` has **0** live instances in every
+histogram and dump: the `MetricName` objects are not retained, and the name copies live in the JMX `ObjectName` /
+`Property` strings and the registry's keys.
+
+**C (P4, V2).** 3/3 survived the same 3,978 CREATEs with the same names, order and client, plus a DROP 500 behind (3,478
+DROPs, all ok). L stays at 290–318 MiB from 500 tables on, with a slope after 500 of **0.0091–0.0095 MiB per CREATE+DROP
+pair** and U_end 320.8–324.4 MiB = **0.157–0.158 × heap**. MBeans stay at 119,073. D3 ≤ 8.4 MiB, worst 60 s GC fraction
+1.1–1.2 %, no OutOfMemoryError. DDL latency 53 → 71 ms. C-1's end dump: `TableMetrics` / `ColumnFamilyStore` 548 = 500 + 48.
+The small residual (+28.9 MiB from 1,000 tables to the end, ≈ 10 KB per pair) is mostly 38,714 queued
+`ScheduledFutureTask`s of `AbstractAllocatorMemtable$1`, plus `byte[]` / `String` / `HashMap$Node`. `TableMetadata`
+instances are 4,075 against 548 live stores, which suggests the metadata of dropped tables is still referenced. That is ≈ 1 %
+of the T slope, and at that rate it would take ≈ 170,000 pairs to fill 2 GiB. It is not claimed and was not pursued.
+
+**I (P5, V4).** 3/3: exactly **1,900 ok** and then **2,078 `rejected`** (`Guardrail tables violated: Cannot have more than
+1900 tables, aborting the creation of table t01901…`). No other error and no OutOfMemoryError. L(1,500) = 741.6 MiB, as in
+T. **U_end 925.2–925.3 MiB = 0.452 × heap**, flat after the bound: the last GCInspector lines show
+`G1 Old Gen: 970,209,336 -> 970,209,264`, with no growth from the 2,078 rejected statements. b = 0.451 MiB per table.
+I-1's end dump: 1,948 `TableMetrics` = 1,900 + 48, marker `byte[]` 352.7 MiB (38.2 %), per-table classes 86.4 %. Useful
+work is stated plainly: the bound stops table creation at 1,900 by design.
+
+**H4-T-1 (4 GiB, P6).** Same T workload to 12,000. L grew from 64.9 to 3,983.1 MiB at 8,000 tables (**b = 0.483**, 214 MBeans
+per table). The per-1,000-table latency medians were 57, 90, 126, 163, 204, 246, 291 and then 839 ms, with 2.9 s for
+8,001–8,027. GC per minute rose from 51–65 % (10:37–10:41) to **87–98 %** (10:42–10:51), with 99–111 full GCs per minute,
+old gen after collection 3,903–3,997 MiB (0.95–0.98 × heap), and 3–19 CREATEs per minute
+(`logs/H4-T-1-tail-per-minute.txt`). The last GCInspector lines read `G1 Old Gen: 4,171,217,184 -> 4,087,331,624`.
+
+The harness's service-loss monitor (600 s window ≥ 0.9) fired at 10:51:54 at 0.900, after 44.6 min of DDL. `run.py` then
+read the names (48 / 222) and took the end checkpoint: K = 8,027, U_end 3,884.5 MiB = 0.948 × heap, 1,729,637 MBeans. It
+wrote a 4.88 GB end dump with `jcmd` and stopped the node with **SIGTERM** at 10:52:38. The client's "Server is shutting
+down" errors (27) and the final `ConnectionShutdown` come from that SIGTERM: `system.log` shows `StorageServiceShutdownHook`
+… `Cassandra shutdown complete`. **No OutOfMemoryError occurred in this lifetime.** The only stdout line containing
+"OutOfMemoryError" is HotSpot's `CompileCommand: exclude …JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V`
+at startup, which is present in every lifetime. End dump (`logs/H4-T-1-scan-end.json`): `TableMetrics` /
+`ColumnFamilyStore` 8,074 = 8,026 + 48 (CREATE 8,027's schema row existed but its store was not yet open). Total 3,881.4
+MiB, marker `byte[]` 1,561.7 MiB = **40.2 %** (0.195 MiB per table), per-table classes **87.2 %**, memtable classes 155.4 MiB.
+
+**S8-1 (short names, P7).** Keyspace `ks`, tables `t00001`…, 2 GiB. L(n) linear: 64.7 → 223.1 → 381.5 → … → 1,871.2 MiB at
+5,500 tables, **b_short = 0.336 MiB per table** (0.339 from 500), 214 MBeans per table. The size-estimates step came between
+3,000 and 3,500 tables (+255 MiB). **Heap OOM at 5,736 tables** (last ok 11:16:34). The run was GC-bound from 11:09
+(89–99 % per minute) and old gen after collection was 2,008.9 MiB = 0.981 × heap. Stdout has `java.lang.OutOfMemoryError:
+Java heap space` → `Heap dump file created [2,702,416,663 bytes]` → `kill -9`. The throwing thread is
+`SizeEstimatesRecorder.run:104` → `SystemKeyspace.updateTableEstimates:1644` → `Mutation.apply` → `SkipListMemtable.put`
+→ `RangeTombstoneList.grow`. Dump: `TableMetrics` / `ColumnFamilyStore` 5,784 = **5,736 + 48**, marker `byte[]` **0**
+(no long names, as expected), `long[330]` 104,308 (264.2 MiB), `byte[]` 346.7 MiB, `ObjectName` 1,239,582. The per-class
+`byte[]` slope is 57,797 B per table (652 arrays), against 209,750 B (644 arrays) with long names: the same number of
+strings per table, ≈ 152 KB shorter.
+
+### 3.4 Deviations
+
+- **Dumps deleted early.** `plan.sh` removed each `.hprof` after `run.py`'s scan (`rm -f $W/dumps/$label/*.hprof`), so the
+  T-2, T-3, S8-1, H4-T-1 end, C-1 end and I-1 end dumps are gone. Their full-pass scans were saved first. `H2-T-1`'s dump
+  is still on `pc99` (2.54 GB, left for the owner; this session deletes nothing). Effect: P3 rests on the saved scans
+  (instance counts, marker and `long[330]` tallies, top 40 classes, thread traces) and the histograms. No retained-size
+  or dominator analysis was made or is possible for the deleted dumps.
+- **The service-loss stop also applied at 4 GiB.** §2.7 lists "service-loss criterion held for 10 min" only for T at
+  2 GiB. For 4 GiB it lists OOM, M_max 12,000, or 50 min of DDL. `run.py`'s monitor applied it to every arm. H4-T-1 was
+  stopped by it at 44.6 min of DDL, 5.4 min before its DDL cap, so the 4 GiB lifetime did not run its full stopping budget.
+  Whether it would have ended in an OOM within the remaining 5.4 min is unknown.
+- **The H4 client was not stopped.** The monitor's `p.kill()` killed the `sh -c` wrapper, not `client.py`, so the client
+  kept one CREATE (8,027) in flight through the end checkpoint and the dump. It was acknowledged at 10:52:42, after the
+  SIGTERM, and the client then logged the shutdown errors. The end readings therefore correspond to 8,026–8,027 tables.
+- **H4-T-1 `memory.events` `max 4543`.** The 10 GiB safety scope reached `memory.max` only between 10:52:29 and 10:52:37
+  (`rss.csv` `cg_current`), while `jcmd` wrote the 4.88 GB end dump through the page cache. That was after the workload
+  had stopped; RssAnon was 4.88 GiB at that moment, with `oom 0` and `oom_kill 0`. No reading is affected.
+- **`run.py`'s OOM-line grep** also matches the startup `CompileCommand … OutOfMemoryError` line, so the `oom.stdout_lines` of
+  the T and S8 summaries list it first. The real lines follow it. This analysis uses the real lines only, from `grep -n
+  "^java.lang.OutOfMemoryError"`.
+- **Schedule:** the runs took place 08:18–11:18 EST, earlier than the 09:00–14:00 plan of §2.9. No lifetime started after
+  13:15, and S8-1 started after H4-T-1 had ended, as §2.9 requires. The 2,000-table template fallback was not needed:
+  `H2-T-1`'s DDL took 15.7 min.
+- **Sampler and scanner names:** `Jmx.java` and `HprofScan.java` in place of `Sampler.java` and `hprof_scan.py`. The function
+  is as designed, and the instrument check passed.
+- **Checkpoint histograms:** in `H2-T-1` at n2500 (and H4 at n2500), the first of the two histograms read more than the
+  second (1,685.6 vs 1,247.2 MB). L is the second one by definition (§2.6), so no reading changes.
+- **Write-up** by a different session two days after the runs, from logs only (see the top of §3). No run was repeated.
 
 ## 4. Conclusion (stage 2)
 
-pending
+**Verdict: true positive.** Protocol status (detail): **`verified-OOM · deployment`**, **unprotected**. This is an
+unprotected configuration (`tables_warn_threshold` / `tables_fail_threshold` = −1, the shipped default) and an unprotected
+accumulation (no byte bound covers the per-table metrics, JMX and schema state). Interpretation: configuration-sizing gap
+(the count guardrail ships disabled and nothing charges per-table heap). It is known upstream as heavy and is reduced only in
+6.0 (CASSANDRA-19567), and the per-table memory cost is not documented as by design.
+
+| Condition (2 GiB unless stated; long names 48 / 222) | Result |
+|---|---|
+| T: empty tables created one by one, guardrail −1 | **heap OOM 3/3** at **3,978 / 3,975 / 3,976** tables, f = 0.980–0.983 |
+| C: same CREATEs plus DROP 500 behind (≤ 500 live) | 0/3; U_end 0.157–0.158 × heap, slope 0.009 MiB per pair |
+| I: `tables_fail_threshold` = 1,900 | 0/3; 1,900 ok, 2,078 rejected, U_end 0.452 × heap |
+| T at **4 GiB** (budget search, 1 lifetime) | **no OOM**: GC service loss (87–98 % GC per minute for ≈ 10 min) at 7,916–8,027 tables, live 0.95–0.98 × heap; stopped by the harness's service-loss monitor at 44.6 of 50 min of DDL (§3.4) |
+| S8: T at 2 GiB with short names (`ks`, `t00001`) | heap OOM 1/1 at **5,736** tables |
+
+**Predictions against readings (frozen §2.7):**
+
+| | Predicted | Read | |
+|---|---|---|---|
+| P1 | b = 0.42–0.52 (central 0.47) MiB per table; 200–240 MBeans per table; D3 ≤ 20 MiB | b = **0.480** (0.487 from 500) 3/3; **214** MBeans per table; D3 rose to **170.7 MiB** (the memtable cleaner threshold), from the size-estimates tables | b, MBeans **met**; D3 sub-prediction **missed** (D3 grows with the table count too, but within its own pool) |
+| P2 | heap OOM 3/3 at N_OOM 3,520–4,630 (central 4,050), f = 0.93–0.98; latency ≈ 50 → 150 ms, then GC-bound in the last ≈ 5 % | OOM **3/3** at 3,975–3,978; f = 0.980–0.983 (old gen after GC; 0.852 at the last checkpoint, 3,500); latency 48 → 162 ms by 3,500, GC-bound from ≈ 3,640 (≈ 8 %) | **met** (f at the top edge) |
+| P3 | `TableMetrics` = `ColumnFamilyStore` = N_OOM + system tables; per-table classes ≥ 70 % of live heap; marker `byte[]` ≥ 0.08 MiB per table, name share ≥ 15 % | 4,026 / 4,023 / 4,024 = N_OOM + 48 exactly; per-table classes **84.7–84.8 %**; marker `byte[]` **0.198 MiB per table, 39.2–39.4 %** | **met** (dump scans; dominators not available, §3.4) |
+| P4 | C: no OOM 3/3, U_end ≤ 0.25 × heap, slope after 500 ≤ 0.02 MiB per pair | 0/3, 0.157–0.158, 0.0091–0.0095 | **met** |
+| P5 | I: no OOM 3/3, exactly X created, the rest rejected, U_end ≈ L(X) ≤ 0.6 × heap | 0/3, 1,900 + 2,078 rejected, 0.452 | **met** |
+| P6 | 4 GiB: OOM at 7,180–9,410 | **no OOM** in 1 lifetime; service loss at 7,916–8,027 (inside the range), stopped early by the harness | **not met** as an OOM; inconclusive (stop rule deviation) |
+| P7 | S8: OOM at 5,500–6,170; b_long − b_short = 0.12–0.15 MiB | OOM at **5,736**; 0.480 − 0.336 = **0.143** (0.487 − 0.339 = 0.148) | **met** |
+
+**V1–V7 (condition: stock 5.0.9, 2 GiB heap, defaults, long names, one DDL client):**
+
+| | Evidence |
+|---|---|
+| V1 Repetition | H2-T-1..3: heap OOM 3/3 from clean starts (fresh run directory each time), N_OOM 3,975–3,978 |
+| V2 Matched control | H2-C-1..3: 0/3 with the same node, build, heap, keyspace, names, client, CREATE count (3,978) and order. Tables do not accumulate past 500. U_end 0.157–0.158 × heap |
+| V3 Measurement | U = class-histogram totals (L(n) at every 500 tables, after two forced full GCs) and dump scans, measured independently of K (`count(*)` of `system_schema.tables`), which matched the client's count at every checkpoint. Per-table U = 0.480 MiB; at the OOM, 84.8 % of the live dump is per-table classes |
+| V4 Intervention | H2-I-1..3: `tables_fail_threshold` = 1,900 (the shipped guardrail, enabled; `u14` an ordinary role) removed the OOM 3/3. Rejections 2,078 / 3,978 attempts, and the live heap stays at 0.452 × heap |
+| V5 Initiating failure | first error `java.lang.OutOfMemoryError: Java heap space` in stdout 3/3, then the dump and the shipped `kill -9`. Throwing thread: memtable flush writer (`SortedTableWriter.append:148` ← `Flushing$FlushRunnable`) in T-2 and T-3; not identified in T-1's dump. Holder at failure: dumps with 4,026 `TableMetrics`, marker `byte[]` 39 %, per-table classes 85 % |
+| V6 Default constraints | `tables_*` and `keyspaces_*` guardrails −1, `columns_per_table_*` −1, name caps 222 / 48 (compile-time), memtable pool 512 MiB (heap/4), caches auto (100 / 50 / 10 MiB), all read back. `tables_fail_threshold` differs only in arm I |
+| V7 Acceptable budget | 2 GiB heap, the ideal, and what `cassandra-env.sh` resolves on a 4 GiB-RAM host; ≥ 512 MiB under the standing rule. Direct limit 15,872 MiB, as resolved on `pc99` and not involved. The 8 GiB scope (10 GiB at 4 GiB heap) is a safety guard only (`oom_kill 0`) |
+
+**Deployment label.** Every setting is a default or an accepted, documented value (`PasswordAuthenticator`, the documented
+production authenticator, used in every arm so that the guardrail applies to an ordinary role, §2.3). There is no patch and
+no agent. The forced full GCs of the checkpoints are identical in all arms and only remove garbage, so they cannot add to
+the holder.
+
+**Reason.** On a stock Cassandra 5.0.9 node with a 2 GiB heap and every capacity setting at its default, an ordinary role
+created empty tables one at a time in one keyspace. The tables had 222-character names in a keyspace with a 48-character
+name, and no row was written. Each table added **0.480 MiB** of live heap that stays for the table's life. The histograms and
+dumps show that it is mostly the eager per-table metrics: 214 JMX MBeans per table (107 metrics under the `Table` and
+`ColumnFamily` names), their `ObjectName` / property strings carrying the keyspace and table names (`byte[]` 205 KB and
+`String` per table), and their reservoir and histogram `long[]` buckets (138 KB per table). The table-count guardrail ships
+at −1 and no byte budget charges this state, so the live heap grew linearly and the node died with `OutOfMemoryError: Java
+heap space` at 3,975–3,978 tables in 3/3 runs, with 98 % of the heap live and 85 % of the dump in per-table classes. The
+same 3,978 CREATEs with a DROP 500 behind never passed 0.16 × heap (0/3), and enabling the shipped guardrail at 1,900
+tables stopped the growth at 0.45 × heap (0/3). The failure therefore follows the number of live tables, which nothing
+bounds at defaults, and not the DDL traffic.
+
+**Budget search.** The largest budget that reached the endpoint is **2 GiB (3/3)**. At **4 GiB** the one lifetime reached the
+predicted multiplicity (8,027 tables, inside 7,180–9,410) and sustained GC service loss: ≥ 87 % GC per minute for ≈ 10 min,
+over 100 full GCs per minute, and live 0.95–0.98 × heap. It ended without an OOM, because the harness's 10-minute
+service-loss stop ended it 5.4 min before its 50-min DDL cap (§3.4). At 4 GiB the result is therefore a service loss (1/1,
+`verified-gap · service-loss` conditions except V1), not a negative. Whether 4 GiB ends in an OOM is not settled. Under
+C6's and this case's slope, a 4 GiB heap needs ≈ 8,000 long-named tables and the DDL slows to seconds per CREATE before the
+heap is gone. 8 GiB was not planned (§2.8).
+
+**The name-length dial (OC-402 / OC-403).** Short names (`ks`, 6-character tables) cost **0.336 MiB per table** and failed at
+**5,736** tables. Long names cost **0.480**, and the difference of **0.143 MiB per table** for 216 + 46 = 262 more
+characters is **≈ 574 B per name character per table**, which agrees with stage 4's ≈ 567 B. So the name text is ≈ 30 % of
+the long-name per-table cost and moves N_OOM at 2 GiB from ≈ 5,700 to ≈ 4,000 tables. The long names are not needed for the
+OOM. The 222- and 48-character caps bound one name each and nothing in total. The baseline per-table cost without long
+names (0.34 MiB) agrees with C6's D2 (0.316–0.342).
+
+**Limits of attribution.**
+- One node and one DDL client issuing serial CREATEs. Concurrent DDL, many keyspaces (OC-400's `KeyspaceMetrics` variant)
+  and written tables (the slab region of OC-400/401, C6's holder) were not run.
+- No retained-size (dominator) analysis. P3 uses shallow class totals from full dump scans and histogram slopes, and only
+  `H2-T-1`'s dump still exists.
+- D3 (the size-estimates memtables, which also grow with the table count) holds ≈ 125–170 MiB at the endpoint. It is bounded
+  by `memtable_heap_space` and flushed at its cleaner threshold, and it is not claimed. It supplies the last allocations in
+  T-2, T-3 and S8 (flush writer, `SizeEstimatesRecorder`).
+- The 4 GiB result is a single lifetime stopped by a rule the design did not set for that heap.
+- The C residual (≈ 10 KB per CREATE+DROP pair, queued `AbstractAllocatorMemtable$1` tasks and dropped tables' metadata) is
+  noted only.
+- Covered duplicates: OC-402 (name text, measured by S8 and the marker scan) and OC-403 (keyspace-name text, in every long
+  arm) fully. OC-401 covers the empty-table part only; its slab part is C6's. OC-400 is covered partly: the per-table cost
+  with the table guardrail off is covered, but its many-keyspaces variant was not run.
+
+**What is left on `pc99`** (checked 2026-11-23 09:23 MST): no Cassandra, Java or harness process, and no `/dev/shm/u14`.
+`/mydata/s4/u14/` holds `cassandra/` (the build copy), `harness/`, `jmxcls/`, `excerpts/`, `logs/` (full logs of all twelve
+lifetimes, ≈ 1.4 GB, mostly `gc.log*` and `stdout.txt`), `dumps/` (empty folders except `H2-T-1`'s 2.54 GB `.hprof`) and
+empty `*.out` files. The `run/` directory is gone. Nothing was deleted by this write-up. The `H2-T-1` dump and the tree are
+for the owner to remove.

@@ -1,0 +1,54 @@
+1795274555.770 10:22:35 start label=XI2 n1heap=2G arm=I N=20000 size=1048576 threads=200 extra=0 n1home=/mydata/s4/b23/cassandra-fix
+               total        used        free      shared  buff/cache   available
+Mem:          128850         849      121294           4        6707      127003
+Swap:           8192           0        8192
+Filesystem                   1M-blocks  Used Available Use% Mounted on
+tmpfs                            64426     0     64426   0% /dev/shm
+/dev/mapper/emulab-node3--bs    770477  4279    726989   1% /mydata
+1795274574.182 10:22:54 n2 native up=1 pid=319867
+1795274634.068 10:23:54 n3 native up=1 pid=320218
+1795274695.131 10:24:55 n1 native up=1 pid=320758
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address     Load        Tokens  Owns (effective)  Host ID                               Rack 
+UN  127.0.0.31  79.71 KiB   1       0.0%              d69252b7-3549-49c5-bfec-87aa95a9706d  rack1
+UN  127.0.0.32  119.48 KiB  1       100.0%            39408ab4-5252-45b4-a443-3b6e5b5a0a0b  rack1
+UN  127.0.0.33  79.71 KiB   1       100.0%            f950b228-ac66-46db-9643-a39679c2b514  rack1
+
+-XX:+UseG1GC -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/b23/XI2/dump/cassandra-1795274634-pid320758.hprof 
+G1HeapRegionSize=16777216 MaxDirectMemorySize=16642998272 MaxHeapSize=2147483648 ParallelGCThreads=40 
+0::/user.slice/user-20001.slice/user@20001.service/app.slice/run-r6e4ee19ffbbe462785e4a4196800d9c8.scope
+1795274696.909 10:24:56 schema: stress write n=1000
+Op rate                   :      380 op/s  [WRITE: 380 op/s]
+Total partitions          :      1,000 [WRITE: 1,000]
+Total errors              :          0 [WRITE: 0]
+1795274710.803 10:25:10 stopping n3 (nodetool stopdaemon)
+Cassandra has shutdown.
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address     Load        Tokens  Owns (effective)  Host ID                               Rack 
+UN  127.0.0.31  114.5 KiB   1       0.0%              d69252b7-3549-49c5-bfec-87aa95a9706d  rack1
+UN  127.0.0.32  119.48 KiB  1       100.0%            39408ab4-5252-45b4-a443-3b6e5b5a0a0b  rack1
+DN  127.0.0.33  114.5 KiB   1       100.0%            f950b228-ac66-46db-9643-a39679c2b514  rack1
+
+1795274726.187 10:25:26 n1 hints dir before load: 4096 B, files 0
+1795274729.207 10:25:29 MaxHintsInProgress: MaxHintsInProgress=5120
+1795274729.212 10:25:29 load start N=20000
+1795274729.720 10:25:29 stress pids 322480
+1795274739.972 10:25:39 L+10 K=1052 pending=1017 old=1456160768 unavail=0 wr_done=3460
+1795274749.156 10:25:49 L+20 K=1807 pending=1772 old=1970414648 unavail=0 wr_done=5052
+1795274759.383 10:25:59 L+30 K=1807 pending=1772 old=1970414648 unavail=0 wr_done=5052
+1795274763.448 10:26:03 stop: n1 death at L+34 valid=1
+1795274775.480 10:26:15 all nodes stopped
+1795274775.518 10:26:15 OOM lines: 2; first: /mydata/s4/b23/XI2/n1/logs/stdout.txt:423:java.lang.OutOfMemoryError: Java heap space
+1795274775.535 10:26:15 n1 hints dir at end: 2145540741 B; n1 data 354858 B; shm 6243290744 B
+total 1994304
+drwxr-xr-x 2 jason92 misconfiguration       4096 Nov 21 08:25 .
+drwxr-xr-x 8 jason92 misconfiguration       4096 Nov 21 08:25 ..
+-rw------- 1 jason92 misconfiguration 2042157229 Nov 21 08:26 cassandra-1795274634-pid320758.hprof
+1795274775.544 10:26:15 dump analysis started keep=0
+1795274776.199 10:26:16 done alive=0 why=n1 death at L+34 valid=1

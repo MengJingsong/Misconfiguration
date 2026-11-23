@@ -1,0 +1,44 @@
+# B4G (4 GiB, run 1): why the run ended alive=1 although n1 threw OutOfMemoryError. Extracted 2026-11-23 from pc75:/mydata/s4/b23/B4G (node clock MST = New York - 2 h; load start 09:13:55 NY = 07:13:55 MST = L+0).
+
+## driver.log (New York times)
+09:13:55 load start N=200000
+09:14:15 L+20 K=31021 pending=30955 old=4108145368 unavail=0 wr_done=67717
+09:14:25 L+30 K=31612 pending=31534 old=4160187696 unavail=0 wr_done=69879
+09:15:25 L+90 K=31612 pending=31534 old=4160187696 unavail=0 wr_done=69879
+09:15:32 stress done at L+97 K=31612
+09:16:32 stop: stress done + 60 s valid=1
+09:17:14 all nodes stopped
+09:17:14 done alive=1 why=stress done + 60 s valid=1
+
+## n1 stdout.txt lines 546-560 (system.log ends at 14:14:27.8 UTC = 09:14:27 NY = L+32)
+INFO  [Service Thread] 2026-11-21T14:14:27,804 StatusLogger.java:71 - InternalResponseStage                0         0              0         0                 
+INFO  [Service Thread] 2026-11-21T14:14:27,804 StatusLogger.java:71 - CacheCleanupExecutor                 0         0              0         0                 
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /mydata/s4/b23/B4G/dump/cassandra-1795270344-pid213061.hprof ...
+
+Exception: java.lang.OutOfMemoryError thrown from the UncaughtExceptionHandler in thread "PerDiskMemtableFlushWriter_0:1"
+
+Exception: java.lang.OutOfMemoryError thrown from the UncaughtExceptionHandler in thread "CompactionExecutor:2"
+
+Exception: java.lang.OutOfMemoryError thrown from the UncaughtExceptionHandler in thread "MemtableFlushWriter:1"
+
+Exception: java.lang.OutOfMemoryError thrown from the UncaughtExceptionHandler in thread "AsyncAppender-Worker-ASYNCDEBUGLOG"
+Heap dump file created [4333209173 bytes in 114.472 secs]
+
+Exception: java.lang.OutOfMemoryError thrown from the UncaughtExceptionHandler in thread "CompactionExecutor:1"
+
+## n1 gc.log: Full GCs per minute (MST) and every non-GC safepoint operation after L+30
+Full GCs in 07:14 241
+Full GCs in 07:15 290
+Full GCs in 07:16 251
+Full GCs in 07:17 19
+[2026-11-21T07:16:17.210-0700][232.185s][info ][safepoint      ] Entering safepoint region: HeapDumper
+[2026-11-21T07:16:17.210-0700][232.185s][info ][safepoint      ] Entering safepoint region: HeapDumper
+[2026-11-21T07:16:23.057-0700][238.033s][info ][safepoint      ] Leaving safepoint region
+[2026-11-21T07:16:23.057-0700][238.033s][info ][safepoint      ] Total time for which application threads were stopped: 5.8474592 seconds, Stopping threads took: 0.000111
+[2026-11-21T07:16:23.057-0700][238.033s][info ][safepoint      ] Application time: 0.0001824 seconds
+last gc.log lines:
+[2026-11-21T07:17:04.206-0700][279.182s][info ][gc,phases      ] GC(1300) Phase 3: Adjust pointers 16.468ms
+[2026-11-21T07:17:04.206-0700][279.182s][info ][gc,phases,start] GC(1300) Phase 4: Compact heap
+
+## No "Executing /bin/sh -c kill -9" line in stdout.txt: 0 occurrences (T1, B4G-2: 1 each)

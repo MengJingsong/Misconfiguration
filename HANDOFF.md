@@ -160,13 +160,38 @@ and one fresh verify agent per case, deadline 07:30 so the nodes are free for th
   lead (patched build at 15,872 MiB still held ≈ 6.8 GiB live after its flushes, no dump); R22's S512 service-loss secondary
   and R20's 2 GiB matched set are possible follow-ups, not retry items.
 - **Node data:** all wave-5b run folders deleted 2026-11-21 ≈ 05:55 (owner); every node holds only `/mydata/s4/cassandra-base`.
-- **Next:** 8 AM 2026-11-21 batch of 10 candidate cases (OC-533, 504, 565, 509, 479, 104, 383, 147, 291, 404), scheduled.
+- **Next:** 8 AM 2026-11-21 batch of 10 candidate cases (OC-533, 504, 565, 509, 479, 104, 383, 147, 291, 404), run as wave 6 (below).
+
+**Wave 6 (2026-11-21 ≈ 08:00 → ≈ 11:20 EST runs; write-up finished 2026-11-23): 10 candidate cases.** One fresh design
+and one fresh verify agent per case, one case per node. The stage-2 sessions of B23 and U14 were cut off after their
+runs finished; on 2026-11-23 a fresh agent per case wrote §3–§4 from the node logs (no re-runs).
+
+| Case | From | Node | Verdict |
+|---|---|---|---|
+| U12 | OC-104 (+118) | `ms0611` | **true positive** |
+| B19 | OC-533 | `ms0625` | **true positive** (on T2; owner to rule on T2's form) |
+| B21 | OC-565 (+456) | `ms0604` | **true positive** (owner to confirm: the frozen I-2G intervention failed) |
+| B20 | OC-504 | `ms0640` | **true positive** |
+| U13 | OC-383 (+326, 341) | `ms0617` | **true positive** (owner to rule deployment vs diagnostic) |
+| U15 | OC-291 (+292) | `pc72` | **true positive** (owner to confirm the "not corrupt input" reading) |
+| C10 | OC-509 | `pc91` | **true positive** |
+| B22 | OC-479 | `pc82` | retry (retry-list row added) |
+| B23 | OC-147 (+13) | `pc75` | **true positive**: 2 GiB OOM 3/3 at K ≈ 15.3 k, 0 refusals; control and LoadingCache fix 0/3; 4 / 8 / 15,872 MiB 3/3 each |
+| U14 | OC-404 (+401–403) | `pc99` | **true positive**: 2 GiB OOM 3/3 at ≈ 3,976 empty tables (0.48 MiB/table); control and guardrail 0/3; 4 GiB stopped for service loss at 8,027, not OOM |
+
+- **Filed:** 10 `_INDEX.md` rows, retry-list row B22, candidate-list statuses (the picked rows plus their covered duplicates).
+- **Open owner items:** the rulings in the table above; B23 — E2/E3 placement as `deployment`, B4G run 1 counted as an
+  OOM (JVM self-kill late under full-GC thrash), and whether OC-19/77/145 close fully (their local-write part is S2/R22's);
+  OC-148/332 stay open (timeout/expiry hint path not driven); U14 — OC-400 left `open` (many-keyspaces variant not run),
+  optional 4 GiB ×3 rerun without the service-loss stop; harness bug: OOM grep matches the JVM's startup `CompileCommand` line.
+- **Node data:** every wave-6 run folder is still on its node (`/mydata/s4/<case>`; B23 keeps a 2.2 GB dump, U14 a 2.5 GB
+  dump); delete on the owner's word.
 
 **Other open work:**
-- 372 candidate rows are `open` (OC-4 closed, OC-578 added). All of OC-63…577 are now triaged (2026-11-18 and 2026-11-20 files); the 11-18
+- 341 candidate rows are `open` (2026-11-23, after wave 6). All of OC-63…577 are now triaged (2026-11-18 and 2026-11-20 files); the 11-18
   triage's §2 "not reachable at shipped defaults" and §3 "too slow / too much disk" lists were **not** closed (owner
   closed only the already-covered list), and the 11-20 triage's "covered" list is not closed either.
-- Retry list: 1 row `open` (R19, with its proposed change).
+- Retry list: 2 rows `open` (R19, with its proposed change; B22 from wave 6).
 - Hadoop: JIRA OOM report built; stage 5 runs with Yang's and Jingsong's batches (`hadoop/PROCEDURE.md` 5b);
   no Hadoop phase 2 yet. Jingsong's Hadoop stage-4 nodes `pc41`, `pc39`, `pc29` failed SSH host-key checks on
   2026-11-18 (probably reallocated): a new Hadoop stage-4 node needs `jingsong/setup-node.sh`.
