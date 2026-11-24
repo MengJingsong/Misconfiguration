@@ -160,6 +160,8 @@ Work in a fresh directory named for your run, and never open, reuse or delete th
 - `ssh pcNN` alone works after `setup-node.sh --peers "..."` is re-run: the `setup-node: peer` stanzas in `~/.ssh/config` now name `/proj/misconfiguration-PG0/.ssh/id_ed25519`, which the peers accept. On a node set up before this change the stanzas still name the old `cluster_ed25519` (refused with `Permission denied (publickey)`); re-run the script, or pass `-i …/id_ed25519` as above.
 - GitHub: `id_ed25519` works for `git push` (the `github.com` stanza).
 
+**2026-11-24: Utah m400 nodes for extension-set stage 4.** `ms0625`, `ms0640`, `ms0604`, `ms0611`, `ms0617` (aarch64, 8 cores, 62 GiB, Ubuntu 22.04.1, JDK 11 (11.0.33) + Ant 1.10.12; built copy `/mydata/s4/cassandra-base`) used for extension stage 4 from 2026-11-24 (Jingsong), run data `/mydata/jingsong-cass-s4/o<order>/`. `/mydata` is root-owned: `/mydata/jingsong-cass-s4` was created with `sudo` and chowned. The nodes are reserved for OOM-exp from 05:00 (EST) on 2026-11-24; the batch-1 run was interrupted before then by an API usage limit, so partial `o<order>/` folders may remain (see `HANDOFF-Jingsong.md`).
+
 ## Logs
 
 Run 1's logs are in `~/stage4-logs/` on the node, outside the repo:

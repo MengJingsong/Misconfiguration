@@ -20,9 +20,10 @@
 Select by the `band` column of `bands.csv`; every unit is in exactly one person's share. The
 Cassandra material below this section is unchanged and still applies to the Cassandra work.
 
-- **Progress (2026-11-06):** batch 1 (queue orders 1–5) written up and closed at stage 4 — see the
-  Hadoop log below. Next: order 6. Stage-4 environment: `pc41`, `pc39`, `pc29`
-  ([`environment.md`](experiments/capacity-enforcement-exp/hadoop/stage4-runtime-verification/jingsong/environment.md)).
+- **Progress (2026-11-24):** orders 1–25 written up; 1–5, 19 and 21 closed at stage 4, the other 18 wait for stage 4
+  (see the Hadoop log below). Next stage-3 unit: order 26. Stage-4 environment: `pc91`, `pc82`, `pc72`, `pc75`, `pc99`
+  ([`environment.md`](experiments/capacity-enforcement-exp/hadoop/stage4-runtime-verification/jingsong/environment.md);
+  the 2026-11-06 nodes `pc41`, `pc39`, `pc29` are gone).
   Your folders (do not write to the other person's):
   stage 3 → `experiments/capacity-enforcement-exp/hadoop/stage3-ai-deep-read/jingsong/`, stage 4 →
   `experiments/capacity-enforcement-exp/hadoop/stage4-runtime-verification/jingsong/`. Each has a README listing the
@@ -41,6 +42,38 @@ Cassandra material below this section is unchanged and still applies to the Cass
   counts with unclear per-object size.
 
 ### Hadoop log (newest first)
+
+- **2026-11-24 (Hadoop batch 1 of 2026-11-24, orders 6–25, band A; interrupted ~02:30 EST by an API usage limit)** —
+  Stage-4 nodes `pc91`, `pc82`, `pc72`, `pc75`, `pc99` (experiment `jason92-326665`) set up with `setup-node.sh`, full
+  builds 24–33 min (`environment.md`). **Stage 3 (filed):** 20 autonomous case files in `jingsong/cases/`, `_INDEX.md` §1
+  and §4, `queue.csv` `case_file`/`estimate`: 15 positive, 5 negative (6, 8, 9, 10, 11). Stems already taken got `-2`
+  with the title line fixed: order 6 `MAX_KEY_SIZE-write-limit-2` (order 5 has the plain stem), 15
+  `DUMP_WRITE_WATER_MARK-waitForDump-…-2` (14), 17 `DUMP_WRITE_WATER_MARK-run-…-2` (16). Orders 14–17 are four checks
+  of the same NFS-gateway constant and 22/23 two checks of `dfs.datanode.max.locked.memory`; each is its own case.
+  **Stage 4:** run 1 finished for two cases, both **true positive** (unit and cluster Confirmed — caps):
+  19 `dfs.qjournal.queued-edits.limit.mb` (`pc72`; real batches are ~1–2 KB, so the plateau lands within bytes of the
+  limit; refused edits are dropped for the lagging JournalNode and resynced at the next NameNode start) and 21
+  `CachePoolInfo_limit` (`pc75`, native `mlock`; every predicted number matched at both tiers). Results in
+  `stage4-runtime-verification/jingsong/results/<stem>.md` (raw excerpts in `results/<stem>/run1/`), harness in
+  `harness/<stem>/`; full logs on the nodes under `/mydata/jingsong-s4/<run folder>/`. **The other 18 wait**: CSV and
+  index `stage4 = waiting (stage-4 run interrupted 2026-11-24 by an API usage limit; nodes reserved for OOM-exp from
+  05:00)`. Runs had started for 9 (`pc91`), 11 (`pc82`) and 13 (`pc99`): their filed case files carry that run's dated
+  amendments (9: A1–A8, 11: A1–A7, 13: A1–A9; no verdict; as-filed hashes in `_INDEX.md` §4), draft harness (and for 11 a
+  draft `results.md`) sit in `~/writeup-hadoop/out/o<order>/`, and partial run folders are on the nodes:
+  `pc91:/mydata/jingsong-s4/PriorityQueue_maxSize-insert-maxSize-run1` (1.7 GB),
+  `pc82:/mydata/jingsong-s4/dfs.client.socketcache.capacity-putInternal-capacity-run1` (2.0 GB) and
+  `pc99:/mydata/jingsong-s4/dfs.client.write.byte-array-manager.count-limit-recycle-maxAllocated-run1` (5.5 GB).
+  **On `pc82` the case-11 NameNode and DataNode were still running at filing** (pids 630644, 630862, run folder above):
+  stop them (`hdfs --daemon stop` with that run's `HADOOP_CONF_DIR`) before the node is used again. No run folder
+  exists for the other 15 waiting cases. **Stage 5:** for 19 and 21, one autonomous and one guided agent each (re-run
+  the morning of 2026-11-24): 5 candidates `hadoop:OC-1`–`OC-5` (status open) in
+  `hadoop/stage5-oom-clue-find/phase1-oom-candidates.md` (the first Hadoop rows), full text in
+  `stage5-oom-clue-find/runs/p1-hadoop-2026-11-24.md`, four `coverage.csv` lines (19 autonomous found none). Notable: the
+  QJM queue limit charges only payload bytes while each queued batch pins ~800 B more (stage 4 saw 1.7–2.1× the counted
+  bytes; OC-1); the cache pool limit counts bytes, never mappings, so tiny cached files can use up `vm.max_map_count`
+  on the DataNode (OC-3, OC-4). **Next:** stage 4 for the 18 waiting cases once the nodes are free (not before the
+  OOM-exp reservation ends; clean up the three partial run folders first), then stage 5 for them; stage 3 continues at
+  order 26.
 
 - **2026-11-06 (Hadoop batch 1, orders 1–5, band A)** — Stage-4 environment set up on `pc41`, `pc39`, `pc29`
   (`hadoop/stage4-runtime-verification/jingsong/environment.md`, `setup-node.sh`; full builds 25–31 min, JDK 8,
@@ -559,3 +592,41 @@ needs its inner `cassandra-driver-3.29.0/` on `PYTHONPATH`; `/mydata` on the apt
 node0. Delete when no longer needed.
 
 **Next:** band A of the extension set continues at order 54 (the rows after 53 that are not yet skipped or filed).
+
+## Cassandra extension set, batch 1 of 2026-11-24 (interrupted ~02:30 EST by an API usage limit)
+
+**Selection.** The 20 next new rows of orders 54–134 (bands A and B). 60 rows on the way were recorded as covered
+(`stage3_record` "skipped 2026-11-24 (Jingsong): covered by …", `stage4 = skipped`): orders 54-56, 58-63, 65-69, 71, 73,
+74, 76-95, 97-99, 101-113, 118, 121, 126, 128-131. Judgement calls you may overrule: 100 (`MAX_OUTSTANDING_REPLAY_COUNT`)
+and 125 (`flushHighWaterMark`) counted as new although existing cases mention them as companion or control; 124 and 132
+(frame-size constants) new; 114–117 (`CQLSSTableWriter` buffer) new, not the LCS `sstable_size_in_mb` constraint.
+
+**Stage 3 (filed).** 20 autonomous case files in `cases/`, `_INDEX.md` §1 and §4, CSV `case_file`, `estimate`,
+`stage3_record` "written up 2026-11-24": orders 57, 64, 70, 72, 96, 100, 114, 115, 116, 117, 119, 120, 122, 123, 124,
+125, 127, 132, 133, 134 (13 positive, 7 negative). Index Type calls by the filer, open to overrule: 70 (`acquire` checks a
+refcount against 0) and 122 (`rowSize` comes from the data) marked `not-a-case`; builder/JMX arguments (114, 116, 117, 123)
+typed `query parameter`.
+
+**Stage 4.** Run 1 finished for two cases, on the Utah m400 nodes (`environment.md` §7, 2026-11-24 line):
+
+| Order | Case | Unit | Cluster | Outcome class |
+|---|---|---|---|---|
+| 122 | `rowsize-checkcanread-bytesread` (`ms0640`) | Confirmed — does not cap | Confirmed — does not cap | true negative (`new byte[V]` before the row limit fires) |
+| 123 | `profileload-capacity-beginsampling-capacity` (`ms0604`) | Confirmed — caps | Confirmed — caps | true positive (entries, ≈ 116 B each on the write path) |
+
+Results in `stage4-runtime-verification/results/<stem>.md`, harness in `harness/<stem>/`; raw logs stay in
+`~/writeup-ext/out/o122/raw/` and `o123/run1/` (and on the nodes). **The other 18 wait**: CSV and index
+`stage4 = waiting (stage-4 run interrupted 2026-11-24 by an API usage limit; nodes reserved for OOM-exp from 05:00)`.
+Runs had started for 57 (`ms0625`), 72 (`ms0611`), 115 (`ms0604`), 117 (`ms0640`) and 120 (node not recorded): their
+filed case files carry that run's dated audit amendments (no run finished on them; the as-filed hashes are in `_INDEX.md` §4
+except 57's, not taken), and draft `results.md`/harness files sit in `~/writeup-ext/out/o<order>/`. A partial run folder
+may exist on any of the five nodes at `/mydata/jingsong-cass-s4/o<order>/`; check, and clean up when done.
+
+**Stage 5.** For 122 and 123, one autonomous and one guided agent each: 11 candidates, `OC-580`–`OC-590` (status open),
+full text in `stage5-oom-clue-find/runs/p1-cassandra-2026-11-24.md`, four `coverage.csv` lines. Notable: the sampler keys
+of memtable-served reads pin whole 1 MiB slab regions (OC-585, OC-588); the JMX sampling paths take any capacity
+(OC-586, OC-589); a corrupt value length allocates up to `max_value_size` before the row limit, repeatable under
+`disk_failure_policy: stop` (OC-581, OC-583).
+
+**Next:** stage 4 for the 18 waiting cases once nodes are free (not before the OOM-exp reservation ends), then stage 5 for
+them; then band B continues after order 134.

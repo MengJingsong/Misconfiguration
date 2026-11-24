@@ -1,0 +1,65 @@
+**B2f. Predictions.**
+
+| cap | expected `size` (ASC and RND) | `bytes` |
+|---|---|---|
+| −5, 0, 1 | 1 | < 1 KB |
+| 10 | 10 | ~1–2 KB |
+| 256 | 256 | ≈ 256 × s + fixed, s ≈ 70–110 B → ~18–30 KB |
+| 1024 | 1024 | ~70–115 KB |
+| 10000 | 10000 | ~0.7–1.1 MB |
+| 100000 (non-binding) | 50000 (= N) | ~3.5–5.5 MB |
+
+`bytesPerEntry` roughly constant (±20%) across binding arms with ≥ 256 entries; `bytes` scales linearly with `size`, not with N. Control `fieldHuge`: size 10. Baseline: queue `null`. The claim is wrong if any arm shows `size > max(1, cap)`, or `bytes` for cap 1024 is near the cap-100000 arm's.
+
+**B2g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| `size == min(max(1,cap), N)` for every arm and both orders; bytes ∝ size | Claim confirmed at unit level: capacity caps retained entries. |
+| any binding arm with `size > max(1,cap)` | Claim wrong: the cap does not bound the container. |
+| cap 100000 arm `size == N` and bytes several MB (positive control moved) | Workload really drives usage when the cap does not bind; binding arms' flat size is due to the cap. |
+| cap 100000 arm `size < N` | Workload/admission broken (e.g. sampler inactive, values ≤ 0); result not confirmed. |
+| `fieldHuge` size 10 | The bound comes from `maximumSize` (line 46), the line-48 field only filters admission. |
+| `fieldHuge` size > 10 | The field, not `maximumSize`, bounds the queue — amend A3. |
+| cap −5/0 arm size 0 | Edge behaviour differs from A3 (`max(1,…)`); amend A3. |
+
+> **Amendment S4-A2 (stage 4, 2026-11-24, before any reading; labels and thresholds only).** Verdict labels and reading rules for B2g:
+> - "bytes ∝ size" means: `bytesPerEntry` of every binding arm with `size` ≥ 256 (both orders) is within ±20 % of the mean of those arms (B2f), **and** the cap-1024 arm's `bytes` is < 0.1 × the cap-100000 arm's.
+> - **U1 Confirmed (caps):** row 1 holds for all 16 arms (exact `size`), "bytes ∝ size" holds, row 3 holds (positive control moved, `size` = 50000, `bytes` ≥ 1 MB), `fieldHuge` size 10 and baseline `null`.
+> - **U2 Refuted (does not cap):** row 2 (any binding arm `size > max(1,cap)`), or `bytes` of the cap-1024 arm ≥ 0.5 × the cap-100000 arm's.
+> - **U3 Not confirmed:** row 4 (control `size < N`), or baseline not `null`, or `size` exact but "bytes ∝ size" fails without meeting U2 (counter capped, real bytes not shown to follow), or the test does not run.
+> - Rows 5–7 do not change the verdict on the bound: `fieldHuge` > 10 or a cap −5/0 arm of size 0 is filed as an amendment of A3 (and, for size 0 with every other arm exact, U1 still holds for the bound).
+
+**B2h. Controls.** Non-binding arm (positive control); inactive-sampler baseline (no retention without `beginSampling`); two value orders (rules out the cap holding only because later samples happened to be rejected); direct `insert` (rules out executor load shedding hiding growth); field-override control separating line 46 from line 48.
+**B3f. Predictions.** Let s = per-entry retained heap (Sample ≈ 32 B + key `HeapByteBuffer` ≈ 48 B + 10-byte key array ≈ 32 B + array slot 4–8 B; expect 80–150 B).
+
+| C | Sample count at M1 | Sample bytes (histo) | release delta used1−used2 |
+|---|---|---|---|
+| 256 | 256 | ~8 KB | below resolution (< 1 MB) |
+| 1024 | 1024 | ~33 KB | below resolution (< 1 MB) |
+| 100000 | 100000 | ~3.2 MB | ≈ 8–15 MB |
+| 2000000 (control) | ≈ S (≈ 1,000,000 minus dropped `_SAMPLE`) | ~32 MB | ≈ 80–150 MB |
+
+At M2 the count is ≤ 1 in every arm. Relation to test: count1 = min(C, S) exactly for the binding arms; the release delta for C = 100000 is ≈ (100000 / S) × that of the control. Claim wrong if a binding arm shows count1 > C, or its release delta is of the same order as the control's.
+
+**B3g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| count1 = C for C ∈ {256, 1024, 100000}; control count1 ≈ S; release deltas ∝ count1 | Confirmed: capacity caps the sampler's heap on a real node. |
+| any binding arm count1 > C | Claim wrong. |
+| control count1 ≈ S and release delta tens of MB (positive control moved) while binding arms stay at C | Usage follows workload only until the cap; the cap governs. |
+| control count1 ≪ S, or `_SAMPLE` drops ≈ N | Workload did not reach the sampler (wrong table/sampler, inactive, or load shedding); not confirmed — lower `-rate threads` and repeat. |
+| count2 > 1 | Queue not released by the replacing `beginSampling` (amend A3 retention note). |
+| nodetool accepts `-s 2000` | Client-side 1024 check absent; amend A1. |
+
+> **Amendment S4-A4 (stage 4, 2026-11-24, before any reading; labels and thresholds only).** Reading rules for B3g
+> (S as in S4-A3; delta = used1 − used2):
+> - "control count1 ≈ S": |count1 − S| ≤ 0.001 · S (the control admits every positive sample, so exact equality is expected).
+> - "release deltas ∝ count1": control delta ≥ 20 MB; delta(100000) ≤ 0.3 × control delta; delta(256) and delta(1024) ≤ 5 MB.
+> - **C1 Confirmed (caps):** count1 = C exactly for C ∈ {256, 1024, 100000}, control count1 ≈ S with S ≥ 900,000, deltas ∝ count1, count2 ≤ 1, baseline histo shows no `Sample`.
+> - **C2 Refuted (does not cap):** any binding arm count1 > C; or count1 = C but delta(100000) ≥ 0.5 × control delta (counter capped, real heap grows with the workload).
+> - **C3 Not confirmed:** control count1 ≪ S or S < 900,000 (limit not reached / load shedding), or the control delta < 20 MB (heap instrument cannot show the positive control), or delta(100000) between 0.3 and 0.5 × control delta.
+> - count2 > 1 and nodetool accepting `-s 2000` are amendments to A3 / A1; they do not change the verdict on the bound.
+
+**B3h. Controls.** Baseline histo before any sampling (no `Sample` instances); non-binding control arm with the same workload; one sampler on one table (no cross-talk); flush before M1 and no writes between M1 and M2 (memtable heap constant, so the release delta isolates the sampler); `_SAMPLE` drop counts to account for samples that never reached `insert`; truncation between arms.
