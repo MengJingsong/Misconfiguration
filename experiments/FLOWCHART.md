@@ -65,8 +65,9 @@ Only default constraints are considered (rule 2026-11-23).
 
 ## 5. Flowchart
 
-Step names only; what each step does is in sections 2–4. Arrow labels carry the **current numbers** (C = Cassandra,
-H = Hadoop; as of 2026-11-23); the full breakdown with sources is in 5.1. Solid arrows: the main path. Dotted arrows:
+Step names only; what each step does is in sections 2–4. Arrow labels carry the **current numbers** as
+**Cassandra/Hadoop** (for example `275/6`), as of 2026-11-23; **–** = not started for that system. The full breakdown
+with sources is in 5.1. Solid arrows: the main path. Dotted arrows:
 write-back and feedback. Cylinders: lists and files that one step writes and another reads.
 
 ```mermaid
@@ -102,35 +103,35 @@ flowchart TD
     CT[("Stage 3-b client trigger files")]
   end
 
-  S1 -->|"C 11,228 · H 19,674 units"| S2
-  S2 -->|"units read: C 2,685 · H 10"| S3A
-  S2 -->|"C 29 targets · H none"| S3G
-  S3A -->|"C 275 · H 6 case files"| CF
-  S3G -->|"C 29 · H 0 case files"| CF
-  CF -->|"run: C 261 of 304 · H 6 of 6"| S4
-  S4 -.->|"results: C TP 122, TN 98, FN 6 · H TP 2, TN 3"| CF
-  JR -->|"kept: C 246 · H 368 issues; 16 patterns"| CPAT
-  CF -->|"read: C 304 · H 0 files"| S5A
-  CF -->|"read: C 304 · H 0 files"| S5G
+  S1 -->|"11,228/19,674 units"| S2
+  S2 -->|"units read: 2,685/10"| S3A
+  S2 -->|"targets: 29/–"| S3G
+  S3A -->|"case files: 275/6"| CF
+  S3G -->|"case files: 29/–"| CF
+  CF -->|"run: 261/6 (of 304/6)"| S4
+  S4 -.->|"TP 122/2, TN 98/3, FN 6/0"| CF
+  JR -->|"issues kept: 246/368; 16 patterns"| CPAT
+  CF -->|"files read: 304/–"| S5A
+  CF -->|"files read: 304/–"| S5G
   CPAT --> S5G
-  S5A -->|"C 251 candidates · H 0"| CL
-  S5G -->|"C 264 candidates · H 0"| CL
+  S5A -->|"candidates: 251/–"| CL
+  S5G -->|"candidates: 264/–"| CL
 
-  CL -->|"C 579 candidates, 342 open"| O1
-  RL -->|"C 23 rows, 3 open"| O1
+  CL -->|"candidates: 579/–, open 342/–"| O1
+  RL -->|"retry rows: 23/–, open 3/–"| O1
   O1 --> CASE
-  CASE -->|"C 47 cases with a verdict"| O2
-  O2 -->|"C 30"| TP
-  O2 -->|"C 4"| FP
-  O2 -->|"C 13"| RT
+  CASE -->|"cases: 70/–"| O2
+  O2 -->|"44/–"| TP
+  O2 -->|"4/–"| FP
+  O2 -->|"21/–"| RT
   RT --> RL
   O2 -.->|verdict| CL
   O2 -.->|new holder| CL
   TP -.->|new pattern| CPAT
-  TP -->|"C 30"| O3
-  O3 -->|"C 13 known, 1 fixed upstream, 3 documented, 13 new"| JC
-  TP -->|"C 30"| O3B
-  O3B -->|"C 22 user alone, 7 conditional, 1 admin; 20 of 23 confirmed"| CT
+  TP -->|"checked: 30/– (14 pending)"| O3
+  O3 -->|"known 13/–, fixed upstream 1/–, documented 3/–, new 13/–"| JC
+  TP -->|"checked: 30/– (14 pending)"| O3B
+  O3B -->|"alone 22/–, conditional 7/–, admin 1/–; confirmed 20/–"| CT
 
   class CF,JR,CPAT,CL,RL,CASE,JC,CT store
   class TP verdict
@@ -166,9 +167,9 @@ files named; where a README or handoff states an older count, the data file wins
 | Step | Cassandra | Source |
 |---|---|---|
 | Inputs | 579 candidates (342 open); retry list 23 rows (3 open: R19, B22, B8) | candidate list, `cassandra/phase2-retry-list.md` |
-| Stages 1–2 — verdicts | **47 cases**: true positive **30** (28 `deployment`, 2 `diagnostic`), false positive 4, retry 13 | `OOM-exp/cassandra/cases/_INDEX.md` |
-| Stage 3-a — JIRA check | of 30: **13 mentioned** (6 exact, 7 partial: 10 open, 2 fixed only after 5.0.9, 1 fixed incompletely in 5.0.9); 1 fixed upstream without an issue; 3 documented only; **13 new** | `OOM-exp/cassandra/stage3-jira-check/README.md` |
-| Stage 3-b — client trigger | of 30: **22 by a user alone** (pre-auth 1, login without grants 2, data role 15, DDL role 4); 7 given an outside condition; 1 admin only. Confirm runs: 23 run, **20 confirmed, 3 partly** | `OOM-exp/cassandra/stage3b-client-trigger/README.md` |
+| Stages 1–2 — verdicts | **70 cases** (74 index rows, 4 superseded history rows): true positive **44** (42 `deployment`, 2 `diagnostic`: C1, B8; plus R15's condition B), false positive 4 (5 rows), retry 21 rows (most later re-tried; 3 still open on the retry list) | `OOM-exp/cassandra/cases/_INDEX.md` |
+| Stage 3-a — JIRA check | **30 of 44 checked** (the 14 wave 1–3 true positives B9, B10, B12, B13, B15, C4–C8, U2–U4, R7 were missed by a counting error and are pending): **13 mentioned** (6 exact, 7 partial: 10 open, 2 fixed only after 5.0.9, 1 fixed incompletely in 5.0.9); 1 fixed upstream without an issue; 3 documented only; **13 new** | `OOM-exp/cassandra/stage3-jira-check/README.md` |
+| Stage 3-b — client trigger | **30 of 44 checked** (same 14 pending): **22 by a user alone** (pre-auth 1, login without grants 2, data role 15, DDL role 4); 7 given an outside condition; 1 admin only. Confirm runs: 23 run, **20 confirmed, 3 partly** | `OOM-exp/cassandra/stage3b-client-trigger/README.md` |
 
 ## 6. Change log of this page
 
@@ -183,3 +184,4 @@ files named; where a README or handoff states an older count, the data file wins
 | 2026-11-23 | Stage 3 split (owner): the JIRA check becomes **3-a**; new **3-b, client trigger check** (could an ordinary authenticated user trigger the OOM and affect other users); chart nodes O3B and CT; case index gains a Client column |
 | 2026-11-23 | Stage 3-b privilege levels gain `login role, no grants` (between pre-auth and data role), from the confirm runs; no step or arrow changed |
 | 2026-11-23 | Result numbers added (owner): arrow labels in the chart and a results snapshot (5.1) for both phases, refreshed with each batch's results; Hadoop note corrected (its JIRA report exists, stage 5 not started) |
+| 2026-11-23 | Arrow-label format (owner): numbers written as Cassandra/Hadoop with a legend, – = not started; phase-2 counts corrected (44 true positives, not 30; stage 3 covered 30 of them) |

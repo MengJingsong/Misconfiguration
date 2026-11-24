@@ -1,5 +1,9 @@
 # Cassandra — stage 3-b client trigger check (analysis and confirm runs, 2026-11-23)
 
+> **Scope correction (2026-11-23).** This check covered **30 of the 44** Cassandra true positives. The 14 wave 1–3 true
+> positives (B9, B10, B12, B13, B15, C4, C5, C6, C7, C8, U2, U3, U4, R7; plus R15's condition B) write their verdict
+> without bold in `_INDEX.md` and were missed by the count that selected the cases. They are pending.
+
 Rules: [`../../oom-agent-playbook.md`](../../oom-agent-playbook.md#stage-3-b--client-trigger-check). Every Cassandra
 **true positive** (30) was checked against the client threat model: a Cassandra user, not an admin or developer;
 `PasswordAuthenticator` + `CassandraAuthorizer` on; native CQL protocol only; all capacity constraints at defaults.

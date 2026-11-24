@@ -191,8 +191,8 @@ runs finished; on 2026-11-23 a fresh agent per case wrote §3–§4 from the nod
 
 **Stage 3 — JIRA check (added and run 2026-11-23, owner).** New phase-2 stage (`OOM-exp/oom-agent-playbook.md`): every
 true positive is checked read-only against Apache JIRA (match level exact / partial / related / none; issue state; fix in
-the pinned version or not; shipped docs that warn, source labelled). Cassandra, 30 true positives (false positives and
-retries excluded), after the owner's rulings of 2026-11-23: **13 mentioned** (6 exact, 7 partial: 10 open, 2 fixed only
+the pinned version or not; shipped docs that warn, source labelled). Cassandra, 30 of the 44 true positives (false positives and
+retries excluded; the 14 wave 1–3 true positives were missed by a counting error and are pending), after the owner's rulings of 2026-11-23: **13 mentioned** (6 exact, 7 partial: 10 open, 2 fixed only
 after 5.0.9, 1 `known-fixed (incomplete)` = B8), R21 fixed incidentally in 6.0 (known-fixed, not mentioned), 3 documented
 only, **13 new**. Results: `OOM-exp/cassandra/stage3-jira-check/` (README counts, one file
 per case with its query log) and the `_INDEX.md` JIRA (stage 3) column. Owner rulings (2026-11-23): B8 `known-fixed (incomplete)`
@@ -202,7 +202,7 @@ as filed. Cassandra history clone for fix checks: `~/jira-s3/cassandra-history.g
 on the local node (`/mydata/j1` is gone). Hadoop: no phase-2 cases yet, so no stage 3.
 
 **Stage 3-b — client trigger check (added and analysed 2026-11-23, owner).** Could an ordinary authenticated user
-(native protocol, defaults) trigger each true positive? Analysis of the 30 Cassandra true positives, nothing run: 22
+(native protocol, defaults) trigger each true positive? Analysis of 30 of the 44 Cassandra true positives (14 wave 1–3 ones pending, see 3-a), nothing run: 22
 client-triggerable alone (2 pre-auth, 15 data role, 5 DDL role), 7 given an outside condition, 1 not (R18). Results in
 `OOM-exp/cassandra/stage3b-client-trigger/` and the `_INDEX.md` Client (stage 3-b) column. **Confirm runs (same day,
 owner-approved, 23 cases on 10 nodes, auth on, least-privilege attacker + victim role): 20 confirmed, 3 partly** — R13
@@ -269,12 +269,16 @@ noticed along the way are noted in case files for Target 3, not chased.
 
 - **Stage 1:** 17,343 `if` statements → 4,489 numeric comparisons + 1,099 helper-guarded rows.
 - **Stage 2:** 4,789 units banded (A 134, B 174, C 94, D 4,387); `cassandra/stage2-ai-preprocessing/bands.csv`.
-- **Stage 3:** bands A, B and C fully read; **115 case files** (29 guided, 86 autonomous; estimate
+- **Current totals (recomputed 2026-11-23 from `_INDEX.md` §1 and the set CSVs; the 2026-10-27 counts below are history):**
+  **304 case files** (guided 29, autonomous 275; estimate positive 137, negative 160, undetermined 7); set A has
+  written up 154 of its 159 targets; **stage 4 run on 261 of 304** (TP 122, FP 0, TN 98, FN 6, undetermined 16, plus
+  weak TP 6 / TN 12 / FN 1); 43 not run (29 of them `none`-type cases awaiting an owner decision).
+- **Stage 3 (as of 2026-10-27):** bands A, B and C fully read; **115 case files** (29 guided, 86 autonomous; estimate
   positive 56, negative 59). 65 of the 402 A/B/C units were a case's target before the two-set job;
   the other **337** are that job (2 accepted candidates in `predicted-positive.md`, the rest rejected
   lines in `predicted-negative.md`, ~151 rows). Set A has written up **78** of its 159 targets
   (batches 1–11, 2026-10-24/27); set B none yet. Nothing is undecided. Band D is not read.
-- **Stage 4:** **all 115 closed**, run 1 only (set A batch 10: `lc` also ran a second cluster pass, same session): 94 Confirmed, 4 Refuted,
+- **Stage 4 (as of 2026-10-27):** **all 115 closed**, run 1 only (set A batch 10: `lc` also ran a second cluster pass, same session): 94 Confirmed, 4 Refuted,
   16 partial, 1 not confirmed. **Outcome class:** 51 true positive, 0 false positive, 46 true
   negative, 5 false negative, 13 undetermined (all autonomous, mostly the cluster tier).
   Per-case verdicts: `cassandra/stage3-ai-deep-read/_INDEX.md` §1. *(The counts above predate set A's later
