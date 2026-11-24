@@ -82,7 +82,7 @@ flowchart TD
   subgraph P1["Phase 1: capacity-enforcement-exp"]
     S1["Stage 1: CodeQL"]
     S2["Stage 2: AI banding"]
-    S3A["Stage 3: autonomous agent<br/>left: queued 2,539/10,651 · not queued 5,918/8,993"]
+    S3A["Stage 3: autonomous agent<br/>left: 8,457/19,644"]
     S3G["Stage 3: guided agent"]
     CF[("Phase-1 case files")]
     S4["Stage 4: runtime verification<br/>left: not run 61/18"]
