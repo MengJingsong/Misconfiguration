@@ -65,7 +65,8 @@ Only default constraints are considered (rule 2026-11-23).
 
 ## 5. Flowchart
 
-Step names only; what each step does is in sections 2–4. Solid arrows: the main path. Dotted arrows:
+Step names only; what each step does is in sections 2–4. Arrow labels carry the **current numbers** (C = Cassandra,
+H = Hadoop; as of 2026-11-23); the full breakdown with sources is in 5.1. Solid arrows: the main path. Dotted arrows:
 write-back and feedback. Cylinders: lists and files that one step writes and another reads.
 
 ```mermaid
@@ -101,35 +102,35 @@ flowchart TD
     CT[("Stage 3-b client trigger files")]
   end
 
-  S1 --> S2
-  S2 --> S3A
-  S2 --> S3G
-  S3A --> CF
-  S3G --> CF
-  CF --> S4
-  S4 -.->|results| CF
-  JR --> CPAT
-  CF --> S5A
-  CF --> S5G
+  S1 -->|"C 11,228 · H 19,674 units"| S2
+  S2 -->|"units read: C 2,685 · H 10"| S3A
+  S2 -->|"C 29 targets · H none"| S3G
+  S3A -->|"C 275 · H 6 case files"| CF
+  S3G -->|"C 29 · H 0 case files"| CF
+  CF -->|"run: C 261 of 304 · H 6 of 6"| S4
+  S4 -.->|"results: C TP 122, TN 98, FN 6 · H TP 2, TN 3"| CF
+  JR -->|"kept: C 246 · H 368 issues; 16 patterns"| CPAT
+  CF -->|"read: C 304 · H 0 files"| S5A
+  CF -->|"read: C 304 · H 0 files"| S5G
   CPAT --> S5G
-  S5A --> CL
-  S5G --> CL
+  S5A -->|"C 251 candidates · H 0"| CL
+  S5G -->|"C 264 candidates · H 0"| CL
 
-  CL --> O1
-  RL --> O1
+  CL -->|"C 579 candidates, 342 open"| O1
+  RL -->|"C 23 rows, 3 open"| O1
   O1 --> CASE
-  CASE --> O2
-  O2 --> TP
-  O2 --> FP
-  O2 --> RT
+  CASE -->|"C 47 cases with a verdict"| O2
+  O2 -->|"C 30"| TP
+  O2 -->|"C 4"| FP
+  O2 -->|"C 13"| RT
   RT --> RL
   O2 -.->|verdict| CL
   O2 -.->|new holder| CL
   TP -.->|new pattern| CPAT
-  TP --> O3
-  O3 --> JC
-  TP --> O3B
-  O3B --> CT
+  TP -->|"C 30"| O3
+  O3 -->|"C 13 known, 1 fixed upstream, 3 documented, 13 new"| JC
+  TP -->|"C 30"| O3B
+  O3B -->|"C 22 user alone, 7 conditional, 1 admin; 20 of 23 confirmed"| CT
 
   class CF,JR,CPAT,CL,RL,CASE,JC,CT store
   class TP verdict
@@ -139,7 +140,35 @@ Notes on the chart:
 
 - **Stage 5 never chases a clue** and phase-1 agents never read phase-2 results; the only phase-2 signal
   that reaches phase 1 is a new clue pattern, which only the guided agent reads.
-- **Hadoop** runs phase 1 stages 3–5; its JIRA OOM report and phase 2 are not started.
+- **Hadoop** has run phase 1 stages 1–4 (stage 3 and 4 on a first batch) and its JIRA OOM report; its stage 5
+  and phase 2 are not started.
+
+### 5.1 Results snapshot (as of 2026-11-23)
+
+Refreshed in the same commit as each batch's results (rule in [`CLAUDE.md`](CLAUDE.md)). Counts recomputed from the data
+files named; where a README or handoff states an older count, the data file wins.
+
+**Phase 1 — `capacity-enforcement-exp`**
+
+| Step | Cassandra | Hadoop | Source |
+|---|---|---|---|
+| Stage 1 — CodeQL | 13,632 result rows → **11,228 units** (`if` corpus 4,789, extension 6,439) | 22,693 rows → **19,674 units** (9,684 / 9,990) | `codeql-queries/results/<sys>/` (gitignored), `bands.csv` |
+| Stage 2 — AI banding | A 224 · B 298 · C 401 · D 10,305 | A 200 · B 442 · C 1,104 · D 17,928 | `<sys>/stage2-ai-preprocessing/bands.csv` |
+| Stage 3 — deep read | ≈ 2,685 units read; **304 case files** (autonomous 275, guided 29): positive 137, negative 160, undetermined 7 | 10 units read; **6 case files** (autonomous): positive 3, negative 3 | `<sys>/stage3-ai-deep-read/_INDEX.md`, set CSVs, `hadoop/status.py` |
+| Stage 4 — runtime verification | **261 of 304 run**: TP 122, FP 0, TN 98, FN 6, undetermined 16, weak 19 (TP 6, TN 12, FN 1); 43 not run | **6 of 6 run**: TP 2, TN 3, undetermined 1 | `_INDEX.md` outcome column, `stage4-runtime-verification/results/` |
+| JIRA OOM report | 604 surveyed, **246 kept** | 961 read, **368 kept** | `<sys>/stage5-oom-clue-find/jira-oom-survey.csv` |
+| OOM clue patterns | **16** (CP-1–16; 14 from Cassandra's report, 3 from Hadoop's; 0 added by phase 2) | (shared) | `stage5-oom-clue-find/oom-clue-patterns.md` |
+| Stage 5 — clue find | 304 case files read by each agent; **579 candidates** (autonomous 251, guided 264, legacy 62, phase-2 2) | not started | `<sys>/stage5-oom-clue-find/coverage.csv`, `phase1-oom-candidates.md` |
+| Candidate Status | open 342 · true positive 76 · closed: covered 150 · retry 10 · skipped 1 | — | `phase1-oom-candidates.md` |
+
+**Phase 2 — `OOM-exp`** (Cassandra; Hadoop not started)
+
+| Step | Cassandra | Source |
+|---|---|---|
+| Inputs | 579 candidates (342 open); retry list 23 rows (3 open: R19, B22, B8) | candidate list, `cassandra/phase2-retry-list.md` |
+| Stages 1–2 — verdicts | **47 cases**: true positive **30** (28 `deployment`, 2 `diagnostic`), false positive 4, retry 13 | `OOM-exp/cassandra/cases/_INDEX.md` |
+| Stage 3-a — JIRA check | of 30: **13 mentioned** (6 exact, 7 partial: 10 open, 2 fixed only after 5.0.9, 1 fixed incompletely in 5.0.9); 1 fixed upstream without an issue; 3 documented only; **13 new** | `OOM-exp/cassandra/stage3-jira-check/README.md` |
+| Stage 3-b — client trigger | of 30: **22 by a user alone** (pre-auth 1, login without grants 2, data role 15, DDL role 4); 7 given an outside condition; 1 admin only. Confirm runs: 23 run, **20 confirmed, 3 partly** | `OOM-exp/cassandra/stage3b-client-trigger/README.md` |
 
 ## 6. Change log of this page
 
@@ -153,3 +182,4 @@ Notes on the chart:
 | 2026-11-23 | Phase 2 gains **stage 3, JIRA check** (owner): every true positive checked read-only against Apache JIRA; new chart nodes O3 and JC; case index gains a JIRA column. Scope rule (owner): default constraints only, an OOM needing a non-default constraint is a false positive and stage 1 skips such candidates (verdict row and new scope row) |
 | 2026-11-23 | Stage 3 split (owner): the JIRA check becomes **3-a**; new **3-b, client trigger check** (could an ordinary authenticated user trigger the OOM and affect other users); chart nodes O3B and CT; case index gains a Client column |
 | 2026-11-23 | Stage 3-b privilege levels gain `login role, no grants` (between pre-auth and data role), from the confirm runs; no step or arrow changed |
+| 2026-11-23 | Result numbers added (owner): arrow labels in the chart and a results snapshot (5.1) for both phases, refreshed with each batch's results; Hadoop note corrected (its JIRA report exists, stage 5 not started) |

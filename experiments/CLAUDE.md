@@ -17,3 +17,10 @@ functionality or design**, update `FLOWCHART.md` in the same commit so it matche
   log (section 6). If nothing in the page needs to change, say so in the commit message.
 - After editing the chart, check that it still parses (every node ID defined once, labels quoted,
   no `<`/`>` in labels, arrows use `-->`, `-.->` or `-->|label|`).
+
+## Keep the flowchart's numbers current (rule, 2026-11-23, owner)
+
+`FLOWCHART.md` shows result numbers as Mermaid arrow labels and in its results snapshot (section 5.1). When a commit
+under `experiments/` changes a counted result (a batch's verdicts, stage-3/4/5 counts, candidate or retry-list status
+counts, stage-3-a/3-b labels), refresh the affected arrow labels and the 5.1 table in the same commit, with the
+"as of" date. Number refreshes need no change-log line. Recompute from the data files, not from READMEs.
