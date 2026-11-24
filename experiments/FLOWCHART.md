@@ -67,13 +67,17 @@ Only default constraints are considered (rule 2026-11-23).
 
 Step names only; what each step does is in sections 2–4. Arrow labels carry the **current numbers** as
 **Cassandra/Hadoop** (for example `275/6`), as of 2026-11-23; **–** = not started for that system. The full breakdown
-with sources is in 5.1. Solid arrows: the main path. Dotted arrows:
+with sources is in 5.1. **Node markers** (open work, details in 5.2): **orange border** = work at this step waits on an
+owner decision; **dashed border** = not started for Hadoop (phase 2 is Cassandra only and is not marked). Solid arrows: the main path. Dotted arrows:
 write-back and feedback. Cylinders: lists and files that one step writes and another reads.
 
 ```mermaid
 flowchart TD
   classDef store fill:#e3eefc,stroke:#3a6fb0,color:#222
   classDef verdict fill:#e2f4e2,stroke:#3a8a3a,color:#222
+  classDef owner stroke:#d97706,stroke-width:3px
+  classDef storeOwner fill:#e3eefc,stroke:#d97706,stroke-width:3px,color:#222
+  classDef hadoopPending stroke-dasharray:6 4
 
   subgraph P1["Phase 1: capacity-enforcement-exp"]
     S1["Stage 1: CodeQL"]
@@ -133,7 +137,10 @@ flowchart TD
   TP -->|"checked: 30/– (14 + R15-B pending)"| O3B
   O3B -->|"alone 22/–, conditional 7/–, admin 1/–; confirmed 20/–"| CT
 
-  class CF,JR,CPAT,CL,RL,CASE,JC,CT store
+  class CF,JR,CPAT,RL,CASE,JC,CT store
+  class CL storeOwner
+  class S4,O2 owner
+  class S3G,S5A,S5G hadoopPending
   class TP verdict
 ```
 
@@ -273,6 +280,35 @@ C3 false positive 1 + disk-paused skip 1.
     (C1, S1, U13, R1-V).
 - **Confirm runs: 30 = run 23 + not run 7; run 23 = confirmed 20 + partly 3** (R13, U7, U14).
 
+### 5.2 Open work (as of 2026-11-24)
+
+What is left at each step, from the "+ left" terms of 5.1 and the open items in the handoffs. Numbers are
+**Cassandra/Hadoop** where both apply. **Waiting on**: **owner** = a decision only the owner can make (orange border in
+the chart); **queue** = ordinary work for whoever runs that queue; **node** = a broken node or environment. Refreshed with
+5.1 (rule in [`CLAUDE.md`](CLAUDE.md)).
+
+**Phase 1 — `capacity-enforcement-exp`**
+
+| Step | What is left | Waiting on | Tracked in |
+|---|---|---|---|
+| Stage 1 — CodeQL | nothing; optional: numeric `switch` case labels are not matched | — | `stage1-codeql-preprocessing/README.md` |
+| Stage 2 — banding | nothing | — | `bands.csv` |
+| Stage 3 — deep read | queued, not read **2,619/10,671** (C: band-D set A 2,164, extension A–C 455; H: Yang 8,930, Jingsong 1,741); not queued **5,918/8,993** (extension band D); judged but not written up 169/– (set B); unresolved unit 1/–; notes backlog (stage-3 notes not applied to filed cases, `undetermined.md` §2 re-audit, `predicted-negative.md` §10 band-D lines) | **queue** (Jingsong: band-D set A, extension; Yang: set B write-ups, Hadoop queue); **owner**: whether to queue extension band D | set CSVs, `hadoop/<name>/queue.csv`, `HANDOFF.md` "Open follow-ups" |
+| Stage 4 — runtime verification | not run **43/0** (29 `none`-type, 14 with no run recorded); undetermined **16/1** (rerun list in the handoff) | **owner**: the `none`-type design (29 cases); **node**: Jingsong's Hadoop stage-4 nodes `pc41`, `pc39`, `pc29` fail SSH host-key checks (a new node needs `jingsong/setup-node.sh`); **queue**: reruns | `_INDEX.md` §1, `HANDOFF.md` |
+| JIRA OOM report | nothing | — | `jira-oom-report.md` |
+| OOM clue patterns | nothing | — | `oom-clue-patterns.md` |
+| Stage 5 — clue find | case files not yet read **0/6** (Cassandra: new stage-3 case files feed it as they come) | **queue** (Hadoop stage 5 not started) | `coverage.csv` |
+| Candidate list | open **342/–**; triage lists not closed (2026-11-18 §2 "not reachable at shipped defaults", §3 "too slow / too much disk"; 2026-11-20 "covered"); B18's cluster rows still `retry (B18)` | **owner**: close the triage lists, rule on B18's rows | `phase1-oom-candidates.md`, `runs/triage-*.md` |
+
+**Phase 2 — `OOM-exp`** (Cassandra; Hadoop not started)
+
+| Step | What is left | Waiting on | Tracked in |
+|---|---|---|---|
+| Stages 1–2 — design, verify | open retries **3** (R19, B22, B8 for a deployment-level OOM); owner rulings **5** (B19 T2's form, B21 failed I-2G intervention, U13 deployment vs diagnostic, U15 "not corrupt input", B15 proposed status); optional follow-ups 4 (R21 unclaimed lead, R22 512 MiB service-loss arm, R20 2 GiB matched set, B6 status caveat) | **owner**: the 5 rulings; **queue**: retries, follow-ups | `cassandra/phase2-retry-list.md`, `cases/_INDEX.md`, `HANDOFF.md` waves |
+| Stage 3-a — JIRA check | true positives not checked **15** (B9, B10, B12, B13, B15, C4–C8, U2–U4, R7, R15-B); not ruled: C9, R1-V labels (as filed) | **queue** | `stage3-jira-check/README.md` |
+| Stage 3-b — client trigger | true positives not analysed **15** (as 3-a); confirm: U14 one more run (OOM 1 of 2), repetition across nodes (all cases), B21 ring-wide fan-out, B20/U14 cluster-wide reach; 7 cases not confirm-run (low value) | **queue** | `stage3b-client-trigger/README.md` |
+| Nodes | wave-6 run folders on all 10 nodes (`/mydata/s4/<case>`, 0.6–6 GB each; heap dumps 2.2 GB on `pc75`, 2.4 GB on `pc99`) | **owner**: delete or keep | `HANDOFF.md` wave 6 |
+
 ## 6. Change log of this page
 
 | Date | Change |
@@ -289,3 +325,4 @@ C3 false positive 1 + disk-paused skip 1.
 | 2026-11-23 | Arrow-label format (owner): numbers written as Cassandra/Hadoop with a legend, – = not started; phase-2 counts corrected (44 true positives, not 30; stage 3 covered 30 of them) |
 | 2026-11-23 | Rule widened (owner): result-number changes in either experiment also update this page in the same commit; pointers added to the root `CLAUDE.md` batch-commit step and Hadoop `PROCEDURE.md` |
 | 2026-11-23 | §5.1 rewritten as splits that close (owner): each step as in = out + … + left, per system; corrections: phase-2 cases 69, open retries 2, Cassandra units read 2,678, pattern origins 13 + 2 + 1 |
+| 2026-11-24 | Open work shown (owner): new §5.2 (what is left per step, waiting on owner / queue / node) and node markers in the chart (orange border = waits on an owner decision; dashed = not started for Hadoop) |
