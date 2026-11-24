@@ -23,15 +23,15 @@ each query logged in the case's file; fix commits tested in the same blobless cl
 |---|---|
 | True positives checked | **45** (44 + R15-B) |
 | **Mentioned in JIRA** (exact or partial match) | **21 / 45 (47 %)** — exact 10, partial 11 |
-| · still open | 13 (exact: C2, R14, B19, U9, B23, B13, C6; partial: S1, S2, R22, U15, U14, R7) |
+| · still open | 12 (exact: C2, B19, U9, B23, B13, C6; partial: S1, S2, R22, U15, U14, R7) |
 | · fixed upstream, fix not in 5.0.9 | 4 — exact: U4 (CASSANDRA-11745, opt-in, 6.0-alpha3; owner ruling 2026-11-24: an opt-in fix counts); partial: U10 and B20 (CASSANDRA-11745, 6.0-alpha3), U2 (CASSANDRA-21755, 5.0.10 / 6.0-alpha3) |
-| · fixed in 5.0.9 but the fix does not cover it (`known-fixed (incomplete)`) | 4 — exact: B8 (CASSANDRA-8639 bounds serialized bytes, not heap), C7 (CASSANDRA-19336's bound ships off); partial: B10 (CASSANDRA-20052 covers multi-frame messages only), B15 (CASSANDRA-8639, as B8) |
+| · fixed in 5.0.9 but the fix does not cover it (`known-fixed (incomplete)`) | 5 — exact: B8 (CASSANDRA-8639 bounds serialized bytes, not heap), R14 (CASSANDRA-17187's opt-in guardrail checks after the product is built; owner ruling 2026-11-24), C7 (CASSANDRA-19336's bound ships off); partial: B10 (CASSANDRA-20052 covers multi-frame messages only), B15 (CASSANDRA-8639, as B8) |
 | Not mentioned, but fixed incidentally in a newer version | 1 (R21: CASSANDRA-20780, 6.0/trunk) |
 | Not mentioned, but the shipped docs warn (`documented only`) | 5 (R1-V, R18, U12, C4, U3) |
 | **New** (no exact/partial issue, no fix, no doc warning) | **18 / 45** — B6, C1, C9, R12, R13, R20, U7, U8, B16, B17, B21, U13, C10, B9, B12, C5, C8, R15-B |
 | Docs warn at all (with or without an issue), source labelled in each file | 7 fully (R1-V, R18, U12, R14, C4, C7, U3), 2 partly (U9, B16) |
 
-Label totals: known-open 13, known-fixed (not in 5.0.9) 5 (U10, B20, R21, U2, U4), known-fixed (incomplete) 4 (B8, B10, B15,
+Label totals: known-open 12, known-fixed (not in 5.0.9) 5 (U10, B20, R21, U2, U4), known-fixed (incomplete) 5 (B8, R14, B10, B15,
 C7), documented only 5, new 18.
 
 ## Per case
@@ -47,7 +47,7 @@ C7), documented only 5, new 18.
 | [B8](B8.md) | known-fixed (incomplete) | exact | CASSANDRA-8639 (Fixed 3.2, exact; fix 1c41a9ac2c in 5.0.9 bounds serialized bytes); 7533, 6087, 16878 related | no (NEWS.txt:1292-1293 only announces 'bound maximum in-flight commit log replay mutation bytes to 64 megabytes'; no serialized-vs-heap warning) |
 | [R12](R12.md) | new | related | CASSANDRA-7392 (Fixed 3.2, related: review comment on query retention), 12403, 13001, 15500/15503, 11719 related | no (cassandra.yaml:1393-1398 slow_query_log_timeout comment has no retention/memory warning) |
 | [R13](R13.md) | new | related | CASSANDRA-20166 (Fixed 6.0, related by owner ruling: reduces, does not bound); 20052, 8518, 7402, 19959 related | no (native_transport_max_request_data_in_flight not in cassandra.yaml, doc/ or NEWS.txt) |
-| [R14](R14.md) | known-open | exact | CASSANDRA-15250 (Open, exact on root cause); CASSANDRA-17187 (Fixed 4.1, opt-in guardrail, 3233c82311 in 5.0.9, ships -1) | cassandra.yaml:2101-2105 "Guardrail to warn or fail when an IN query creates a cartesian product with a size exceeding threshold ... The two thresholds default to -1 to disable." |
+| [R14](R14.md) | known-fixed (incomplete) | exact | CASSANDRA-15250 (Open, exact on root cause); CASSANDRA-17187 (Fixed 4.1, opt-in guardrail, 3233c82311 in 5.0.9, ships -1) | cassandra.yaml:2101-2105 "Guardrail to warn or fail when an IN query creates a cartesian product with a size exceeding threshold ... The two thresholds default to -1 to disable." |
 | [R20](R20.md) | new | related | none on point; 7111, 7569, 17655 (Open), 11428 related | no |
 | [U7](U7.md) | new | related | CASSANDRA-15250 (Open, related: SELECT form, different holder); 17187, 12618, 12829, 19959 related | no (nearest cassandra.yaml:2101-2105 describes the SELECT in_select_cartesian_product guardrail, off by default; it does not cover modification row build or P x Q) |
 | [U8](U8.md) | new | none | none (closest related: CASSANDRA-18730 Fixed, guardrail ships -1; CASSANDRA-18504 Fixed) | no (conf/cassandra.yaml:2183-2186 names the vector_dimensions guardrail, no memory hazard; side finding: doc/modules/cassandra/pages/reference/vector-data-type.adoc:15 'Vectors are limited to a maximum dimension of 8K (2^13) items.' is not enforced in 5.0.9) |

@@ -282,7 +282,7 @@ split (U6 → R15) 1 + covered by the default re-tests (R2–R4) 3 + C3 false po
 
 - **Checked 45 = true positives 44 + R15-B** (R15's condition B; R15 counts as a retry). 30 on 2026-11-23 + 15 on
   2026-11-24 (B9, B10, B12, B13, B15, C4–C8, U2–U4, R7, R15-B; missed on 2026-11-23 by a counting error).
-- **Checked 45 = known-open 13 + known-fixed (not in 5.0.9) 5 (U10, B20, R21, U2, U4) + known-fixed (incomplete) 4 (B8, B10,
+- **Checked 45 = known-open 12 + known-fixed (not in 5.0.9) 5 (U10, B20, R21, U2, U4) + known-fixed (incomplete) 5 (B8, R14, B10,
   B15, C7) + documented only 5 (R1-V, R18, U12, C4, U3) + new 18.** Mentioned in JIRA (exact or partial match) = 21 (exact
   10 + partial 11); not mentioned but fixed incidentally 1 (R21). Chart: known 21 + fixed upstream 1 + documented 5 + new 18.
 
