@@ -65,7 +65,7 @@ Only default constraints are considered (rule 2026-11-23).
 
 ## 5. Flowchart
 
-Step names only; what each step does is in sections 2–4. Arrow labels carry the **current numbers** as
+Each box holds the step name and, where work is left, a second line **left: …** (from the "+ left" terms of 5.1; never in-progress counts); what each step does is in sections 2–4. Arrow labels carry the **current numbers** as
 **Cassandra/Hadoop** (for example `295/26`), as of 2026-11-24; **–** = not started for that system. The full breakdown
 with sources is in 5.1. **Node markers** (open work, details in 5.2): **orange border** = work at this step waits on an
 owner decision; **dashed border** = not started for Hadoop (phase 2 is Cassandra only and is not marked). Solid arrows: the main path. Dotted arrows:
@@ -82,28 +82,28 @@ flowchart TD
   subgraph P1["Phase 1: capacity-enforcement-exp"]
     S1["Stage 1: CodeQL"]
     S2["Stage 2: AI banding"]
-    S3A["Stage 3: autonomous agent"]
+    S3A["Stage 3: autonomous agent<br/>left: queued 2,539/10,651 · not queued 5,918/8,993"]
     S3G["Stage 3: guided agent"]
     CF[("Phase-1 case files")]
-    S4["Stage 4: runtime verification"]
+    S4["Stage 4: runtime verification<br/>left: not run 61/18"]
     JR[("JIRA OOM reports")]
     CPAT[("OOM clue patterns")]
-    S5A["Stage 5: autonomous agent"]
-    S5G["Stage 5: guided agent"]
+    S5A["Stage 5: autonomous agent<br/>left: 18/24"]
+    S5G["Stage 5: guided agent<br/>left: 18/24"]
     CL[("Phase 1 OOM candidate list")]
   end
 
   subgraph P2["Phase 2: OOM-exp"]
     RL[("Phase 2 retry list")]
-    O1["Stage 1: OOM agent, pick and design"]
+    O1["Stage 1: OOM agent, pick and design<br/>left: open candidates 71/–"]
     CASE[("Phase-2 case files")]
-    O2["Stage 2: OOM agent, verify"]
+    O2["Stage 2: OOM agent, verify<br/>left: 10/– cases"]
     TP["True positive"]
     FP["False positive"]
     RT["Retry"]
     O3["Stage 3-a: JIRA check"]
     JC[("Stage 3-a JIRA check files")]
-    O3B["Stage 3-b: client trigger check"]
+    O3B["Stage 3-b: client trigger check<br/>left: confirm runs 11/–"]
     CT[("Stage 3-b client trigger files")]
   end
 
@@ -323,9 +323,9 @@ the chart); **queue** = ordinary work for whoever runs that queue; **node** = a 
 | Step | What is left | Waiting on | Tracked in |
 |---|---|---|---|
 | Stages 1–2 — design, verify | **new batch of 2026-11-24 at stage 1: 10 cases** (B25, B26, B27, B28, B29, U16, U17 from the candidate list; R23 ← B8, R24 ← B22, R25 ← R19 from the retry list), conclusion pending, not yet rows of `_INDEX.md`; open retries **0**; owner rulings **5** (B19 T2's form, B21 failed I-2G intervention, U13 deployment vs diagnostic, U15 "not corrupt input", B15 proposed status); optional follow-ups 4 (R21 unclaimed lead, R22 512 MiB service-loss arm, R20 2 GiB matched set, B6 status caveat) | **queue**: stage 2 of the 10 (nodes reserved for OOM-exp from 05:00); **owner**: the 5 rulings; **queue**: follow-ups | `cases/<case>/` (the 10), `cassandra/phase2-retry-list.md`, `cases/_INDEX.md`, `HANDOFF.md` waves |
-| Stage 3-a — JIRA check | true positives not checked **0**; not ruled: C9, R1-V labels (as filed); flagged for the owner on 2026-11-24: B10 (`new` if CASSANDRA-20052 is rated related), C7 (by design or known-open), C8 (CASSANDRA-20752 borderline partial), U4 (opt-in fix as known-fixed) | **owner**: the 4 flags; **queue** | `stage3-jira-check/README.md` |
+| Stage 3-a — JIRA check | true positives not checked **0**; not ruled: C9, R1-V labels (as filed); flagged for the owner on 2026-11-24: B10 (`new` if CASSANDRA-20052 is rated related), C7 (by design or known-open), C8 (CASSANDRA-20752 borderline partial); U4 and R14 ruled 2026-11-24 (an opt-in fix counts) | **owner**: the 4 flags; **queue** | `stage3-jira-check/README.md` |
 | Stage 3-b — client trigger | true positives not analysed **0**; confirm runs not run for the 15 of 2026-11-24 (recommended: B9 (needed: pre-auth by code reading), B10, B12, B13, C4, C6, C8, U3, U4, R15-B; low priority: U2); confirm: U14 one more run (OOM 1 of 2), repetition across nodes (all cases), B21 ring-wide fan-out, B20/U14 cluster-wide reach; 7 cases of 2026-11-23 not confirm-run (low value) | **owner**: approve confirm runs (as for the 23); **queue** | `stage3b-client-trigger/README.md` |
-| Nodes (both experiments) | **stale locks and orphaned processes left at ≈ 02:30 on 2026-11-24 on the 10 nodes** (`pc91`, `pc82`, `pc72`, `pc75`, `pc99`; `ms0625`, `ms0640`, `ms0604`, `ms0611`, `ms0617`) when both stage-4 batches stopped: e.g. case 11's NameNode and DataNode still running on `pc82`, partial run folders on `pc91`, `pc82`, `pc99` (`/mydata/jingsong-s4/…-run1`, 1.7–5.5 GB) and possibly `/mydata/jingsong-cass-s4/o<order>/` on the m400s; wave-6 run folders on all 10 nodes (`/mydata/s4/<case>`, 0.6–6 GB each; heap dumps 2.2 GB on `pc75`, 2.4 GB on `pc99`) | **owner**: clean up (stop, unlock) before the nodes are used again; delete or keep the wave-6 folders | `HANDOFF-Jingsong.md` 2026-11-24, `HANDOFF.md` wave 6 and "Nodes" |
+| Nodes (both experiments) | stale locks and orphaned runs from the 02:30 interrupt were cleared on 2026-11-24 at 09:15 (owner); stale locks from the 15:00 stop were cleared at 15:00 | — | `HANDOFF.md` |
 
 ## 6. Change log of this page
 
@@ -344,3 +344,4 @@ the chart); **queue** = ordinary work for whoever runs that queue; **node** = a 
 | 2026-11-23 | Rule widened (owner): result-number changes in either experiment also update this page in the same commit; pointers added to the root `CLAUDE.md` batch-commit step and Hadoop `PROCEDURE.md` |
 | 2026-11-23 | §5.1 rewritten as splits that close (owner): each step as in = out + … + left, per system; corrections: phase-2 cases 69, open retries 2, Cassandra units read 2,678, pattern origins 13 + 2 + 1 |
 | 2026-11-24 | Open work shown (owner): new §5.2 (what is left per step, waiting on owner / queue / node) and node markers in the chart (orange border = waits on an owner decision; dashed = not started for Hadoop) |
+| 2026-11-24 | Chart boxes show what is left (owner): step name plus a second line `left: …` (Cassandra/Hadoop) from the 5.1 "+ left" terms; `<br/>` is the only markup allowed in labels; §5.2 node and U4 rows brought up to date |

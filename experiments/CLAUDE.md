@@ -9,7 +9,7 @@ workflow). **Whenever a commit under `experiments/` changes the design or change
 `FLOWCHART.md` in the same commit.**
 
 **1. Design change** → update the affected rows in sections 2–4, the Mermaid chart in section 5 (nodes and arrows;
-**step names only** in chart nodes, descriptions go in sections 2–4), and add one dated line to the change log
+**step name** in each chart node, plus, where work is left at that step, one second line `left: …` after `<br/>` with the open count as Cassandra/Hadoop, taken from the 5.1 "+ left" terms and never an in-progress count (owner, 2026-11-24); descriptions go in sections 2–4), and add one dated line to the change log
 (section 6).
 - *Counts as a design change:* a step, stage, agent, playbook, template section, mode, option or rule added,
   removed, renamed or rerouted; a list or table that one step writes and another reads (lead lists, queues, link
@@ -17,7 +17,7 @@ workflow). **Whenever a commit under `experiments/` changes the design or change
   lead source.
 - *Does not count:* typo or wording fixes that leave the method the same.
 
-**2. Result-number change** → refresh the affected arrow labels in the chart and the results snapshot (section 5.1),
+**2. Result-number change** → refresh the affected arrow labels and box `left:` lines in the chart, the results snapshot (section 5.1) and the open work (section 5.2),
 with the "as of" date. No change-log line is needed.
 - *Counts:* anything the chart or 5.1 counts — new case files or verdicts at any stage (phase-1 stages 1–5, a
   Yang/Jingsong batch, a phase-2 wave, stage 3-a/3-b labels), stage-4 outcome classes, candidate or retry-list status
@@ -27,4 +27,4 @@ with the "as of" date. No change-log line is needed.
   started).
 
 If nothing in the page needs to change, say so in the commit message. After editing the chart, check that it still
-parses (every node ID defined once, labels quoted, no `<`/`>` in labels, arrows use `-->`, `-.->` or `-->|label|`).
+parses (every node ID defined once, labels quoted, no `<`/`>` in labels except the `<br/>` before a box's `left:` line, arrows use `-->`, `-.->` or `-->|label|`).
