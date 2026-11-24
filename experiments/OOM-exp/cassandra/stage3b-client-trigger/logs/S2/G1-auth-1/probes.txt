@@ -1,0 +1,36 @@
+# as role: (no credentials) via 127.0.0.1
+CONNECT FAILED: AuthenticationException: Authentication error on host /127.0.0.1:9042: Host /127.0.0.1:9042 requires authentication, but no authenticator found in Cluster configuration
+# as role: attacker via 127.0.0.1
+# as attacker (MODIFY on b6.t_blob only): what it can and cannot do
+> SELECT key, release_version, tokens FROM system.local
+  local | 5.0.9-SNAPSHOT | [-9223372036854775808]
+  ok (1 rows)
+> SELECT peer, data_center, tokens FROM system.peers
+  /127.0.0.3 | c | [3074457345618258602]
+  /127.0.0.2 | c | [-3074457345618258603]
+  ok (2 rows)
+> INSERT INTO b6.t_blob (pk, b) VALUES (-1, 0x00)
+  ok (0 rows)
+> SELECT pk FROM b6.t_blob LIMIT 1
+  ERROR UnauthorizedException: User attacker has no SELECT permission on <table b6.t_blob> or any of its parents
+> SELECT k FROM vks.kv LIMIT 1
+  ERROR UnauthorizedException: User attacker has no SELECT permission on <table vks.kv> or any of its parents
+> INSERT INTO vks.kv (k, v) VALUES (-1, 0x00)
+  ERROR UnauthorizedException: User attacker has no MODIFY permission on <table vks.kv> or any of its parents
+> CREATE KEYSPACE atk WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+  ERROR UnauthorizedException: User attacker has no CREATE permission on <all keyspaces> or any of its parents
+> CREATE TABLE b6.t2 (pk int PRIMARY KEY)
+  ERROR UnauthorizedException: User attacker has no CREATE permission on <all tables in b6> or any of its parents
+> ALTER TABLE b6.t_blob WITH gc_grace_seconds = 0
+  ERROR UnauthorizedException: User attacker has no ALTER permission on <table b6.t_blob> or any of its parents
+> GRANT MODIFY ON TABLE vks.kv TO attacker
+  ERROR UnauthorizedException: User attacker has no AUTHORIZE permission on <table vks.kv> or any of its parents
+> LIST ALL PERMISSIONS OF attacker
+  attacker | attacker | <table b6.t_blob> | MODIFY
+  ok (1 rows)
+# as role: victim via 127.0.0.1
+# as victim (SELECT, MODIFY on vks.kv only)
+> SELECT k FROM vks.kv LIMIT 1
+  ok (0 rows)
+> INSERT INTO b6.t_blob (pk, b) VALUES (-2, 0x00)
+  ERROR UnauthorizedException: User victim has no MODIFY permission on <table b6.t_blob> or any of its parents

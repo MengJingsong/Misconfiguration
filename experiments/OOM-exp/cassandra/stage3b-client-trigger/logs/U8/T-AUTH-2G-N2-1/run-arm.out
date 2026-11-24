@@ -1,0 +1,107 @@
+[2026-11-23 20:01:01 EST] ARM T-AUTH-2G-N2-1 arm=A heap=2G mode=json N=2 R=5 D=16000000 (auth on)
+[2026-11-23 20:01:02 EST] started T-AUTH-2G-N2-1 pid 663985 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/3bu8-T-AUTH-2G-N2-1-1795482061.scope
+[2026-11-23 20:01:54 EST] ready T-AUTH-2G-N2-1
+-XX:+HeapDumpOnOutOfMemoryError -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/3b-U8/runs/T-AUTH-2G-N2-1/cassandra-1795482061-pid663985.hprof -XX:OnOutOfMemoryError=kill 
+authenticator: PasswordAuthenticator
+authorizer: CassandraAuthorizer
+role_manager: CassandraRoleManager
+[2026-11-23 20:01:55 EST] superuser setup
+> CREATE ROLE IF NOT EXISTS u8atk WITH PASSWORD = 'atk-3bU8' AND LOGIN = true AND SUPERUSER = false
+  OK
+> CREATE ROLE IF NOT EXISTS u8victim WITH PASSWORD = 'vic-3bU8' AND LOGIN = true AND SUPERUSER = false
+  OK
+> CREATE ROLE IF NOT EXISTS u8nogrant WITH PASSWORD = 'nog-3bU8' AND LOGIN = true AND SUPERUSER = false
+  OK
+> GRANT CREATE ON ALL KEYSPACES TO u8atk
+  OK
+> CREATE KEYSPACE IF NOT EXISTS victimks WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+  OK
+> CREATE TABLE IF NOT EXISTS victimks.kv (k int PRIMARY KEY, v blob)
+  OK
+> GRANT SELECT ON TABLE victimks.kv TO u8victim
+  OK
+> GRANT MODIFY ON TABLE victimks.kv TO u8victim
+  OK
+> LIST ROLES
+  OK
+> LIST ALL PERMISSIONS OF u8atk
+  OK
+> LIST ALL PERMISSIONS OF u8victim
+  OK
+> LIST ALL PERMISSIONS OF u8nogrant
+  OK
+  OK
+[2026-11-23 20:02:13 EST] probes
+# as user=
+> SELECT release_version FROM system.local
+  RESULT CONNECT-FAIL AuthenticationException:Authentication error on host /127.0.0.1:9042: Host /127.0.0.1:9042 requires authentication; but no authenticator found in Cluster configuration
+# as user=u8atk
+> SELECT release_version FROM system.local
+  RESULT CONNECT-FAIL AuthenticationException:Authentication error on host /127.0.0.1:9042: Provided username u8atk and/or password are incorrect
+# as user=u8atk
+> SELECT k FROM victimks.kv LIMIT 1
+  RESULT FAIL UnauthorizedException:User u8atk has no SELECT permission on <table victimks.kv> or any of its parents
+# as user=u8victim
+> CREATE TABLE victimks.x (pk int PRIMARY KEY, v vector<boolean, 16000000>)
+  RESULT FAIL UnauthorizedException:User u8victim has no CREATE permission on <all tables in victimks> or any of its parents
+# as user=u8victim
+> CREATE KEYSPACE u8v WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+  RESULT FAIL UnauthorizedException:User u8victim has no CREATE permission on <all keyspaces> or any of its parents
+# as user=u8nogrant
+> CREATE KEYSPACE u8n WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+  RESULT FAIL UnauthorizedException:User u8nogrant has no CREATE permission on <all keyspaces> or any of its parents
+[2026-11-23 20:02:49 EST] attacker load (u8atk)
+  row: role=u8atk username=u8atk resource=<all keyspaces> permission=CREATE
+  row: role=u8atk username=u8atk resource=<keyspace u8> permission=CREATE
+  row: role=u8atk username=u8atk resource=<keyspace u8> permission=ALTER
+  row: role=u8atk username=u8atk resource=<keyspace u8> permission=DROP
+  row: role=u8atk username=u8atk resource=<keyspace u8> permission=SELECT
+  row: role=u8atk username=u8atk resource=<keyspace u8> permission=MODIFY
+  row: role=u8atk username=u8atk resource=<keyspace u8> permission=AUTHORIZE
+  row: role=u8atk username=u8atk resource=<keyspace u8> permission=UNMASK
+  row: role=u8atk username=u8atk resource=<keyspace u8> permission=SELECT_MASKED
+  row: role=u8atk username=u8atk resource=<table u8.t> permission=ALTER
+  row: role=u8atk username=u8atk resource=<table u8.t> permission=DROP
+  row: role=u8atk username=u8atk resource=<table u8.t> permission=SELECT
+  row: role=u8atk username=u8atk resource=<table u8.t> permission=MODIFY
+  row: role=u8atk username=u8atk resource=<table u8.t> permission=AUTHORIZE
+  row: role=u8atk username=u8atk resource=<table u8.t> permission=UNMASK
+  row: role=u8atk username=u8atk resource=<table u8.t> permission=SELECT_MASKED
+  row: role=u8atk username=u8atk resource=<all functions in u8> permission=CREATE
+  row: role=u8atk username=u8atk resource=<all functions in u8> permission=ALTER
+  row: role=u8atk username=u8atk resource=<all functions in u8> permission=DROP
+  row: role=u8atk username=u8atk resource=<all functions in u8> permission=AUTHORIZE
+  row: role=u8atk username=u8atk resource=<all functions in u8> permission=EXECUTE
+  row: keyspace_name=u8 table_name=t column_name=pk type=int
+  row: keyspace_name=u8 table_name=t column_name=v type=vector<boolean, 16000000>
+[2026-11-23 20:03:11 EST] victim client pid 665195; 60 s baseline
+1795482251,base,rssKB=2765552,rssAnonKB=2583608,scopeCurB=2696343552,scopeOomKill=0,1795482251137,923248536,67610520,0,0,0,1339,0,0,44738563,2,-1,141,0,-1
+[2026-11-23 20:04:12 EST] attack client pid 665328 (t0 1795482251733)
+1795482263,t+10,rssKB=2766928,rssAnonKB=2584984,scopeCurB=2701336576,scopeOomKill=0,1795482258137,1627389952,1493172224,0,11,8,1497,0,0,44732038,6,-1,1181,0,-1
+1795482273,t+21,rssKB=2767660,rssAnonKB=2585716,scopeCurB=3108298752,scopeOomKill=0,1795482266630,2116113328,2065781680,1981895600,34,0,1656,0,0,44710903,6,-1,2358,6257,-1
+1795482283,t+31,rssKB=2767660,rssAnonKB=2585716,scopeCurB=3702063104,scopeOomKill=0,1795482266630,2116113328,2065781680,1981895600,34,0,1656,0,0,44710903,6,-1,2358,6257,-1
+1795482293,t+41,rssKB=2767660,rssAnonKB=2585716,scopeCurB=4163010560,scopeOomKill=0,1795482266630,2116113328,2065781680,1981895600,34,0,1656,0,0,44710903,6,-1,2358,6257,-1
+1795482303,t+51,rssKB=2767660,rssAnonKB=2585716,scopeCurB=4620791808,scopeOomKill=0,1795482266630,2116113328,2065781680,1981895600,34,0,1656,0,0,44710903,6,-1,2358,6257,-1
+1795482313,t+61,rssKB=2767660,rssAnonKB=2585716,scopeCurB=5077475328,scopeOomKill=0,1795482266630,2116113328,2065781680,1981895600,34,0,1656,0,0,44710903,6,-1,2358,6257,-1
+/mydata/s4/3b-U8/harness/victim-ctl.sh: line 53: 663985 Killed                  CASSANDRA_CONF=$R/conf CASSANDRA_LOG_DIR=$R/logs MAX_HEAP_SIZE=$HEAP MAX_DIRECT_MEMORY_SIZE=$DENV CASSANDRA_HEAPDUMP_DIR=$R JVM_EXTRA_OPTS="$XO" setsid nohup systemd-run --user --scope --unit="3bu8-$L-$(date +%s)" -p MemoryMax=${MM}M -p MemorySwapMax=0 "$BUILD/bin/cassandra" -f < /dev/null > "$R/stdout.log" 2>&1
+[2026-11-23 20:05:19 EST] VICTIM NODE DEAD at +67s
+SUMMARY ok=0 err=2 down=true
+[2026-11-23 20:05:21 EST] victim client: 60 s more
+[2026-11-23 20:06:34 EST] OOM/GC check
+--
+INFO  [Service Thread] 2026-11-24T01:04:26,719 StatusLogger.java:121 - system.prepared_statements               3,326
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /mydata/s4/3b-U8/runs/T-AUTH-2G-N2-1/cassandra-1795482061-pid663985.hprof ...
+WARN  [Service Thread] 2026-11-24T01:04:29,250 GCInspector.java:284 - G1 Old Generation GC in 2363ms.  G1 Old Gen: 2128587888 -> 2016344672; 
+Heap dump file created [2677342733 bytes in 49.589 secs]
+#
+# java.lang.OutOfMemoryError: Java heap space
+# -XX:OnOutOfMemoryError="kill -9 %p"
+#   Executing /bin/sh -c "kill -9 663985"...
+-rw------- 1 jason92 misconfiguration 2677342733 Nov 23 18:05 cassandra-1795482061-pid663985.hprof
+pauses=30 full_gcs=7 total_pause=11s max60=18% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=none
+[2026-11-23 20:06:36 EST] stopped T-AUTH-2G-N2-1
+OOM type="java.lang.OutOfMemoryError: Java heap space" at+67s completed=0 errors=2 lens=[      2 -1 ]
+[2026-11-23 20:06:36 EST] dump scan cassandra-1795482061-pid663985.hprof
+[2026-11-23 20:10:03 EST] dump deleted
+[2026-11-23 20:10:03 EST] END T-AUTH-2G-N2-1 OOM type="java.lang.OutOfMemoryError: Java heap space" at+67s completed=0 errors=2 lens=[      2 -1 ]

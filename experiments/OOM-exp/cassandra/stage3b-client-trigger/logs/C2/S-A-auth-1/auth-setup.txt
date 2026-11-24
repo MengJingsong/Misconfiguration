@@ -1,0 +1,37 @@
+[2026-11-23T21:37:24Z] superuser setup
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+
+ role      | super | login | options | datacenters
+-----------+-------+-------+---------+-------------
+       atk | False |  True |        {} |         ALL
+ cassandra |  True |  True |        {} |         ALL
+    tenant | False |  True |        {} |         ALL
+
+(3 rows)
+
+ role | username | resource     | permission
+------+----------+--------------+------------
+  atk |      atk | <table c2.t> |     SELECT
+  atk |      atk | <table c2.t> |     MODIFY
+
+(2 rows)
+
+ role   | username | resource      | permission
+--------+----------+---------------+------------
+ tenant |   tenant | <table vk.kv> |     SELECT
+ tenant |   tenant | <table vk.kv> |     MODIFY
+
+(2 rows)
+[2026-11-23T21:37:31Z] attacker privilege checks (expected: Unauthorized)
+<stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User atk has no SELECT permission on <table vk.kv> or any of its parents"
+<stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User atk has no CREATE permission on <all keyspaces> or any of its parents"
+<stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User atk has no ALTER permission on <table c2.t> or any of its parents"
+[2026-11-23T21:37:37Z] pre-auth check: QUERY before AUTH_RESPONSE (expected: error, no rows)
+pre-auth: STARTUP -> AUTHENTICATE ; QUERY -> opcode 0 len 55 Unexpected message QUERY, expecting SASL_RESPONSE

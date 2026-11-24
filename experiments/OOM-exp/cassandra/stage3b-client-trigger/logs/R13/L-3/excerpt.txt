@@ -1,0 +1,34 @@
+--- stdout OOM / dump / kill lines
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /mydata/s4/3b-R13/runs/L-3/cassandra-1795472506-pid752925.hprof ...
+Heap dump file created [2277636523 bytes in 95.654 secs]
+# java.lang.OutOfMemoryError: Java heap space
+# -XX:OnOutOfMemoryError="kill -9 %p"
+#   Executing /bin/sh -c "kill -9 752925"...
+--- system.log WARN/ERROR (first 15, cut)
+WARN  [main] 2026-11-23T22:21:51,747 DatabaseDescriptor.java:727 - Only 28.721GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+WARN  [main] 2026-11-23T22:22:00,334 SystemKeyspace.java:1265 - No host ID found, created 61fec8d0-fa58-4d9d-97fb-e9a2fc9a2f04 (Note: This should happen exactly once per node).
+WARN  [Service Thread] 2026-11-23T22:23:43,313 GCInspector.java:284 - G1 Young Generation GC in 1051ms.  G1 Eden Space: 939524096 -> 0; G1 Old Gen: 313355264 -> 2013265920; 
+--- completions (first 5 / last 3 lines, cut)
+1795472737467 10 118004 io_error@recv:[Errno_104]_Connection_reset_by_peer|server:- k=11000000
+1795472737467 11 117817 io_error@rest:[Errno_104]_Connection_reset_by_peer|server:none(closed) k=12000000
+1795472737467 12 117783 io_error@rest:[Errno_104]_Connection_reset_by_peer|server:none(closed) k=13000000
+1795472737467 13 117909 io_error@recv:[Errno_104]_Connection_reset_by_peer|server:- k=14000000
+1795472737467 14 117964 io_error@recv:[Errno_104]_Connection_reset_by_peer|server:- k=15000000
+1795472737468 2 118176 io_error@recv:[Errno_104]_Connection_reset_by_peer|server:- k=3000000
+1795472737468 6 118292 io_error@recv:[Errno_104]_Connection_reset_by_peer|server:- k=7000000
+1795472737468 9 117838 io_error@recv:[Errno_104]_Connection_reset_by_peer|server:- k=10000000
+--- completions lines: 16
+--- gc Full pauses (last 12)
+[2026-11-23T15:24:33.085-0700][165.994s][752925][753045][info ] GC(50) Pause Full (G1 Evacuation Pause) 2035M->2035M(2048M) 1951.716ms
+[2026-11-23T15:24:35.166-0700][168.075s][752925][753045][info ] GC(52) Pause Full (G1 Evacuation Pause) 2035M->2035M(2048M) 2072.125ms
+[2026-11-23T15:24:37.184-0700][170.093s][752925][753045][info ] GC(53) Pause Full (G1 Evacuation Pause) 2035M->2035M(2048M) 2017.535ms
+[2026-11-23T15:24:39.226-0700][172.136s][752925][753045][info ] GC(56) Pause Full (G1 Evacuation Pause) 2035M->2035M(2048M) 2031.492ms
+[2026-11-23T15:24:41.406-0700][174.316s][752925][753045][info ] GC(57) Pause Full (G1 Evacuation Pause) 2035M->2035M(2048M) 2179.764ms
+[2026-11-23T15:24:43.381-0700][176.290s][752925][753045][info ] GC(59) Pause Full (G1 Evacuation Pause) 2035M->2035M(2048M) 1965.630ms
+[2026-11-23T15:24:45.368-0700][178.278s][752925][753045][info ] GC(60) Pause Full (G1 Evacuation Pause) 2035M->2035M(2048M) 1986.980ms
+[2026-11-23T15:24:47.316-0700][180.226s][752925][753045][info ] GC(62) Pause Full (G1 Evacuation Pause) 2035M->2035M(2048M) 1933.294ms
+[2026-11-23T15:24:49.314-0700][182.223s][752925][753045][info ] GC(63) Pause Full (G1 Evacuation Pause) 2035M->2035M(2048M) 1996.831ms
+[2026-11-23T15:24:51.306-0700][184.215s][752925][753045][info ] GC(65) Pause Full (G1 Evacuation Pause) 2035M->2035M(2048M) 1983.419ms
+[2026-11-23T15:24:53.266-0700][186.176s][752925][753045][info ] GC(66) Pause Full (G1 Evacuation Pause) 2035M->2035M(2048M) 1959.912ms
+[2026-11-23T15:24:55.381-0700][188.291s][752925][753045][info ] GC(69) Pause Full (G1 Evacuation Pause) 2035M->1777M(2048M) 2102.225ms

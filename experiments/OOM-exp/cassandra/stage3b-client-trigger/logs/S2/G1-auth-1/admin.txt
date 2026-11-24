@@ -1,0 +1,49 @@
+# as role: cassandra via 127.0.0.1
+# superuser (default 'cassandra'): system_auth replicated to all three nodes, as the shipped yaml advises for these authenticators (repair follows)
+> ALTER KEYSPACE system_auth WITH replication = {'class':'NetworkTopologyStrategy','c':3}
+22:34:02 WARN  c.d.d.c.RequestHandler - Query '[0 bound values] ALTER KEYSPACE system_auth WITH replication = {'class':'NetworkTopologyStrategy','c':3};' generated server side warning(s): When increasing replication factor you need to run a full (-full) repair to distribute the data.
+  ok (0 rows)
+repair 7199: [2026-11-23 22:34:07,190] Repair completed successfully
+repair 7299: [2026-11-23 22:34:08,975] Repair completed successfully
+repair 7399: [2026-11-23 22:34:10,739] Repair completed successfully
+# as role: cassandra via 127.0.0.1
+# superuser: roles, the only GRANTs, and the admin-made schema (attack table b6.t_blob as in stage 2; the victim's own keyspace)
+> CREATE ROLE attacker WITH PASSWORD = '***' AND LOGIN = true AND SUPERUSER = false
+  ok (0 rows)
+> CREATE ROLE victim WITH PASSWORD = '***' AND LOGIN = true AND SUPERUSER = false
+  ok (0 rows)
+> CREATE KEYSPACE b6 WITH replication = {'class':'NetworkTopologyStrategy','c':3}
+  ok (0 rows)
+> CREATE TABLE b6.t_blob (pk int PRIMARY KEY, b blob)
+  ok (0 rows)
+> GRANT MODIFY ON TABLE b6.t_blob TO attacker
+  ok (0 rows)
+> CREATE KEYSPACE vks WITH replication = {'class':'NetworkTopologyStrategy','c':3}
+  ok (0 rows)
+> CREATE TABLE vks.kv (k int PRIMARY KEY, v blob)
+  ok (0 rows)
+> GRANT SELECT ON TABLE vks.kv TO victim
+  ok (0 rows)
+> GRANT MODIFY ON TABLE vks.kv TO victim
+  ok (0 rows)
+> LIST ROLES
+  attacker | false | true | {} | ALL
+  cassandra | true | true | {} | ALL
+  victim | false | true | {} | ALL
+  ok (3 rows)
+> LIST ALL PERMISSIONS OF attacker
+  attacker | attacker | <table b6.t_blob> | MODIFY
+  ok (1 rows)
+> LIST ALL PERMISSIONS OF victim
+  victim | victim | <table vks.kv> | SELECT
+  victim | victim | <table vks.kv> | MODIFY
+  ok (2 rows)
+> SELECT keyspace_name, replication FROM system_schema.keyspaces
+  system_auth | {c=3, class=org.apache.cassandra.locator.NetworkTopologyStrategy}
+  system_schema | {class=org.apache.cassandra.locator.LocalStrategy}
+  system_distributed | {class=org.apache.cassandra.locator.SimpleStrategy, replication_factor=3}
+  system | {class=org.apache.cassandra.locator.LocalStrategy}
+  b6 | {c=3, class=org.apache.cassandra.locator.NetworkTopologyStrategy}
+  vks | {c=3, class=org.apache.cassandra.locator.NetworkTopologyStrategy}
+  system_traces | {class=org.apache.cassandra.locator.SimpleStrategy, replication_factor=2}
+  ok (7 rows)

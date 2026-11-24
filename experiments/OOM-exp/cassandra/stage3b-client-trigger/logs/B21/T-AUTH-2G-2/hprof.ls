@@ -1,0 +1,1 @@
+-rw------- 1 jason92 misconfiguration 1966107063 Nov 23 14:49 /mydata/s4/3b-B21/runs/T-AUTH-2G-2/cassandra-1795470456-pid319869.hprof

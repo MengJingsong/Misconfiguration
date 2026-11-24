@@ -1,0 +1,210 @@
+1795471492.580 17:04:52 start label=AUTHCHECK heap=2G arm=T mode=A frac=0.75 batch=100 fill_inflight=1 wmax=150
+               total        used        free      shared  buff/cache   available
+Mem:          128850         738      122796           4        5315      127128
+Swap:           8192           0        8192
+Filesystem     1M-blocks  Used Available Use% Mounted on
+tmpfs              64426     0     64426   0% /dev/shm
+198:authenticator: PasswordAuthenticator
+217:authorizer: CassandraAuthorizer
+232:role_manager: CassandraRoleManager
+246:network_authorizer: AllowAllNetworkAuthorizer
+1795471532.939 17:05:32 native up=1 pid=325083
+-Xmx2G
+-XX:MaxDirectMemorySize=15872M
+-XX:ParallelGCThreads=40
+-XX:ConcGCThreads=40
+-XX:HeapDumpPath=/dev/shm/3b-R22/dump-AUTHCHECK/cassandra-1795471492-pid325083.hprof
+ConcGCThreads=40 G1HeapRegionSize=16777216 MaxDirectMemorySize=16642998272 ParallelGCThreads=40 
+jvm_cpus=pid 325083's current affinity list: 24-31
+{
+ "superuser_login_after_s": 9.5,
+ "statements": [
+  [
+   "CREATE ROLE IF NOT EXISTS attacker WITH PASSWORD = '***' AND LOGIN = true AND SUPERUSER = false",
+   "OK"
+  ],
+  [
+   "CREATE ROLE IF NOT EXISTS tenant WITH PASSWORD = '***' AND LOGIN = true AND SUPERUSER = false",
+   "OK"
+  ],
+  [
+   "CREATE ROLE IF NOT EXISTS ops WITH PASSWORD = '***' AND LOGIN = true AND SUPERUSER = false",
+   "OK"
+  ],
+  [
+   "CREATE KEYSPACE IF NOT EXISTS r22 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}",
+   "OK"
+  ],
+  [
+   "CREATE TABLE IF NOT EXISTS r22.rt (pk int, ck int, v int, PRIMARY KEY (pk, ck))",
+   "OK"
+  ],
+  [
+   "CREATE TABLE IF NOT EXISTS r22.blob (k bigint PRIMARY KEY, v blob)",
+   "OK"
+  ],
+  [
+   "CREATE KEYSPACE IF NOT EXISTS vic WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}",
+   "OK"
+  ],
+  [
+   "CREATE TABLE IF NOT EXISTS vic.kv (k int PRIMARY KEY, v text)",
+   "OK"
+  ],
+  [
+   "GRANT MODIFY ON TABLE r22.rt TO attacker",
+   "OK"
+  ],
+  [
+   "GRANT MODIFY ON TABLE r22.blob TO attacker",
+   "OK"
+  ],
+  [
+   "GRANT SELECT ON TABLE vic.kv TO tenant",
+   "OK"
+  ],
+  [
+   "GRANT MODIFY ON TABLE vic.kv TO tenant",
+   "OK"
+  ],
+  [
+   "GRANT SELECT ON KEYSPACE system_views TO ops",
+   "OK"
+  ]
+ ],
+ "permissions": {
+  "attacker": [
+   "<table r22.blob> MODIFY",
+   "<table r22.rt> MODIFY"
+  ],
+  "tenant": [
+   "<table vic.kv> MODIFY",
+   "<table vic.kv> SELECT"
+  ],
+  "ops": [
+   "<keyspace system_views> SELECT"
+  ]
+ },
+ "roles": [
+  "attacker super=False login=True",
+  "cassandra super=True login=True",
+  "ops super=False login=True",
+  "tenant super=False login=True"
+ ]
+}
+{"audit_logging_options_enabled": "false", "authenticator": "PasswordAuthenticator", "authorizer": "CassandraAuthorizer", "batch_size_fail_threshold": "50KiB", "batch_size_warn_threshold": "5KiB", "column_value_size_fail_threshold": null, "column_value_size_warn_threshold": null, "commitlog_segment_size": "32MiB", "commitlog_total_space": "8192MiB", "compaction_throughput": "64MiB/s", "concurrent_writes": "32", "counter_cache_size": "50MiB", "cql_start_time": "REQUEST", "credentials_validity": "2000ms", "enforce_native_deadline_for_hints": "false", "hinted_handoff_enabled": "true", "initial_range_tombstone_list_allocation_size": "1", "key_cache_size": "100MiB", "max_hint_window": "3h", "max_hints_delivery_threads": "2", "max_hints_size_per_host": "0B", "max_mutation_size": "16384KiB", "memtable_allocation_type": "heap_buffers", "memtable_cleanup_threshold": "0.33333334", "memtable_flush_writers": "2", "memtable_heap_space": "512MiB", "memtable_offheap_space": "512MiB", "native_transport_max_concurrent_requests_in_bytes": "214748364", "native_transport_max_frame_size": "16MiB", "native_transport_max_request_data_in_flight": "214748364B", "native_transport_max_request_data_in_flight_per_ip": "53687091B", "native_transport_max_requests_per_second": "1000000", "native_transport_max_threads": "128", "native_transport_rate_limiting_enabled": "false", "native_transport_timeout": "12s", "network_authorizer": "AllowAllNetworkAuthorizer", "permissions_cache_active_update": "false", "permissions_validity": "2000ms", "range_tombstone_list_growth_factor": "1.5", "role_manager": "CassandraRoleManager", "roles_cache_active_update": "false", "roles_validity": "2000ms", "row_cache_size": "0MiB", "write_request_timeout": "2000ms"}
+P1 OPTIONS -> SUPPORTED (102 bytes)
+P2 QUERY(T) before STARTUP -> ERROR code=0x000a 'Unexpected message QUERY, expecting STARTUP or OPTIONS'
+P2b STARTUP on the same connection after P2 -> connection reset by server (ConnectionResetError)
+P3 STARTUP (conn 2) -> AUTHENTICATE 'org.apache.cassandra.auth.PasswordAuthenticator'
+P4 QUERY(T) after AUTHENTICATE, no AUTH_RESPONSE -> ERROR code=0x000a 'Unexpected message QUERY, expecting SASL_RESPONSE'
+P4b AUTH_RESPONSE wrong password after P4 -> ERROR code=0x0100 'Provided username attacker and/or password are incorrect'
+P5 STARTUP (conn 3) -> AUTHENTICATE 'org.apache.cassandra.auth.PasswordAuthenticator'
+P6 AUTH_RESPONSE wrong password -> ERROR code=0x0100 'Provided username attacker and/or password are incorrect'
+P7 QUERY(T) after failed auth -> ERROR code=0x000a 'Unexpected message QUERY, expecting SASL_RESPONSE'
+P8 STARTUP (conn 4) -> AUTHENTICATE 'org.apache.cassandra.auth.PasswordAuthenticator'
+P9 REGISTER before auth -> ERROR code=0x000a 'Unexpected message REGISTER, expecting SASL_RESPONSE'
+P10 QUERY(INSERT blob) before auth -> ERROR code=0x000a 'Unexpected message QUERY, expecting SASL_RESPONSE'
+P11 STARTUP (conn 5, control) -> AUTHENTICATE 'org.apache.cassandra.auth.PasswordAuthenticator'
+P12 AUTH_RESPONSE correct attacker password (control) -> AUTH_SUCCESS (4 bytes)
+P13 QUERY(T) after auth (control) -> RESULT kind=1 (4 bytes)
+preauth done
+[
+ {
+  "role": "(no credentials)",
+  "check": "connect",
+  "result": "NoHostAvailable: ('Unable to connect to any servers', {'127.0.0.1:9742': AuthenticationFailed('Remote end requires authentication')})"
+ },
+ {
+  "role": "attacker",
+  "check": "connect",
+  "result": "NoHostAvailable: ('Unable to connect to any servers', {'127.0.0.1:9742': AuthenticationFailed('Failed to authenticate to 127.0.0.1:9742: Error from server: code=0100 [Bad credentials] message=\"Provided username attacker and/or password are incorrect\"')})"
+ },
+ {
+  "role": "attacker",
+  "check": "connect",
+  "result": "CONNECTED"
+ },
+ {
+  "role": "attacker",
+  "check": "range DELETE (MODIFY)",
+  "result": "OK"
+ },
+ {
+  "role": "attacker",
+  "check": "INSERT 12 MiB blob (MODIFY)",
+  "result": "InvalidRequest: Error from server: code=2200 [Invalid query] message=\"Request is too big: length 25165895 exceeds maximum allowed length 16777216.\""
+ },
+ {
+  "role": "attacker",
+  "check": "SELECT r22.rt (no SELECT grant)",
+  "result": "Unauthorized: Error from server: code=2100 [Unauthorized] message=\"User attacker has no SELECT permission on <table r22.rt> or any of its parents\""
+ },
+ {
+  "role": "attacker",
+  "check": "LWT DELETE IF EXISTS (needs SELECT)",
+  "result": "Unauthorized: Error from server: code=2100 [Unauthorized] message=\"User attacker has no SELECT permission on <table r22.rt> or any of its parents\""
+ },
+ {
+  "role": "attacker",
+  "check": "CREATE TABLE in r22",
+  "result": "Unauthorized: Error from server: code=2100 [Unauthorized] message=\"User attacker has no CREATE permission on <all tables in r22> or any of its parents\""
+ },
+ {
+  "role": "attacker",
+  "check": "CREATE KEYSPACE",
+  "result": "Unauthorized: Error from server: code=2100 [Unauthorized] message=\"User attacker has no CREATE permission on <all keyspaces> or any of its parents\""
+ },
+ {
+  "role": "attacker",
+  "check": "ALTER TABLE r22.rt",
+  "result": "Unauthorized: Error from server: code=2100 [Unauthorized] message=\"User attacker has no ALTER permission on <table r22.rt> or any of its parents\""
+ },
+ {
+  "role": "attacker",
+  "check": "SELECT vic.kv (other tenant)",
+  "result": "Unauthorized: Error from server: code=2100 [Unauthorized] message=\"User attacker has no SELECT permission on <table vic.kv> or any of its parents\""
+ },
+ {
+  "role": "attacker",
+  "check": "INSERT vic.kv (other tenant)",
+  "result": "Unauthorized: Error from server: code=2100 [Unauthorized] message=\"User attacker has no MODIFY permission on <table vic.kv> or any of its parents\""
+ },
+ {
+  "role": "attacker",
+  "check": "SELECT system_views.settings",
+  "result": "Unauthorized: Error from server: code=2100 [Unauthorized] message=\"User attacker has no SELECT permission on <table system_views.settings> or any of its parents\""
+ },
+ {
+  "role": "attacker",
+  "check": "SELECT system_auth.roles",
+  "result": "Unauthorized: Error from server: code=2100 [Unauthorized] message=\"User attacker has no SELECT permission on <table system_auth.roles> or any of its parents\""
+ },
+ {
+  "role": "attacker",
+  "check": "unlogged batch of 1000 range DELETEs, one partition",
+  "result": "OK"
+ },
+ {
+  "role": "attacker",
+  "check": "unlogged batch of 1000 range DELETEs over two partitions",
+  "result": "OK"
+ },
+ {
+  "role": "tenant",
+  "check": "INSERT vic.kv (own)",
+  "result": "OK"
+ },
+ {
+  "role": "tenant",
+  "check": "SELECT vic.kv (own)",
+  "result": "OK"
+ },
+ {
+  "role": "tenant",
+  "check": "INSERT r22.blob (attacker table)",
+  "result": "Unauthorized: Error from server: code=2100 [Unauthorized] message=\"User tenant has no MODIFY permission on <table r22.blob> or any of its parents\""
+ }
+]
+1795471555.923 17:05:55 node stopped
+1795471555.931 17:05:55 authcheck done

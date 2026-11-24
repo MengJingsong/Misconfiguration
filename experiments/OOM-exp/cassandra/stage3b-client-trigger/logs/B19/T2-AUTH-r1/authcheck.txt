@@ -1,0 +1,7 @@
+HANDSHAKE lz4=false STARTUP -> AUTHENTICATE org.apache.cassandra.auth.PasswordAuthenticator (left unanswered: no credentials)
+CHECK1 plain, no login, QUERY [SELECT k FROM vic.kv LIMIT 1] -> ERROR code=0xa Unexpected message QUERY, expecting SASL_RESPONSE
+CHECK2 wrong password -> AUTH_RESPONSE reply opcode 0 code=0x100 Provided username tenant and/or password are incorrect
+HANDSHAKE lz4=true STARTUP -> AUTHENTICATE org.apache.cassandra.auth.PasswordAuthenticator (left unanswered: no credentials)
+CHECK3 lz4, no login, LZ4-compressed QUERY [SELECT k FROM vic.kv LIMIT 1] -> ERROR code=0xa Unexpected message QUERY, expecting SASL_RESPONSE
+HANDSHAKE lz4=false STARTUP -> AUTHENTICATE org.apache.cassandra.auth.PasswordAuthenticator -> AUTH_SUCCESS as tenant
+CHECK4 login as tenant, QUERY [SELECT k FROM vic.kv LIMIT 1] -> RESULT (opcode 8) body=38B

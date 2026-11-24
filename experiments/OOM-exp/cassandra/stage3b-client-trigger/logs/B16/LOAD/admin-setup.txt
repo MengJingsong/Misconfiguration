@@ -1,0 +1,29 @@
+admin login retry 0: AuthenticationException: Authentication error on host /127.0.0.1:9042: Provided username cassandra and/or password are incorrect
+admin login retry 1: AuthenticationException: Authentication error on host /127.0.0.1:9042: Provided username cassandra and/or password are incorrect
+15:20:43 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+admin: CREATE ROLE IF NOT EXISTS attacker WITH PASSWORD = '…' AND LOGIN = true AND SUPERUSER = false
+admin: CREATE ROLE IF NOT EXISTS tenant WITH PASSWORD = '…' AND LOGIN = true AND SUPERUSER = false
+admin: CREATE ROLE IF NOT EXISTS reader WITH PASSWORD = '…' AND LOGIN = true AND SUPERUSER = false
+admin: CREATE KEYSPACE IF NOT EXISTS b16 WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+admin: CREATE TABLE IF NOT EXISTS b16.t (pk int, ck text, v int, PRIMARY KEY (pk, ck))
+admin: CREATE TABLE IF NOT EXISTS b16.m (pk int, ck text, v int, PRIMARY KEY (pk, ck))
+admin: CREATE KEYSPACE IF NOT EXISTS vic WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+admin: CREATE TABLE IF NOT EXISTS vic.kv (k int PRIMARY KEY, v text)
+admin: GRANT SELECT ON TABLE b16.t TO attacker
+admin: GRANT MODIFY ON TABLE b16.t TO attacker
+admin: GRANT SELECT ON TABLE b16.m TO attacker
+admin: GRANT MODIFY ON TABLE b16.m TO attacker
+admin: GRANT SELECT ON TABLE vic.kv TO tenant
+admin: GRANT MODIFY ON TABLE vic.kv TO tenant
+admin: GRANT SELECT ON TABLE b16.t TO reader
+perm attacker: <table b16.m> SELECT
+perm attacker: <table b16.m> MODIFY
+perm attacker: <table b16.t> SELECT
+perm attacker: <table b16.t> MODIFY
+perm tenant: <table vic.kv> SELECT
+perm tenant: <table vic.kv> MODIFY
+perm reader: <table b16.t> SELECT
+role attacker superuser=false login=true member_of=[]
+role cassandra superuser=true login=true member_of=[]
+role tenant superuser=false login=true member_of=[]
+role reader superuser=false login=true member_of=[]

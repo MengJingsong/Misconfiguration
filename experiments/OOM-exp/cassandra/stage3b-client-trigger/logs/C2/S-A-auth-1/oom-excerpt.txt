@@ -1,0 +1,58 @@
+ERROR [Native-Transport-Requests-122] 2026-11-23T21:39:23,336 JVMStabilityInspector.java:70 - Exception in thread Thread[Native-Transport-Requests-122,10,SharedPool]
+org.apache.cassandra.transport.messages.ErrorMessage$WrappedException: io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 4160749568, max: 4175429632)
+	at org.apache.cassandra.transport.messages.ErrorMessage.wrap(ErrorMessage.java:486)
+	at org.apache.cassandra.transport.Message.encode(Message.java:423)
+	at org.apache.cassandra.transport.PreV5Handlers$LegacyDispatchHandler.toFlushItem(PreV5Handlers.java:95)
+	at org.apache.cassandra.transport.Dispatcher.processRequest(Dispatcher.java:462)
+	at org.apache.cassandra.transport.Dispatcher$RequestProcessor.run(Dispatcher.java:307)
+	at org.apache.cassandra.concurrent.FutureTask$1.call(FutureTask.java:99)
+	at org.apache.cassandra.concurrent.FutureTask.call(FutureTask.java:61)
+	at org.apache.cassandra.concurrent.FutureTask.run(FutureTask.java:71)
+	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+Caused by: io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 4160749568, max: 4175429632)
+	at io.netty.util.internal.PlatformDependent.incrementMemoryCounter(PlatformDependent.java:880)
+	at io.netty.util.internal.PlatformDependent.allocateDirectNoCleaner(PlatformDependent.java:809)
+	at io.netty.buffer.PoolArena$DirectArena.allocateDirect(PoolArena.java:718)
+	at io.netty.buffer.PoolArena$DirectArena.newChunk(PoolArena.java:693)
+	at io.netty.buffer.PoolArena.allocateNormal(PoolArena.java:213)
+	at io.netty.buffer.PoolArena.tcacheAllocateNormal(PoolArena.java:195)
+	at io.netty.buffer.PoolArena.allocate(PoolArena.java:137)
+	at io.netty.buffer.PoolArena.allocate(PoolArena.java:127)
+	at io.netty.buffer.PooledByteBufAllocator.newDirectBuffer(PooledByteBufAllocator.java:403)
+	at io.netty.buffer.AbstractByteBufAllocator.directBuffer(AbstractByteBufAllocator.java:188)
+	at io.netty.buffer.AbstractByteBufAllocator.directBuffer(AbstractByteBufAllocator.java:179)
+	at io.netty.buffer.AbstractByteBufAllocator.buffer(AbstractByteBufAllocator.java:116)
+	at org.apache.cassandra.transport.Message.encode(Message.java:367)
+	... 9 common frames omitted
+ERROR [Native-Transport-Requests-83] 2026-11-23T21:39:23,319 JVMStabilityInspector.java:70 - Exception in thread Thread[Native-Transport-Requests-83,10,SharedPool]
+org.apache.cassandra.transport.messages.ErrorMessage$WrappedException: io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 4160749568, max: 4175429632)
+	at org.apache.cassandra.transport.messages.ErrorMessage.wrap(ErrorMessage.java:486)
+	at org.apache.cassandra.transport.Message.encode(Message.java:423)
+	at org.apache.cassandra.transport.PreV5Handlers$LegacyDispatchHandler.toFlushItem(PreV5Handlers.java:95)
+	at org.apache.cassandra.transport.Dispatcher.processRequest(Dispatcher.java:462)
+	at org.apache.cassandra.transport.Dispatcher$RequestProcessor.run(Dispatcher.java:307)
+	at org.apache.cassandra.concurrent.FutureTask$1.call(FutureTask.java:99)
+	at org.apache.cassandra.concurrent.FutureTask.call(FutureTask.java:61)
+	at org.apache.cassandra.concurrent.FutureTask.run(FutureTask.java:71)
+	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+Caused by: io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 4160749568, max: 4175429632)
+	at io.netty.util.internal.PlatformDependent.incrementMemoryCounter(PlatformDependent.java:880)
+	at io.netty.util.internal.PlatformDependent.allocateDirectNoCleaner(PlatformDependent.java:809)
+	at io.netty.buffer.PoolArena$DirectArena.allocateDirect(PoolArena.java:718)
+	at io.netty.buffer.PoolArena$DirectArena.newChunk(PoolArena.java:693)
+---stdout---
+INFO  [main] 2026-11-23T21:36:28,406 CassandraDaemon.java:619 - JVM Arguments: [-ea, -da:net.openhft..., -XX:+UseThreadPriorities, -XX:+HeapDumpOnOutOfMemoryError, -Xss256k, -XX:+AlwaysPreTouch, -XX:+UseTLAB, -XX:+ResizeTLAB, -XX:+UseNUMA, -XX:+PerfDisableSharedMem, -Djava.net.preferIPv4Stack=true, -Dchronicle.analytics.disable=true, -XX:-UseBiasedLocking, -XX:+UseG1GC, -XX:+ParallelRefProcEnabled, -XX:MaxTenuringThreshold=2, -XX:G1HeapRegionSize=16m, -XX:+UnlockExperimentalVMOptions, -XX:G1NewSizePercent=50, -XX:G1RSetUpdatingPauseTimePercent=5, -XX:MaxGCPauseMillis=300, -XX:InitiatingHeapOccupancyPercent=70, -Djdk.attach.allowAttachSelf=true, --add-exports=java.base/jdk.internal.misc=ALL-UNNAMED, --add-exports=java.base/jdk.internal.ref=ALL-UNNAMED, --add-exports=java.base/jdk.internal.util=ALL-UNNAMED, --add-exports=java.base/sun.nio.ch=ALL-UNNAMED, --add-exports=java.management.rmi/com.sun.jmx.remote.internal.rmi=ALL-UNNAMED, --add-exports=java.rmi/sun.rmi.registry=ALL-UNNAMED, --add-exports=java.rmi/sun.rmi.server=ALL-UNNAMED, --add-exports=java.sql/java.sql=ALL-UNNAMED, --add-opens=java.base/java.lang.module=ALL-UNNAMED, --add-opens=java.base/jdk.internal.loader=ALL-UNNAMED, --add-opens=java.base/jdk.internal.ref=ALL-UNNAMED, --add-opens=java.base/jdk.internal.reflect=ALL-UNNAMED, --add-opens=java.base/jdk.internal.math=ALL-UNNAMED, --add-opens=java.base/jdk.internal.module=ALL-UNNAMED, --add-opens=java.base/jdk.internal.util.jar=ALL-UNNAMED, --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED, -Dio.netty.tryReflectionSetAccessible=true, -Dio.netty.allocator.useCacheForAllThreads=true, -Dio.netty.allocator.maxOrder=11, -Xlog:gc=info,heap*=trace,age*=debug,safepoint=info,promotion*=trace:file=/mydata/s4/3b-C2/runs/S-A-auth-1/logs/gc.log:time,uptime,pid,tid,level:filecount=10,filesize=10485760, -Xms2G, -Xmx2G, -XX:MaxDirectMemorySize=3982M, -XX:ParallelGCThreads=8, -XX:ConcGCThreads=8, -XX:CompileCommandFile=/mydata/s4/3b-C2/runs/S-A-auth-1/conf/hotspot_compiler, -javaagent:/mydata/s4/3b-C2/cassandra/bin/../lib/jamm-0.4.0.jar, -XX:HeapDumpPath=/mydata/s4/3b-C2/runs/S-A-auth-1/cassandra-1795469781-pid467219.hprof, -Dcassandra.jmx.local.port=7199, -Dcom.sun.management.jmxremote.authenticate=false, -Dcom.sun.management.jmxremote.password.file=/etc/cassandra/jmxremote.password, -Djava.library.path=/mydata/s4/3b-C2/cassandra/bin/../lib/sigar-bin, -XX:NativeMemoryTracking=summary, -Xlog:gc=info,safepoint=info:file=/mydata/s4/3b-C2/runs/S-A-auth-1/gc.log:time,uptime,level,tags:filecount=20,filesize=20m, -XX:OnOutOfMemoryError=kill -9 %p, -Dlogback.configurationFile=logback.xml, -Dcassandra.logdir=/mydata/s4/3b-C2/runs/S-A-auth-1/logs, -Dcassandra.storagedir=/mydata/s4/3b-C2/cassandra/bin/../data, -Dcassandra-foreground=yes]
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /mydata/s4/3b-C2/runs/S-A-auth-1/cassandra-1795469781-pid467219.hprof ...
+Heap dump file created [281587454 bytes in 1.316 secs]
+# -XX:OnOutOfMemoryError="kill -9 %p"
+#   Executing /bin/sh -c "kill -9 467219"...
+---count of OutOfDirectMemoryError lines in system.log---
+35
+---auto flush---
+INFO  [SlabPoolCleaner] 2026-11-23T21:37:44,927 ColumnFamilyStore.java:1055 - Enqueuing flush of c2.t, Reason: MEMTABLE_LIMIT, Usage: 170.758MiB (33%) on-heap, 0B (0%) off-heap
+INFO  [PerDiskMemtableFlushWriter_0:1] 2026-11-23T21:37:47,832 Flushing.java:179 - Completed flushing /mydata/s4/3b-C2/node/data/c2/t-14021230e78611f191830deb844498da/nb-1-big-Data.db (143.481MiB) for

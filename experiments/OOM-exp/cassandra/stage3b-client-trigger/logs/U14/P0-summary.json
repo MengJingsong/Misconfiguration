@@ -1,0 +1,450 @@
+{
+ "label": "P0",
+ "mode": "probe",
+ "args": [
+  "probe",
+  "P0"
+ ],
+ "shm": false,
+ "cotenancy": {
+  "daemons": "none",
+  "MemAvailable_MiB": 63402
+ },
+ "start": {
+  "pid": 644209,
+  "up_s": 86,
+  "unit": "u14-3b-p0-1795469899",
+  "cgroup": "/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/u14-3b-p0-1795469899.scope",
+  "memory.max": "8589934592",
+  "swap.max": "0",
+  "scope_ok": true,
+  "flags": {
+   "-XX:+UseG1GC": true,
+   "-XX:G1HeapRegionSize=16m": true,
+   "-XX:+AlwaysPreTouch": true,
+   "-XX:+HeapDumpOnOutOfMemoryError": true,
+   "-XX:OnOutOfMemoryError=kill -9 %p": true,
+   "-Xmx2G": true
+  },
+  "flags_ok": true,
+  "MaxDirectMemorySize": [
+   "-XX:MaxDirectMemorySize=15872M"
+  ],
+  "xmx": [
+   "-Xmx2G"
+  ],
+  "xms": [
+   "-Xms2G"
+  ],
+  "heapdump": [
+   "-XX:HeapDumpPath=/mydata/s4/3b-U14/dumps/P0/cassandra-1795469899-pid644209.hprof"
+  ]
+ },
+ "settings": {
+  "values": {
+   "authenticator": "PasswordAuthenticator",
+   "authorizer": "CassandraAuthorizer",
+   "role_manager": "CassandraRoleManager",
+   "tables_warn_threshold": "-1",
+   "tables_fail_threshold": "-1",
+   "keyspaces_fail_threshold": "-1",
+   "memtable_allocation_type": "heap_buffers",
+   "memtable_heap_space": "512MiB",
+   "key_cache_size": "100MiB",
+   "counter_cache_size": "50MiB",
+   "prepared_statements_cache_size": "10MiB",
+   "auto_snapshot": "true",
+   "num_tokens": "16",
+   "columns_per_table_fail_threshold": "-1"
+  },
+  "ok": true
+ },
+ "setup": {
+  "cmd": "setup3b",
+  "args": [
+   "ks",
+   "victimks"
+  ],
+  "start_ms": 1795469988070,
+  "login_wait_s": 0.3,
+  "statements": [
+   "CREATE ROLE IF NOT EXISTS u14 WITH PASSWORD = 'u14pw' AND LOGIN = true AND SUPERUSER = false",
+   "CREATE ROLE IF NOT EXISTS victim WITH PASSWORD = 'victimpw' AND LOGIN = true AND SUPERUSER = false",
+   "CREATE KEYSPACE IF NOT EXISTS \"ks\" WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}",
+   "GRANT CREATE ON KEYSPACE \"ks\" TO u14",
+   "CREATE KEYSPACE IF NOT EXISTS \"victimks\" WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}",
+   "CREATE TABLE IF NOT EXISTS \"victimks\".kv (k int PRIMARY KEY, v blob)",
+   "GRANT SELECT ON TABLE \"victimks\".kv TO victim",
+   "GRANT MODIFY ON TABLE \"victimks\".kv TO victim"
+  ],
+  "roles": [
+   [
+    "cassandra",
+    true,
+    true
+   ],
+   [
+    "u14",
+    false,
+    true
+   ],
+   [
+    "victim",
+    false,
+    true
+   ]
+  ],
+  "perms": {
+   "u14": [
+    [
+     "u14",
+     "<keyspace ks>",
+     "CREATE"
+    ]
+   ],
+   "victim": [
+    [
+     "victim",
+     "<table victimks.kv>",
+     "SELECT"
+    ],
+    [
+     "victim",
+     "<table victimks.kv>",
+     "MODIFY"
+    ]
+   ]
+  },
+  "ks": "ks",
+  "seconds": 1.99
+ },
+ "authprobe": {
+  "cmd": "authprobe",
+  "args": [
+   "ks",
+   "victimks"
+  ],
+  "start_ms": 1795469991246,
+  "setup": "probe roles nobody (no grant), datarole (SELECT, MODIFY on victim table) created by the superuser",
+  "perms_u14": {
+   "before": [
+    [
+     "<keyspace ks>",
+     "CREATE"
+    ]
+   ],
+   "after_create": [
+    [
+     "<keyspace ks>",
+     "CREATE"
+    ],
+    [
+     "<table ks.probe_u14>",
+     "ALTER"
+    ],
+    [
+     "<table ks.probe_u14>",
+     "DROP"
+    ],
+    [
+     "<table ks.probe_u14>",
+     "SELECT"
+    ],
+    [
+     "<table ks.probe_u14>",
+     "MODIFY"
+    ],
+    [
+     "<table ks.probe_u14>",
+     "AUTHORIZE"
+    ],
+    [
+     "<table ks.probe_u14>",
+     "UNMASK"
+    ],
+    [
+     "<table ks.probe_u14>",
+     "SELECT_MASKED"
+    ]
+   ],
+   "after_drop": [
+    [
+     "<keyspace ks>",
+     "CREATE"
+    ]
+   ]
+  },
+  "roles": [
+   [
+    "cassandra",
+    true,
+    true
+   ],
+   [
+    "datarole",
+    false,
+    true
+   ],
+   [
+    "nobody",
+    false,
+    true
+   ],
+   [
+    "u14",
+    false,
+    true
+   ],
+   [
+    "victim",
+    false,
+    true
+   ]
+  ],
+  "probe": [
+   {
+    "role": "anonymous (no credentials)",
+    "stmt": "connect + CREATE TABLE",
+    "expect": "no connection",
+    "got": "NoHostAvailable: ('Unable to connect to any servers', {'127.0.14.1:9042': AuthenticationFailed('Remote end requires authentication')})",
+    "pass": true
+   },
+   {
+    "role": "u14 wrong password",
+    "stmt": "connect + CREATE TABLE",
+    "expect": "no connection",
+    "got": "NoHostAvailable: ('Unable to connect to any servers', {'127.0.14.1:9042': AuthenticationFailed('Failed to authenticate to 127.0.14.1:9042: Error from server: code=0100 [Bad credentials] message=\"Provided username u14 ",
+    "pass": true
+   },
+   {
+    "role": "nobody",
+    "stmt": "CREATE TABLE \"ks\".probe_nobody (k int PRIMARY KEY)",
+    "expect": "Unauthorized",
+    "got": "Unauthorized: Error from server: code=2100 [Unauthorized] message=\"User nobody has no CREATE permission on <all tables in ks> or any of its parents\"",
+    "pass": true
+   },
+   {
+    "role": "datarole",
+    "stmt": "INSERT INTO \"victimks\".kv (k, v) VALUES (999999, 0x00)",
+    "expect": "ok",
+    "got": "ok",
+    "pass": true
+   },
+   {
+    "role": "datarole",
+    "stmt": "CREATE TABLE \"ks\".probe_data (k int PRIMARY KEY)",
+    "expect": "Unauthorized",
+    "got": "Unauthorized: Error from server: code=2100 [Unauthorized] message=\"User datarole has no CREATE permission on <all tables in ks> or any of its parents\"",
+    "pass": true
+   },
+   {
+    "role": "datarole",
+    "stmt": "CREATE TABLE \"victimks\".probe_data (k int PRIMARY KEY)",
+    "expect": "Unauthorized",
+    "got": "Unauthorized: Error from server: code=2100 [Unauthorized] message=\"User datarole has no CREATE permission on <all tables in victimks> or any of its parents\"",
+    "pass": true
+   },
+   {
+    "role": "datarole",
+    "stmt": "CREATE KEYSPACE probe_data_ks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}",
+    "expect": "Unauthorized",
+    "got": "Unauthorized: Error from server: code=2100 [Unauthorized] message=\"User datarole has no CREATE permission on <all keyspaces> or any of its parents\"",
+    "pass": true
+   },
+   {
+    "role": "u14",
+    "stmt": "CREATE KEYSPACE probe_u14_ks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}",
+    "expect": "Unauthorized",
+    "got": "Unauthorized: Error from server: code=2100 [Unauthorized] message=\"User u14 has no CREATE permission on <all keyspaces> or any of its parents\"",
+    "pass": true
+   },
+   {
+    "role": "u14",
+    "stmt": "CREATE TABLE \"victimks\".probe_u14 (k int PRIMARY KEY)",
+    "expect": "Unauthorized",
+    "got": "Unauthorized: Error from server: code=2100 [Unauthorized] message=\"User u14 has no CREATE permission on <all tables in victimks> or any of its parents\"",
+    "pass": true
+   },
+   {
+    "role": "u14",
+    "stmt": "SELECT * FROM \"victimks\".kv LIMIT 1",
+    "expect": "Unauthorized",
+    "got": "Unauthorized: Error from server: code=2100 [Unauthorized] message=\"User u14 has no SELECT permission on <table victimks.kv> or any of its parents\"",
+    "pass": true
+   },
+   {
+    "role": "u14",
+    "stmt": "INSERT INTO \"victimks\".kv (k, v) VALUES (1, 0x00)",
+    "expect": "Unauthorized",
+    "got": "Unauthorized: Error from server: code=2100 [Unauthorized] message=\"User u14 has no MODIFY permission on <table victimks.kv> or any of its parents\"",
+    "pass": true
+   },
+   {
+    "role": "u14",
+    "stmt": "CREATE TABLE \"ks\".probe_u14 (k int PRIMARY KEY, v blob)",
+    "expect": "ok",
+    "got": "ok",
+    "pass": true
+   },
+   {
+    "role": "u14",
+    "stmt": "INSERT INTO \"ks\".probe_u14 (k, v) VALUES (1, 0x00)",
+    "expect": "ok",
+    "got": "ok",
+    "pass": true
+   },
+   {
+    "role": "u14",
+    "stmt": "DROP TABLE \"ks\".probe_u14",
+    "expect": "ok",
+    "got": "ok",
+    "pass": true
+   }
+  ],
+  "all_pass": true,
+  "seconds": 6.08
+ },
+ "checkpoint s0": {
+  "tag": "s0",
+  "n_ok": null,
+  "ms": 1795470001111,
+  "L1": 54318248,
+  "L": 54165336,
+  "K": 0,
+  "mbeans": 12378,
+  "perms_u14": {
+   "rows": 1,
+   "table_ALL_rows": 0,
+   "other": [
+    "<keyspace ks> CREATE"
+   ]
+  },
+  "secs": 3.5
+ },
+ "client 1-300": {
+  "cmd": "create",
+  "args": [
+   "ks",
+   "long",
+   "1",
+   "300",
+   "/mydata/s4/3b-U14/logs/P0",
+   "644209",
+   "600"
+  ],
+  "start_ms": 1795470003583,
+  "ok": 300,
+  "rejected": 0,
+  "error": 0,
+  "timeout_tries": 0,
+  "drops_ok": 0,
+  "last_ok_i": 300,
+  "last_ok_ms": 1795470159778,
+  "stopped": "end",
+  "ddl_seconds": 155.8,
+  "seconds": 156.28
+ },
+ "perms_after": {
+  "cmd": "perms",
+  "args": [
+   "u14"
+  ],
+  "start_ms": 1795470163694,
+  "n": 2101,
+  "first": [
+   [
+    "u14",
+    "<keyspace ks>",
+    "CREATE"
+   ],
+   [
+    "u14",
+    "<table ks.t00001xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx>",
+    "ALTER"
+   ],
+   [
+    "u14",
+    "<table ks.t00001xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx>",
+    "DROP"
+   ],
+   [
+    "u14",
+    "<table ks.t00001xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx>",
+    "SELECT"
+   ],
+   [
+    "u14",
+    "<table ks.t00001xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx>",
+    "MODIFY"
+   ],
+   [
+    "u14",
+    "<table ks.t00001xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx>",
+    "AUTHORIZE"
+   ],
+   [
+    "u14",
+    "<table ks.t00001xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx>",
+    "UNMASK"
+   ],
+   [
+    "u14",
+    "<table ks.t00001xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx>",
+    "SELECT_MASKED"
+   ],
+   [
+    "u14",
+    "<table ks.t00002xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx>",
+    "ALTER"
+   ],
+   [
+    "u14",
+    "<table ks.t00002xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx>",
+    "DROP"
+   ],
+   [
+    "u14",
+    "<table ks.t00002xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx>",
+    "SELECT"
+   ],
+   [
+    "u14",
+    "<table ks.t00002xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx>",
+    "MODIFY"
+   ]
+  ],
+  "seconds": 0.75
+ },
+ "namecheck": {
+  "cmd": "namecheck",
+  "args": [
+   "ks"
+  ],
+  "start_ms": 1795470165603,
+  "ks_len": 2,
+  "table_len": 222,
+  "table": "t00001xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "seconds": 0.32
+ },
+ "checkpoint end": {
+  "tag": "end",
+  "n_ok": null,
+  "ms": 1795470169995,
+  "L1": 190150504,
+  "L": 190151144,
+  "K": 300,
+  "mbeans": 76578,
+  "perms_u14": {
+   "rows": 2101,
+   "table_ALL_rows": 2100,
+   "other": [
+    "<keyspace ks> CREATE"
+   ]
+  },
+  "secs": 4.3
+ },
+ "end": {
+  "daemons_left": "none"
+ },
+ "DONE": true
+}

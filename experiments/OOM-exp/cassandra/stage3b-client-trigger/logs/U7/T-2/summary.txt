@@ -1,0 +1,40 @@
+endpoint: survived
+resolved: authenticator=PasswordAuthenticator{};
+resolved: authenticator=null;
+resolved: authorizer=AllowAllCIDRAuthorizernull;
+resolved: authorizer=AllowAllNetworkAuthorizer{};
+resolved: authorizer=CassandraAuthorizer{};
+resolved: commitlog_segment_size=32MiB;
+resolved: in_select_cartesian_product_fail_threshold=-1;
+resolved: in_select_cartesian_product_warn_threshold=-1;
+resolved: max_mutation_size=null;
+resolved: memtable_allocation_type=heap_buffers;
+resolved: memtable_heap_space=null;
+resolved: native_transport_max_message_size=null;
+resolved: native_transport_max_request_data_in_flight=null;
+resolved: native_transport_max_request_data_in_flight_per_ip=null;
+resolved: native_transport_max_threads=128;
+resolved: native_transport_receive_queue_capacity=1MiB;
+resolved: native_transport_timeout=12s;
+resolved: role_manager=CassandraRoleManager{};
+resolved: write_request_timeout=2000ms;
+resolved: write_request_timeout=5000ms;
+flag MaxHeapSize 2147483648
+flag MaxDirectMemorySize 16642998272
+flag HeapDumpOnOutOfMemoryError +
+flag UseG1GC +
+flag G1HeapRegionSize 16777216
+flag AlwaysPreTouch +
+client: count k=0 rows=0 t=1795471044496
+client: count k=1999 rows=0 t=1795471046036
+step 0 update p=2000 q=20000 k0=0 rows=40000000 wire_est=176054 latency_ms=172185 outcome=ERR Unauthorized: Error from server: code=2100 [Unauthorized] message="Unable to perform authorization of super-user permission: Operation timed out - received only 0 responses."
+   GC during step 94 (full 44); baseline after-GC 74 MiB; max after-GC in step 2048 MiB; U_peak 1974 MiB; last after-GC 2017 2001 2017 2001 2033 63
+   K RequestsSize max 219077 B; memtable max 0 MiB; MutationStage pending max 10; NTR active max 128
+jmx samples 198; RequestsSize max 219077; Paused max 0; direct max 42.7 MiB; last row 1795471188673,,,,,,,,
+thread samples 57; NTR-in-ModificationStatement top frames: ModificationStatement.authorize x184 - x37 Mutation.validateSize x29 UpdateParameters.addCell x12 StorageProxy.performLocally x7 UpdateStatement.addUpdateForKey x3 StorageProxy$$Lambda$1626/0x00000001008c5440.run x2 StorageProxy.fetchRows x2 BTreeRow$Builder.build x2 StorageProxy.updateCoordinatorWriteLatencyTableMetric x2 StorageProxy.mutate x2 StorageProxy.performWrite x2 ModificationStatement.buildPartitionKeyNames x1 ModificationStatement.addUpdates x1 ModificationStatement.execute x1
+RssAnon max 2530 MiB
+VmSwap max 0 kB over 112 samples
+heap_info used max 2030 MiB
+GCs 103; Pause Full 44; to-space exhausted 45; heap after GC max 2048 MiB of 2048; first-6 after-GC 9 16 16 13 28 28
+STW share over last 60 s of GC log: 101%
+dumps: none

@@ -1,0 +1,40 @@
+endpoint: survived
+resolved: authenticator=PasswordAuthenticator{};
+resolved: authenticator=null;
+resolved: authorizer=AllowAllCIDRAuthorizernull;
+resolved: authorizer=AllowAllNetworkAuthorizer{};
+resolved: authorizer=CassandraAuthorizer{};
+resolved: commitlog_segment_size=32MiB;
+resolved: in_select_cartesian_product_fail_threshold=-1;
+resolved: in_select_cartesian_product_warn_threshold=-1;
+resolved: max_mutation_size=null;
+resolved: memtable_allocation_type=heap_buffers;
+resolved: memtable_heap_space=null;
+resolved: native_transport_max_message_size=null;
+resolved: native_transport_max_request_data_in_flight=null;
+resolved: native_transport_max_request_data_in_flight_per_ip=null;
+resolved: native_transport_max_threads=128;
+resolved: native_transport_receive_queue_capacity=1MiB;
+resolved: native_transport_timeout=12s;
+resolved: role_manager=CassandraRoleManager{};
+resolved: write_request_timeout=2000ms;
+resolved: write_request_timeout=5000ms;
+flag MaxHeapSize 2147483648
+flag MaxDirectMemorySize 16642998272
+flag HeapDumpOnOutOfMemoryError +
+flag UseG1GC +
+flag G1HeapRegionSize 16777216
+flag AlwaysPreTouch +
+client: count k=0 rows=0 t=1795470489802
+client: count k=1999 rows=0 t=1795470491352
+step 0 update p=2000 q=20000 k0=0 rows=40000000 wire_est=176054 latency_ms=171389 outcome=ERR Unauthorized: Error from server: code=2100 [Unauthorized] message="Unable to perform authorization of super-user permission: Operation timed out - received only 0 responses."
+   GC during step 96 (full 45); baseline after-GC 65 MiB; max after-GC in step 2048 MiB; U_peak 1983 MiB; last after-GC 2000 1984 2000 1984 2032 63
+   K RequestsSize max 217187 B; memtable max 0 MiB; MutationStage pending max 2; NTR active max 128
+jmx samples 198; RequestsSize max 217187; Paused max 0; direct max 42.7 MiB; last row 1795470634963,,,,,,,,
+thread samples 58; NTR-in-ModificationStatement top frames: ModificationStatement.authorize x267 - x35 ModificationStatement.execute x12 UpdateParameters.addCell x10 StorageProxy.mutate x5 UpdateStatement.addUpdateForKey x4 BTreeRow$Builder.build x4 ModificationStatement.addUpdates x3 Mutation.validateSize x3 StorageProxy.fetchRows x3 StorageProxy.performWrite x2 StorageProxy$6.hasNext x1 ModificationStatement.hasConditions x1 CommitLogSegment.allocate x1
+RssAnon max 2527 MiB
+VmSwap max 0 kB over 112 samples
+heap_info used max 1990 MiB
+GCs 105; Pause Full 45; to-space exhausted 46; heap after GC max 2048 MiB of 2048; first-6 after-GC 9 16 16 13 28 28
+STW share over last 60 s of GC log: 102%
+dumps: none

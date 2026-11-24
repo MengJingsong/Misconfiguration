@@ -1,0 +1,18 @@
+--- orig/excerpt.sh	2026-11-23 16:47:40.062429065 -0500
++++ h/excerpt.sh	2026-11-23 16:49:56.462013053 -0500
+@@ -1,6 +1,6 @@
+ #!/bin/bash
+-# U15: small excerpts of run $1 into /mydata/s4/u15/excerpts/$1 (copied to the case folder logs/<run>/). Full logs stay in /mydata/s4/u15/<run>/.
+-R=/mydata/s4/u15/$1; O=/mydata/s4/u15/excerpts/$1; rm -rf "$O"; mkdir -p "$O"
++# U15: small excerpts of run $1 into /mydata/s4/3b-U15/excerpts/$1 (copied to the case folder logs/<run>/). Full logs stay in /mydata/s4/3b-U15/<run>/.
++R=/mydata/s4/3b-U15/$1; O=/mydata/s4/3b-U15/excerpts/$1; rm -rf "$O"; mkdir -p "$O"
+ cp "$R/logs/driver.log" "$R/logs/settings.json" "$R/logs/conf.diff" "$R/analysis.json" "$O/" 2>/dev/null
+ cp "$R"/logs/data0.json "$R"/logs/poison.json "$O/" 2>/dev/null
+ cp "$R/hist/dump-hist.txt" "$O/" 2>/dev/null
+@@ -26,3 +26,6 @@
+ print(park[0] if park else '')
+ EOF
+ ls "$O"
++# 3-b: auth setup, attacker probe, victim per-second view, clients by address/role, cmdline budget
++cp "$R/logs/auth-setup.txt" "$R/logs/attacker-probe.txt" "$R/logs/victim.csv" "$R/logs/victim.json" "$O/" 2>/dev/null
++grep -n "clients_by_address\|stall check\|W start\|W stop\|victim\|native up\|MaxDirect\|Xmx" "$R/logs/driver.log" > "$O/driver-key.txt"

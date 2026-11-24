@@ -1,0 +1,76 @@
+{
+ "superuser_login_after_s": 9.5,
+ "statements": [
+  [
+   "CREATE ROLE IF NOT EXISTS attacker WITH PASSWORD = '***' AND LOGIN = true AND SUPERUSER = false",
+   "OK"
+  ],
+  [
+   "CREATE ROLE IF NOT EXISTS tenant WITH PASSWORD = '***' AND LOGIN = true AND SUPERUSER = false",
+   "OK"
+  ],
+  [
+   "CREATE ROLE IF NOT EXISTS ops WITH PASSWORD = '***' AND LOGIN = true AND SUPERUSER = false",
+   "OK"
+  ],
+  [
+   "CREATE KEYSPACE IF NOT EXISTS r22 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}",
+   "OK"
+  ],
+  [
+   "CREATE TABLE IF NOT EXISTS r22.rt (pk int, ck int, v int, PRIMARY KEY (pk, ck))",
+   "OK"
+  ],
+  [
+   "CREATE TABLE IF NOT EXISTS r22.blob (k bigint PRIMARY KEY, v blob)",
+   "OK"
+  ],
+  [
+   "CREATE KEYSPACE IF NOT EXISTS vic WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}",
+   "OK"
+  ],
+  [
+   "CREATE TABLE IF NOT EXISTS vic.kv (k int PRIMARY KEY, v text)",
+   "OK"
+  ],
+  [
+   "GRANT MODIFY ON TABLE r22.rt TO attacker",
+   "OK"
+  ],
+  [
+   "GRANT MODIFY ON TABLE r22.blob TO attacker",
+   "OK"
+  ],
+  [
+   "GRANT SELECT ON TABLE vic.kv TO tenant",
+   "OK"
+  ],
+  [
+   "GRANT MODIFY ON TABLE vic.kv TO tenant",
+   "OK"
+  ],
+  [
+   "GRANT SELECT ON KEYSPACE system_views TO ops",
+   "OK"
+  ]
+ ],
+ "permissions": {
+  "attacker": [
+   "<table r22.blob> MODIFY",
+   "<table r22.rt> MODIFY"
+  ],
+  "tenant": [
+   "<table vic.kv> MODIFY",
+   "<table vic.kv> SELECT"
+  ],
+  "ops": [
+   "<keyspace system_views> SELECT"
+  ]
+ },
+ "roles": [
+  "attacker super=False login=True",
+  "cassandra super=True login=True",
+  "ops super=False login=True",
+  "tenant super=False login=True"
+ ]
+}

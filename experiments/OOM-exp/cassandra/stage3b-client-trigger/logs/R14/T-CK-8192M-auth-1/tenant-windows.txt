@@ -1,0 +1,9 @@
+# tenant (role tenant, vk.kv, 10 ops/s scheduled, 2 s timeout) per window; times relative to t_send (attack EXECUTE sent)
+# attack_start (attacker process launched) = t_send - 1.7 s; OOM thrown = +156.3 s; kill -9 = +378.3 s; death detected = +380.7 s
+before (60 s): 59 s, ok=590 (100% of schedule), err=0, s with 0 ok=0, median per-s p50=2.7 ms, max=169.9 ms, errors=[]
+attacker login+prepare+send: 2 s, ok=20 (100% of schedule), err=0, s with 0 ok=0, median per-s p50=3.1 ms, max=3.5 ms, errors=[]
++0..30 s: 30 s, ok=243 (81% of schedule), err=2, s with 0 ok=4, median per-s p50=4.0 ms, max=1866.4 ms, errors=['TimeoutError timed out']
++30..90 s: 59 s, ok=272 (46% of schedule), err=17, s with 0 ok=32, median per-s p50=3.8 ms, max=1338.5 ms, errors=['TimeoutError timed out']
++90 s..OOM: 67 s, ok=188 (28% of schedule), err=27, s with 0 ok=53, median per-s p50=3.8 ms, max=1929.0 ms, errors=['TimeoutError timed out']
+OOM..kill -9 (heap dump): 225 s, ok=0 (0% of schedule), err=152, s with 0 ok=225, median per-s p50=- ms, max=- ms, errors=['ConnectionRefusedError', 'ConnectionResetError', 'TimeoutError timed out']
+after death (60 s): 62 s, ok=0 (0% of schedule), err=620, s with 0 ok=62, median per-s p50=- ms, max=- ms, errors=['ConnectionRefusedError']

@@ -1,0 +1,30 @@
+[cassandra] CREATE ROLE attacker WITH PASSWORD = '***' AND LOGIN = true AND SUPERUSER = false
+   OK
+[cassandra] CREATE ROLE victim WITH PASSWORD = '***' AND LOGIN = true AND SUPERUSER = false
+   OK
+[cassandra] CREATE KEYSPACE app WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 2}
+   OK
+[cassandra] CREATE TABLE app.data (key blob PRIMARY KEY, v blob)
+   OK
+[cassandra] GRANT MODIFY ON TABLE app.data TO attacker
+   OK
+[cassandra] CREATE KEYSPACE vks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 2}
+   OK
+[cassandra] CREATE TABLE vks.t (k int PRIMARY KEY, v blob)
+   OK
+[cassandra] GRANT SELECT ON TABLE vks.t TO victim
+   OK
+[cassandra] GRANT MODIFY ON TABLE vks.t TO victim
+   OK
+[cassandra] LIST ROLES
+   row: Row[attacker, false, true, {}, ALL]
+   row: Row[cassandra, true, true, {}, ALL]
+   row: Row[victim, false, true, {}, ALL]
+   OK
+[cassandra] LIST ALL PERMISSIONS OF attacker
+   row: Row[attacker, attacker, <table app.data>, MODIFY]
+   OK
+[cassandra] LIST ALL PERMISSIONS OF victim
+   row: Row[victim, victim, <table vks.t>, SELECT]
+   row: Row[victim, victim, <table vks.t>, MODIFY]
+   OK

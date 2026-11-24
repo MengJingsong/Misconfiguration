@@ -1,0 +1,104 @@
+[2026-11-23T21:47:56Z] BEGIN 3B T-CK-8192M-auth-1 heap=8192M direct=15872M k1=160 k2=1600000 N=256000000 W=600s G=600s
+[2026-11-23T21:47:56Z] free /mydata 28893 MiB
+[2026-11-23T21:47:57Z] started pid 469131 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/r14-3b-T-CK-8192M-auth-1-1795470476.scope
+[2026-11-23T21:48:48Z] ready
+-XX:+HeapDumpOnOutOfMemoryError -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms8192M -Xmx8192M -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/3b-R14/runs/T-CK-8192M-auth-1/cassandra-1795470477-pid469131.hprof -XX:OnOutOfMemoryError=kill 
+authenticator=PasswordAuthenticator{}; authenticator=null; authorizer=AllowAllCIDRAuthorizernull; authorizer=AllowAllNetworkAuthorizer{}; authorizer=CassandraAuthorizer{}; in_select_cartesian_product_fail_threshold=-1; in_select_cartesian_product_warn_threshold=-1; role_manager=CassandraRoleManager{}; 
+[2026-11-23T21:49:01Z] superuser setup
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+
+ role      | super | login | options | datacenters
+-----------+-------+-------+---------+-------------
+       atk | False |  True |        {} |         ALL
+ cassandra |  True |  True |        {} |         ALL
+   nogrant | False |  True |        {} |         ALL
+    tenant | False |  True |        {} |         ALL
+
+(4 rows)
+
+ role | username | resource      | permission
+------+----------+---------------+------------
+  atk |      atk | <table u5.ck> |     SELECT
+
+(1 rows)
+
+ role   | username | resource      | permission
+--------+----------+---------------+------------
+ tenant |   tenant | <table vk.kv> |     SELECT
+ tenant |   tenant | <table vk.kv> |     MODIFY
+
+(2 rows)
+
+ role | resource | permissions
+------+----------+-------------
+
+
+(0 rows)
+[2026-11-23T21:49:11Z] attacker privilege checks (expected: Unauthorized x4)
+<stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User atk has no SELECT permission on <table vk.kv> or any of its parents"
+<stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User atk has no MODIFY permission on <table u5.ck> or any of its parents"
+<stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User atk has no CREATE permission on <all keyspaces> or any of its parents"
+<stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User atk has no ALTER permission on <table u5.ck> or any of its parents"
+[2026-11-23T21:49:19Z] attacker allowed read (expected: 1 row)
+  0 |  0 |  0 | 1
+
+(1 rows)
+[2026-11-23T21:49:21Z] no-grant login probe (small, not an attack): system_schema.columns IN x IN (expected rows) and u5.ck (expected Unauthorized)
+
+ keyspace_name | table_name | column_name
+---------------+------------+-------------
+            u5 |         ck |          c1
+            u5 |         ck |          c2
+            u5 |         ck |           v
+
+(3 rows)
+<stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User nogrant has no SELECT permission on <table u5.ck> or any of its parents"
+[2026-11-23T21:49:25Z] pre-auth check: QUERY before AUTH_RESPONSE (expected: error, no rows)
+pre-auth: STARTUP -> AUTHENTICATE ; QUERY -> opcode 0 len 55 Unexpected message QUERY, expecting SASL_RESPONSE
+[2026-11-23T21:49:25Z] attacker small CK request through the case client as atk (4 x 4, expected 1 row)
+{"ev": "prepared", "cond": "CK", "k1": 4, "k2": 4, "N": 16, "body_bytes": 115, "build_s": 0.0, "t_ms": 1795470565833}
+{"ev": "sent", "t_send_ms": 1795470565833, "body_bytes": 115, "t_ms": 1795470565834}
+{"ev": "result", "rows": 1, "more_pages": false, "latency_s": 0.012, "t_ms": 1795470565846}
+[2026-11-23T21:49:25Z] no-grant role through the case client on u5.ck (expected pre_send_error Unauthorized)
+{"ev": "prepared", "cond": "CK", "k1": 4, "k2": 4, "N": 16, "body_bytes": 115, "build_s": 0.0, "t_ms": 1795470566106}
+{"ev": "sent", "t_send_ms": 1795470566106, "body_bytes": 115, "t_ms": 1795470566106}
+{"ev": "error", "code": "0x2100", "msg": "User nogrant has no SELECT permission on <table u5.ck> or any of its parents", "latency_s": 0.002, "t_ms": 1795470566107}
+Total        711506       57600368
+[2026-11-23T21:49:30Z] victim tenant client started (pid 469879)
+[2026-11-23T21:50:30Z] ATTACK START (as atk): one EXECUTE, c1 IN (160) x c2 IN (1600000)
+[2026-11-23T21:50:32Z] sent: {"ev": "sent", "t_send_ms": 1795470632022, "body_bytes": 12801331, "t_ms": 1795470632048}
+[2026-11-23T21:50:52Z] +20s jmx: 1795470652370,3609350000,2971815792,57600368,1,0,994,0,0,53106479,2,-1,5778,149,-1 | tenant: 1795470650780,0,0,0,-1,-1,-1,0,
+[2026-11-23T21:51:12Z] +40s jmx: 1795470671375,7669436272,3391246192,57600368,1,0,1183,0,0,53106479,2,-1,5778,149,-1 | tenant: 1795470671374,10,10,0,3.8,6.6,6.6,1,
+[2026-11-23T21:51:32Z] +60s jmx: 1795470681628,7842228592,7020145008,57600368,1,0,1225,0,0,53106479,2,-1,14931,149,-1 | tenant: 1795470691868,0,0,0,-1,-1,-1,0,
+[2026-11-23T21:51:52Z] +80s jmx: 1795470706389,8465010688,6317527040,5679992832,1,0,1354,0,0,53096113,2,-1,17278,10010,-1 | tenant: 1795470712779,0,0,0,-1,-1,-1,0,
+[2026-11-23T21:52:13Z] +101s jmx: 1795470728927,8390705296,7300186256,7300186256,1,0,1458,0,0,53096113,2,-1,21537,21884,-1 | tenant: 1795470731790,0,0,0,-1,-1,-1,0,
+[2026-11-23T21:52:33Z] +121s jmx: 1795470747309,8453085280,8050432096,8050432096,1,0,1522,0,0,53096113,2,-1,24249,34642,-1 | tenant: 1795470751608,0,0,0,-1,-1,-1,0,
+[2026-11-23T21:52:53Z] +141s jmx: 1795470761390,8362046568,8328492136,8328492136,1,0,1524,0,0,53096113,3,-1,25078,47585,-1 | tenant: 1795470771932,0,0,0,-1,-1,-1,0,
+[2026-11-23T21:53:09Z] THROWN seen at +157s: 1795470788.350 java.lang.OutOfMemoryError: Java heap space
+[2026-11-23T21:53:13Z] +161s jmx: 1795470761390,8362046568,8328492136,8328492136,1,0,1524,0,0,53096113,3,-1,25078,47585,-1 | tenant: 1795470791963,0,0,0,-1,-1,-1,0,
+[2026-11-23T21:53:33Z] +181s jmx: 1795470761390,8362046568,8328492136,8328492136,1,0,1524,0,0,53096113,3,-1,25078,47585,-1 | tenant: 1795470811989,0,0,0,-1,-1,-1,0,
+[2026-11-23T21:53:53Z] +201s jmx: 1795470761390,8362046568,8328492136,8328492136,1,0,1524,0,0,53096113,3,-1,25078,47585,-1 | tenant: 1795470832019,0,0,0,-1,-1,-1,0,
+[2026-11-23T21:54:13Z] +221s jmx: 1795470761390,8362046568,8328492136,8328492136,1,0,1524,0,0,53096113,3,-1,25078,47585,-1 | tenant: 1795470852048,0,0,0,-1,-1,-1,0,
+[2026-11-23T21:54:33Z] +241s jmx: 1795470761390,8362046568,8328492136,8328492136,1,0,1524,0,0,53096113,3,-1,25078,47585,-1 | tenant: 1795470872073,0,0,0,-1,-1,-1,0,
+[2026-11-23T21:54:52Z] +260s jmx: 1795470761390,8362046568,8328492136,8328492136,1,0,1524,0,0,53096113,3,-1,25078,47585,-1 | tenant: 1795470890095,0,0,0,-1,-1,-1,0,
+[2026-11-23T21:55:12Z] +280s jmx: 1795470761390,8362046568,8328492136,8328492136,1,0,1524,0,0,53096113,3,-1,25078,47585,-1 | tenant: 1795470912122,0,0,0,-1,-1,-1,0,
+[2026-11-23T21:55:32Z] +300s jmx: 1795470761390,8362046568,8328492136,8328492136,1,0,1524,0,0,53096113,3,-1,25078,47585,-1 | tenant: 1795470932147,0,0,0,-1,-1,-1,0,
+[2026-11-23T21:55:52Z] +320s jmx: 1795470761390,8362046568,8328492136,8328492136,1,0,1524,0,0,53096113,3,-1,25078,47585,-1 | tenant: 1795470952168,0,0,0,-1,-1,-1,0,
+[2026-11-23T21:56:12Z] +340s jmx: 1795470761390,8362046568,8328492136,8328492136,1,0,1524,0,0,53096113,3,-1,25078,47585,-1 | tenant: 1795470972191,0,0,0,-1,-1,-1,0,
+[2026-11-23T21:56:32Z] +360s jmx: 1795470761390,8362046568,8328492136,8328492136,1,0,1524,0,0,53096113,3,-1,25078,47585,-1 | tenant: 1795470992211,0,0,0,-1,-1,-1,0,
+[2026-11-23T21:56:50Z] dump done seen at +378s
+h/run-3b.sh: line 51: 469131 Killed                  CASSANDRA_CONF=$R/conf CASSANDRA_LOG_DIR=$R/logs MAX_HEAP_SIZE=$HEAP MAX_DIRECT_MEMORY_SIZE=$DIRECT CASSANDRA_HEAPDUMP_DIR=$R JVM_EXTRA_OPTS="$EX" setsid nohup systemd-run --user --scope --unit="r14-3b-$L-$(date +%s)" -p MemoryMax=${MM}M -p MemorySwapMax=0 "$TREE/bin/cassandra" -f < /dev/null > "$R/stdout.log" 2>&1
+[2026-11-23T21:56:52Z] VICTIM NODE DEAD at +380s
+[2026-11-23T21:56:54Z] victim tenant: 60 s after
+1795471073374,10,0,10,-1,-1,-1,0,ConnectionRefusedError [Errno 111] Connection refused
+1795471074374,10,0,10,-1,-1,-1,0,ConnectionRefusedError [Errno 111] Connection refused
+OOM type="java.lang.OutOfMemoryError: Java heap space" thrown_at=+156.3s dump_done_at=+378.3s kill9_at=+378.3s dead_detected_at=+380.7s client={"ev": "conn_closed", "msg": "[Errno 104] Connection reset by peer", "latency_s": 379.829, "t_ms": 1795471011851}
+[2026-11-23T21:57:56Z] java left: none
+[2026-11-23T21:57:56Z] END T-CK-8192M-auth-1 OOM type="java.lang.OutOfMemoryError: Java heap space" thrown_at=+156.3s dump_done_at=+378.3s kill9_at=+378.3s dead_detected_at=+380.7s client={"ev": "conn_closed", "msg": "[Errno 104] Connection reset by peer", "latency_s": 379.829, "t_ms": 1795471011851}

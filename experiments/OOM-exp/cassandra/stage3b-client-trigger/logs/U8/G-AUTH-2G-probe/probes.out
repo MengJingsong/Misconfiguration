@@ -1,0 +1,31 @@
+# as user=u8atk
+> CREATE KEYSPACE u8 WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+  RESULT OK
+# as user=u8atk
+> CREATE TABLE u8.t (pk int PRIMARY KEY, v vector<boolean, 16000000>)
+18:12:15.822 [cluster1-nio-worker-1] WARN com.datastax.driver.core.RequestHandler -- Query '[0 bound values] CREATE TABLE u8.t (pk int PRIMARY KEY, v vector<boolean, 16000000>);' generated server side warning(s): Guardrail vector_dimensions violated: Column v has a vector of 16000000 dimensions, this exceeds the failure threshold of 8192.
+  RESULT FAIL InvalidQueryException:Guardrail vector_dimensions violated: Column v has a vector of 16000000 dimensions; this exceeds the failure threshold of 8192.
+# as user=u8atk
+> CREATE TABLE u8.t8k (pk int PRIMARY KEY, v vector<boolean, 8192>)
+  RESULT OK
+# as user=cassandra
+> CREATE TABLE u8.tsu (pk int PRIMARY KEY, v vector<boolean, 16000000>)
+18:12:27.802 [main] ERROR com.datastax.driver.core.SchemaParser -- Error parsing schema for table u8.t8k: Cluster.getMetadata().getKeyspace("u8").getTable("t8k") will be missing or incomplete
+java.lang.IllegalArgumentException: Could not parse type name vector<boolean, 8192>
+	at com.datastax.driver.core.DataTypeCqlNameParser.parse(DataTypeCqlNameParser.java:235)
+	at com.datastax.driver.core.TableMetadata.build(TableMetadata.java:313)
+	at com.datastax.driver.core.SchemaParser.buildTables(SchemaParser.java:304)
+	at com.datastax.driver.core.SchemaParser.buildKeyspaces(SchemaParser.java:205)
+	at com.datastax.driver.core.SchemaParser.refresh(SchemaParser.java:111)
+	at com.datastax.driver.core.ControlConnection.refreshSchema(ControlConnection.java:419)
+	at com.datastax.driver.core.ControlConnection.tryConnect(ControlConnection.java:326)
+	at com.datastax.driver.core.ControlConnection.reconnectInternal(ControlConnection.java:237)
+	at com.datastax.driver.core.ControlConnection.connect(ControlConnection.java:111)
+	at com.datastax.driver.core.Cluster$Manager.negotiateProtocolVersionAndConnect(Cluster.java:1815)
+	at com.datastax.driver.core.Cluster$Manager.init(Cluster.java:1728)
+	at com.datastax.driver.core.Cluster.init(Cluster.java:216)
+	at com.datastax.driver.core.Cluster.connectAsync(Cluster.java:389)
+	at com.datastax.driver.core.Cluster.connectAsync(Cluster.java:368)
+	at com.datastax.driver.core.Cluster.connect(Cluster.java:313)
+	at U8Client.main(U8Client.java:84)
+  RESULT OK

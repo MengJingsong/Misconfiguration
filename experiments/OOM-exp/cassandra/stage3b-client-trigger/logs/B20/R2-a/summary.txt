@@ -1,0 +1,54 @@
+=== R2-a
+label=R2-a heap=2G direct=1024M lifetime=attack
+baseline_histo_total: Total        948206     1193419864
+outcome=OOM
+trigger_epoch=1795471059.665441799
+endpoint_seconds=78.9
+first_oom: /mydata/s4/3b-B20/runs/R2-a/stdout.log:888:java.lang.OutOfMemoryError: Java heap space
+syslog: INFO  [SecondaryIndexManagement:1] 2026-11-23T21:52:02,727 SecondaryIndexManager.java:1880 - Index [PaxosUncommittedIndex] became queryable after successful build.
+syslog: INFO  [main] 2026-11-23T21:52:35,416 PipelineConfigurator.java:148 - Starting listening for CQL clients on localhost/127.0.0.1:9042 (unencrypted)...
+syslog: INFO  [SecondaryIndexManagement:1] 2026-11-23T21:57:40,761 CassandraIndex.java:704 - Submitting index build of t_ck for data in BigTableReader:big(path='/mydata/s4/3b-B20/work/data/atk/t-5f59b880e78811f1941a85105771932a/nb-30-big-Data.db'), BigTableReader:big(path='/mydata/s4/3b-B20/work/data/atk/t-5f59b880e78811f1941a85105771932a/nb-45-big-Data.db'), BigTableReader:big(path='/mydata/s4/3b-B20/wor
+trigger:  Warning: Using a password on the command line interface can be insecure. Recommendation: use the credentials file to securely provide the password.  rc=0 
+hprof=/mydata/s4/3b-B20/runs/R2-a/cassandra-1795470717-pid358327.hprof size=2204121548
+hprof deleted after analysis
+baseline_used=1545 MiB  peak_sampled_used_after_trigger=1911 MiB  peak_rssAnon_after_trigger=2895 MiB
+gc_after_trigger: pauses=55 full=27 max_post_gc=1942 MiB last=(78.16055822372437, 'Full', 1938, 1938, 2048, 474.695)
+last_index_build_progress: t+69.1s completed=64037041 total=4394898951 (1.5%)
+hprof: total shallow 1999 MiB, objects 7527100
+hprof: B20 byte[1048576]: 1626 arrays, 1626.0 MiB = 1.705 GB
+hprof: org.apache.cassandra.db.rows.BTreeRow: 668643
+hprof: java.nio.HeapByteBuffer: 688171
+hprof: org.apache.cassandra.db.partitions.ImmutableBTreePartition: 1
+hprof: org.apache.cassandra.db.rows.BufferCell: 8874
+stack (first with SecondaryIndexManager):
+--- thread serial 218, 48 frames
+  java.lang.OutOfMemoryError.<init>(OutOfMemoryError.java:48)
+  org.apache.cassandra.db.marshal.ByteArrayAccessor.read(ByteArrayAccessor.java:102)
+  org.apache.cassandra.db.marshal.ByteArrayAccessor.read(ByteArrayAccessor.java:40)
+  org.apache.cassandra.db.marshal.AbstractType.read(AbstractType.java:599)
+  org.apache.cassandra.db.rows.Cell$Serializer.deserialize(Cell.java:339)
+  org.apache.cassandra.db.rows.UnfilteredSerializer.readSimpleColumn(UnfilteredSerializer.java:652)
+  org.apache.cassandra.db.rows.UnfilteredSerializer.lambda$deserializeRowBody$2(UnfilteredSerializer.java:617)
+  org.apache.cassandra.db.rows.UnfilteredSerializer$$Lambda$1278.accept(?:-1)
+  org.apache.cassandra.utils.btree.BTree$$Lambda$1165.accept(?:-1)
+  org.apache.cassandra.utils.btree.BTree.applyValue(BTree.java:1765)
+  org.apache.cassandra.utils.btree.BTree.applyLeaf(BTree.java:1773)
+  org.apache.cassandra.utils.btree.BTree.apply(BTree.java:1788)
+  org.apache.cassandra.utils.btree.BTree.apply(BTree.java:1814)
+  org.apache.cassandra.db.Columns.apply(Columns.java:415)
+  org.apache.cassandra.db.rows.UnfilteredSerializer.deserializeRowBody(UnfilteredSerializer.java:613)
+  org.apache.cassandra.db.UnfilteredDeserializer.readNext(UnfilteredDeserializer.java:143)
+  org.apache.cassandra.io.sstable.format.big.SSTableIterator$ForwardIndexedReader.computeNext(SSTableIterator.java:174)
+  org.apache.cassandra.io.sstable.AbstractSSTableIterator$ForwardReader.hasNextInternal(AbstractSSTableIterator.java:563)
+  org.apache.cassandra.io.sstable.AbstractSSTableIterator$AbstractReader.hasNext(AbstractSSTableIterator.java:398)
+  org.apache.cassandra.io.sstable.AbstractSSTableIterator.hasNext(AbstractSSTableIterator.java:263)
+  org.apache.cassandra.db.transform.BaseRows.hasNext(BaseRows.java:133)
+  org.apache.cassandra.db.rows.LazilyInitializedUnfilteredRowIterator.computeNext(LazilyInitializedUnfilteredRowIterator.java:95)
+  org.apache.cassandra.db.rows.UnfilteredRowIteratorWithLowerBound.computeNext(UnfilteredRowIteratorWithLowerBound.java:129)
+  org.apache.cassandra.db.rows.UnfilteredRowIteratorWithLowerBound.computeNext(UnfilteredRowIteratorWithLowerBound.java:54)
+  org.apache.cassandra.utils.AbstractIterator.hasNext(AbstractIterator.java:47)
+  org.apache.cassandra.utils.MergeIterator$Candidate.advance(MergeIterator.java:375)
+  org.apache.cassandra.utils.MergeIterator$ManyToOne.advance(MergeIterator.java:187)
+  org.apache.cassandra.utils.MergeIterator$ManyToOne.computeNext(MergeIterator.java:156)
+  org.apache.cassandra.utils.AbstractIterator.hasNext(AbstractIterator.java:47)
+gcwin: pauses=162 full_gcs=64 total_pause=17s max60=13% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=HeapDumper@420.491s,ReportJavaOutOfMemory@426.320s

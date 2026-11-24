@@ -1,0 +1,31 @@
+# as user=
+> SELECT release_version FROM system.local
+  RESULT CONNECT-FAIL AuthenticationException: Authentication error on host /127.0.0.1:9042: Host /127.0.0.1:9042 requires authentication; but no authenticator found in Cluster configuration
+# as user=u10atk
+> SELECT release_version FROM system.local
+  RESULT CONNECT-FAIL AuthenticationException: Authentication error on host /127.0.0.1:9042: Provided username u10atk and/or password are incorrect
+# as user=u10atk
+> SELECT k FROM victimks.kv LIMIT 1
+18:20:20 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+  RESULT FAIL UnauthorizedException: User u10atk has no SELECT permission on <table victimks.kv> or any of its parents
+# as user=u10atk
+> CREATE TABLE u10.t2 (pk int PRIMARY KEY, v blob)
+18:20:27 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+  RESULT FAIL UnauthorizedException: User u10atk has no CREATE permission on <all tables in u10> or any of its parents
+# as user=u10atk
+> CREATE KEYSPACE u10x WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+18:20:34 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+  RESULT FAIL UnauthorizedException: User u10atk has no CREATE permission on <all keyspaces> or any of its parents
+# as user=u10atk
+> ALTER TABLE u10.t WITH comment = 'x'
+18:20:41 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+  RESULT FAIL UnauthorizedException: User u10atk has no ALTER permission on <table u10.t> or any of its parents
+# as user=u10victim
+> SELECT ck FROM u10.t LIMIT 1
+18:20:47 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+  RESULT FAIL UnauthorizedException: User u10victim has no SELECT permission on <table u10.t> or any of its parents
+# as user=u10atk
+> SELECT count(*) FROM u10.t WHERE pk = 0
+18:20:54 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+  row: count=0
+  RESULT OK

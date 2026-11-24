@@ -1,0 +1,28 @@
+OK   LIST ALL PERMISSIONS OF attacker
+     rows 2: role | username | resource | permission
+       attacker | attacker | <table r12.t> | SELECT
+       attacker | attacker | <table r12.t> | MODIFY
+OK   SELECT k, c FROM r12.t WHERE k = 1 LIMIT 1
+     rows 0: k | c
+OK   INSERT INTO r12.t (k, c, v) VALUES (-1, 0, 0x00)
+     void
+OK   DELETE FROM r12.t WHERE k = -1
+     void
+ERR  SELECT k FROM vks.t LIMIT 1
+     0x2100:User attacker has no SELECT permission on <table vks.t> or any of its parents
+ERR  INSERT INTO vks.t (k, v) VALUES (5000, 0x00)
+     0x2100:User attacker has no MODIFY permission on <table vks.t> or any of its parents
+ERR  CREATE KEYSPACE ak WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+     0x2100:User attacker has no CREATE permission on <all keyspaces> or any of its parents
+ERR  CREATE TABLE r12.x (k int PRIMARY KEY)
+     0x2100:User attacker has no CREATE permission on <all tables in r12> or any of its parents
+ERR  CREATE INDEX ON r12.t (v)
+     0x2100:User attacker has no ALTER permission on <table r12.t> or any of its parents
+ERR  ALTER TABLE r12.t ADD z int
+     0x2100:User attacker has no ALTER permission on <table r12.t> or any of its parents
+ERR  DROP TABLE r12.t
+     0x2100:User attacker has no DROP permission on <table r12.t> or any of its parents
+ERR  CREATE ROLE x WITH LOGIN = true
+     0x2100:User attacker does not have sufficient privileges to perform the requested operation
+ERR  GRANT SELECT ON TABLE vks.t TO attacker
+     0x2100:User attacker has no AUTHORIZE permission on <table vks.t> or any of its parents

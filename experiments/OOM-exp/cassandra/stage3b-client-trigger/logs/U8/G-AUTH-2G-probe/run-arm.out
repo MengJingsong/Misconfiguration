@@ -1,0 +1,53 @@
+[2026-11-23 20:10:53 EST] ARM G-AUTH-2G-probe arm=G heap=2G mode=none N=0 R=0 D=16000000 (auth on)
+[2026-11-23 20:10:54 EST] started G-AUTH-2G-probe pid 666326 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/3bu8-G-AUTH-2G-probe-1795482653.scope
+[2026-11-23 20:11:47 EST] ready G-AUTH-2G-probe
+-XX:+HeapDumpOnOutOfMemoryError -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/3b-U8/runs/G-AUTH-2G-probe/cassandra-1795482653-pid666326.hprof -XX:OnOutOfMemoryError=kill 
+authenticator: PasswordAuthenticator
+authorizer: CassandraAuthorizer
+role_manager: CassandraRoleManager
+vector_dimensions_fail_threshold: 8192
+[2026-11-23 20:11:47 EST] superuser setup
+> CREATE ROLE IF NOT EXISTS u8atk WITH PASSWORD = 'atk-3bU8' AND LOGIN = true AND SUPERUSER = false
+  OK
+> CREATE ROLE IF NOT EXISTS u8victim WITH PASSWORD = 'vic-3bU8' AND LOGIN = true AND SUPERUSER = false
+  OK
+> CREATE ROLE IF NOT EXISTS u8nogrant WITH PASSWORD = 'nog-3bU8' AND LOGIN = true AND SUPERUSER = false
+  OK
+> GRANT CREATE ON ALL KEYSPACES TO u8atk
+  OK
+> CREATE KEYSPACE IF NOT EXISTS victimks WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+  OK
+> CREATE TABLE IF NOT EXISTS victimks.kv (k int PRIMARY KEY, v blob)
+  OK
+> GRANT SELECT ON TABLE victimks.kv TO u8victim
+  OK
+> GRANT MODIFY ON TABLE victimks.kv TO u8victim
+  OK
+> LIST ROLES
+  OK
+> LIST ALL PERMISSIONS OF u8atk
+  OK
+> LIST ALL PERMISSIONS OF u8victim
+  OK
+> LIST ALL PERMISSIONS OF u8nogrant
+  OK
+  OK
+[2026-11-23 20:12:05 EST] guardrail probe: attacker, then superuser, create the 16M-dimension table
+# as user=u8atk
+> CREATE KEYSPACE u8 WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+  RESULT OK
+# as user=u8atk
+> CREATE TABLE u8.t (pk int PRIMARY KEY, v vector<boolean, 16000000>)
+  RESULT FAIL InvalidQueryException:Guardrail vector_dimensions violated: Column v has a vector of 16000000 dimensions; this exceeds the failure threshold of 8192.
+# as user=u8atk
+> CREATE TABLE u8.t8k (pk int PRIMARY KEY, v vector<boolean, 8192>)
+  RESULT OK
+# as user=cassandra
+> CREATE TABLE u8.tsu (pk int PRIMARY KEY, v vector<boolean, 16000000>)
+  RESULT OK
+ERROR [Native-Transport-Requests-1] 2026-11-24T01:12:15,807 NoSpamLogger.java:110 - Guardrail vector_dimensions violated: Column v has a vector of 16000000 dimensions, this exceeds the failure threshold of 8192.
+[2026-11-23 20:12:31 EST] OOM/GC check
+pauses=9 full_gcs=0 total_pause=0s max60=0% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=none
+[2026-11-23 20:12:44 EST] stopped G-AUTH-2G-probe
+PROBE-ONLY
+[2026-11-23 20:12:44 EST] END G-AUTH-2G-probe PROBE-ONLY

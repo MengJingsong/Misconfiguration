@@ -1,0 +1,67 @@
+1795470752.492 16:52:32 start label=R1 topo=vnode n1heap=2G N=250000 size=64000 inflight=200
+1795470816.525 16:53:36 n2 native up=1 pid=539672
+1795470892.585 16:54:52 n3 native up=1 pid=540246
+1795470969.945 16:56:09 n1 native up=1 pid=540946
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address     Load        Tokens  Owns (effective)  Host ID                               Rack 
+UN  127.0.0.31  80.06 KiB   16      76.0%             3c75714b-a951-4920-8fd3-e5d369705d54  rack1
+UN  127.0.0.32  119.83 KiB  16      64.7%             44cd40cc-06a3-486c-a056-48c51fac4b5d  rack1
+UN  127.0.0.33  85.09 KiB   16      59.3%             b3adf918-fe1b-4fbd-a776-c38c013b2528  rack1
+
+-XX:+UseG1GC -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/3b-B23/R1/dump/cassandra-1795470892-pid540946.hprof 
+G1HeapRegionSize=16777216 MaxDirectMemorySize=16642998272 MaxHeapSize=2147483648 ParallelGCThreads=40 
+0::/user.slice/user-20001.slice/user@20001.service/app.slice/run-r77ac33c76b0949a49f03d7bacf20c955.scope
+num_tokens: 16
+authenticator: PasswordAuthenticator
+authorizer: CassandraAuthorizer
+role_manager: CassandraRoleManager
+1795470976.147 16:56:16 superuser login ok
+1795470984.450 16:56:24 repair system_auth rc=0
+/mydata/s4/3b-B23/R1/logs/admin1.txt:0
+/mydata/s4/3b-B23/R1/logs/admin2.txt:0
+1795470996.591 16:56:36 attacker probe: 4 OK, 6 ERROR
+1795470998.625 16:56:38 victim pid 542629
+1795471001.642 16:56:41 MaxHintsInProgress: MaxHintsInProgress=5120
+1795471001.647 16:56:41 victim baseline, all up (30 s)
+1795471031.653 16:57:11 operator: stopping n3 (nodetool stopdaemon)
+Cassandra has shutdown.
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address     Load        Tokens  Owns (effective)  Host ID                               Rack 
+UN  127.0.0.31  135.1 KiB   16      76.0%             3c75714b-a951-4920-8fd3-e5d369705d54  rack1
+UN  127.0.0.32  112.92 KiB  16      64.7%             44cd40cc-06a3-486c-a056-48c51fac4b5d  rack1
+DN  127.0.0.33  130.04 KiB  16      59.3%             b3adf918-fe1b-4fbd-a776-c38c013b2528  rack1
+
+1795471046.087 16:57:26 victim baseline, n3 down (30 s)
+1795471076.097 16:57:56 n1 hints dir before load: 167646 B, files 1
+1795471076.103 16:57:56 attack start N=250000 (role attacker, keys chosen off n1)
+1795471076.610 16:57:56 attack pid 544152
+1795471086.842 16:58:06 L+10 K=14937 pending=15035 old=2009004736 unavail=0 wr_done=47774
+1795471106.224 16:58:26 L+30 K=15384 pending=15562 old=2071333528 unavail=0 wr_done=49339
+1795471116.426 16:58:36 L+40 K=15384 pending=15562 old=2071333528 unavail=0 wr_done=49339
+1795471126.631 16:58:46 L+50 K=15384 pending=15562 old=2071333528 unavail=0 wr_done=49339
+1795471136.847 16:58:56 L+60 K=15384 pending=15562 old=2071333528 unavail=0 wr_done=49339
+1795471138.885 16:58:58 attack client done at L+62 K=15384
+1795471146.057 16:59:06 L+70 K=15384 pending=15562 old=2071333528 unavail=0 wr_done=49339
+1795471156.272 16:59:16 L+80 K=15384 pending=15562 old=2071333528 unavail=0 wr_done=49339
+1795471166.495 16:59:26 L+90 K=15384 pending=15562 old=2071333528 unavail=0 wr_done=49339
+1795471176.703 16:59:36 L+100 K=15384 pending=15562 old=2071333528 unavail=0 wr_done=49339
+1795471186.922 16:59:46 L+110 K=15384 pending=15562 old=2071333528 unavail=0 wr_done=49339
+1795471196.116 16:59:56 L+120 K=15384 pending=15562 old=2071333528 unavail=0 wr_done=49339
+1795471198.148 16:59:58 stop: attack done + 60 s valid=1
+1795471198.151 16:59:58 victim after-window (60 s)
+1795471258.157 17:00:58 stopall begin (teardown)
+1795471298.257 17:01:38 all nodes and clients stopped
+1795471298.293 17:01:38 OOM lines: 2; first: /mydata/s4/3b-B23/R1/n1/logs/stdout.txt:828:java.lang.OutOfMemoryError: Java heap space
+1795471298.308 17:01:38 n1 hints dir at end: 1809506624 B; n1 data 380047 B; shm 2941111996 B
+total 8
+drwxr-xr-x 2 jason92 misconfiguration 4096 Nov 23 14:58 .
+drwxr-xr-x 7 jason92 misconfiguration 4096 Nov 23 15:00 ..
+-rw------- 1 jason92 misconfiguration    0 Nov 23 14:58 cassandra-1795470892-pid540946.hprof
+1795471298.316 17:01:38 dump analysis started (dump deleted after)
+1795471298.609 17:01:38 done alive=1 why=attack done + 60 s valid=1

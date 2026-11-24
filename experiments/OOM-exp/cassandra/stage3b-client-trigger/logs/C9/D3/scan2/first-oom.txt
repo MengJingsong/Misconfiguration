@@ -1,0 +1,48 @@
+INFO  [Service Thread] 2026-11-23T22:51:41,755 StatusLogger.java:103 - Cache Type                     Size                 Capacity               KeysToSave
+ERROR [ReadStage-33] 2026-11-23T22:51:41,937 JVMStabilityInspector.java:70 - Exception in thread Thread[ReadStage-33,5,SharedPool]
+java.lang.OutOfMemoryError: Direct buffer memory
+	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+	at org.apache.cassandra.io.compress.BufferType$2.allocate(BufferType.java:35)
+	at org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer.getBlock(ThreadLocalReadAheadBuffer.java:84)
+	at org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer.allocateBuffer(ThreadLocalReadAheadBuffer.java:76)
+	at org.apache.cassandra.io.util.CompressedChunkReader$ScanCompressedReader.allocateResources(CompressedChunkReader.java:204)
+	at org.apache.cassandra.io.util.CompressedChunkReader$Standard.forScan(CompressedChunkReader.java:244)
+	at org.apache.cassandra.io.util.CompressedChunkReader.instantiateRebufferer(CompressedChunkReader.java:95)
+	at org.apache.cassandra.io.util.FileHandle.instantiateRebufferer(FileHandle.java:204)
+	at org.apache.cassandra.io.util.FileHandle.createReader(FileHandle.java:156)
+	at org.apache.cassandra.io.util.FileHandle.createReaderForScan(FileHandle.java:139)
+	at org.apache.cassandra.io.sstable.format.SSTableReader.openDataReaderForScan(SSTableReader.java:1385)
+	at org.apache.cassandra.io.sstable.format.SSTableScanner.<init>(SSTableScanner.java:78)
+	at org.apache.cassandra.io.sstable.format.big.BigTableScanner.<init>(BigTableScanner.java:62)
+	at org.apache.cassandra.io.sstable.format.big.BigTableScanner.getScanner(BigTableScanner.java:53)
+	at org.apache.cassandra.io.sstable.format.big.BigTableReader.partitionIterator(BigTableReader.java:149)
+	at org.apache.cassandra.io.sstable.format.big.BigTableReader.partitionIterator(BigTableReader.java:85)
+	at org.apache.cassandra.db.PartitionRangeReadCommand.queryStorage(PartitionRangeReadCommand.java:340)
+	at org.apache.cassandra.db.ReadCommand.executeLocally(ReadCommand.java:452)
+	at org.apache.cassandra.service.StorageProxy$LocalReadRunnable.runMayThrow(StorageProxy.java:2209)
+	at org.apache.cassandra.service.StorageProxy$DroppableRunnable.run(StorageProxy.java:2608)
+	at org.apache.cassandra.concurrent.ExecutionFailure$2.run(ExecutionFailure.java:163)
+	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+INFO  [Service Thread] 2026-11-23T22:51:41,946 StatusLogger.java:105 - KeyCache                       5304                104857600                      all
+INFO  [Service Thread] 2026-11-23T22:51:41,948 StatusLogger.java:111 - RowCache                          0                        0                      all
+INFO  [Service Thread] 2026-11-23T22:51:41,948 StatusLogger.java:118 - Table                       Memtable ops,data
+INFO  [Service Thread] 2026-11-23T22:51:41,953 StatusLogger.java:121 - c9.t                                      0,0
+INFO  [Service Thread] 2026-11-23T22:51:41,955 StatusLogger.java:121 - system_auth.identity_to_role                 0,0
+INFO  [Service Thread] 2026-11-23T22:51:41,955 StatusLogger.java:121 - system_auth.roles                         0,0
+INFO  [Service Thread] 2026-11-23T22:51:41,955 StatusLogger.java:121 - system_auth.cidr_permissions                 0,0
+INFO  [Service Thread] 2026-11-23T22:51:41,955 StatusLogger.java:121 - system_auth.role_members                  0,0
+INFO  [Service Thread] 2026-11-23T22:51:41,955 StatusLogger.java:121 - system_auth.resource_role_permissons_index                 0,0
+INFO  [Service Thread] 2026-11-23T22:51:41,955 StatusLogger.java:121 - system_auth.network_permissions                 0,0
+INFO  [Service Thread] 2026-11-23T22:51:41,955 StatusLogger.java:121 - system_auth.cidr_groups                   0,0
+INFO  [Service Thread] 2026-11-23T22:51:41,955 StatusLogger.java:121 - system_auth.role_permissions                 0,0
+INFO  [Service Thread] 2026-11-23T22:51:41,956 StatusLogger.java:121 - system_distributed.parent_repair_history                 0,0
+INFO  [Service Thread] 2026-11-23T22:51:41,956 StatusLogger.java:121 - system_distributed.repair_history                 0,0
+INFO  [Service Thread] 2026-11-23T22:51:41,956 StatusLogger.java:121 - system_distributed.partition_denylist                 0,0
+INFO  [Service Thread] 2026-11-23T22:51:41,956 StatusLogger.java:121 - system_distributed.view_build_status                 0,0
+INFO  [Service Thread] 2026-11-23T22:51:41,956 StatusLogger.java:121 - vks.kv                              969,54264
+INFO  [Service Thread] 2026-11-23T22:51:41,956 StatusLogger.java:121 - system_traces.sessions                    0,0
+INFO  [Service Thread] 2026-11-23T22:51:41,956 StatusLogger.java:121 - system_traces.events                      0,0

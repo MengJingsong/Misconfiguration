@@ -1,0 +1,18 @@
+CREATE KEYSPACE IF NOT EXISTS u15 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}
+CREATE TABLE IF NOT EXISTS u15.t (pk bigint, ck blob, v blob, PRIMARY KEY (pk, ck))
+CREATE KEYSPACE IF NOT EXISTS vks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}
+CREATE TABLE IF NOT EXISTS vks.kv (k int PRIMARY KEY, v blob)
+CREATE ROLE attacker WITH PASSWORD = '<pw>' AND LOGIN = true AND SUPERUSER = false
+GRANT MODIFY ON TABLE u15.t TO attacker
+CREATE ROLE victim WITH PASSWORD = '<pw>' AND LOGIN = true AND SUPERUSER = false
+GRANT SELECT ON KEYSPACE vks TO victim
+GRANT MODIFY ON KEYSPACE vks TO victim
+-- LIST ALL PERMISSIONS OF attacker
+   role=attacker resource=<table u15.t> permission=MODIFY
+-- LIST ALL PERMISSIONS OF victim
+   role=victim resource=<keyspace vks> permission=SELECT
+   role=victim resource=<keyspace vks> permission=MODIFY
+-- LIST ROLES
+   attacker super=False login=True
+   cassandra super=True login=True
+   victim super=False login=True

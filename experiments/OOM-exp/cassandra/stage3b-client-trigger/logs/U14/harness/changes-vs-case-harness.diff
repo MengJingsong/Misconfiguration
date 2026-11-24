@@ -1,0 +1,538 @@
+--- harness-orig/run.py	2026-11-23 11:44:55.041759000 -0500
++++ harness/run.py	2026-11-23 19:36:48.887205591 -0500
+@@ -11,16 +11,26 @@
+ Output: /mydata/s4/u14/logs/<label>/ (session.log, summary.json, client.csv, checkpoints.jsonl, hist-*.txt, sampler.csv,
+ rss.csv, system.log, debug.log, gc.log*, stdout.txt, scan-*.json, yaml.diff, env.diff, jvm-cmdline.txt, limits.txt,
+ memory.events). Dumps: /mydata/s4/u14/dumps/<label>/."""
++# ---- 3-b confirm copy (2026-11-23, ms0640; experiments/OOM-exp/cassandra/stage3b-client-trigger/U14.md) ----
++# Changes against the case harness: W = /mydata/s4/3b-U14; authorizer CassandraAuthorizer (+ role_manager CassandraRoleManager)
++# in every lifetime and read back; setup by the superuser = roles, grants and the admin keyspace only (client.py setup3b): the
++# attacker u14 holds only CREATE ON KEYSPACE ks (admin-made, short name 'ks'), tables are created by u14 with the case's
++# 222-character names; a victim role (SELECT, MODIFY on victimks.kv) runs victim.py at 20 ops/s through the same node from
++# before the attack to after the node's death; 60 s victim baseline before the attack; modes 'probe' (claim tests + 300
++# tables) and 'restart' (restart on the previous lifetime's data, KEEP_RUN=1); the superuser instrument session counts the
++# creator grants at checkpoints (U14_SU). Stop rules of the case (T at 2 GiB: OOM, M_max 6,500, 40 min DDL, service loss 10 min).
+ import json, os, re, shutil, signal, subprocess, sys, threading, time
+ 
+-W = '/mydata/s4/u14'
++W = '/mydata/s4/3b-U14'
+ C = W + '/cassandra'
+ RD = W + '/run'
+ SHM = os.environ.get('U14_SHM') == '1'
+-DD = '/dev/shm/u14/run' if SHM else RD
++DD = '/dev/shm/3b-u14/run' if SHM else RD
+ HARNESS = os.path.dirname(os.path.abspath(__file__))
+ ADDR, JMXPORT = '127.0.14.1', 7214
+-KS = {'long': 'u14' + 'k' * 45, 'short': 'ks'}
++KS = {'long': 'ks', 'short': 'ks'}   # 3-b: admin-made keyspace 'ks' (short); names= sets the table names only
++VKS = 'victimks'
++VU = ('victim', 'victimpw')
+ G_ON = 'org.apache.cassandra.metrics:type=Table,name=AllMemtablesOnHeapDataSize'
+ SAMPLER_BEANS = [
+     ('java.lang:type=Memory', 'HeapMemoryUsage'),
+@@ -50,13 +60,21 @@
+     NO_START_AFTER = None
+ # a real OutOfMemoryError thrown at runtime: HotSpot's OOM report lines or an uncaught-exception trace. Never the startup
+ # line "CompileCommand: exclude ...forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V" that every lifetime prints.
++# ---- 3-b amendment (2026-11-23 17:30 EST, after R1): R1 stopped at the design's 40-min DDL cap at 3,991 tables (old gen
++# 0.92 x heap) on ms0640, whose DDL is 2-4x slower than pc99's. For R2/R3: U14_DDL_CAP / U14_WALL_CAP (seconds) override the
++# caps and U14_NO_SL=1 drops the service-loss stop, mirroring the owner's 4 GiB amendment of 2026-11-23; OOM / node death /
++# M_max 6,500 kept. Recorded in summary.json ('caps').
++if os.environ.get('U14_DDL_CAP'):
++    CAPS[('T', '2G')] = (int(os.environ['U14_DDL_CAP']), int(os.environ.get('U14_WALL_CAP') or int(os.environ['U14_DDL_CAP']) + 900))
++if os.environ.get('U14_NO_SL') == '1':
++    SL_STOP = set()
+ OOM_RE = re.compile(r'^(?:Exception in thread .*?)?(?:# )?java\.lang\.OutOfMemoryError(?::|$)')
+ 
+ args = sys.argv[1:]
+-if not args or args[0] not in ('shake', 'life', 'down'):
++if not args or args[0] not in ('shake', 'life', 'down', 'probe', 'restart'):
+     sys.exit(__doc__)
+ mode = args[0]
+-label = args[1] if mode in ('shake', 'life') else 'down'
++label = args[1] if mode in ('shake', 'life', 'probe', 'restart') else 'down'
+ LOGS = f'{W}/logs/{label}'
+ DUMPS = f'{W}/dumps/{label}'
+ os.makedirs(LOGS, exist_ok=True)
+@@ -127,6 +145,7 @@
+ 
+ def fail(msg):
+     note('FAIL', msg)
++    stop_victim()
+     stop_samplers()
+     stop_node()
+     collect()
+@@ -135,7 +154,42 @@
+ 
+ 
+ def cenv():
+-    return dict(os.environ, CASSANDRA_HOME=C, U14_JMXCLS=W + '/jmxcls', U14_JMXPORT=str(JMXPORT))
++    return dict(os.environ, CASSANDRA_HOME=C, U14_JMXCLS=W + '/jmxcls', U14_JMXPORT=str(JMXPORT), U14_SU=':'.join(SU), U14_HOST=ADDR)
++
++
++# ---------------- victim (3-b) ----------------
++VIC = {'p': None}
++
++
++def start_victim(rate=20):
++    stopf = f'{RD}/victim.stop'
++    try:
++        os.remove(stopf)
++    except OSError:
++        pass
++    argv = ['python3', '-I', f'{HARNESS}/victim.py', ADDR, VU[0], VU[1], VKS, LOGS, stopf, str(rate)]
++    log('+ ' + ' '.join(argv))
++    VIC['p'] = subprocess.Popen(argv, stdout=open(LOGS + '/victim.out', 'a'), stderr=subprocess.STDOUT, env=cenv(), cwd='/',
++                                start_new_session=True)
++    note('victim_start_ms', int(time.time() * 1000))
++
++
++def stop_victim():
++    p = VIC['p']
++    if p is None:
++        return
++    os.makedirs(RD, exist_ok=True)
++    open(f'{RD}/victim.stop', 'w').close()
++    try:
++        p.wait(timeout=20)
++    except subprocess.TimeoutExpired:
++        try:
++            os.killpg(p.pid, signal.SIGKILL)
++        except ProcessLookupError:
++            pass
++        p.wait()
++    note('victim_stop_ms', int(time.time() * 1000))
++    VIC['p'] = None
+ 
+ 
+ def client(user, *a, timeout=3600, quiet=False):
+@@ -223,7 +277,7 @@
+ # ---------------- node ----------------
+ def write_conf(extra, fresh=True):
+     if fresh:
+-        for p in (RD, '/dev/shm/u14'):
++        for p in (RD, '/dev/shm/3b-u14'):
+             if os.path.exists(p):
+                 shutil.rmtree(p)
+         os.makedirs(RD + '/logs')
+@@ -240,7 +294,8 @@
+              'seed_provider:', '  - class_name: org.apache.cassandra.locator.SimpleSeedProvider', '    parameters:', f'      - seeds: "{ADDR}:7000"',
+              'data_file_directories:', f'    - {DD}/data', f'commitlog_directory: {DD}/commitlog', f'hints_directory: {DD}/hints',
+              f'saved_caches_directory: {DD}/saved_caches', f'cdc_raw_directory: {DD}/cdc_raw',
+-             'authenticator: PasswordAuthenticator'] + extra
++             'authenticator: PasswordAuthenticator', 'authorizer: CassandraAuthorizer',
++             'role_manager: CassandraRoleManager'] + extra
+     keys = {l.split(':', 1)[0] for l in lines if re.match(r'^[A-Za-z_]+:', l)}
+     out, skip = [], False
+     for l in open(RD + '/conf/cassandra.yaml').read().splitlines():
+@@ -262,6 +317,10 @@
+ NODE = {'popen': None}
+ 
+ 
++class StartDeath(Exception):
++    pass
++
++
+ def start(heap, extra, fresh=True):
+     if pid_of() is not None:
+         fail('a node of this harness is already running')
+@@ -279,7 +338,7 @@
+     for k in ('HEAP_NEWSIZE', 'JVM_EXTRA_OPTS', 'JVM_OPTS'):
+         env.pop(k, None)
+     scope = SCOPE[heap]
+-    unit = f'u14-{label.lower()}-{int(time.time())}'
++    unit = f'u14-3b-{label.lower()}-{int(time.time())}'
+     cmd = (f"systemd-run --user --scope --unit={unit} -p MemoryMax={scope} -p MemorySwapMax=0 "
+            f"bash -c 'ulimit -n 100000 && exec bin/cassandra -f -p {RD}/cassandra.pid' >> {RD}/stdout.txt 2>&1")
+     log('+ ' + cmd)
+@@ -288,10 +347,14 @@
+     while time.time() - t0 < 600:
+         time.sleep(3)
+         if NODE['popen'].poll() is not None:
++            if mode == 'restart':
++                raise StartDeath(f'node died during start (exit {NODE["popen"].returncode})')
+             fail(f'node died during start (exit {NODE["popen"].returncode})')
+         if pid_of() and client(SU, 'probe', quiet=True, timeout=120):
+             break
+     else:
++        if mode == 'restart':
++            raise StartDeath('node not serving after 600 s')
+         fail('node not serving (or no superuser login) after 600 s')
+     pid = pid_of()
+     cg = cgroup_path(pid)
+@@ -326,7 +389,8 @@
+     tft = s.get('tables_fail_threshold')
+     tft_ok = (str(tft) == str(X)) if X is not None else (tft in (None, '-1', 'null'))
+     ok = (s.get('memtable_allocation_type') == 'heap_buffers' and s.get('memtable_heap_space') == quarter and tft_ok
+-          and 'PasswordAuthenticator' in str(s.get('authenticator')) and 'AllowAllAuthorizer' in str(s.get('authorizer')))
++          and 'PasswordAuthenticator' in str(s.get('authenticator')) and 'CassandraAuthorizer' in str(s.get('authorizer'))
++          and 'CassandraRoleManager' in str(s.get('role_manager')))
+     note('settings', {'values': s, 'ok': ok})
+     if not ok:
+         fail('settings read-back differs')
+@@ -352,9 +416,9 @@
+ def finish():
+     left = daemons()
+     note('end', {'daemons_left': left or 'none'})
+-    if pid_of() is None:
++    if pid_of() is None and os.environ.get('KEEP_RUN') != '1':
+         shutil.rmtree(RD, ignore_errors=True)
+-        shutil.rmtree('/dev/shm/u14', ignore_errors=True)
++        shutil.rmtree('/dev/shm/3b-u14', ignore_errors=True)
+ 
+ 
+ def wait_death(limit):
+@@ -455,13 +519,17 @@
+ 
+ # ---------------- modes ----------------
+ def setup_user(ks, pid):
+-    r = client(SU, 'setup', ks, quiet=True, timeout=300)
++    r = client(SU, 'setup3b', ks, VKS, quiet=True, timeout=300)
+     note('setup', r)
+     if not r or 'roles' not in r:
+         fail('role/keyspace setup failed')
+-    u = [x for x in r['roles'] if x[0] == 'u14']
+-    if not u or u[0][1]:
+-        fail('u14 missing or a superuser')
++    for who in ('u14', 'victim'):
++        u = [x for x in r['roles'] if x[0] == who]
++        if not u or u[0][1]:
++            fail(f'{who} missing or a superuser')
++    pu = [p[2] for p in r['perms']['u14']]
++    if pu != ['CREATE']:
++        fail(f'attacker grants differ from CREATE ON KEYSPACE: {r["perms"]["u14"]}')
+ 
+ 
+ def lifetime_begin(heap, X, names):
+@@ -480,17 +548,33 @@
+ def mode_life(arm, heap, names, N, X):
+     pid, cg, ks = lifetime_begin(heap, X if arm == 'I' else None, names)
+     start_samplers(pid, cg)
++    start_victim()
+     time.sleep(10)
+     checkpoint(ks, pid, 's0')
+-    time.sleep(10)
++    time.sleep(60)   # 3-b: victim baseline (>= 60 s after the s0 full GCs)
+     ddl_cap, wall_cap = CAPS.get((arm, heap), (1800, 2400))
++    note('caps', {'ddl_cap_s': ddl_cap, 'wall_cap_s': wall_cap, 'service_loss_stop': (arm, heap) in SL_STOP})
++    note('attack_start_ms', int(time.time() * 1000))
+     r = workload(ks, names, 1, N, pid, ddl_cap, wall_cap, 500 if arm == 'C' else None, sl_stop=(arm, heap) in SL_STOP)
+     alive = pid_of() is not None
+     if alive and arm == 'T' and r.get('stopped') != 'end' and r.get('stopped') != 'ddl_cap' and not r.get('monitor_stop'):
+         log('client stopped with the node alive: wait <= 300 s for an OOM')
+         alive = not wait_death(300)
++    # 3-b fix (2026-11-23, after R2): R2's client stopped at its DDL cap 1.5 min after a real heap OOM while the JVM was still
++    # writing the dump (310 s); the surviving path stopped the node and the dump was deleted unscanned. Now a real OOM line in
++    # stdout always leads to the OOM path (wait <= 600 s for the dump and the JVM's exit, then scan).
++    if alive and any(OOM_RE.search(l) and 'CompileCommand' not in l for l in (readf(RD + '/stdout.txt') or '').splitlines()[-2000:]):
++        log('real OutOfMemoryError in stdout with the node alive: wait <= 600 s for the dump and exit')
++        note('oom_seen_alive_ms', int(time.time() * 1000))
++        alive = not wait_death(600)
++        if alive:
++            stop_node('KILL')
++            alive = False
+     if not alive:
++        note('node_dead_ms', int(time.time() * 1000))
++        time.sleep(30)   # 3-b: victim keeps recording after the node's death
+         oom_path(time.time())
++        stop_victim()
+         finish()
+         return
+     # surviving lifetime
+@@ -502,6 +586,7 @@
+     note('U_end', checkpoint(ks, pid, 'end'))
+     if label.endswith('-1'):
+         rc, _ = sh(f'jcmd {pid} GC.heap_dump {DUMPS}/end.hprof', check=False, timeout=900)
++        stop_victim()
+         stop_samplers()
+         stop_node()
+         collect()
+@@ -511,9 +596,77 @@
+         except OSError:
+             pass
+     else:
++        stop_victim()
++        stop_samplers()
++        stop_node()
++        collect()
++    finish()
++
++
++def mode_probe():
++    """3-b: claim tests (client.py authprobe) and 300 long-named tables as u14 (DDL latency on this node); not a reading"""
++    pid, cg, ks = lifetime_begin('2G', None, 'long')
++    pr = client(SU, 'authprobe', ks, VKS, quiet=True, timeout=600)
++    note('authprobe', pr)
++    start_samplers(pid, cg)
++    checkpoint(ks, pid, 's0')
++    r = workload(ks, 'long', 1, 300, pid, 600, 900, sl_stop=False)
++    note('perms_after', client(SU, 'perms', 'u14', quiet=True))
++    note('namecheck', client(SU, 'namecheck', ks, quiet=True))
++    checkpoint(ks, pid, 'end')
++    stop_samplers()
++    stop_node()
++    collect()
++    finish()
++
++
++def mode_restart(minutes):
++    """3-b: restart the node on the run directory a previous lifetime left (KEEP_RUN=1, same conf, no setup), victim on;
++    observe up to <minutes> min: start or not, OOM or not, L after start"""
++    if not os.path.isdir(DD + '/data'):
++        fail('no run directory to restart on')
++    os.makedirs(RD + '/logs', exist_ok=True)   # RS2: R2's /mydata run dir was removed by its finish(); data restored to DD
++    if os.path.exists(RD + '/stdout.txt'):
++        os.rename(RD + '/stdout.txt', RD + '/stdout-previous-lifetime.txt')
++    start_victim()
++    t0 = time.time()
++    note('restart_begin_ms', int(t0 * 1000))
++    try:
++        pid, cg = start('2G', [], fresh=False)
++    except StartDeath as e:
++        note('start_death', str(e))
++        if pid_of() is not None:
++            wait_death(max(30, minutes * 60 - (time.time() - t0)))
++        note('node_dead_ms', int(time.time() * 1000) if pid_of() is None else None)
++        time.sleep(20)
++        oom_path(time.time())
++        stop_victim()
++        stop_node('KILL')
++        os.environ['KEEP_RUN'] = '0'
++        finish()
++        return
++    note('restart_up_ms', int(time.time() * 1000))
++    readback('2G', None)
++    start_samplers(pid, cg)
++    note('tablecount', client(SU, 'tablecount', KS['long'], quiet=True))
++    time.sleep(30)
++    note('L_after_start', checkpoint(KS['long'], pid, 'restart'))
++    while time.time() - t0 < minutes * 60:
++        if pid_of() is None:
++            break
++        time.sleep(5)
++    if pid_of() is None:
++        note('node_dead_ms', int(time.time() * 1000))
++        time.sleep(30)
++        oom_path(time.time())
++        stop_victim()
++    else:
++        note('restart_alive_at_end', True)
++        stop_victim()
+         stop_samplers()
+         stop_node()
+         collect()
++    os.environ['KEEP_RUN'] = '0'
+     finish()
+ 
+ 
+@@ -549,6 +702,10 @@
+         note('down', daemons() or 'none')
+     elif mode == 'shake':
+         mode_shake()
++    elif mode == 'probe':
++        mode_probe()
++    elif mode == 'restart':
++        mode_restart(int(args[2]) if len(args) > 2 else 20)
+     else:
+         mode_life(args[2], args[3], args[4], int(args[5]), int(args[6]) if len(args) > 6 else None)
+     note('DONE', True)
+--- harness-orig/client.py	2026-11-21 08:16:27.287418000 -0500
++++ harness/client.py	2026-11-23 16:37:42.936242863 -0500
+@@ -16,12 +16,23 @@
+        After every 500 successful CREATEs: checkpoint (two jcmd GC.class_histogram, L = total of the 2nd; K = count of the
+        keyspace's tables; MBean count) to <outdir>/checkpoints.jsonl. Stops at <last>, at node death (pid gone, or no
+        reconnect within 60 s), or when DDL time (checkpoints excluded) exceeds <ddl_cap_s>.
+-One JSON object on stdout."""
++One JSON object on stdout.
++3-b confirm (2026-11-23, ms0640; copy of the U14 harness in /mydata/s4/3b-U14/harness):
++  client.py <host> cassandra <pw> setup3b <ks> <victimks> as the superuser (roles, grants and admin schema only): CREATE ROLE u14
++                                                          (attacker, LOGIN, not SUPERUSER) and victim (LOGIN); CREATE KEYSPACE
++                                                          <ks> (admin-made, RF 1); GRANT CREATE ON KEYSPACE <ks> TO u14 (the only
++                                                          grant of the attacker); CREATE KEYSPACE <victimks> + TABLE kv; GRANT
++                                                          SELECT, MODIFY ON TABLE <victimks>.kv TO victim; LIST ROLES / LIST ALL
++                                                          PERMISSIONS OF u14 / victim
++  client.py <host> cassandra <pw> authprobe <ks> <victimks>  claim tests (pre-auth, data role, keyspace scope, creator grant)
++  client.py <host> cassandra <pw> perms <role>            LIST ALL PERMISSIONS OF <role> (count + first rows)
++  In 'create', when U14_SU="user:pw" is set, each checkpoint also counts the attacker's rows in LIST ALL PERMISSIONS OF u14
++  through a separate superuser instrument session (the creator grants; not part of the attack)."""
+ import glob, json, os, re, subprocess, sys, time
+ 
+-CASS = os.environ.get('CASSANDRA_HOME', '/mydata/s4/u14/cassandra')
++CASS = os.environ.get('CASSANDRA_HOME', '/mydata/s4/3b-U14/cassandra')
+ LIB = os.path.join(CASS, 'lib')
+-JMXCLS = os.environ.get('U14_JMXCLS', '/mydata/s4/u14/jmxcls')
++JMXCLS = os.environ.get('U14_JMXCLS', '/mydata/s4/3b-U14/jmxcls')
+ JMXPORT = os.environ.get('U14_JMXPORT', '7214')
+ 
+ 
+@@ -94,6 +105,25 @@
+     return sum(1 for _ in rows)
+ 
+ 
++SU_SESSION = {'c': None, 's': None}
++
++
++def perm_count(role='u14'):
++    """3-b: rows of LIST ALL PERMISSIONS OF <role> via a superuser instrument session (U14_SU), or None"""
++    su = os.environ.get('U14_SU')
++    if not su:
++        return None
++    try:
++        if SU_SESSION['s'] is None:
++            u, p = su.split(':', 1)
++            SU_SESSION['c'], SU_SESSION['s'] = connect(os.environ.get('U14_HOST', '127.0.14.1'), u, p)
++        rows = list(SU_SESSION['s'].execute(f'LIST ALL PERMISSIONS OF {role}'))
++        return {'rows': len(rows), 'table_ALL_rows': sum(1 for r in rows if r.resource.startswith('<table ')),
++                'other': sorted({f'{r.resource} {r.permission}' for r in rows if not r.resource.startswith('<table ')})[:8]}
++    except Exception as e:
++        return repr(e)[:160]
++
++
+ def checkpoint(s, ks, outdir, pid, tag, n):
+     t0 = time.time()
+     h1, _ = hist(pid, f'{outdir}/hist-{tag}-1.txt')
+@@ -103,7 +133,7 @@
+     except Exception as e:
+         k = repr(e)[:120]
+     r = {'tag': tag, 'n_ok': n, 'ms': int(time.time() * 1000), 'L1': h1, 'L': h2, 'K': k, 'mbeans': mbeans(), 'top40': top,
+-         'secs': round(time.time() - t0, 1)}
++         'perms_u14': perm_count(), 'secs': round(time.time() - t0, 1)}
+     with open(f'{outdir}/checkpoints.jsonl', 'a') as f:
+         f.write(json.dumps(r) + '\n')
+     return r
+@@ -231,6 +261,114 @@
+         ks, names, first, last, outdir, pid, cap = a[4], a[5], int(a[6]), int(a[7]), a[8], int(a[9]), float(a[10])
+         W = int(a[11]) if len(a) > 11 else None
+         run_create(host, user, pw, ks, names, first, last, outdir, pid, cap, W, out)
++    elif cmd == 'setup3b':
++        ks, vks = a[4], a[5]
++        t1 = time.time()
++        while True:
++            try:
++                c, s = connect(host, user, pw)
++                break
++            except Exception as e:
++                if time.time() - t1 > 180:
++                    raise
++                time.sleep(3)
++        out['login_wait_s'] = round(time.time() - t1, 1)
++        stmts = ["CREATE ROLE IF NOT EXISTS u14 WITH PASSWORD = 'u14pw' AND LOGIN = true AND SUPERUSER = false",
++                 "CREATE ROLE IF NOT EXISTS victim WITH PASSWORD = 'victimpw' AND LOGIN = true AND SUPERUSER = false",
++                 f"CREATE KEYSPACE IF NOT EXISTS \"{ks}\" WITH replication = {{'class': 'SimpleStrategy', 'replication_factor': 1}}",
++                 f"GRANT CREATE ON KEYSPACE \"{ks}\" TO u14",
++                 f"CREATE KEYSPACE IF NOT EXISTS \"{vks}\" WITH replication = {{'class': 'SimpleStrategy', 'replication_factor': 1}}",
++                 f"CREATE TABLE IF NOT EXISTS \"{vks}\".kv (k int PRIMARY KEY, v blob)",
++                 f"GRANT SELECT ON TABLE \"{vks}\".kv TO victim",
++                 f"GRANT MODIFY ON TABLE \"{vks}\".kv TO victim"]
++        for q in stmts:
++            s.execute(q)
++        out['statements'] = stmts
++        out['roles'] = [[r.role, r.super, r.login] for r in s.execute('LIST ROLES')]
++        out['perms'] = {ro: [[r.role, r.resource, r.permission] for r in s.execute(f'LIST ALL PERMISSIONS OF {ro}')] for ro in ('u14', 'victim')}
++        out['ks'] = ks
++        c.shutdown()
++    elif cmd == 'perms':
++        c, s = connect(host, user, pw)
++        rows = [[r.role, r.resource, r.permission] for r in s.execute(f'LIST ALL PERMISSIONS OF {a[4]}')]
++        out['n'] = len(rows)
++        out['first'] = rows[:12]
++        c.shutdown()
++    elif cmd == 'authprobe':
++        from cassandra import Unauthorized, AuthenticationFailed  # noqa: F401
++        ks, vks = a[4], a[5]
++        res = []
++
++        def attempt(who, session, q, expect):
++            try:
++                session.execute(q)
++                got = 'ok'
++            except Exception as e:
++                got = f'{type(e).__name__}: {str(e)[:160]}'
++            res.append({'role': who, 'stmt': q[:120], 'expect': expect, 'got': got,
++                        'pass': (got == 'ok') if expect == 'ok' else got.startswith(expect)})
++
++        def try_connect(who, u, p):
++            try:
++                if u is None:
++                    prof = ExecutionProfile(request_timeout=30, load_balancing_policy=WhiteListRoundRobinPolicy([host]))
++                    cc = Cluster([host], port=9042, protocol_version=4, execution_profiles={EXEC_PROFILE_DEFAULT: prof},
++                                 schema_metadata_enabled=False, token_metadata_enabled=False, connect_timeout=15)
++                    ss = cc.connect()
++                else:
++                    cc, ss = connect(host, u, p)
++                got = 'connected'
++                try:
++                    ss.execute(f'CREATE TABLE "{ks}".probe_preauth (k int PRIMARY KEY)')
++                    got += '; CREATE ok'
++                except Exception as e:
++                    got += f'; CREATE {type(e).__name__}'
++                cc.shutdown()
++            except Exception as e:
++                got = f'{type(e).__name__}: {str(e)[:200]}'
++            res.append({'role': who, 'stmt': 'connect + CREATE TABLE', 'expect': 'no connection', 'got': got,
++                        'pass': not got.startswith('connected')})
++
++        c, s = connect(host, user, pw)
++        for q in ["CREATE ROLE IF NOT EXISTS nobody WITH PASSWORD = 'nobodypw' AND LOGIN = true",
++                  "CREATE ROLE IF NOT EXISTS datarole WITH PASSWORD = 'datapw' AND LOGIN = true",
++                  f'GRANT SELECT ON TABLE "{vks}".kv TO datarole', f'GRANT MODIFY ON TABLE "{vks}".kv TO datarole']:
++            s.execute(q)
++        out['setup'] = 'probe roles nobody (no grant), datarole (SELECT, MODIFY on victim table) created by the superuser'
++        # 1. pre-auth: no credentials, wrong password
++        try_connect('anonymous (no credentials)', None, None)
++        try_connect('u14 wrong password', 'u14', 'wrong')
++        # 2. no grant at all
++        cn, sn = connect(host, 'nobody', 'nobodypw')
++        attempt('nobody', sn, f'CREATE TABLE "{ks}".probe_nobody (k int PRIMARY KEY)', 'Unauthorized')
++        cn.shutdown()
++        # 3. data role
++        cd, sd = connect(host, 'datarole', 'datapw')
++        attempt('datarole', sd, f'INSERT INTO "{vks}".kv (k, v) VALUES (999999, 0x00)', 'ok')
++        attempt('datarole', sd, f'CREATE TABLE "{ks}".probe_data (k int PRIMARY KEY)', 'Unauthorized')
++        attempt('datarole', sd, f'CREATE TABLE "{vks}".probe_data (k int PRIMARY KEY)', 'Unauthorized')
++        attempt('datarole', sd, "CREATE KEYSPACE probe_data_ks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}", 'Unauthorized')
++        cd.shutdown()
++        s.execute(f'DELETE FROM "{vks}".kv WHERE k = 999999')
++        # 4. attacker (CREATE ON KEYSPACE ks only)
++        p0 = [[r.resource, r.permission] for r in s.execute('LIST ALL PERMISSIONS OF u14')]
++        ca, sa = connect(host, 'u14', 'u14pw')
++        attempt('u14', sa, "CREATE KEYSPACE probe_u14_ks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}", 'Unauthorized')
++        attempt('u14', sa, f'CREATE TABLE "{vks}".probe_u14 (k int PRIMARY KEY)', 'Unauthorized')
++        attempt('u14', sa, f'SELECT * FROM "{vks}".kv LIMIT 1', 'Unauthorized')
++        attempt('u14', sa, f'INSERT INTO "{vks}".kv (k, v) VALUES (1, 0x00)', 'Unauthorized')
++        attempt('u14', sa, f'CREATE TABLE "{ks}".probe_u14 (k int PRIMARY KEY, v blob)', 'ok')
++        p1 = [[r.resource, r.permission] for r in s.execute('LIST ALL PERMISSIONS OF u14')]
++        attempt('u14', sa, f'INSERT INTO "{ks}".probe_u14 (k, v) VALUES (1, 0x00)', 'ok')
++        attempt('u14', sa, f'DROP TABLE "{ks}".probe_u14', 'ok')
++        time.sleep(2)
++        p2 = [[r.resource, r.permission] for r in s.execute('LIST ALL PERMISSIONS OF u14')]
++        ca.shutdown()
++        out['perms_u14'] = {'before': p0, 'after_create': p1, 'after_drop': p2}
++        out['roles'] = [[r.role, r.super, r.login] for r in s.execute('LIST ROLES')]
++        c.shutdown()
++        out['probe'] = res
++        out['all_pass'] = all(x['pass'] for x in res)
+     elif cmd == 'setup':
+         ks = a[4]
+         t1 = time.time()
+--- harness-orig/instrument-check.sh	2026-11-21 08:17:18.161893000 -0500
++++ harness/instrument-check.sh	2026-11-23 16:37:42.932242876 -0500
+@@ -2,7 +2,7 @@
+ # U14 known-answer check (design §2.5): a JVM (node's G1 flags) holds 1,000 marker Strings of 222 chars + 500 long[330];
+ # jcmd GC.heap_dump; HprofScan must report >= 1,000 marker byte[] and exactly 500 long[330]. Not a reading.
+ set -euo pipefail
+-H=$(cd "$(dirname "$0")" && pwd); W=/mydata/s4/u14; O=${1:-$W/logs/instrument}
++H=$(cd "$(dirname "$0")" && pwd); W=/mydata/s4/3b-U14; O=${1:-$W/logs/instrument}
+ mkdir -p "$O/cls" "$W/jmxcls"; rm -f "$O"/{ready,stop} "$O"/hold.hprof
+ javac -d "$O/cls" "$H/Hold.java"
+ javac -d "$W/jmxcls" "$H/HprofScan.java" "$H/Jmx.java"
+--- harness-orig/excerpts.sh	2026-11-23 15:09:54.476243000 -0500
++++ harness/excerpts.sh	2026-11-23 16:37:42.932242876 -0500
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env bash
+ # U14 (2026-11-23: + shutdown lines, tail-per-minute, trimmed hist, session, summary): small per-lifetime excerpts on the node -> /mydata/s4/u14/excerpts/ (copied into the case folder's logs/).
+-W=/mydata/s4/u14; O=${OUT:-$W/excerpts}; mkdir -p $O   # OUT added 2026-11-23
++W=/mydata/s4/3b-U14; O=${OUT:-$W/excerpts}; mkdir -p $O   # OUT added 2026-11-23
+ python3 $W/harness/analyze.py $W/logs "$@" > $O/analyze.jsonl
+ for L in "$@"; do
+   d=$W/logs/$L; [ -d $d ] || continue

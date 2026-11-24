@@ -1,0 +1,16 @@
+# 3-b confirm S2 G1-auth-1: victim view re-windowed at node 1's OOM (victimsum.py uses the HeapDumper safepoint, which
+# the VM thread reached only at +146.6 s, after 87 s of back-to-back Full GCs). OOM thrown = dump timer start =
+# "Heap dump file created ... in 87.644 secs" ending at the HeapDumper safepoint exit 15:38:03.098 MST -> 15:36:35.45 MST
+# (console: first "java.lang.OutOfMemoryError: Java heap space" right after the Full GC logged 22:36:33.708 UTC).
+# kill -9 (shipped OnOutOfMemoryError) detected at +150.7 s. Computed from victim.csv (per-second rows).
+oom thrown ~ 61.372 s after attack start; kill detected 150.709 s
+V1 before 57 s issued 2281 ok 2280 err 0 succ%=100.0 p99 med 4.0 max 9.3
+V1 attack->OOM 62 s issued 2480 ok 2005 err 321 succ%=80.8 p99 med 1845.0 max 11971.1
+V1 OOM->kill 89 s issued 3560 ok 0 err 3515 succ%=0.0 p99 med -1 max -1.0
+V1 after kill 81 s issued 3240 ok 0 err 3440 succ%=0.0 p99 med -1 max -1.0
+V1 first 30s 30 s issued 1200 ok 921 err 105 succ%=76.8 p99 med 1214.7 max 7250.3
+V2 before 57 s issued 2281 ok 2280 err 0 succ%=100.0 p99 med 5.8 max 11.5
+V2 attack->OOM 62 s issued 2485 ok 1796 err 690 succ%=72.3 p99 med 7.3 max 2793.1
+V2 OOM->kill 89 s issued 3555 ok 3481 err 73 succ%=97.9 p99 med 4.4 max 1957.5
+V2 after kill 81 s issued 3240 ok 3240 err 0 succ%=100.0 p99 med 4.4 max 61.9
+V2 first 30s 30 s issued 1215 ok 915 err 260 succ%=75.3 p99 med 19.2 max 2793.1

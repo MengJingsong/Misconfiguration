@@ -1,0 +1,369 @@
+--- orig/U8Client.java	2026-11-23 19:57:42.071325613 -0500
++++ harness/U8Client.java	2026-11-23 19:58:14.871224188 -0500
+@@ -1,33 +1,121 @@
+ // U8 client (ms0640, loopback). Java driver 3.12.1 (shaded), protocol V4, CL ONE, metadata disabled
+ // (driver 3 cannot parse vector<...> schema strings).
++// 3-b confirm (2026-11-23): every mode logs in with -Du8.user / -Du8.pass (PasswordAuthenticator); empty user = no credentials.
+ //   java U8Client load   <host> <D>          schema + one row pk=0 with a D-byte zero vector<boolean, D> (all false)
+ //   java U8Client verify <host>              SELECT v ... pk=0 once; prints the value length
+ //   java U8Client run    <host> <json|plain> <N> <R>
++//   java U8Client su     <host> <file>       (superuser) run each non-empty line of <file> as a statement, print result rows;
++//                                            waits up to 120 s for the superuser login to exist
++//   java U8Client try    <host> <stmt>       run one statement as -Du8.user, print OK/rows or the exception class + message
++//   java U8Client victim <host> <rate/s> <stopfile> <out.csv>   victim workload on victimks.kv
+ // run: N separate Cluster objects (one connection each), a CyclicBarrier(N) per round, R rounds.
+ // json = SELECT JSON v FROM u8.t WHERE pk = 0; plain = SELECT v FROM u8.t WHERE pk = 0.
+ // One CSV line per request: start_ms,end_ms,thread,round,resp_len,error  (the JSON is never decoded to a String).
+ // Ends when R rounds finish, or when every thread has seen a connection-level error (node unreachable).
+ import com.datastax.driver.core.*;
+ import com.datastax.driver.core.policies.*;
++import com.google.common.util.concurrent.*;
++import java.io.*;
+ import java.nio.ByteBuffer;
++import java.nio.file.*;
+ import java.util.*;
+ import java.util.concurrent.*;
+ import java.util.concurrent.atomic.*;
+ 
+ public class U8Client {
+-    static Cluster cluster(String host) {
++    static Cluster cluster(String host) { return cluster(host, 120000); }
++    static Cluster cluster(String host, int readTimeoutMs) {
+         PoolingOptions po = new PoolingOptions().setConnectionsPerHost(HostDistance.LOCAL, 1, 1);
+-        return Cluster.builder().addContactPoint(host).withProtocolVersion(ProtocolVersion.V4)
++        Cluster.Builder b = Cluster.builder().addContactPoint(host).withProtocolVersion(ProtocolVersion.V4)
+             .withLoadBalancingPolicy(new WhiteListPolicy(new RoundRobinPolicy(),
+                 Collections.singletonList(new java.net.InetSocketAddress(host, 9042))))
+-            .withSocketOptions(new SocketOptions().setReadTimeoutMillis(120000).setConnectTimeoutMillis(30000))
++            .withSocketOptions(new SocketOptions().setReadTimeoutMillis(readTimeoutMs).setConnectTimeoutMillis(30000))
+             .withQueryOptions(new QueryOptions().setMetadataEnabled(false).setConsistencyLevel(ConsistencyLevel.ONE))
+             .withRetryPolicy(FallthroughRetryPolicy.INSTANCE)
+-            .withPoolingOptions(po).withoutJMXReporting().build();
++            .withReconnectionPolicy(new ConstantReconnectionPolicy(1000))
++            .withPoolingOptions(po).withoutJMXReporting();
++        String u = System.getProperty("u8.user", ""), p = System.getProperty("u8.pass", "");
++        if (!u.isEmpty()) b = b.withCredentials(u, p);
++        return b.build();
++    }
++    static String err(Throwable x) {
++        String e = x.getClass().getSimpleName() + ":" + String.valueOf(x.getMessage()).replace(',', ';').replace('\n', ' ');
++        return e.length() > 300 ? e.substring(0, 300) : e;
++    }
++    static void printRows(ResultSet rs) {
++        for (Row r : rs) {
++            StringBuilder sb = new StringBuilder("  row:");
++            for (int i = 0; i < r.getColumnDefinitions().size(); i++) {
++                ByteBuffer bb = r.getBytesUnsafe(i);
++                String s;
++                try { s = String.valueOf(r.getObject(i)); } catch (Throwable t) { s = bb == null ? "null" : ("<" + bb.remaining() + " B>"); }
++                sb.append(' ').append(r.getColumnDefinitions().getName(i)).append('=').append(s);
++            }
++            System.out.println(sb);
++        }
+     }
+ 
+     public static void main(String[] a) throws Exception {
+         String host = a[1];
++        System.out.println("# as user=" + System.getProperty("u8.user", "") );
++        if (a[0].equals("su")) {
++            List<String> lines = Files.readAllLines(Paths.get(a[2]));
++            Cluster c = null; Session s = null;
++            long until = System.currentTimeMillis() + 120000;
++            while (true) {
++                try { c = cluster(host, 30000); s = c.connect(); break; }
++                catch (Throwable t) {
++                    if (c != null) c.close();
++                    if (System.currentTimeMillis() > until) throw t;
++                    System.out.println("# login not ready: " + err(t)); Thread.sleep(3000);
++                }
++            }
++            for (String l : lines) {
++                l = l.trim(); if (l.isEmpty() || l.startsWith("#")) continue;
++                System.out.println("> " + l);
++                try { printRows(s.execute(l)); System.out.println("  OK"); }
++                catch (Throwable t) { System.out.println("  FAIL " + err(t)); }
++            }
++            c.close(); return;
++        }
++        if (a[0].equals("try")) {
++            String st = a[2];
++            System.out.println("> " + st);
++            try (Cluster c = cluster(host, 30000); Session s = c.connect()) {
++                try { printRows(s.execute(st)); System.out.println("  RESULT OK"); }
++                catch (Throwable t) { System.out.println("  RESULT FAIL " + err(t)); }
++            } catch (Throwable t) { System.out.println("  RESULT CONNECT-FAIL " + err(t)); }
++            return;
++        }
++        if (a[0].equals("victim")) {
++            double rate = Double.parseDouble(a[2]); File stop = new File(a[3]);
++            PrintWriter out = new PrintWriter(new FileWriter(a[4], true), false);
++            out.println("issue_ms,end_ms,op,result"); out.flush();
++            Cluster c = cluster(host, 10000); Session s = c.connect();
++            PreparedStatement ins = s.prepare("INSERT INTO victimks.kv (k, v) VALUES (?, ?)");
++            PreparedStatement sel = s.prepare("SELECT v FROM victimks.kv WHERE k = ?");
++            byte[] blob = new byte[100];
++            AtomicLong seq = new AtomicLong();
++            ScheduledExecutorService ex = Executors.newSingleThreadScheduledExecutor();
++            long periodUs = (long) (1e6 / rate);
++            ex.scheduleAtFixedRate(() -> {
++                long i = seq.getAndIncrement(); int k = (int) ((i / 2) % 1000);
++                final boolean w = (i % 2 == 0);
++                final long t0 = System.currentTimeMillis();
++                try {
++                    ResultSetFuture f = w ? s.executeAsync(ins.bind(k, ByteBuffer.wrap(blob))) : s.executeAsync(sel.bind(k));
++                    Futures.addCallback(f, new FutureCallback<ResultSet>() {
++                        public void onSuccess(ResultSet r) { synchronized (out) { out.println(t0 + "," + System.currentTimeMillis() + "," + (w ? "W" : "R") + ",ok"); } }
++                        public void onFailure(Throwable t) { synchronized (out) { out.println(t0 + "," + System.currentTimeMillis() + "," + (w ? "W" : "R") + "," + err(t)); } }
++                    }, MoreExecutors.directExecutor());
++                } catch (Throwable t) { synchronized (out) { out.println(t0 + "," + System.currentTimeMillis() + "," + (w ? "W" : "R") + "," + err(t)); } }
++            }, 0, periodUs, TimeUnit.MICROSECONDS);
++            while (!stop.exists()) { Thread.sleep(500); synchronized (out) { out.flush(); } }
++            ex.shutdownNow(); Thread.sleep(11000);
++            synchronized (out) { out.flush(); out.close(); }
++            try { c.closeAsync(); } catch (Throwable t) {}
++            System.exit(0);
++        }
+         if (a[0].equals("load")) {
+             int d = Integer.parseInt(a[2]);
+             try (Cluster c = cluster(host); Session s = c.connect()) {
+@@ -72,12 +160,9 @@
+                             len = bb == null ? -1 : bb.remaining();
+                             ok.incrementAndGet();
+                         } catch (Throwable x) {
+-                            e = x.getClass().getSimpleName() + ":" + String.valueOf(x.getMessage()).replace(',', ';').replace('\n', ' ');
++                            e = err(x);
+                             if (e.length() > 200) e = e.substring(0, 200);
+                             err.incrementAndGet();
+-                            // amended 2026-11-18 14:50 EST: a client-side timeout (OperationTimedOutException) no longer
+-                            // ends the run; only an unreachable node does (the frozen design: "Exit when R rounds finish
+-                            // or the node is unreachable"). Runs before B-8G-N11-2 used the earlier rule.
+                             if (x instanceof com.datastax.driver.core.exceptions.NoHostAvailableException
+                                 || x instanceof com.datastax.driver.core.exceptions.TransportException) {
+                                 down.set(true); bar.reset();
+--- orig/victim-ctl.sh	2026-11-23 19:57:42.067325625 -0500
++++ harness/victim-ctl.sh	2026-11-23 19:58:25.915190040 -0500
+@@ -2,10 +2,13 @@
+ # U8 victim controller (ms0640, local), adapted from U4's victim-ctl.sh. One single-node Cassandra 5.0.9 per lifetime,
+ # unmodified build copied from /mydata/s4/cassandra-base, empty node dir per lifetime. Only directories change
+ # (environment), plus arm I (patched VectorType classes shadowing the jar through CASSANDRA_CONF, the first classpath entry).
+-#   victim-ctl.sh start <label> <A|I> <heap e.g. 2G> [direct e.g. 2048M | auto]   (auto = MAX_DIRECT_MEMORY_SIZE unset)
++# 3-b confirm (2026-11-23): ROOT /mydata/s4/3b-U8; every arm sets authenticator PasswordAuthenticator, authorizer
++# CassandraAuthorizer (role_manager CassandraRoleManager is the shipped value); arm G (claim probe only) also sets
++# vector_dimensions_fail_threshold: 8192 (an intervention on a guardrail, never an attack arm). Arm I removed.
++#   victim-ctl.sh start <label> <A|G> <heap e.g. 2G> [direct e.g. 2048M | auto]   (auto = MAX_DIRECT_MEMORY_SIZE unset)
+ #   victim-ctl.sh ready|read <label> [tag]|hist <label> <tag>|stop|alive|oom|pid <label>
+ set -uo pipefail
+-ROOT=/mydata/s4/u8-w4
++ROOT=/mydata/s4/3b-U8
+ H=$ROOT/harness
+ BUILD=$ROOT/tree
+ NT="$BUILD/bin/nodetool -h 127.0.0.1"
+@@ -27,10 +30,13 @@
+     -e "s|^# hints_directory: /var/lib/cassandra/hints|hints_directory: $ROOT/node/hints|" \
+     -e "s|^# saved_caches_directory: /var/lib/cassandra/saved_caches|saved_caches_directory: $ROOT/node/saved_caches|" \
+     -e "s|^# cdc_raw_directory: /var/lib/cassandra/cdc_raw|cdc_raw_directory: $ROOT/node/cdc_raw|" \
++    -e "s|^authenticator: AllowAllAuthenticator|authenticator: PasswordAuthenticator|" \
++    -e "s|^authorizer: AllowAllAuthorizer|authorizer: CassandraAuthorizer|" \
+     "$y"
++  grep -q '^role_manager: CassandraRoleManager' "$y" || { log "role_manager not CassandraRoleManager"; return 1; }
+   case $ARM in
+     A) ;;
+-    I) mkdir -p "$R/conf/org/apache/cassandra/db/marshal"; cp "$ROOT"/patch/org/apache/cassandra/db/marshal/VectorType*.class "$R/conf/org/apache/cassandra/db/marshal/";;
++    G) sed -i -e "s|^# vector_dimensions_fail_threshold: -1|vector_dimensions_fail_threshold: 8192|" "$y";;
+     *) log "bad arm $ARM"; return 1;;
+   esac
+   diff "$ROOT/conf-pristine/cassandra.yaml" "$y" > "$R/yaml.diff"
+@@ -41,10 +47,9 @@
+   [ "$(mib "$HEAP")" -gt 2048 ] && XO="$XO -XX:-HeapDumpOnOutOfMemoryError"
+   echo "label=$L arm=$ARM heap=$HEAP direct=$DIRECT scopeMemoryMax=${MM}M start=$(date -u +%FT%TZ) host=$(hostname -s) arch=$(uname -m)" > "$R/run.meta"
+   sha256sum "$BUILD"/build/apache-cassandra-*.jar >> "$R/run.meta" 2>&1
+-  [ "$ARM" = I ] && sha256sum "$R"/conf/org/apache/cassandra/db/marshal/VectorType*.class >> "$R/run.meta"
+   ( cd "$R" && CASSANDRA_CONF=$R/conf CASSANDRA_LOG_DIR=$R/logs MAX_HEAP_SIZE=$HEAP MAX_DIRECT_MEMORY_SIZE=$DENV \
+     CASSANDRA_HEAPDUMP_DIR=$R JVM_EXTRA_OPTS="$XO" \
+-    setsid nohup systemd-run --user --scope --unit="u8-$L-$(date +%s)" -p MemoryMax=${MM}M -p MemorySwapMax=0 \
++    setsid nohup systemd-run --user --scope --unit="3bu8-$L-$(date +%s)" -p MemoryMax=${MM}M -p MemorySwapMax=0 \
+       "$BUILD/bin/cassandra" -f < /dev/null > "$R/stdout.log" 2>&1 & )
+   local i p=""; for i in $(seq 1 20); do sleep 1; p=$(pid "$L"); [ -n "$p" ] && break; done
+   [ -z "$p" ] && { log "no java pid for $L"; return 1; }
+--- orig/run-arm.sh	2026-11-23 19:57:42.071325613 -0500
++++ harness/run-arm.sh	2026-11-23 20:00:36.762785554 -0500
+@@ -1,23 +1,28 @@
+ #!/usr/bin/env bash
+-# U8 one clean lifetime on ms0640 (victim + client on the same node, loopback).
+-#   run-arm.sh <label> <A|I> <heap> <json|plain> <N> <R>
++# U8 3-b confirm: one clean lifetime on ms0640 with PasswordAuthenticator + CassandraAuthorizer (victim node + clients on
++# the same node, loopback). Adapted from the case's run-arm.sh (stage 2).
++#   run-arm.sh <label> <A|G> <heap> <json|plain|none> <N> <R>
+ # 1 refuse if a CassandraDaemon runs; empty node dir; start; ready (one retry if not ready)
+-# 2 load: schema + one vector<boolean, 16000000> row (pk 0), nodetool flush u8, verify the stored length, idle 30 s
+-# 3 client run in the background (N connections, barrier per round, R rounds); alive check every 2 s, readings every
+-#   10 s; labels D1*: jcmd GC.class_histogram baseline before the client and every 2 s while it runs (U of the list)
+-# 4 stop at client end, victim death or 600 s; outcome; stop a survivor (drain + SIGTERM by PID); small files to out/<label>
++# 2 superuser (cassandra/cassandra) only: roles u8atk / u8victim / u8nogrant, GRANT CREATE ON ALL KEYSPACES TO u8atk, the
++#   victim's keyspace/table + SELECT/MODIFY grants, read-backs (LIST, system_views.settings)
++# 3 claim probes (no credentials, wrong password, cross-role access, data role DDL)
++# 4 attacker u8atk: CREATE KEYSPACE u8, CREATE TABLE u8.t vector<boolean,16000000>, one 16 MB INSERT, verify (no nodetool
++#   flush: an operator step, not a client step; the row stays in the memtable)
++# 5 victim role u8victim: 20 ops/s on victimks.kv from 60 s before the attack until 60 s after its end / node death
++# 6 attack client as u8atk (N connections, barrier per round, R rounds); alive check every 2 s; readings every 10 s
++# 7 stop at client end, victim death or 600 s; outcome; stop a survivor; dump scan (hprofhist/hprofstacks) then delete it
++# mode none (arm G, guardrail claim probe): steps 1-4 only, the load as the attacker and then as the superuser.
+ set -uo pipefail
+ L=$1 ARM=$2 HEAP=$3 MODE=$4 N=$5 RR=$6
+ D=16000000
+-ROOT=/mydata/s4/u8-w4; H=$ROOT/harness; R=$ROOT/runs/$L; O=$ROOT/out/$L
++ROOT=/mydata/s4/3b-U8; H=$ROOT/harness; R=$ROOT/runs/$L; O=$ROOT/out/$L
+ J=$ROOT/tree/build/lib/jars
+ CCP="$ROOT/cls:$J/cassandra-driver-core-3.12.1-shaded.jar:$J/guava-32.0.1-jre.jar:$J/metrics-core-4.2.28.jar:$ROOT/tree/lib/*"
++SU="-Du8.user=cassandra -Du8.pass=cassandra"; ATK="-Du8.user=u8atk -Du8.pass=atk-3bU8"; VIC="-Du8.user=u8victim -Du8.pass=vic-3bU8"
++JC="java -Xmx512m -cp $CCP"
+ V="bash $H/victim-ctl.sh"
+ log(){ echo "[$(TZ=America/New_York date '+%F %T %Z')] $*"; }
+-hsum(){ # histogram file -> one line: HeapByteBuffer instances,bytes ; Object[] bytes ; byte[] bytes ; total
+-  # jcmd lines: "num: instances bytes class (module)"
+-  awk '$4=="java.nio.HeapByteBuffer"{hb=$2; hbb=$3} $4=="[Ljava.lang.Object;"{ob=$3} $4=="[B"{bb=$3} $1=="Total"{tot=$3} END{print "hbb_n="hb",hbb_B="hbb",objarr_B="ob",bytearr_B="bb",total_B="tot}' "$1"; }
+-log "ARM $L arm=$ARM heap=$HEAP mode=$MODE N=$N R=$RR D=$D"
++log "ARM $L arm=$ARM heap=$HEAP mode=$MODE N=$N R=$RR D=$D (auth on)"
+ ok=0
+ for try in 1 2; do
+   $V start "$L" "$ARM" "$HEAP" auto || exit 1
+@@ -25,36 +30,65 @@
+   log "invalid start (try $try)"; $V stop "$L"; [ -d "$R" ] && mv "$R" "$R.badstart$try"
+ done
+ [ $ok = 1 ] || { echo "INVALID not-ready" > "$R/outcome"; exit 1; }
+-java -Xmx1g -cp "$CCP" U8Client load 127.0.0.1 $D > "$R/load.out" 2>&1; tail -2 "$R/load.out"
+-timeout 300 $ROOT/tree/bin/nodetool -h 127.0.0.1 flush u8 >> "$R/load.out" 2>&1; log "flushed"
+-java -Xmx1g -cp "$CCP" U8Client verify 127.0.0.1 >> "$R/load.out" 2>&1; tail -1 "$R/load.out"
++grep -E '^(authenticator|authorizer|role_manager|vector_dimensions)' "$R/conf/cassandra.yaml" | tee "$R/auth-yaml.txt"
++log "superuser setup"; $JC $SU U8Client su 127.0.0.1 $H/setup-su.cql > "$R/setup-su.out" 2>&1
++grep -E '^(>|  OK|  FAIL)' "$R/setup-su.out" | grep -v 'system_views.settings' | head -40
++grep -E 'name=(authenticator|authorizer|role_manager|network_authorizer|vector_|native_transport_max_threads|native_transport_max_frame_size|commitlog_segment_size|max_mutation_size|read_thresholds_enabled|column_value_size|coordinator_read_size|native_transport_rate_limiting_enabled|native_transport_max_concurrent_connections |native_transport_max_request_data_in_flight|memtable_allocation_type|memtable_heap_space)' "$R/setup-su.out" > "$R/settings-readback.txt"
++grep -q 'FAIL' "$R/setup-su.out" && { log "superuser setup had a FAIL"; }
++if [ "$MODE" = none ]; then
++  log "guardrail probe: attacker, then superuser, create the 16M-dimension table"
++  {
++    java -Xmx256m -cp "$CCP" $ATK U8Client try 127.0.0.1 "CREATE KEYSPACE u8 WITH replication = {'class':'SimpleStrategy','replication_factor':1}"
++    java -Xmx256m -cp "$CCP" $ATK U8Client try 127.0.0.1 "CREATE TABLE u8.t (pk int PRIMARY KEY, v vector<boolean, 16000000>)"
++    java -Xmx256m -cp "$CCP" $ATK U8Client try 127.0.0.1 "CREATE TABLE u8.t8k (pk int PRIMARY KEY, v vector<boolean, 8192>)"
++    java -Xmx256m -cp "$CCP" $SU U8Client try 127.0.0.1 "CREATE TABLE u8.tsu (pk int PRIMARY KEY, v vector<boolean, 16000000>)"
++  } > "$R/probes.out" 2>&1
++  grep -E '^(# as|>|  RESULT)' "$R/probes.out"
++  grep -i guardrail "$R/logs/system.log" | cut -c1-300 | head -5 > "$R/guardrail-log.txt"; cat "$R/guardrail-log.txt"
++  echo "PROBE-ONLY" > "$R/outcome"
++else
++log "probes"
++{
++  java -Xmx256m -cp "$CCP" -Du8.user= U8Client try 127.0.0.1 "SELECT release_version FROM system.local"
++  java -Xmx256m -cp "$CCP" -Du8.user=u8atk -Du8.pass=wrong U8Client try 127.0.0.1 "SELECT release_version FROM system.local"
++  java -Xmx256m -cp "$CCP" $ATK U8Client try 127.0.0.1 "SELECT k FROM victimks.kv LIMIT 1"
++  java -Xmx256m -cp "$CCP" $VIC U8Client try 127.0.0.1 "CREATE TABLE victimks.x (pk int PRIMARY KEY, v vector<boolean, 16000000>)"
++  java -Xmx256m -cp "$CCP" $VIC U8Client try 127.0.0.1 "CREATE KEYSPACE u8v WITH replication = {'class':'SimpleStrategy','replication_factor':1}"
++  java -Xmx256m -cp "$CCP" -Du8.user=u8nogrant -Du8.pass=nog-3bU8 U8Client try 127.0.0.1 "CREATE KEYSPACE u8n WITH replication = {'class':'SimpleStrategy','replication_factor':1}"
++} > "$R/probes.out" 2>&1
++grep -E '^(# as|>|  RESULT)' "$R/probes.out"
++log "attacker load (u8atk)"
++$JC -Xmx1g $ATK U8Client load 127.0.0.1 $D > "$R/load.out" 2>&1; tail -2 "$R/load.out"
++$JC $ATK U8Client verify 127.0.0.1 >> "$R/load.out" 2>&1; tail -1 "$R/load.out"
++$JC $SU U8Client su 127.0.0.1 $H/post-su.cql > "$R/post-su.out" 2>&1; grep -E '^(  row|  FAIL)' "$R/post-su.out"
+ grep -q "verify len=$D" "$R/load.out" || { log "verify failed"; echo "INVALID load/verify" > "$R/outcome"; }
++fi
+ if [ ! -f "$R/outcome" ]; then
+-sleep 30
++( cd "$R" && setsid nohup java -Xmx256m -cp "$CCP" $VIC U8Client victim 127.0.0.1 20 "$R/victim.stop" "$R/victim.csv" > victim.out 2>&1 < /dev/null & )
++sleep 2; VP=$(pgrep -f "U8Client victim 127.0.0.1" | head -1); echo "$VP" > "$R/victim.pid"; log "victim client pid $VP; 60 s baseline"
++sleep 60
+ $V read "$L" base | cut -c1-240
+-if [[ $L == D1* ]]; then $V hist "$L" base; hsum "$R/histo-base.txt" | sed 's/^/hist,base,/' | tee -a "$R/histsum.csv"; fi
+-( cd "$R" && setsid nohup java -Xmx8g -XX:MaxDirectMemorySize=8g -cp "$CCP" U8Client run 127.0.0.1 "$MODE" "$N" "$RR" > client.csv 2> client.err < /dev/null & )
++( cd "$R" && setsid nohup java -Xmx8g -XX:MaxDirectMemorySize=8g -cp "$CCP" $ATK U8Client run 127.0.0.1 "$MODE" "$N" "$RR" > client.csv 2> client.err < /dev/null & )
++t0ms=$(date +%s%3N); echo "$t0ms" > "$R/attack_t0_ms"
+ sleep 1; CP=$(pgrep -f "U8Client run 127.0.0.1 $MODE $N $RR" | head -1); echo "$CP" > "$R/client.pid"
+-log "client pid $CP"
+-t0=$(date +%s); dead=0; k=0; lastread=0
++log "attack client pid $CP (t0 $t0ms)"
++t0=$(date +%s); dead=0; lastread=0; deathms=0
+ while true; do
+   el=$(( $(date +%s) - t0 ))
+-  if [ "$($V alive "$L")" != ALIVE ]; then log "VICTIM DEAD at +${el}s"; dead=1; break; fi
+-  # amended 2026-11-18 15:10 EST: if the client gave up because its connections failed (SUMMARY down=true) while the
+-  # victim is alive, keep watching the victim until the frozen per-run budget (600 s from the first request) or death:
+-  # the server keeps rendering the requests it already accepted.
+-  if ! kill -0 "$CP" 2>/dev/null; then grep -q "down=true" "$R/client.csv" 2>/dev/null || break; [ -f "$R/watch.flag" ] || { log "client gave up (down=true); watching victim to 600 s"; touch "$R/watch.flag"; }; fi
++  if [ "$($V alive "$L")" != ALIVE ]; then deathms=$(date +%s%3N); log "VICTIM NODE DEAD at +${el}s"; dead=1; break; fi
++  if ! kill -0 "$CP" 2>/dev/null; then grep -q "down=true" "$R/client.csv" 2>/dev/null || break; [ -f "$R/watch.flag" ] || { log "client gave up (down=true); watching node to 600 s"; touch "$R/watch.flag"; }; fi
+   [ $el -ge 600 ] && { log "600 s stop"; break; }
+-  if [[ $L == D1* ]]; then
+-    k=$((k+1)); $V hist "$L" s$k; echo "hist,$(date +%s%3N),s$k,$(hsum "$R/histo-s$k.txt")" | tee -a "$R/histsum.csv"; rm -f "$R/histo-s$k.txt"
+-  fi
+   if [ $(( el - lastread )) -ge 10 ]; then $V read "$L" "t+$el" | cut -c1-240; lastread=$el; fi
+-  if [[ $L == D1* ]]; then sleep 0.5; else sleep 2; fi   # D1: a histogram takes ~1.5 s itself, so samples are ~2 s apart
++  sleep 2
+ done
++echo "$deathms" > "$R/death_ms"
+ for i in $(seq 1 30); do kill -0 "$CP" 2>/dev/null || break; sleep 1; done
+ kill "$CP" 2>/dev/null; sleep 1; kill -9 "$CP" 2>/dev/null
+ grep SUMMARY "$R/client.csv"; tail -3 "$R/client.err"
+ if [ $dead = 0 ] && [ "$($V alive "$L")" = ALIVE ]; then sleep 3; $V read "$L" end | cut -c1-240; fi
++log "victim client: 60 s more"; sleep 60; touch "$R/victim.stop"
++for i in $(seq 1 30); do kill -0 "$VP" 2>/dev/null || break; sleep 1; done; kill -9 "$VP" 2>/dev/null
++python3 $H/victimsum.py "$R/victim.csv" "$t0ms" "$deathms" "$R/victim" > /dev/null
+ fi
+ log "OOM/GC check"; $V oom "$L" > "$R/oom-check.txt" 2>&1; head -40 "$R/oom-check.txt"
+ $V stop "$L"
+@@ -66,19 +100,25 @@
+ if [ -f "$R/outcome" ]; then :
+ elif [ $dead = 1 ] && [ -n "$oomtype" ]; then echo "OOM type=\"$oomtype\" at+${el}s completed=$done_n errors=$err_n lens=[$lens]" > "$R/outcome"
+ elif [ $dead = 1 ]; then echo "DEAD-noOOM at+${el}s completed=$done_n (scope: $(tr '\n' ' ' < $R/memory.events.last 2>/dev/null))" > "$R/outcome"
+-elif [ "${err_n:-0}" -gt 0 ]; then echo "ALIVE-noOOM (requests failed) completed=$done_n errors=$err_n lens=[$lens] wall=${el}s" > "$R/outcome"   # label added 2026-11-18 14:52 EST
++elif [ "${err_n:-0}" -gt 0 ]; then echo "ALIVE-noOOM (requests failed) completed=$done_n errors=$err_n lens=[$lens] wall=${el}s" > "$R/outcome"
+ else echo "SURVIVED completed=$done_n errors=$err_n lens=[$lens] wall=${el}s" > "$R/outcome"; fi
+ cat "$R/outcome"
+-mkdir -p "$O"; rm -f "$O"/*
+-cp "$R"/{readings.csv,samples.csv,yaml.diff,run.meta,outcome,oom-check.txt,load.out,histsum.csv} "$O"/ 2>/dev/null
++for hp in "$R"/*.hprof; do
++  [ -f "$hp" ] || continue
++  ls -la "$hp" > "$R/hprof.ls"; log "dump scan $(basename "$hp")"
++  nice -n 10 python3 $H/hprofhist.py "$hp" 30 > "$R/dump-hist.txt" 2>&1
++  nice -n 10 python3 $H/hprofstacks.py "$hp" VectorType > "$R/dump-stacks.txt" 2>&1
++  rm -f -- "$hp"; log "dump deleted"
++done
++mkdir -p "$O"; find "${O:?}" -maxdepth 1 -type f -delete
++cp "$R"/{readings.csv,samples.csv,yaml.diff,run.meta,outcome,oom-check.txt,load.out,setup-su.out,post-su.out,probes.out,settings-readback.txt,auth-yaml.txt,guardrail-log.txt,victim-summary.json,victim-per-second.csv,victim.out,attack_t0_ms,death_ms,hprof.ls,dump-hist.txt,dump-stacks.txt} "$O"/ 2>/dev/null
+ cp "$R/memory.events.last" "$O/memory.events" 2>/dev/null
+ grep -E '^(start_ms|[0-9]{13},|SUMMARY)' "$R/client.csv" > "$O/client.csv" 2>/dev/null
+ tail -20 "$R/client.err" > "$O/client.err.tail" 2>/dev/null; [ -s "$O/client.err.tail" ] || rm -f "$O/client.err.tail"
+ grep -h -m3 -B2 -A30 'java\.lang\.OutOfMemoryError' "$R/logs/system.log" "$R/stdout.log" 2>/dev/null | head -120 > "$O/oom-excerpt.txt"; [ -s "$O/oom-excerpt.txt" ] || rm -f "$O/oom-excerpt.txt"
+-grep -h 'VectorType' "$R/classload.log" 2>/dev/null | head -10 > "$O/classload-vectortype.txt"
+ grep -h 'Pause' "$R"/gc.log* 2>/dev/null | grep -E 'ms$' | tail -40 > "$O/gc-pauses-tail.txt"
+ grep -h -E 'Pause (Full|Young).*ms$' "$R"/gc.log* 2>/dev/null | sed -n 's/.*->\([0-9]*\)M(\([0-9]*\)M).*/\1 \2/p' | sort -n | tail -1 > "$O/gc-max-after.txt"
++grep -h -E 'Pause Full.*ms$' "$R"/gc.log* 2>/dev/null | tail -10 > "$O/gc-full-tail.txt"
+ python3 "$H/gcwin.py" "$R" > "$O/gcwin.txt" 2>&1
+-grep -i -m5 'exception\|error' "$R/logs/system.log" 2>/dev/null | grep -v 'OutOfMemory' | cut -c1-400 > "$O/system-errors.txt"; [ -s "$O/system-errors.txt" ] || rm -f "$O/system-errors.txt"
+-ls -la "$R" | grep -i 'hprof\|hs_err' > "$O/hprof.ls" || rm -f "$O/hprof.ls"
++grep -i 'exception\|error\|guardrail\|Unauthorized' "$R/logs/system.log" 2>/dev/null | grep -v 'OutOfMemory' | head -20 | cut -c1-400 > "$O/system-errors.txt"; [ -s "$O/system-errors.txt" ] || rm -f "$O/system-errors.txt"
+ log "END $L $(cat "$R/outcome")"
+--- orig/setup.sh	2026-11-23 19:57:42.071325613 -0500
++++ harness/setup.sh	2026-11-23 19:59:57.250907677 -0500
+@@ -1,17 +1,13 @@
+ #!/usr/bin/env bash
+-# U8 setup on ms0640 (stage 2). Copies the built 5.0.9 tree out of /mydata/s4/cassandra-base (read only), keeps a
+-# pristine conf, compiles the client, the sampler and the arm-I diagnostic VectorType (one method changed; diff in
+-# vectortype-intervention.diff). The harness directory is copied to $ROOT/harness by the controller (rsync) first.
++# U8 3-b confirm setup on ms0640. Copies the built 5.0.9 tree out of /mydata/s4/cassandra-base (read only), keeps a
++# pristine conf, compiles the client and the sampler. (No arm-I class: not part of the confirm.)
+ set -euo pipefail
+-ROOT=/mydata/s4/u8-w4
+-mkdir -p "$ROOT"/{runs,out,cls,patch}
++ROOT=/mydata/s4/3b-U8
++mkdir -p "$ROOT"/{runs,out,cls}
+ [ -d "$ROOT/tree" ] || cp -a /mydata/s4/cassandra-base "$ROOT/tree"
+ [ -d "$ROOT/conf-pristine" ] || cp -a "$ROOT/tree/conf" "$ROOT/conf-pristine"
+ J=$ROOT/tree/build/lib/jars
+ CP="$J/cassandra-driver-core-3.12.1-shaded.jar:$J/guava-32.0.1-jre.jar:$J/metrics-core-4.2.28.jar:$ROOT/tree/lib/*"
+ javac -cp "$CP" -d "$ROOT/cls" "$ROOT/harness/U8Client.java" "$ROOT/harness/C2Sampler.java"
+-javac --release 11 -nowarn -cp "$ROOT/tree/build/apache-cassandra-5.0.9-SNAPSHOT.jar:$ROOT/tree/lib/*:$ROOT/tree/build/lib/jars/*" \
+-  -d "$ROOT/patch" "$ROOT/harness/VectorType.java" 2>&1 | grep -v '^Note:' || true
+-ls "$ROOT"/patch/org/apache/cassandra/db/marshal/VectorType*.class
+-sha256sum "$ROOT"/tree/build/apache-cassandra-*.jar "$ROOT"/patch/org/apache/cassandra/db/marshal/VectorType*.class
++sha256sum "$ROOT"/tree/build/apache-cassandra-*.jar
+ echo setup ok

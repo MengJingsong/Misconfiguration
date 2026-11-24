@@ -1,0 +1,59 @@
+1795470259.655 16:44:19 start label=smoke topo=vnode n1heap=2G N=2000 size=64000 inflight=200
+1795470323.791 16:45:23 n2 native up=1 pid=531734
+1795470401.991 16:46:41 n3 native up=1 pid=532332
+1795470479.364 16:47:59 n1 native up=1 pid=533083
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address     Load        Tokens  Owns (effective)  Host ID                               Rack 
+UN  127.0.0.31  85.12 KiB   16      76.0%             de772d9e-e75a-48c6-b50d-5a384e95961e  rack1
+UN  127.0.0.32  119.83 KiB  16      64.7%             58aab8c1-3cdf-45a8-a483-cef9b3cf8ee5  rack1
+UN  127.0.0.33  80.04 KiB   16      59.3%             de5988bd-f5d2-4ce6-9fb7-dba085a08166  rack1
+
+-XX:+UseG1GC -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/3b-B23/smoke/dump/cassandra-1795470402-pid533083.hprof 
+G1HeapRegionSize=16777216 MaxDirectMemorySize=16642998272 MaxHeapSize=2147483648 ParallelGCThreads=40 
+0::/user.slice/user-20001.slice/user@20001.service/app.slice/run-r997cf42f109a4054b48c721d863c41bb.scope
+num_tokens: 16
+authenticator: PasswordAuthenticator
+authorizer: CassandraAuthorizer
+role_manager: CassandraRoleManager
+1795470485.617 16:48:05 superuser login ok
+1795470493.584 16:48:13 repair system_auth rc=0
+/mydata/s4/3b-B23/smoke/logs/admin1.txt:0
+/mydata/s4/3b-B23/smoke/logs/admin2.txt:0
+1795470506.121 16:48:26 attacker probe: 4 OK, 6 ERROR
+1795470508.154 16:48:28 victim pid 534807
+1795470511.171 16:48:31 MaxHintsInProgress: MaxHintsInProgress=5120
+1795470511.175 16:48:31 victim baseline, all up (30 s)
+1795470541.181 16:49:01 operator: stopping n3 (nodetool stopdaemon)
+Cassandra has shutdown.
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address     Load        Tokens  Owns (effective)  Host ID                               Rack 
+UN  127.0.0.31  130.06 KiB  16      76.0%             de772d9e-e75a-48c6-b50d-5a384e95961e  rack1
+UN  127.0.0.32  112.92 KiB  16      64.7%             58aab8c1-3cdf-45a8-a483-cef9b3cf8ee5  rack1
+DN  127.0.0.33  135.09 KiB  16      59.3%             de5988bd-f5d2-4ce6-9fb7-dba085a08166  rack1
+
+1795470555.755 16:49:15 victim baseline, n3 down (30 s)
+1795470585.766 16:49:45 n1 hints dir before load: 161414 B, files 1
+1795470585.772 16:49:45 attack start N=2000 (role attacker, keys chosen off n1)
+1795470586.279 16:49:46 attack pid 536367
+1795470591.370 16:49:51 attack client done at L+6 K=0
+1795470595.478 16:49:55 L+10 K=0 pending=0 old=2809472 unavail=0 wr_done=6787
+1795470605.701 16:50:05 L+20 K=0 pending=0 old=2809472 unavail=0 wr_done=7337
+1795470615.925 16:50:15 L+30 K=0 pending=0 old=2809472 unavail=0 wr_done=7837
+1795470625.123 16:50:25 L+40 K=0 pending=0 old=2809472 unavail=0 wr_done=8287
+1795470635.343 16:50:35 L+50 K=0 pending=0 old=2809472 unavail=0 wr_done=8787
+1795470645.566 16:50:45 L+60 K=0 pending=0 old=2809472 unavail=0 wr_done=9287
+1795470651.682 16:50:51 stop: attack done + 60 s valid=1
+1795470651.686 16:50:51 victim after-window (60 s)
+1795470728.728 16:52:08 all nodes and clients stopped
+1795470728.765 16:52:08 OOM lines: 0; first: 
+1795470728.780 16:52:08 n1 hints dir at end: 128950206 B; n1 data 482639 B; shm 196358541 B
+total 8
+drwxr-xr-x 2 jason92 misconfiguration 4096 Nov 23 14:44 .
+drwxr-xr-x 7 jason92 misconfiguration 4096 Nov 23 14:51 ..
+1795470728.823 16:52:08 done alive=1 why=attack done + 60 s valid=1

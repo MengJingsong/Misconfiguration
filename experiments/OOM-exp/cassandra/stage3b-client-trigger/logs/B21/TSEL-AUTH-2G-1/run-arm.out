@@ -1,0 +1,56 @@
+[2026-11-23 16:53:29 EST] ARM TSEL-AUTH-2G-1 arm=AUTH heap=2G spec=one:T:1000:100:3:0;idle:20000;run:T:1000:100:12/120 hist=0 noverify
+[2026-11-23 16:53:31 EST] started TSEL-AUTH-2G-1 pid 322812 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b3b21-TSEL-AUTH-2G-1-1795470810.scope
+[2026-11-23 16:53:39 EST] ready TSEL-AUTH-2G-1
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/3b-B21/runs/TSEL-AUTH-2G-1/cassandra-1795470810-pid322812.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-23 16:53:45 EST] GC.run TSEL-AUTH-2G-1
+1795470828,base,rssKB=2868844,rssAnonKB=2688188,scopeCurB=2781872128,scopeOomKill=0,1795470827864,101854408,85077192,85077192,0,0,-1,-1,-1,16587725,-1,-1,-1,-1,-1,-1,48,98
+[2026-11-23 16:53:48 EST] victim tenant client pid 323291 (role tenant, 20 w/s + 20 r/s)
+victim seconds before attack: 60
+[2026-11-23 16:54:49 EST] ATTACK START role=reader
+[2026-11-23 16:54:49 EST] client pid 323882
+[2026-11-23 16:55:25 EST] VICTIM DEAD at +36s
+VSUMMARY secs=127 sent=5081 ok=3610 timeout=0 unavail=0 nohost=1287 other=184 skipped=0
+HOSTGONE
+SUMMARY secs=34 ok=3 err_readfail=0 err_timeout=0 err_invalid=0 err_other=15 inflight_left=0 rows=3000 vbytes=368640000
+	at com.datastax.driver.core.Cluster.connect(Cluster.java:313)
+	at B21Load.main(B21Load.java:197)
+21:55:24 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+[2026-11-23 16:55:59 EST] OOM/GC check
+CompileCommand: dontinline org/apache/cassandra/io/util/RebufferingInputStream.readPrimitiveSlowly(I)J
+CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.address()J
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.length()I
+CompileCommand: inline org/apache/cassandra/db/rows/UnfilteredSerializer.serializeRowBody(Lorg/apache/cassandra/db/rows/Row;ILorg/apache/cassandra/db/rows/SerializationHelper;Lorg/apache/cassandra/io/util/DataOutputPlus;)V
+CompileCommand: inline org/apache/cassandra/io/util/Memory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/SafeMemory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/TrackedDataInputPlus.checkCanRead(I)V
+CompileCommand: inline org/apache/cassandra/net/FrameDecoderWith8bHeader.decode(Ljava/util/Collection;Lorg/apache/cassandra/net/ShareableBytes;I)V
+CompileCommand: inline org/apache/cassandra/service/reads/repair/RowIteratorMergeListener.applyToPartition(ILjava/util/function/Consumer;)V
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.selectBoundary(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;II)I
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.strictnessOfLessThan(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;)I
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.indexes(Lorg/apache/cassandra/utils/IFilter/FilterKey;)[J
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.setIndexes(JJIJ[J)V
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare(Ljava/nio/ByteBuffer;[B)I
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare([BLjava/nio/ByteBuffer;)I
+--
+INFO  [ScheduledTasks:1] 2026-11-23T21:54:56,704 NoSpamLogger.java:104 - Some operations were slow, details available at debug level (debug.log)
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /mydata/s4/3b-B21/runs/TSEL-AUTH-2G-1/cassandra-1795470810-pid322812.hprof ...
+Heap dump file created [1998804343 bytes in 3.174 secs]
+#
+# java.lang.OutOfMemoryError: Java heap space
+# -XX:OnOutOfMemoryError="kill -9 %p"
+#   Executing /bin/sh -c "kill -9 322812"...
+-rw------- 1 jason92 misconfiguration 1998804343 Nov 23 14:55 cassandra-1795470810-pid322812.hprof
+pauses=29 full_gcs=9 total_pause=1s max60=2% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=HeapDumper@110.385s,ReportJavaOutOfMemory@113.560s
+[2026-11-23 16:56:01 EST] stopped TSEL-AUTH-2G-1
+OOM type="java.lang.OutOfMemoryError: Java heap space" at+36s overload_drop_lines=0 oversized=0 last=[Q {"start":1795470924765,"end":1795470924766,"ms":0,"Q":"T","limit":1000,"fetch":100,"thread":11,"arg":"v0=0.3766985","rows":0,"pages":0,"more":false,"vbytes":0,"warns":0,"warn":"","err":"NoHostAvaila]
+attack.start=1795470889234 c-step.start=1795470919333 attack.end=1795470925141 (c-step length 5.808 s); victim 127 s
+  before: 54 s, sent 2160 (40.0/s), completed ok 2161 / err timeout 0, unavailable 0, nohost 0, other 0; skipped 0; success 100.0 % of completions, ok/s 40.0; seconds with 0 ok: 0; p50 median 1.0 ms, p99 max 7 ms, max 7 ms; inflight max 1
+  attack warm-up (single T queries + idle): 30 s, sent 1200 (40.0/s), completed ok 1199 / err timeout 0, unavailable 0, nohost 0, other 0; skipped 0; success 100.0 % of completions, ok/s 40.0; seconds with 0 ok: 0; p50 median 1.0 ms, p99 max 23 ms, max 23 ms; inflight max 1
+  attack c-step: 6 s, sent 240 (40.0/s), completed ok 50 / err timeout 0, unavailable 0, nohost 7, other 184; skipped 0; success 20.7 % of completions, ok/s 8.3; seconds with 0 ok: 4; p50 median 52.5 ms, p99 max 271 ms, max 271 ms; inflight max 151
+      err: NoHostAvailableException: All host(s) tried for query failed (no host was tried)
+  after: 32 s, sent 1280 (40.0/s), completed ok 0 / err timeout 0, unavailable 0, nohost 1280, other 0; skipped 0; success 0.0 % of completions, ok/s 0.0; seconds with 0 ok: 32; p50 median NA ms, p99 max NA ms, max NA ms; inflight max 0
+      err: NoHostAvailableException: All host(s) tried for query failed (no host was tried)
+first degraded victim second: +36 s after attack start (ok 0, errs 0/0/7/184, max -1 ms)
+[2026-11-23 16:56:01 EST] END TSEL-AUTH-2G-1 OOM type="java.lang.OutOfMemoryError: Java heap space" at+36s overload_drop_lines=0 oversized=0 last=[Q {"start":1795470924765,"end":1795470924766,"ms":0,"Q":"T","limit":1000,"fetch":100,"thread":11,"arg":"v0=0.3766985","rows":0,"pages":0,"more":false,"vbytes":0,"warns":0,"warn":"","err":"NoHostAvaila]

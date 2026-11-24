@@ -1,0 +1,95 @@
+[2026-11-23 20:23:52 EST] ARM T-AUTH-2G-1 heap=2048M direct=1024M fetch=off kind=agg steps=1:4096:20,1:65536:160 P=2 (auth on)
+[2026-11-23 20:23:59 EST] started T-AUTH-2G-1 pid 669441 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/3bu10-T-AUTH-2G-1-1795483438.scope
+[2026-11-23 20:24:22 EST] ready T-AUTH-2G-1
+-XX:+HeapDumpOnOutOfMemoryError -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms2048M -Xmx2048M -XX:MaxDirectMemorySize=1024M -XX:HeapDumpPath=/mydata/s4/3b-U10/runs/T-AUTH-2G-1/cassandra-1795483439-pid669441.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+authenticator: PasswordAuthenticator
+authorizer: CassandraAuthorizer
+role_manager: CassandraRoleManager
+network_authorizer: AllowAllNetworkAuthorizer
+> LIST ROLES
+  row: role=cassandra super=true login=true options={} datacenters=ALL
+  row: role=u10atk super=false login=true options={} datacenters=ALL
+  row: role=u10victim super=false login=true options={} datacenters=ALL
+> LIST ALL PERMISSIONS OF u10atk
+  row: role=u10atk username=u10atk resource=<table u10.t> permission=SELECT
+  row: role=u10atk username=u10atk resource=<table u10.t> permission=MODIFY
+> LIST ALL PERMISSIONS OF u10victim
+  row: role=u10victim username=u10victim resource=<table victimks.kv> permission=SELECT
+  row: role=u10victim username=u10victim resource=<table victimks.kv> permission=MODIFY
+> SELECT name, value FROM system_views.settings
+  row: role=cassandra super=true login=true options={} datacenters=ALL
+  row: role=u10atk super=false login=true options={} datacenters=ALL
+  row: role=u10victim super=false login=true options={} datacenters=ALL
+  row: role=u10atk username=u10atk resource=<table u10.t> permission=SELECT
+  row: role=u10atk username=u10atk resource=<table u10.t> permission=MODIFY
+  row: role=u10victim username=u10victim resource=<table victimks.kv> permission=SELECT
+  row: role=u10victim username=u10victim resource=<table victimks.kv> permission=MODIFY
+  row: name=authenticator value=PasswordAuthenticator
+  row: name=authenticator.class_name value=PasswordAuthenticator
+  row: name=authenticator.parameters value={}
+  row: name=authorizer value=CassandraAuthorizer
+  row: name=authorizer.class_name value=CassandraAuthorizer
+  row: name=authorizer.parameters value={}
+  row: name=local_read_size_fail_threshold value=null
+  row: name=page_size_fail_threshold value=-1
+  row: name=read_request_timeout value=5000ms
+  row: name=read_request_timeout_in_ms value=5000
+  row: name=read_thresholds_enabled value=false
+  row: name=role_manager value=CassandraRoleManager
+  row: name=role_manager.class_name value=CassandraRoleManager
+  row: name=role_manager.parameters value={}
+[2026-11-23 20:24:36 EST] GC.run T-AUTH-2G-1
+1795483479,base,nmtOtherKB=231829,nmtTotalKB=2635859,rssKB=2699468,rssAnonKB=2533252,scopeCurB=2622681088,scopeOomKill=0,1795483479343,93203576,59649144,59649144,0,0,20,0,0,52826953,0,0,171,119,0
+		SSTable count: 7
+		Old SSTable count: 0
+		Space used (live): 2161629169
+		Number of partitions (estimate): 2
+		Local read count: 0
+[2026-11-23 20:24:46 EST] victim client pid 670043; 60 s baseline
+1795483543777,1795483543779,R,ok
+1795483543827,1795483543829,W,ok
+[2026-11-23 20:25:45 EST] attack client pid 670104 (t0 1795483543885)
+1795483556,t+10,nmtOtherKB=232104,nmtTotalKB=2658713,rssKB=2738344,rssAnonKB=2571680,scopeCurB=2664247296,scopeOomKill=0,1795483556356,992419456,807870080,59649144,1,0,1462,1,0,53118499,19,0,231,119,0
+1795483556415,1,4096,1,19,3,3,0,0,0,335,382,
+1795483567,t+21,nmtOtherKB=232104,nmtTotalKB=2658279,rssKB=2738928,rssAnonKB=2572264,scopeCurB=2665480192,scopeOomKill=0,1795483567357,757636512,522755488,103187136,1,0,1717,1,0,53118499,19,0,272,119,0
+1795483567444,1,4096,1,54,3,3,0,0,0,320,326,
+/mydata/s4/3b-U10/harness/victim-ctl.sh: line 51: 669441 Killed                  CASSANDRA_CONF=$R/conf CASSANDRA_LOG_DIR=$R/logs MAX_HEAP_SIZE=$HEAP MAX_DIRECT_MEMORY_SIZE=$DM CASSANDRA_HEAPDUMP_DIR=$R JVM_EXTRA_OPTS="-XX:NativeMemoryTracking=summary -Xlog:gc=info,safepoint=info:file=$R/gc.log:time,uptime,level,tags:filecount=20,filesize=20m" setsid nohup systemd-run --user --scope --unit="3bu10-$L-$(date +%s)" -p MemoryMax=${MM}M -p MemorySwapMax=0 "$BUILD/bin/cassandra" -f < /dev/null > "$R/stdout.log" 2>&1
+[2026-11-23 20:26:17 EST] VICTIM NODE DEAD at +32s
+18:26:23 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 8000 milliseconds
+18:26:31 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 16000 milliseconds
+18:26:47 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 32000 milliseconds
+[2026-11-23 20:26:58 EST] victim client: 60 s more
+[2026-11-23 20:28:11 EST] OOM/GC check
+CompileCommand: dontinline org/apache/cassandra/io/util/RebufferingInputStream.readPrimitiveSlowly(I)J
+CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.address()J
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.length()I
+CompileCommand: inline org/apache/cassandra/db/rows/UnfilteredSerializer.serializeRowBody(Lorg/apache/cassandra/db/rows/Row;ILorg/apache/cassandra/db/rows/SerializationHelper;Lorg/apache/cassandra/io/util/DataOutputPlus;)V
+CompileCommand: inline org/apache/cassandra/io/util/Memory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/SafeMemory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/TrackedDataInputPlus.checkCanRead(I)V
+CompileCommand: inline org/apache/cassandra/net/FrameDecoderWith8bHeader.decode(Ljava/util/Collection;Lorg/apache/cassandra/net/ShareableBytes;I)V
+CompileCommand: inline org/apache/cassandra/service/reads/repair/RowIteratorMergeListener.applyToPartition(ILjava/util/function/Consumer;)V
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.selectBoundary(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;II)I
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.strictnessOfLessThan(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;)I
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.indexes(Lorg/apache/cassandra/utils/IFilter/FilterKey;)[J
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.setIndexes(JJIJ[J)V
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare(Ljava/nio/ByteBuffer;[B)I
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare([BLjava/nio/ByteBuffer;)I
+--
+INFO  [ScheduledTasks:1] 2026-11-24T01:25:54,148 NoSpamLogger.java:104 - Some operations were slow, details available at debug level (debug.log)
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /mydata/s4/3b-U10/runs/T-AUTH-2G-1/cassandra-1795483439-pid669441.hprof ...
+Heap dump file created [854876174 bytes in 2.786 secs]
+#
+# java.lang.OutOfMemoryError: Java heap space
+# -XX:OnOutOfMemoryError="kill -9 %p"
+#   Executing /bin/sh -c "kill -9 669441"...
+-rw------- 1 jason92 misconfiguration 854876174 Nov 23 18:26 cassandra-1795483439-pid669441.hprof
+query-cancelled-timeout: 0
+pauses=34 full_gcs=2 total_pause=1s max60=1% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=HeapDumper@132.856s,ReportJavaOutOfMemory@135.644s
+[2026-11-23 20:28:13 EST] stopped T-AUTH-2G-1
+OOM c=1 n=65536 type="java.lang.OutOfMemoryError: Java heap space" at+32s
+[2026-11-23 20:28:13 EST] dump scan cassandra-1795483439-pid669441.hprof
+[2026-11-23 20:28:21 EST] dump deleted
+[2026-11-23 20:28:21 EST] END T-AUTH-2G-1 OOM c=1 n=65536 type="java.lang.OutOfMemoryError: Java heap space" at+32s

@@ -1,0 +1,16 @@
+--- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/OOM-exp/cassandra/cases/convergence/coordinator_read_size_fail_threshold-concurrent-reads/harness/C2Load.java	2026-11-12 09:23:49.993448000 -0500
++++ C2Load.java	2026-11-23 16:42:10.976569000 -0500
+@@ -1,4 +1,4 @@
+-// C2 run-1 load client (apt138). Java driver 3.12.1 (shaded), protocol v4, CL ONE.
++// C2 run-1 load client (apt138). 3-b confirm 2026-11-23: logs in as -Dc2.user/-Dc2.pass (PasswordAuthenticator). Java driver 3.12.1 (shaded), protocol v4, CL ONE.
+ //   java C2Load schema <host>
+ //   java C2Load load   <host> <parts> <rows> <valueBytes> <pk0>      insert parts x rows rows of random blobs
+ //   java C2Load one    <host> <pk>                                  one read; prints rows, value bytes, or the error
+@@ -23,6 +23,7 @@
+                 Collections.singletonList(new java.net.InetSocketAddress(host, 9042))))
+             .withSocketOptions(new SocketOptions().setReadTimeoutMillis(120000).setConnectTimeoutMillis(30000))
+             .withRetryPolicy(FallthroughRetryPolicy.INSTANCE)
++            .withCredentials(System.getProperty("c2.user", "cassandra"), System.getProperty("c2.pass", "cassandra"))
+             .withPoolingOptions(po).withoutJMXReporting().build();
+     }
+ 

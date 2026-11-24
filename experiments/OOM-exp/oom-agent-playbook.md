@@ -149,6 +149,7 @@ upstream (README).
      internode ports, JMX/nodetool, sstableloader, the config or data files.
    - **Privilege levels** (lowest that triggers counts):
      - **pre-auth** — network access to the native port only; the OOM is reached before or during authentication;
+     - **login role, no grants** — any authenticated role, no permission at all (added 2026-11-23 from R13/R20's confirm runs);
      - **data role** — SELECT/MODIFY on tables someone else created (schema as an admin made it);
      - **DDL role** — may create its own keyspaces/tables/indexes/types (a shared, multi-tenant cluster);
      - **admin only** — needs superuser, JMX/nodetool, a config change or file access: not client-triggerable.

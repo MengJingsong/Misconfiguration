@@ -1,0 +1,9 @@
+events (s from attack_start): node_start -77.3, node_ready -41.1, victim_start -30.0, attack_start +0.0, oom_seen +17.4, jvm_dead +19.4, attack_load_end +40.0, restart_start +103.0, restart_ready +114.2, oom_seen_restart +116.2, jvm_dead_restart +118.2, victim_stop_requested +131.3
+before                                29.5 s  ops    590  ok    590 (100.0 %)  err {}  ok-latency ms p50 2 p99 5 max 7
+during attack                         17.4 s  ops    347  ok    339 ( 97.7 %)  err {'err:NoHostAvailable': 8}  ok-latency ms p50 1 p99 141 max 175
+down (OOM -> restart ready)           96.8 s  ops   1937  ok      0 (  0.0 %)  err {'err:NoHostAvailable': 1937}  ok-latency ms p50 None p99 None max None
+after restart (up)                     2.0 s  ops     39  ok      0 (  0.0 %)  err {'err:NoHostAvailable': 39}  ok-latency ms p50 None p99 None max None
+down again (2nd OOM ->)               15.0 s  ops    301  ok      0 (  0.0 %)  err {'err:NoHostAvailable': 301}  ok-latency ms p50 None p99 None max None
+first second (from attack_start) with victim ok < 50 %: 17
+first fully-ok second after that: none
+seconds during/after the attack with victim ok-latency p99 > 500 ms: 0 (first None)

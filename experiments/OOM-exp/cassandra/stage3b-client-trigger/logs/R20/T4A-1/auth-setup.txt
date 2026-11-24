@@ -1,0 +1,50 @@
+# superuser cassandra logged in at 1795475036414
+CREATE ROLE attacker WITH PASSWORD = 'atk-3bR20' AND LOGIN = true -> ok
+CREATE ROLE victim WITH PASSWORD = 'vic-3bR20' AND LOGIN = true -> ok
+CREATE KEYSPACE victim_ks WITH replication = {'class':'SimpleStrategy','replication_factor':1} -> ok
+CREATE TABLE victim_ks.t (k int PRIMARY KEY, v text) -> ok
+GRANT SELECT ON TABLE victim_ks.t TO victim -> ok
+GRANT MODIFY ON TABLE victim_ks.t TO victim -> ok
+LIST ROLES
+  -> role | super | login | options | datacenters
+     attacker | False | True | {} | ALL
+     cassandra | True | True | {} | ALL
+     victim | False | True | {} | ALL
+LIST ALL PERMISSIONS OF attacker
+  -> RESULT kind 1
+LIST ALL PERMISSIONS OF victim
+  -> role | username | resource | permission
+     victim | victim | <table victim_ks.t> | SELECT
+     victim | victim | <table victim_ks.t> | MODIFY
+LIST ALL PERMISSIONS
+  -> role | username | resource | permission
+     cassandra | cassandra | <keyspace victim_ks> | CREATE
+     cassandra | cassandra | <keyspace victim_ks> | ALTER
+     cassandra | cassandra | <keyspace victim_ks> | DROP
+     cassandra | cassandra | <keyspace victim_ks> | SELECT
+     cassandra | cassandra | <keyspace victim_ks> | MODIFY
+     cassandra | cassandra | <keyspace victim_ks> | AUTHORIZE
+     cassandra | cassandra | <keyspace victim_ks> | UNMASK
+     cassandra | cassandra | <keyspace victim_ks> | SELECT_MASKED
+     cassandra | cassandra | <table victim_ks.t> | ALTER
+     cassandra | cassandra | <table victim_ks.t> | DROP
+     cassandra | cassandra | <table victim_ks.t> | SELECT
+     cassandra | cassandra | <table victim_ks.t> | MODIFY
+     cassandra | cassandra | <table victim_ks.t> | AUTHORIZE
+     cassandra | cassandra | <table victim_ks.t> | UNMASK
+     cassandra | cassandra | <table victim_ks.t> | SELECT_MASKED
+     cassandra | cassandra | <all functions in victim_ks> | CREATE
+     cassandra | cassandra | <all functions in victim_ks> | ALTER
+     cassandra | cassandra | <all functions in victim_ks> | DROP
+     cassandra | cassandra | <all functions in victim_ks> | AUTHORIZE
+     cassandra | cassandra | <all functions in victim_ks> | EXECUTE
+     cassandra | cassandra | <role attacker> | ALTER
+     cassandra | cassandra | <role attacker> | DROP
+     cassandra | cassandra | <role attacker> | AUTHORIZE
+     cassandra | cassandra | <role attacker> | DESCRIBE
+     cassandra | cassandra | <role victim> | ALTER
+     cassandra | cassandra | <role victim> | DROP
+     cassandra | cassandra | <role victim> | AUTHORIZE
+     cassandra | cassandra | <role victim> | DESCRIBE
+     victim | victim | <table victim_ks.t> | SELECT
+     victim | victim | <table victim_ks.t> | MODIFY

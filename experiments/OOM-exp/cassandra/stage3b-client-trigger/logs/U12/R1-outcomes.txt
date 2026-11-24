@@ -1,0 +1,12 @@
+# phase 2 (attack), samples cut at the restart (1795470038865); see U12.md deviations
+oom=direct thread=CompactionExecutor:4 stack=[expandToFit,UnfilteredSerializer.serialize,SortedTablePartitionWriter.addUnfiltered,CompactionTask] | base_direct=51.6 peak_direct_used=861.6 peak_direct_cap=861.6 peak_heap=1080.0 MiB rss_anon_peak=3047 vmhwm=3551 MiB | death_after_cmp_start_s=4.2 | no-compacted-line | MaxDirectMemorySize=1024M
+direct_used-over-base steps (s after cmp start: MiB): +0.2s:0 +2.0s:16 +2.2s:240 +2.5s:216 +2.7s:540 +3.0s:810 +3.2s:486
+
+# phase 3 (operator restart on the same data)
+oom=direct thread=CompactionExecutor:1 stack=[expandToFit,UnfilteredSerializer.serialize,SortedTablePartitionWriter.addUnfiltered,CompactionTask] | base_direct=17.2 peak_direct_used=829.6 peak_direct_cap=829.6 peak_heap=992.0 MiB rss_anon_peak=3375 vmhwm=3537 MiB | death_after_cmp_start_s=4.9 | no-compacted-line | MaxDirectMemorySize=1024M
+direct_used-over-base steps (s after cmp start: MiB): +0.1s:4 +2.6s:162 +2.9s:362 +3.1s:542 +3.4s:812 +3.9s:488
+
+# raw R1/outcome.txt as written by run3b.sh (phase-2 sampler polluted by the restarted node after 1795470038865)
+oom=direct thread=CompactionExecutor:4 stack=[expandToFit,UnfilteredSerializer.serialize,SortedTablePartitionWriter.addUnfiltered,CompactionTask] | base_direct=51.6 peak_direct_used=861.6 peak_direct_cap=861.6 peak_heap=1080.0 MiB rss_anon_peak=3047 vmhwm=3551 MiB | death_after_cmp_start_s=68.8 | no-compacted-line | MaxDirectMemorySize=1024M
+direct_used-over-base steps (s after cmp start: MiB): +0.2s:0 +2.0s:16 +2.2s:240 +2.5s:216 +2.7s:540 +3.0s:810 +3.2s:486 +44.8s:-52 +52.5s:-34 +60.5s:-2 +61.0s:-34 +66.6s:128 +66.8s:328 +67.1s:508 +67.3s:778 +67.8s:454
+END=exit restart_end=exit

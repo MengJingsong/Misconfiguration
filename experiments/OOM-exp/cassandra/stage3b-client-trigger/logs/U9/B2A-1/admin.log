@@ -1,0 +1,18 @@
+{"connect_retry": "cassandra", "err": "NoHostAvailable: ('Unable to connect to any servers', {'127.0.0.1:9042': AuthenticationFailed('Failed to authenticate to 127.0.0.1:9042: Error from server: code=0100 [Bad creden"}
+{"connect_retry": "cassandra", "err": "NoHostAvailable: ('Unable to connect to any servers', {'127.0.0.1:9042': AuthenticationFailed('Failed to authenticate to 127.0.0.1:9042: Error from server: code=0100 [Bad creden"}
+{"connect_retry": "cassandra", "err": "NoHostAvailable: ('Unable to connect to any servers', {'127.0.0.1:9042': AuthenticationFailed('Failed to authenticate to 127.0.0.1:9042: Error from server: code=0100 [Bad creden"}
+{"superuser_cql": "CREATE KEYSPACE ks WITH replication = {'class':'SimpleStrategy','replication_factor':1}"}
+{"superuser_cql": "CREATE TABLE ks.t1 (pk int, ck blob, v blob, PRIMARY KEY (pk, ck))"}
+{"superuser_cql": "CREATE KEYSPACE vks WITH replication = {'class':'SimpleStrategy','replication_factor':1}"}
+{"superuser_cql": "CREATE TABLE vks.vt (k int PRIMARY KEY, v blob)"}
+{"superuser_cql": "CREATE ROLE u9atk WITH PASSWORD = '***' AND LOGIN = true AND SUPERUSER = false"}
+{"superuser_cql": "GRANT MODIFY ON TABLE ks.t1 TO u9atk"}
+{"superuser_cql": "CREATE ROLE u9vic WITH PASSWORD = '***' AND LOGIN = true AND SUPERUSER = false"}
+{"superuser_cql": "GRANT SELECT ON KEYSPACE vks TO u9vic"}
+{"superuser_cql": "GRANT MODIFY ON KEYSPACE vks TO u9vic"}
+{"role": "cassandra", "super": true, "login": true}
+{"role": "u9atk", "super": false, "login": true}
+{"role": "u9vic", "super": false, "login": true}
+{"perm_of": "u9atk", "role": "u9atk", "resource": "<table ks.t1>", "permission": "MODIFY"}
+{"perm_of": "u9vic", "role": "u9vic", "resource": "<keyspace vks>", "permission": "SELECT"}
+{"perm_of": "u9vic", "role": "u9vic", "resource": "<keyspace vks>", "permission": "MODIFY"}

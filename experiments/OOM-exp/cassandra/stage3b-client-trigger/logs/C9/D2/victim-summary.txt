@@ -1,0 +1,16 @@
+| Phase | Length s | Ops | OK % (reads / writes) | Errors | Latency ok p50 / p99 / max ms |
+|---|---|---|---|---|---|
+| before (60 s, no attack) | 55.0 | 2200 | 100.0 (100 / 100) | - | 2.7 / 6.9 / 11.6 |
+| prep + build of the many-sstable table (DDL arm: attacker; data arm: admin) | 46.8 | 1872 | 100.0 (100 / 100) | - | 1.2 / 4.3 / 8.1 |
+| idle before scan | 26.8 | 1074 | 100.0 (100 / 100) | - | 1.7 / 4.4 / 5.7 |
+| scan1: attack start -> node gone | 16.3 | 652 | 81.6 (81 / 82) | {'OperationTimedOut': 73, 'NoHostAvailable': 47} | 239.6 / 1679.6 / 1797.5 |
+| node down (gone -> first ok after restart) | 74.4 | 2976 | 0.0 (0 / 0) | {'NoHostAvailable': 2976} | nan / nan / nan |
+| recovered (first ok -> repeat attack) | 40.9 | 1636 | 100.0 (100 / 100) | - | 2.9 / 7.9 / 88.3 |
+| scan2 (repeat): attack start -> node gone | 9.9 | 398 | 77.1 (77 / 77) | {'OperationTimedOut': 33, 'NoHostAvailable': 58} | 6.1 / 1385.4 / 1649.1 |
+| after repeat (node down, no restart) | 34.1 | 1364 | 0.0 (0 / 0) | {'NoHostAvailable': 1364} | nan / nan / nan |
+scan1: first victim failure at attack+13.2 s (r OperationTimedOut) ; node gone at attack+16.3 s
+  ok ops in the last 5 s before node gone: 80, p50 376.3 max 1737.7 ms
+scan2: first victim failure at attack+7.7 s (r OperationTimedOut) ; node gone at attack+9.9 s
+  ok ops in the last 5 s before node gone: 109, p50 499.5 max 1649.1 ms
+restart: command at gone+65.1 s, native port up after 9.8 s, victim first ok at restart_cmd+9.3 s; victim outage (last ok before gone -> first ok after) 77.3 s
+phases (ms): start_cmd=1795473565619, node_up=1795473602688, roles_done=1795473613918, victim_start=1795473613920, attack_prep=1795473673946, build_start=1795473720736, build_end=1795473720736, scan1_start=1795473747576, scan1_node_gone=1795473763861, restart_cmd=1795473829009, restart_up=1795473838857, scan2_start=1795473879167, scan2_node_gone=1795473889100, after=1795473923163

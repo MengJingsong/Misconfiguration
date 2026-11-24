@@ -1,0 +1,153 @@
+[2026-11-23 20:18:57 EST] started LOAD pid 667758 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/3bu10-LOAD-1795483136.scope
+[2026-11-23 20:19:49 EST] ready LOAD
+-XX:+HeapDumpOnOutOfMemoryError -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms2048M -Xmx2048M -XX:MaxDirectMemorySize=1024M -XX:HeapDumpPath=/mydata/s4/3b-U10/runs/LOAD/cassandra-1795483136-pid667758.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+authenticator: PasswordAuthenticator
+authorizer: CassandraAuthorizer
+role_manager: CassandraRoleManager
+network_authorizer: AllowAllNetworkAuthorizer
+[2026-11-23 20:19:49 EST] superuser setup
+> CREATE ROLE IF NOT EXISTS u10atk WITH PASSWORD = 'atk-3bU10' AND LOGIN = true AND SUPERUSER = false
+  OK
+> CREATE ROLE IF NOT EXISTS u10victim WITH PASSWORD = 'vic-3bU10' AND LOGIN = true AND SUPERUSER = false
+  OK
+> CREATE KEYSPACE IF NOT EXISTS u10 WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+  OK
+> CREATE TABLE IF NOT EXISTS u10.t (pk int, ck int, v blob, PRIMARY KEY (pk, ck))
+  OK
+> GRANT SELECT ON TABLE u10.t TO u10atk
+  OK
+> GRANT MODIFY ON TABLE u10.t TO u10atk
+  OK
+> CREATE KEYSPACE IF NOT EXISTS victimks WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+  OK
+> CREATE TABLE IF NOT EXISTS victimks.kv (k int PRIMARY KEY, v blob)
+  OK
+> GRANT SELECT ON TABLE victimks.kv TO u10victim
+  OK
+> GRANT MODIFY ON TABLE victimks.kv TO u10victim
+  OK
+> LIST ROLES
+  row: role=cassandra super=true login=true options={} datacenters=ALL
+  row: role=u10atk super=false login=true options={} datacenters=ALL
+  row: role=u10victim super=false login=true options={} datacenters=ALL
+  OK
+> LIST ALL PERMISSIONS OF u10atk
+  row: role=u10atk username=u10atk resource=<table u10.t> permission=SELECT
+  row: role=u10atk username=u10atk resource=<table u10.t> permission=MODIFY
+  OK
+> LIST ALL PERMISSIONS OF u10victim
+  row: role=u10victim username=u10victim resource=<table victimks.kv> permission=SELECT
+  row: role=u10victim username=u10victim resource=<table victimks.kv> permission=MODIFY
+  OK
+  OK
+  row: name=authenticator value=PasswordAuthenticator
+  row: name=authenticator.class_name value=PasswordAuthenticator
+  row: name=authenticator.parameters value={}
+  row: name=authorizer value=CassandraAuthorizer
+  row: name=authorizer.class_name value=CassandraAuthorizer
+  row: name=authorizer.parameters value={}
+  row: name=column_value_size_fail_threshold value=null
+  row: name=column_value_size_warn_threshold value=null
+  row: name=concurrent_reads value=32
+  row: name=coordinator_read_size_fail_threshold value=null
+  row: name=coordinator_read_size_warn_threshold value=null
+  row: name=local_read_size_fail_threshold value=null
+  row: name=local_read_size_warn_threshold value=null
+  row: name=memtable_allocation_type value=heap_buffers
+  row: name=memtable_heap_space value=512MiB
+  row: name=memtable_heap_space_in_mb value=512
+  row: name=native_transport_max_concurrent_connections value=-1
+  row: name=native_transport_max_frame_size value=16MiB
+  row: name=native_transport_max_frame_size_in_mb value=16
+  row: name=native_transport_max_request_data_in_flight value=214748364B
+  row: name=native_transport_max_request_data_in_flight_per_ip value=53687091B
+  row: name=native_transport_rate_limiting_enabled value=false
+  row: name=network_authorizer value=AllowAllNetworkAuthorizer
+  row: name=network_authorizer.class_name value=AllowAllNetworkAuthorizer
+  row: name=network_authorizer.parameters value={}
+  row: name=page_size_fail_threshold value=-1
+  row: name=page_size_warn_threshold value=-1
+  row: name=partition_size_fail_threshold value=null
+  row: name=partition_size_warn_threshold value=null
+  row: name=read_request_timeout value=5000ms
+  row: name=read_request_timeout_in_ms value=5000
+  row: name=read_thresholds_enabled value=false
+  row: name=role_manager value=CassandraRoleManager
+  row: name=role_manager.class_name value=CassandraRoleManager
+  row: name=role_manager.parameters value={}
+  row: name=tombstone_failure_threshold value=100000
+  row: name=tombstone_warn_threshold value=1000
+[2026-11-23 20:20:04 EST] claim probes
+# as user=
+> SELECT release_version FROM system.local
+  RESULT CONNECT-FAIL AuthenticationException: Authentication error on host /127.0.0.1:9042: Host /127.0.0.1:9042 requires authentication; but no authenticator found in Cluster configuration
+# as user=u10atk
+> SELECT release_version FROM system.local
+  RESULT CONNECT-FAIL AuthenticationException: Authentication error on host /127.0.0.1:9042: Provided username u10atk and/or password are incorrect
+# as user=u10atk
+> SELECT k FROM victimks.kv LIMIT 1
+  RESULT FAIL UnauthorizedException: User u10atk has no SELECT permission on <table victimks.kv> or any of its parents
+# as user=u10atk
+> CREATE TABLE u10.t2 (pk int PRIMARY KEY, v blob)
+  RESULT FAIL UnauthorizedException: User u10atk has no CREATE permission on <all tables in u10> or any of its parents
+# as user=u10atk
+> CREATE KEYSPACE u10x WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+  RESULT FAIL UnauthorizedException: User u10atk has no CREATE permission on <all keyspaces> or any of its parents
+# as user=u10atk
+> ALTER TABLE u10.t WITH comment = 'x'
+  RESULT FAIL UnauthorizedException: User u10atk has no ALTER permission on <table u10.t> or any of its parents
+# as user=u10victim
+> SELECT ck FROM u10.t LIMIT 1
+  RESULT FAIL UnauthorizedException: User u10victim has no SELECT permission on <table u10.t> or any of its parents
+# as user=u10atk
+> SELECT count(*) FROM u10.t WHERE pk = 0
+  row: count=0
+  RESULT OK
+[2026-11-23 20:20:56 EST] attacker load (u10atk) P=2
+
+real	1m9.990s
+user	1m22.412s
+sys	0m14.314s
+load ok parts=2 rows=65536 size=16384 done=131072 retries=251 fails=0 secs=62
+verify pk=0 rows=65536 maxCk=65535 v0Bytes=16384 OK
+verify pk=1 rows=65536 maxCk=65535 v0Bytes=16384 OK
+		SSTable count: 6
+		Old SSTable count: 0
+		Space used (live): 2141950509
+		Number of partitions (estimate): 3
+		Local read count: 31
+1795483351,end,nmtOtherKB=226812,nmtTotalKB=2670364,rssKB=2782972,rssAnonKB=2609188,scopeCurB=5030744064,scopeOomKill=0,1795483350678,1173493488,1039275760,871295584,0,0,131561,0,0,47678970,0,0,1186,1348,0
+1
+[2026-11-23 20:22:43 EST] stopped LOAD
+2.1G	/mydata/s4/3b-U10/template
+total 2111184
+drwxr-xr-x 2 jason92 misconfiguration     12288 Nov 23 18:22 .
+drwxr-xr-x 3 jason92 misconfiguration      4096 Nov 23 18:20 ..
+-rw-r--r-- 1 jason92 misconfiguration    265567 Nov 23 18:22 nb-11-big-CompressionInfo.db
+-rw-r--r-- 1 jason92 misconfiguration 546224583 Nov 23 18:22 nb-11-big-Data.db
+-rw-r--r-- 1 jason92 misconfiguration        10 Nov 23 18:22 nb-11-big-Digest.crc32
+-rw-r--r-- 1 jason92 misconfiguration        16 Nov 23 18:22 nb-11-big-Filter.db
+-rw-r--r-- 1 jason92 misconfiguration    194812 Nov 23 18:22 nb-11-big-Index.db
+-rw-r--r-- 1 jason92 misconfiguration      4845 Nov 23 18:22 nb-11-big-Statistics.db
+-rw-r--r-- 1 jason92 misconfiguration        56 Nov 23 18:22 nb-11-big-Summary.db
+-rw-r--r-- 1 jason92 misconfiguration        92 Nov 23 18:22 nb-11-big-TOC.txt
+-rw-r--r-- 1 jason92 misconfiguration     74543 Nov 23 18:22 nb-15-big-CompressionInfo.db
+-rw-r--r-- 1 jason92 misconfiguration 153271288 Nov 23 18:21 nb-15-big-Data.db
+-rw-r--r-- 1 jason92 misconfiguration        10 Nov 23 18:22 nb-15-big-Digest.crc32
+-rw-r--r-- 1 jason92 misconfiguration        16 Nov 23 18:21 nb-15-big-Filter.db
+-rw-r--r-- 1 jason92 misconfiguration     53490 Nov 23 18:21 nb-15-big-Index.db
+-rw-r--r-- 1 jason92 misconfiguration      4845 Nov 23 18:22 nb-15-big-Statistics.db
+-rw-r--r-- 1 jason92 misconfiguration        56 Nov 23 18:21 nb-15-big-Summary.db
+-rw-r--r-- 1 jason92 misconfiguration        92 Nov 23 18:22 nb-15-big-TOC.txt
+-rw-r--r-- 1 jason92 misconfiguration    293079 Nov 23 18:22 nb-16-big-CompressionInfo.db
+-rw-r--r-- 1 jason92 misconfiguration 602828412 Nov 23 18:22 nb-16-big-Data.db
+-rw-r--r-- 1 jason92 misconfiguration        10 Nov 23 18:22 nb-16-big-Digest.crc32
+-rw-r--r-- 1 jason92 misconfiguration        16 Nov 23 18:22 nb-16-big-Filter.db
+-rw-r--r-- 1 jason92 misconfiguration    215235 Nov 23 18:22 nb-16-big-Index.db
+-rw-r--r-- 1 jason92 misconfiguration      4849 Nov 23 18:22 nb-16-big-Statistics.db
+-rw-r--r-- 1 jason92 misconfiguration        56 Nov 23 18:22 nb-16-big-Summary.db
+-rw-r--r-- 1 jason92 misconfiguration        92 Nov 23 18:22 nb-16-big-TOC.txt
+-rw-r--r-- 1 jason92 misconfiguration     76311 Nov 23 18:22 nb-17-big-CompressionInfo.db
+-rw-r--r-- 1 jason92 misconfiguration 156897687 Nov 23 18:21 nb-17-big-Data.db
+-rw-r--r-- 1 jason92 misconfiguration        10 Nov 23 18:22 nb-17-big-Digest.crc32
+[2026-11-23 20:22:43 EST] LOAD done

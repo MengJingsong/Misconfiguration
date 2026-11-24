@@ -1,0 +1,24 @@
+[attacker] SELECT peer, data_center FROM system.peers
+   row: Row[/127.0.0.32, datacenter1]
+   row: Row[/127.0.0.33, datacenter1]
+   OK
+[attacker] SELECT keyspace_name, replication FROM system_schema.keyspaces WHERE keyspace_name = 'app'
+   row: Row[app, {class=org.apache.cassandra.locator.SimpleStrategy, replication_factor=2}]
+   OK
+[attacker] INSERT INTO app.data (key, v) VALUES (0x00, 0x00)
+   OK
+[attacker] SELECT key FROM app.data LIMIT 1
+   ERROR UnauthorizedException: User attacker has no SELECT permission on <table app.data> or any of its parents
+[attacker] SELECT k FROM vks.t LIMIT 1
+   ERROR UnauthorizedException: User attacker has no SELECT permission on <table vks.t> or any of its parents
+[attacker] INSERT INTO vks.t (k, v) VALUES (1, 0x00)
+   ERROR UnauthorizedException: User attacker has no MODIFY permission on <table vks.t> or any of its parents
+[attacker] CREATE KEYSPACE atk WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 2}
+   ERROR UnauthorizedException: User attacker has no CREATE permission on <all keyspaces> or any of its parents
+[attacker] CREATE TABLE app.extra (k int PRIMARY KEY)
+   ERROR UnauthorizedException: User attacker has no CREATE permission on <all tables in app> or any of its parents
+[attacker] ALTER TABLE app.data WITH gc_grace_seconds = 0
+   ERROR UnauthorizedException: User attacker has no ALTER permission on <table app.data> or any of its parents
+[attacker] LIST ALL PERMISSIONS OF attacker
+   row: Row[attacker, attacker, <table app.data>, MODIFY]
+   OK

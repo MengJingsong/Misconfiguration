@@ -1,0 +1,16 @@
+19:1795470662.665 16:51:02 native up=1 pid=359115
+20:-ea  -XX:G1HeapRegionSize=16m -Xms2048M -Xmx2048M -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/dev/shm/3b-U15/dump-R1/cassandra-1795470612-pid359115.hprof -XX:OnOutOfMemoryError=kill 
+21:ConcGCThreads=8 G1HeapRegionSize=16777216 MaxDirectMemorySize=16642998272 MaxHeapSize=2147483648 ParallelGCThreads=8 
+29:CREATE ROLE victim WITH PASSWORD = '<pw>' AND LOGIN = true AND SUPERUSER = false
+30:GRANT SELECT ON KEYSPACE vks TO victim
+31:GRANT MODIFY ON KEYSPACE vks TO victim
+34:-- LIST ALL PERMISSIONS OF victim
+35:   role=victim resource=<keyspace vks> permission=SELECT
+36:   role=victim resource=<keyspace vks> permission=MODIFY
+40:   victim super=False login=True
+52:1795470686.192 16:51:26 victim started pid=359735
+55:1795470747.253 16:52:27 W start sw0=0 applied0=2 v_applied0=596
+57:1795470778.352 16:52:58 stall check W+30: stalled=yes applied_delta10=0 issued_delta10=480 mutation_active=32 parked_in_allocate=32 MutationStage=31;Native-Transport-Requests=1 v_applied=727
+58:{"clients_by_address": {"127.0.0.1/attacker": 2, "127.0.0.1/cassandra": 2, "127.0.0.2/attacker": 2, "127.0.0.3/attacker": 2, "127.0.0.4/attacker": 2, "127.0.0.5/attacker": 2, "127.0.0.9/victim": 2}}
+59:1795470795.487 16:53:15 W stop: node death after 48 s
+66:1795470826.537 16:53:46 victim stopped: {"kind": "victim", "issued": 2654, "capped": 104, "outstanding_after": 0, "seconds": 137.9}

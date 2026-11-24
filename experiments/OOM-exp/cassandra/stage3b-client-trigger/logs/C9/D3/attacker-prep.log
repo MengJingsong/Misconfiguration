@@ -1,0 +1,9 @@
+[2026-11-23 15:48:08] connected as mallory
+[2026-11-23 15:48:08]   permissions: mallory <table c9.t> SELECT
+[2026-11-23 15:48:08] FAIL (0.00s) CREATE KEYSPACE m1 WITH replication = {'class':'SimpleStrategy','replication_factor':1}  | Unauthorized: Error from server: code=2100 [Unauthorized] message="User mallory has no CREATE permission on <all keyspaces> or any of its parents"
+[2026-11-23 15:48:08] FAIL (0.00s) CREATE TABLE c9.m (pk bigint PRIMARY KEY)  | Unauthorized: Error from server: code=2100 [Unauthorized] message="User mallory has no CREATE permission on <all tables in c9> or any of its parents"
+[2026-11-23 15:48:08] FAIL (0.00s) ALTER TABLE c9.t WITH memtable_flush_period_in_ms = 0  | Unauthorized: Error from server: code=2100 [Unauthorized] message="User mallory has no ALTER permission on <table c9.t> or any of its parents"
+[2026-11-23 15:48:08] FAIL (0.00s) INSERT INTO c9.t (pk, v) VALUES (1, 0x00)  | Unauthorized: Error from server: code=2100 [Unauthorized] message="User mallory has no MODIFY permission on <table c9.t> or any of its parents"
+[2026-11-23 15:48:08] FAIL (0.00s) SELECT * FROM vks.kv LIMIT 1  | Unauthorized: Error from server: code=2100 [Unauthorized] message="User mallory has no SELECT permission on <table vks.kv> or any of its parents"
+[2026-11-23 15:48:09] OK   (0.05s) SELECT pk FROM c9.t LIMIT 1
+[2026-11-23 15:48:09] attacker-visible sstables of c9.t (trace): 220

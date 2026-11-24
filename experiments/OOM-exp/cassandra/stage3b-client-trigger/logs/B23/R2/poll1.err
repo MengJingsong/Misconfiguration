@@ -1,0 +1,35 @@
+MaxHintsInProgress=5120
+mut_active <- org.apache.cassandra.metrics:type=ThreadPools,path=request,scope=MutationStage,name=ActiveTasks
+mut_pending <- org.apache.cassandra.metrics:type=ThreadPools,path=request,scope=MutationStage,name=PendingTasks
+mut_completed <- org.apache.cassandra.metrics:type=ThreadPools,path=request,scope=MutationStage,name=CompletedTasks
+ntr_active <- org.apache.cassandra.metrics:type=ThreadPools,path=transport,scope=Native-Transport-Requests,name=ActiveTasks
+ntr_pending <- org.apache.cassandra.metrics:type=ThreadPools,path=transport,scope=Native-Transport-Requests,name=PendingTasks
+ntr_completed <- org.apache.cassandra.metrics:type=ThreadPools,path=transport,scope=Native-Transport-Requests,name=CompletedTasks
+K <- org.apache.cassandra.metrics:type=Storage,name=TotalHintsInProgress
+hints_total <- org.apache.cassandra.metrics:type=Storage,name=TotalHints
+unavail <- org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Unavailables
+timeouts <- org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Timeouts
+failures <- org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Failures
+wr_done <- org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Latency
+dropped_mut <- org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION_REQ,name=Dropped
+dropped_hint <- org.apache.cassandra.metrics:type=DroppedMessage,scope=HINT_REQ,name=Dropped
+Exception in thread "main" java.lang.reflect.UndeclaredThrowableException
+	at com.sun.proxy.$Proxy0.getUsage(Unknown Source)
+	at Poll.main(Poll.java:70)
+Caused by: java.rmi.UnmarshalException: Error unmarshaling return header; nested exception is: 
+	java.io.EOFException
+	at java.rmi/sun.rmi.transport.StreamRemoteCall.executeCall(StreamRemoteCall.java:254)
+	at java.rmi/sun.rmi.server.UnicastRef.invoke(UnicastRef.java:164)
+	at jdk.remoteref/jdk.jmx.remote.internal.rmi.PRef.invoke(Unknown Source)
+	at java.management.rmi/javax.management.remote.rmi.RMIConnectionImpl_Stub.getAttribute(Unknown Source)
+	at java.management.rmi/javax.management.remote.rmi.RMIConnector$RemoteMBeanServerConnection.getAttribute(RMIConnector.java:904)
+	at java.management/com.sun.jmx.mbeanserver.MXBeanProxy$GetHandler.invoke(MXBeanProxy.java:122)
+	at java.management/com.sun.jmx.mbeanserver.MXBeanProxy.invoke(MXBeanProxy.java:167)
+	at java.management/javax.management.MBeanServerInvocationHandler.invoke(MBeanServerInvocationHandler.java:258)
+	... 2 more
+Caused by: java.io.EOFException
+	at java.base/java.io.DataInputStream.readByte(DataInputStream.java:272)
+	at java.rmi/sun.rmi.transport.StreamRemoteCall.executeCall(StreamRemoteCall.java:240)
+	... 9 more
+Nov 23, 2026 10:19:00 PM com.sun.jmx.remote.internal.ClientCommunicatorAdmin$Checker run
+WARNING: Failed to check connection: java.net.SocketException: Connection reset

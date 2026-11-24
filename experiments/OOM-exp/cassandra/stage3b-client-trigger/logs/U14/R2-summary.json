@@ -1,0 +1,192 @@
+{
+ "label": "R2",
+ "mode": "life",
+ "args": [
+  "life",
+  "R2",
+  "T",
+  "2G",
+  "long",
+  "6500"
+ ],
+ "shm": true,
+ "cotenancy": {
+  "daemons": "none",
+  "MemAvailable_MiB": 63409
+ },
+ "start": {
+  "pid": 648977,
+  "up_s": 86,
+  "unit": "u14-3b-r2-1795473855",
+  "cgroup": "/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/u14-3b-r2-1795473855.scope",
+  "memory.max": "8589934592",
+  "swap.max": "0",
+  "scope_ok": true,
+  "flags": {
+   "-XX:+UseG1GC": true,
+   "-XX:G1HeapRegionSize=16m": true,
+   "-XX:+AlwaysPreTouch": true,
+   "-XX:+HeapDumpOnOutOfMemoryError": true,
+   "-XX:OnOutOfMemoryError=kill -9 %p": true,
+   "-Xmx2G": true
+  },
+  "flags_ok": true,
+  "MaxDirectMemorySize": [
+   "-XX:MaxDirectMemorySize=15872M"
+  ],
+  "xmx": [
+   "-Xmx2G"
+  ],
+  "xms": [
+   "-Xms2G"
+  ],
+  "heapdump": [
+   "-XX:HeapDumpPath=/mydata/s4/3b-U14/dumps/R2/cassandra-1795473855-pid648977.hprof"
+  ]
+ },
+ "settings": {
+  "values": {
+   "authenticator": "PasswordAuthenticator",
+   "authorizer": "CassandraAuthorizer",
+   "role_manager": "CassandraRoleManager",
+   "tables_warn_threshold": "-1",
+   "tables_fail_threshold": "-1",
+   "keyspaces_fail_threshold": "-1",
+   "memtable_allocation_type": "heap_buffers",
+   "memtable_heap_space": "512MiB",
+   "key_cache_size": "100MiB",
+   "counter_cache_size": "50MiB",
+   "prepared_statements_cache_size": "10MiB",
+   "auto_snapshot": "true",
+   "num_tokens": "16",
+   "columns_per_table_fail_threshold": "-1"
+  },
+  "ok": true
+ },
+ "setup": {
+  "cmd": "setup3b",
+  "args": [
+   "ks",
+   "victimks"
+  ],
+  "start_ms": 1795473944488,
+  "login_wait_s": 0.3,
+  "statements": [
+   "CREATE ROLE IF NOT EXISTS u14 WITH PASSWORD = 'u14pw' AND LOGIN = true AND SUPERUSER = false",
+   "CREATE ROLE IF NOT EXISTS victim WITH PASSWORD = 'victimpw' AND LOGIN = true AND SUPERUSER = false",
+   "CREATE KEYSPACE IF NOT EXISTS \"ks\" WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}",
+   "GRANT CREATE ON KEYSPACE \"ks\" TO u14",
+   "CREATE KEYSPACE IF NOT EXISTS \"victimks\" WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}",
+   "CREATE TABLE IF NOT EXISTS \"victimks\".kv (k int PRIMARY KEY, v blob)",
+   "GRANT SELECT ON TABLE \"victimks\".kv TO victim",
+   "GRANT MODIFY ON TABLE \"victimks\".kv TO victim"
+  ],
+  "roles": [
+   [
+    "cassandra",
+    true,
+    true
+   ],
+   [
+    "u14",
+    false,
+    true
+   ],
+   [
+    "victim",
+    false,
+    true
+   ]
+  ],
+  "perms": {
+   "u14": [
+    [
+     "u14",
+     "<keyspace ks>",
+     "CREATE"
+    ]
+   ],
+   "victim": [
+    [
+     "victim",
+     "<table victimks.kv>",
+     "SELECT"
+    ],
+    [
+     "victim",
+     "<table victimks.kv>",
+     "MODIFY"
+    ]
+   ]
+  },
+  "ks": "ks",
+  "seconds": 1.4
+ },
+ "victim_start_ms": 1795473945994,
+ "checkpoint s0": {
+  "tag": "s0",
+  "n_ok": null,
+  "ms": 1795473959633,
+  "L1": 56151768,
+  "L": 56010960,
+  "K": 0,
+  "mbeans": 12375,
+  "perms_u14": {
+   "rows": 1,
+   "table_ALL_rows": 0,
+   "other": [
+    "<keyspace ks> CREATE"
+   ]
+  },
+  "secs": 3.5
+ },
+ "caps": {
+  "ddl_cap_s": 6000,
+  "wall_cap_s": 6300,
+  "service_loss_stop": false
+ },
+ "attack_start_ms": 1795474021098,
+ "client 1-6500": {
+  "cmd": "create",
+  "args": [
+   "ks",
+   "long",
+   "1",
+   "6500",
+   "/mydata/s4/3b-U14/logs/R2",
+   "648977",
+   "6000"
+  ],
+  "start_ms": 1795474022171,
+  "errors": [
+   "WriteTimeout('Error from server: code=1100 [Coordinator node timed out waiting for replica nodes\\' responses] message=\"Operation timed out - received only 0 responses.\" info={\\'consistency\\': \\'EACH_QUORUM\\', \\'required_responses\\': 1, \\'received_responses\\': 0, \\'write_type\\': \\'SIMPLE\\'}')",
+   "<Error from server: code=1001 [Coordinator node overloaded] message=\"Query timed out before it could start\">",
+   "Unauthorized('Error from server: code=2100 [Unauthorized] message=\"Unable to perform authorization of permissions: Operation timed out - received only 0 responses.\"')",
+   "ConnectionShutdown('Received unexpected response to OptionsMessage: <Error from server: code=1001 [Coordinator node overloaded] message=\"Query timed out before it could start\">')",
+   "<Error from server: code=1001 [Coordinator node overloaded] message=\"Query timed out before it could start\">",
+   "Unauthorized('Error from server: code=2100 [Unauthorized] message=\"Unable to perform authorization of super-user permission: Operation timed out - received only 0 responses.\"')",
+   "ConnectionShutdown('errors=Connection heartbeat timeout after 30 seconds, last_host=127.0.14.1:9042')"
+  ],
+  "ok": 4217,
+  "rejected": 0,
+  "error": 3,
+  "timeout_tries": 8,
+  "drops_ok": 0,
+  "last_ok_i": 4218,
+  "last_ok_ms": 1795479810619,
+  "stopped": "ddl_cap",
+  "ddl_seconds": 6100.3,
+  "seconds": 6257.38
+ },
+ "real_oom_in_stdout": [
+  "java.lang.OutOfMemoryError: Java heap space"
+ ],
+ "namecheck": null,
+ "checkpoint end": null,
+ "U_end": null,
+ "victim_stop_ms": 1795480408077,
+ "end": {
+  "daemons_left": "661085 bash -c until grep -qE \"\\] (DONE|FAIL)\" /mydata/s4/3b-U14/logs/R2/session.log; do sleep 3; done; cd /mydata/s4/3b-U14/logs; tail -5 R2/session.log | cut"
+ },
+ "DONE": true
+}

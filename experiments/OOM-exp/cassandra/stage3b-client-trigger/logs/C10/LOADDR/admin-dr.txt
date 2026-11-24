@@ -1,0 +1,11 @@
+# as role: cassandra
+# superuser: data-role variant. An admin-made keyspace at RF 2 on the 3-node ring (N > RF), and a role with only
+# SELECT + MODIFY on its table (it cannot create anything).
+OK  CREATE KEYSPACE adm WITH replication = {'class':'SimpleStrategy','replication_factor':2}  -> rows=0
+OK  CREATE TABLE adm.t (pk bigint PRIMARY KEY, b int, v blob)  -> rows=0
+OK  CREATE ROLE dataatk WITH PASSWORD = 'dat-pw' AND LOGIN = true AND SUPERUSER = false  -> rows=0
+OK  GRANT SELECT ON TABLE adm.t TO dataatk  -> rows=0
+OK  GRANT MODIFY ON TABLE adm.t TO dataatk  -> rows=0
+OK  LIST ALL PERMISSIONS OF dataatk  -> rows=2
+   ROW Row[dataatk, dataatk, <table adm.t>, SELECT]
+   ROW Row[dataatk, dataatk, <table adm.t>, MODIFY]

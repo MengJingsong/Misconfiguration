@@ -1,0 +1,46 @@
+# as role: attacker
+trace query=M rows=5000 valueBytes=10240000 ms=328 rowTokenMin=-9223358624281578765 rowTokenMax=-9129989547647516796
+  ev 175us /127.0.0.1 [Native-Transport-Requests-1] Parsing SELECT * FROM c10.t WHERE b >= 0 ALLOW FILTERING
+  ev 354us /127.0.0.1 [Native-Transport-Requests-1] Preparing statement
+  ev 50us /127.0.0.3 [Messaging-EventLoop-3-3] READ_REQ message received from /127.0.0.1:7000
+  ev 1621us /127.0.0.1 [Native-Transport-Requests-1] reading digest from /127.0.0.3:7000
+  ev 1708us /127.0.0.1 [ReadStage-2] Executing single-partition query on role_permissions
+  ev 1783us /127.0.0.1 [Messaging-EventLoop-3-9] Sending READ_REQ message to /127.0.0.3:7000 message size 124 bytes
+  ev 1910us /127.0.0.1 [ReadStage-2] Acquiring sstable references
+  ev 2045us /127.0.0.1 [ReadStage-2] Skipped 0/0 non-slice-intersecting sstables, included 0 due to tombstones
+  ev 2229us /127.0.0.1 [ReadStage-2] Merged data from memtables and 0 sstables
+  ev 2367us /127.0.0.1 [ReadStage-2] Read 1 live rows and 0 tombstone cells
+  ev 518us /127.0.0.3 [ReadStage-3] Executing single-partition query on role_permissions
+  ev 686us /127.0.0.3 [ReadStage-3] Acquiring sstable references
+  ev 895us /127.0.0.3 [ReadStage-3] Skipped 0/0 non-slice-intersecting sstables, included 0 due to tombstones
+  ev 1243us /127.0.0.3 [ReadStage-3] Merged data from memtables and 0 sstables
+  ev 4432us /127.0.0.1 [Native-Transport-Requests-1] speculating read retry on Full(/127.0.0.2:7000,(-4915942652636935726,-4611352884713059184])
+  ev 1481us /127.0.0.3 [ReadStage-3] Read 1 live rows and 0 tombstone cells
+  ev 1717us /127.0.0.3 [ReadStage-3] Enqueuing response to /127.0.0.1:7000
+  ev 1969us /127.0.0.3 [Messaging-EventLoop-3-1] Sending READ_RSP message to /127.0.0.1:7000 message size 51 bytes
+  ev 41us /127.0.0.2 [Messaging-EventLoop-3-5] READ_REQ message received from /127.0.0.1:7000
+  ev 4553us /127.0.0.1 [Messaging-EventLoop-3-2] Sending READ_REQ message to /127.0.0.2:7000 message size 124 bytes
+  ev 436us /127.0.0.2 [ReadStage-1] Executing single-partition query on role_permissions
+  ev 4564us /127.0.0.1 [Messaging-EventLoop-3-12] READ_RSP message received from /127.0.0.3:7000
+  ev 548us /127.0.0.2 [ReadStage-1] Acquiring sstable references
+  ev 4640us /127.0.0.1 [RequestResponseStage-2] Processing response from /127.0.0.3:7000
+  ev 5239us /127.0.0.1 [Native-Transport-Requests-1] Computing ranges to query
+  ev 5437us /127.0.0.1 [Native-Transport-Requests-1] Submitting range requests on 49 ranges with a concurrency of 1 (18417.6 rows per range expected)
+  ev 5528us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(9116695661365208627,-8948337320652264943])
+  ev 19us /127.0.0.3 [Messaging-EventLoop-3-3] RANGE_REQ message received from /127.0.0.1:7000
+  ev 698us /127.0.0.2 [ReadStage-1] Skipped 0/0 non-slice-intersecting sstables, included 0 due to tombstones
+  ev 5626us /127.0.0.1 [Native-Transport-Requests-1] Submitted 1 concurrent range requests
+  ev 994us /127.0.0.2 [ReadStage-1] Merged data from memtables and 0 sstables
+  ev 5700us /127.0.0.1 [Messaging-EventLoop-3-9] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 1161us /127.0.0.2 [ReadStage-1] Read 1 live rows and 0 tombstone cells
+  ev 1374us /127.0.0.2 [ReadStage-1] Enqueuing response to /127.0.0.1:7000
+  ev 539us /127.0.0.3 [ReadStage-1] Executing seq scan across 2 sstables for (min(-9223372036854775808), max(-8948337320652264943)]
+  ev 1749us /127.0.0.2 [Messaging-EventLoop-3-1] Sending READ_RSP message to /127.0.0.1:7000 message size 51 bytes
+  ev 7189us /127.0.0.1 [Messaging-EventLoop-3-5] READ_RSP message received from /127.0.0.2:7000
+  ev 7423us /127.0.0.1 [RequestResponseStage-4] Processing response from /127.0.0.2:7000
+  ev 118733us /127.0.0.3 [ReadStage-1] Read 5000 live rows and 0 tombstone cells
+  ev 119051us /127.0.0.3 [ReadStage-1] Enqueuing response to /127.0.0.1:7000
+  ev 119328us /127.0.0.3 [Messaging-OUT-/127.0.0.3:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414787 bytes
+  ev 136969us /127.0.0.1 [Messaging-EventLoop-3-14] RANGE_RSP message received from /127.0.0.3:7000
+  ev 140467us /127.0.0.1 [RequestResponseStage-3] Processing response from /127.0.0.3:7000
+trace duration_us=197532

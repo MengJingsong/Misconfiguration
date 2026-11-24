@@ -1,0 +1,69 @@
+# phase 2
+hop 1: 107 targets -> 122 referrers, 81 to follow
+hop 2: 81 targets -> 352 referrers, 350 to follow
+hop 3: 350 targets -> 857 referrers, 557 to follow
+hop 4: 557 targets -> 1099 referrers, 460 to follow
+hop 5: 460 targets -> 911 referrers, 426 to follow
+hop 6: 426 targets -> 787 referrers, 316 to follow
+DirectByteBuffer instances: 310; owners (allocateDirect) 81 = 50.6 MiB; mapped 23 = 64.0 MiB; slices of owners 13; other 193
+Netty PlatformDependent: DIRECT_MEMORY_COUNTER=176.0 MiB (counter object present), DIRECT_MEMORY_LIMIT=1073741824, USE_DIRECT_BUFFER_NO_CLEANER=1, MAX_DIRECT_MEMORY=1073741824
+DirectByteBuffers without cleaner and without a known owner (Netty no-cleaner / JNI / slices of those): 193, total capacity 466.5 MiB (upper bound; slices may overlap)
+
+Live direct memory by holder (owners = 50.6 MiB):
+  O: hints buffers                                         32.2 MiB   63.8 %
+  P: BufferPool chunks, no live consumer                   16.0 MiB   31.7 %
+  O: netty / NIO buffers                                    2.3 MiB    4.6 %
+  O: DataOutputBuffer scratch                               0.0 MiB    0.0 %
+
+Example referrer chain per category (buffer <- holder <- ...):
+  O: netty / NIO buffers:
+      io.netty.channel.epoll.EpollEventArray.memory <- io.netty.channel.epoll.EpollEventLoop.events <- io.netty.channel.epoll.EpollEventLoop$1.this$0 <- io.netty.channel.epoll.EpollEventLoop.selectNowSupplier
+  O: DataOutputBuffer scratch:
+      org.apache.cassandra.io.util.DataOutputBuffer$1$1.buffer
+  P: BufferPool chunks, no live consumer:
+      java.nio.DirectByteBuffer.att <- org.apache.cassandra.utils.memory.BufferPool$Chunk.slab
+  O: hints buffers:
+      org.apache.cassandra.hints.HintsWriteExecutor.writeBuffer
+
+Owner sizes (bytes x count, top 8): 65536 x 33, 16384 x 11, 5220 x 7, 128 x 5, 0 x 2, 4928 x 2, 1 x 2, 1066 x 2
+
+# restart
+hop 1: 87 targets -> 102 referrers, 70 to follow
+hop 2: 70 targets -> 154 referrers, 152 to follow
+hop 3: 152 targets -> 426 referrers, 288 to follow
+hop 4: 288 targets -> 602 referrers, 254 to follow
+hop 5: 254 targets -> 594 referrers, 197 to follow
+hop 6: 197 targets -> 475 referrers, 191 to follow
+DirectByteBuffer instances: 282; owners (allocateDirect) 70 = 18.5 MiB; mapped 32 = 64.0 MiB; slices of owners 4; other 176
+Netty PlatformDependent: DIRECT_MEMORY_COUNTER=176.0 MiB (counter object present), DIRECT_MEMORY_LIMIT=1073741824, USE_DIRECT_BUFFER_NO_CLEANER=1, MAX_DIRECT_MEMORY=1073741824
+DirectByteBuffers without cleaner and without a known owner (Netty no-cleaner / JNI / slices of those): 176, total capacity 466.5 MiB (upper bound; slices may overlap)
+
+Live direct memory by holder (owners = 18.5 MiB):
+  P: BufferPool chunks, no live consumer                   16.0 MiB   86.6 %
+  O: netty / NIO buffers                                    2.2 MiB   12.0 %
+  O: hints buffers                                          0.2 MiB    1.4 %
+  O: DataOutputBuffer scratch                               0.0 MiB    0.1 %
+
+Example referrer chain per category (buffer <- holder <- ...):
+  P: BufferPool chunks, no live consumer:
+      java.nio.DirectByteBuffer.att <- org.apache.cassandra.utils.memory.BufferPool$Chunk.slab
+  O: netty / NIO buffers:
+      [Ljava.nio.ByteBuffer;[].[] <- sun.nio.ch.Util$BufferCache.buffers <- java.lang.ThreadLocal$ThreadLocalMap$Entry.value <- [Ljava.lang.ThreadLocal$ThreadLocalMap$Entry;[].[] <- java.lang.ThreadLocal$ThreadLocalMap.table <- io.netty.util.concurrent.FastThreadLocalThread.threadLocals
+  O: DataOutputBuffer scratch:
+      org.apache.cassandra.io.util.DataOutputBuffer$1$1.buffer
+  O: hints buffers:
+      org.apache.cassandra.hints.HintsWriteExecutor.writeBuffer
+
+Owner sizes (bytes x count, top 8): 65536 x 33, 2130 x 4, 128 x 3, 366 x 3, 0 x 2, 8392704 x 2, 1 x 2, 1066 x 2
+
+total 107740
+drwxr-xr-x 2 jason92 misconfiguration      4096 Nov 23 14:40 .
+drwxr-xr-x 5 jason92 misconfiguration      4096 Nov 23 14:41 ..
+-rw------- 1 jason92 misconfiguration 110317500 Nov 23 14:40 cassandra-1795469808-pid353926.hprof
+-rw------- 1 jason92 misconfiguration 110317500 Nov 23 14:40 /mydata/s4/3b-U12/runs/R1/dumps/cassandra-1795469808-pid353926.hprof
+total 90176
+drwxr-xr-x 2 jason92 misconfiguration     4096 Nov 23 14:41 .
+drwxr-xr-x 4 jason92 misconfiguration     4096 Nov 23 14:42 ..
+-rw------- 1 jason92 misconfiguration 92324645 Nov 23 14:41 cassandra-1795470039-pid357553.hprof
+-rw------- 1 jason92 misconfiguration 92324645 Nov 23 14:41 /mydata/s4/3b-U12/runs/R1/restart/dumps/cassandra-1795470039-pid357553.hprof
+# both .hprof deleted after the scan

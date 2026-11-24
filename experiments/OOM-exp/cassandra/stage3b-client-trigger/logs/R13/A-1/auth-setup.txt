@@ -1,0 +1,46 @@
+== superuser statements (cqlsh as cassandra)
+CREATE ROLE victim WITH PASSWORD = 'victim-pw-3b' AND LOGIN = true;
+CREATE KEYSPACE victim WITH replication = {'class':'SimpleStrategy','replication_factor':1};
+CREATE TABLE victim.kv (k int PRIMARY KEY, v text);
+GRANT SELECT ON TABLE victim.kv TO victim;
+GRANT MODIFY ON TABLE victim.kv TO victim;
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+== setup OK
+== LIST ROLES
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+
+ role      | super | login | options | datacenters
+-----------+-------+-------+---------+-------------
+ cassandra |  True |  True |        {} |         ALL
+    victim | False |  True |        {} |         ALL
+
+(2 rows)
+== LIST ALL PERMISSIONS OF victim
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+
+ role   | username | resource          | permission
+--------+----------+-------------------+------------
+ victim |   victim | <table victim.kv> |     SELECT
+ victim |   victim | <table victim.kv> |     MODIFY
+
+(2 rows)
+== keyspaces (no r13 schema exists)
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+
+system       system_distributed  system_traces  system_virtual_schema
+system_auth  system_schema       system_views   victim               
+
+== unauthenticated cqlsh (expect AuthenticationFailed)
+Connection error: ('Unable to connect to any servers', {'127.0.0.1:9042': AuthenticationFailed('Remote end requires authentication')})

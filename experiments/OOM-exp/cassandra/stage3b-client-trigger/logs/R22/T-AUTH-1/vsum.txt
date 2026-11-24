@@ -1,0 +1,34 @@
+marks: {'victim': -121.5, 'fill': -59.5, 'W0': 0.0, 'W1': 422.2, 'vstop': 454.3} (s from W start)
+  before (victim only, 60 s): 57 s | writes sent 285, ok 285, timeout 0, error 0 (ok 100.0 % of completed) | reads sent 285, ok 285, timeout 0, error 0 (ok 100.0 %) | skipped 0 | s with 0 ok: 0 | p50 median 3 ms, p99 max 32 ms, max 32 ms | inflight max 0
+  attack fill + quiesce: 59 s | writes sent 295, ok 295, timeout 0, error 0 (ok 100.0 % of completed) | reads sent 295, ok 295, timeout 0, error 0 (ok 100.0 %) | skipped 0 | s with 0 ok: 0 | p50 median 2 ms, p99 max 485 ms, max 485 ms | inflight max 2
+  attack W until OOM: 399 s | writes sent 1995, ok 17, timeout 1918, error 0 (ok 0.9 % of completed) | reads sent 1995, ok 1627, timeout 305, error 3 (ok 84.1 %) | skipped 0 | s with 0 ok: 153 | p50 median 2075 ms, p99 max 12101 ms, max 12101 ms | inflight max 122
+      err: WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message="Operation timed 
+      err: OperationTimedOut: errors={'127.0.0.1:9742': 'Client request timeout. See Session.execute[_async](timeout)'}; last_host=127.0.0.1:9742
+      err: ReadFailure: Error from server: code=1300 [Replica(s) failed to execute read] message="Operation failed - received 0 responses and 1 
+      err: Unauthorized: Error from server: code=2100 [Unauthorized] message="Unable to perform authorization of permissions: Operation timed out
+  OOM -> JVM gone (heap dump): 23 s | writes sent 115, ok 0, timeout 111, error 64 (ok 0.0 % of completed) | reads sent 115, ok 0, timeout 111, error 64 (ok 0.0 %) | skipped 0 | s with 0 ok: 23 | p50 median 12003 ms, p99 max 12100 ms, max 12100 ms | inflight max 122
+      err: OperationTimedOut: errors={'127.0.0.1:9742': 'Client request timeout. See Session.execute[_async](timeout)'}; last_host=127.0.0.1:9742
+  after (node down): 31 s | writes sent 154, ok 0, timeout 0, error 154 (ok 0.0 % of completed) | reads sent 154, ok 0, timeout 0, error 154 (ok 0.0 %) | skipped 0 | s with 0 ok: 31 | p50 median 0 ms, p99 max 0 ms, max 0 ms | inflight max 0
+      err: NoHostAvailable: ('Unable to complete the operation against any hosts'; {})
+per 60 s of W:
+  W+0..60: 60 s | writes sent 300, ok 17, timeout 273, error 0 (ok 5.9 % of completed) | reads sent 300, ok 300, timeout 0, error 0 (ok 100.0 %) | skipped 0 | s with 0 ok: 3 | p50 median 2001 ms, p99 max 3309 ms, max 3309 ms | inflight max 21
+      err: WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message="Operation timed 
+  W+60..120: 60 s | writes sent 300, ok 0, timeout 298, error 0 (ok 0.0 % of completed) | reads sent 300, ok 300, timeout 0, error 0 (ok 100.0 %) | skipped 0 | s with 0 ok: 6 | p50 median 1388 ms, p99 max 4443 ms, max 4443 ms | inflight max 28
+      err: WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message="Operation timed 
+  W+120..180: 60 s | writes sent 300, ok 0, timeout 301, error 0 (ok 0.0 % of completed) | reads sent 300, ok 297, timeout 0, error 0 (ok 100.0 %) | skipped 0 | s with 0 ok: 5 | p50 median 2002 ms, p99 max 4132 ms, max 4132 ms | inflight max 26
+      err: WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message="Operation timed 
+  W+180..240: 60 s | writes sent 300, ok 0, timeout 291, error 0 (ok 0.0 % of completed) | reads sent 300, ok 292, timeout 0, error 0 (ok 100.0 %) | skipped 0 | s with 0 ok: 13 | p50 median 2054 ms, p99 max 5450 ms, max 5450 ms | inflight max 36
+      err: WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message="Operation timed 
+  W+240..300: 60 s | writes sent 300, ok 0, timeout 268, error 0 (ok 0.0 % of completed) | reads sent 300, ok 247, timeout 11, error 1 (ok 95.4 %) | skipped 0 | s with 0 ok: 38 | p50 median 3375 ms, p99 max 12000 ms, max 12000 ms | inflight max 104
+      err: WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message="Operation timed 
+      err: OperationTimedOut: errors={'127.0.0.1:9742': 'Client request timeout. See Session.execute[_async](timeout)'}; last_host=127.0.0.1:9742
+  W+300..360: 60 s | writes sent 300, ok 0, timeout 292, error 0 (ok 0.0 % of completed) | reads sent 300, ok 191, timeout 98, error 2 (ok 65.6 %) | skipped 0 | s with 0 ok: 49 | p50 median 12001 ms, p99 max 12100 ms, max 12100 ms | inflight max 121
+      err: OperationTimedOut: errors={'127.0.0.1:9742': 'Client request timeout. See Session.execute[_async](timeout)'}; last_host=127.0.0.1:9742
+      err: WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message="Operation timed 
+      err: ReadFailure: Error from server: code=1300 [Replica(s) failed to execute read] message="Operation failed - received 0 responses and 1 
+      err: Unauthorized: Error from server: code=2100 [Unauthorized] message="Unable to perform authorization of permissions: Operation timed out
+  W+360..420: 60 s | writes sent 300, ok 0, timeout 300, error 0 (ok 0.0 % of completed) | reads sent 300, ok 0, timeout 300, error 0 (ok 0.0 %) | skipped 0 | s with 0 ok: 60 | p50 median 12003 ms, p99 max 12101 ms, max 12101 ms | inflight max 122
+      err: OperationTimedOut: errors={'127.0.0.1:9742': 'Client request timeout. See Session.execute[_async](timeout)'}; last_host=127.0.0.1:9742
+  W+420..422: 2 s | writes sent 10, ok 0, timeout 6, error 64 (ok 0.0 % of completed) | reads sent 10, ok 0, timeout 7, error 64 (ok 0.0 %) | skipped 0 | s with 0 ok: 2 | p50 median 12000 ms, p99 max 12100 ms, max 12100 ms | inflight max 120
+      err: OperationTimedOut: errors={'127.0.0.1:9742': 'Client request timeout. See Session.execute[_async](timeout)'}; last_host=127.0.0.1:9742
+first degraded victim second: W+3 (w ok 7 to 6 err 0, r ok 5 to 0 err 0, max 2769 ms)

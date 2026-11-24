@@ -1,0 +1,142 @@
+[2026-11-23 16:39:24 EST] started LOAD n1 pid 296428 cpus 0-15 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/3bc10-LOAD-n1-1795469963.scope
+[2026-11-23 16:40:03 EST] CQL up n1
+[2026-11-23 16:40:04 EST] started LOAD n2 pid 296822 cpus 16-23 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/3bc10-LOAD-n2-1795470003.scope
+[2026-11-23 16:41:18 EST] CQL up n2
+[2026-11-23 16:41:19 EST] 2 x UN
+[2026-11-23 16:41:20 EST] started LOAD n3 pid 297486 cpus 24-29 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/3bc10-LOAD-n3-1795470079.scope
+[2026-11-23 16:42:34 EST] CQL up n3
+[2026-11-23 16:42:35 EST] 3 x UN
+[2026-11-23 16:42:35 EST] ring ready LOAD
+INFO  [OptionalTasks:1] 2026-11-23T21:40:11,390 CassandraRoleManager.java:454 - Created default superuser role 'cassandra'
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address    Load        Tokens  Owns (effective)  Host ID                               Rack 
+UN  127.0.0.3  114.64 KiB  16      76.0%             c0bbcae0-bb5a-45d6-9cea-e6c7b798a08e  rack1
+UN  127.0.0.2  85.1 KiB    16      59.3%             39f8170e-4139-4ded-85ac-85b95cc2f75c  rack1
+UN  127.0.0.1  119.84 KiB  16      64.7%             a8e7b927-0c87-4352-a4da-53c28693b9ca  rack1
+
+authenticator: PasswordAuthenticator
+authorizer: CassandraAuthorizer
+role_manager: CassandraRoleManager
+network_authorizer: AllowAllNetworkAuthorizer
+# as role: cassandra
+# superuser (default 'cassandra'): raise system_auth RF as the shipped yaml comments advise (repair follows)
+OK  ALTER KEYSPACE system_auth WITH replication = {'class':'SimpleStrategy','replication_factor':3}  -> rows=0
+[2026-11-23 21:42:44,711] Repair completed successfully
+[2026-11-23 21:42:46,798] Repair completed successfully
+[2026-11-23 21:42:49,232] Repair completed successfully
+# as role: cassandra
+# superuser: roles, the only GRANTs, and the victim's admin-made schema
+OK  CREATE ROLE attacker WITH PASSWORD = 'att-pw' AND LOGIN = true AND SUPERUSER = false  -> rows=0
+OK  CREATE ROLE victim WITH PASSWORD = 'vic-pw' AND LOGIN = true AND SUPERUSER = false  -> rows=0
+OK  CREATE ROLE nogrant WITH PASSWORD = 'nog-pw' AND LOGIN = true AND SUPERUSER = false  -> rows=0
+OK  GRANT CREATE ON ALL KEYSPACES TO attacker  -> rows=0
+OK  CREATE KEYSPACE vks WITH replication = {'class':'SimpleStrategy','replication_factor':3}  -> rows=0
+OK  CREATE TABLE vks.kv (k int PRIMARY KEY, v blob)  -> rows=0
+OK  GRANT SELECT ON TABLE vks.kv TO victim  -> rows=0
+OK  GRANT MODIFY ON TABLE vks.kv TO victim  -> rows=0
+OK  LIST ROLES  -> rows=4
+   ROW Row[attacker, false, true, {}, ALL]
+   ROW Row[cassandra, true, true, {}, ALL]
+   ROW Row[nogrant, false, true, {}, ALL]
+   ROW Row[victim, false, true, {}, ALL]
+OK  LIST ALL PERMISSIONS OF attacker  -> rows=1
+   ROW Row[attacker, attacker, <all keyspaces>, CREATE]
+OK  LIST ALL PERMISSIONS OF victim  -> rows=2
+   ROW Row[victim, victim, <table vks.kv>, SELECT]
+   ROW Row[victim, victim, <table vks.kv>, MODIFY]
+OK  LIST ALL PERMISSIONS OF nogrant  -> rows=0
+[2026-11-23 16:42:55 EST] attacker: ring over CQL
+21:42:57 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+# tokens=48
+vnode ranges=49 merged S=46 SR1 vnodes=1 SR1-3 owners=['127.0.0.3', '127.0.0.2', '127.0.0.1'] dense D=43 by owner={'127.0.0.3': 16, '127.0.0.2': 12, '127.0.0.1': 15} T_hot=-8258547796004310175
+vnode ranges=49 merged S=46 SR1 vnodes=1 SR1-3 owners=['127.0.0.3', '127.0.0.2', '127.0.0.1'] dense D=43 by owner={'127.0.0.3': 16, '127.0.0.2': 12, '127.0.0.1': 15} T_hot=-8258547796004310175
+ring xcheck: CQL ring == nodetool ring (subranges identical)
+# as role: attacker
+21:43:03 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+schema ok
+# as role: attacker
+loaded 0 Mon Nov 23 21:43:09 UTC 2026
+loaded 100000 Mon Nov 23 21:43:17 UTC 2026
+loaded 200000 Mon Nov 23 21:43:21 UTC 2026
+loaded 300000 Mon Nov 23 21:43:26 UTC 2026
+loaded 400000 Mon Nov 23 21:43:29 UTC 2026
+loaded 500000 Mon Nov 23 21:43:32 UTC 2026
+loaded 600000 Mon Nov 23 21:43:36 UTC 2026
+loaded 700000 Mon Nov 23 21:43:41 UTC 2026
+loaded 800000 Mon Nov 23 21:43:44 UTC 2026
+loaded 900000 Mon Nov 23 21:43:47 UTC 2026
+load ok N=1000000 Thot=-8258547796004310175 b1=947335 b0=52665 errors=0
+# as role: attacker
+21:43:56 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+pk=0 server=2945182322382062539 client=2945182322382062539 ok
+pk=1 server=6292367497774912474 client=6292367497774912474 ok
+pk=164236 server=-8144346977203607094 client=-8144346977203607094 ok
+pk=249164 server=-8109880780499737592 client=-8109880780499737592 ok
+pk=829485 server=-9095816874175237880 client=-9095816874175237880 ok
+pk=678044 server=4360231649007926092 client=4360231649007926092 ok
+pk=989380 server=-2092619116120574572 client=-2092619116120574572 ok
+pk=566254 server=-4836521401840974114 client=-4836521401840974114 ok
+pk=887968 server=-1871193727824495736 client=-1871193727824495736 ok
+pk=696649 server=-6607389372448739145 client=-6607389372448739145 ok
+pk=798850 server=2513849782642023535 client=2513849782642023535 ok
+pk=239534 server=2988067168494050839 client=2988067168494050839 ok
+pk=731200 server=2379014302631808668 client=2379014302631808668 ok
+pk=813712 server=-279537036053396463 client=-279537036053396463 ok
+pk=278708 server=-9003903255256396930 client=-9003903255256396930 ok
+pk=588911 server=-4485311927973474497 client=-4485311927973474497 ok
+pk=174495 server=1819750236353635605 client=1819750236353635605 ok
+pk=889662 server=-5810571183932092668 client=-5810571183932092668 ok
+pk=712961 server=3567534389060665863 client=3567534389060665863 ok
+pk=650738 server=-6913848266794640019 client=-6913848266794640019 ok
+tokcheck mismatches=0
+victim preload rows=10000 errors=0
+[2026-11-23 16:44:05 EST] probes
+== 7199
+		SSTable count: 2
+		Old SSTable count: 0
+		Space used (live): 687605758
+		Number of partitions (estimate): 325814
+== 7299
+		SSTable count: 2
+		Old SSTable count: 0
+		Space used (live): 664043821
+		Number of partitions (estimate): 312259
+== 7399
+		SSTable count: 2
+		Old SSTable count: 0
+		Space used (live): 750558462
+		Number of partitions (estimate): 360897
+[2026-11-23 16:44:38 EST] attacker: traced attack queries (fetch 5000 x2, fetch 20000 x1)
+trace query=M rows=5000 valueBytes=10240000 ms=328 rowTokenMin=-9223358624281578765 rowTokenMax=-9129989547647516796
+  ev 5437us /127.0.0.1 [Native-Transport-Requests-1] Submitting range requests on 49 ranges with a concurrency of 1 (18417.6 rows per range expected)
+  ev 5626us /127.0.0.1 [Native-Transport-Requests-1] Submitted 1 concurrent range requests
+trace duration_us=197532
+Exception in thread "main" com.datastax.driver.core.exceptions.ReadTimeoutException: Cassandra timeout during read query at consistency ONE (1 responses were required but only 0 replica responded). In case this was gener
+	at com.datastax.driver.core.exceptions.ReadTimeoutException.copy(ReadTimeoutException.java:99)
+	at com.datastax.driver.core.exceptions.ReadTimeoutException.copy(ReadTimeoutException.java:24)
+Caused by: com.datastax.driver.core.exceptions.ReadTimeoutException: Cassandra timeout during read query at consistency ONE (1 responses were required but only 0 replica responded). In case this was generated during read
+	at com.datastax.driver.core.exceptions.ReadTimeoutException.copy(ReadTimeoutException.java:127)
+	at com.datastax.driver.core.Responses$Error.asException(Responses.java:179)
+	at com.datastax.shaded.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+	at com.datastax.shaded.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+Caused by: com.datastax.driver.core.exceptions.ReadTimeoutException: Cassandra timeout during read query at consistency ONE (1 responses were required but only 0 replica responded). In case this was generated during read
+trace query=test rows=5000 valueBytes=10240000 ms=1555 rowTokenMin=-8258539176479455625 rowTokenMax=-8167543008293659085
+  ev 12787us /127.0.0.1 [Native-Transport-Requests-1] Submitting range requests on 49 ranges with a concurrency of 1 (18417.6 rows per range expected)
+  ev 13431us /127.0.0.1 [Native-Transport-Requests-1] Submitted 1 concurrent range requests
+  ev 414893us /127.0.0.1 [Native-Transport-Requests-1] Didn't get any response rows; new concurrent requests: 48
+  ev 422414us /127.0.0.1 [Native-Transport-Requests-1] Submitted 45 concurrent range requests
+trace duration_us=1445041
+trace query=test rows=5000 valueBytes=10240000 ms=882 rowTokenMin=-8258539176479455625 rowTokenMax=-8167543008293659085
+  ev 3533us /127.0.0.1 [Native-Transport-Requests-2] Submitting range requests on 49 ranges with a concurrency of 1 (18417.6 rows per range expected)
+  ev 3829us /127.0.0.1 [Native-Transport-Requests-2] Submitted 1 concurrent range requests
+  ev 138670us /127.0.0.1 [Native-Transport-Requests-2] Didn't get any response rows; new concurrent requests: 48
+  ev 146335us /127.0.0.1 [Native-Transport-Requests-2] Submitted 45 concurrent range requests
+trace duration_us=770057
+[2026-11-23 16:45:37 EST] stopped LOAD
+658M	/dev/shm/3b-c10/template1
+635M	/dev/shm/3b-c10/template2
+718M	/dev/shm/3b-c10/template3
+[2026-11-23 16:45:38 EST] LOAD done

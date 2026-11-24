@@ -1,0 +1,24 @@
+# as role: cassandra
+# superuser (default 'cassandra'): raise system_auth RF as the shipped yaml comments advise (repair follows)
+OK  ALTER KEYSPACE system_auth WITH replication = {'class':'SimpleStrategy','replication_factor':3}  -> rows=0
+# as role: cassandra
+# superuser: roles, the only GRANTs, and the victim's admin-made schema
+OK  CREATE ROLE attacker WITH PASSWORD = 'att-pw' AND LOGIN = true AND SUPERUSER = false  -> rows=0
+OK  CREATE ROLE victim WITH PASSWORD = 'vic-pw' AND LOGIN = true AND SUPERUSER = false  -> rows=0
+OK  CREATE ROLE nogrant WITH PASSWORD = 'nog-pw' AND LOGIN = true AND SUPERUSER = false  -> rows=0
+OK  GRANT CREATE ON ALL KEYSPACES TO attacker  -> rows=0
+OK  CREATE KEYSPACE vks WITH replication = {'class':'SimpleStrategy','replication_factor':3}  -> rows=0
+OK  CREATE TABLE vks.kv (k int PRIMARY KEY, v blob)  -> rows=0
+OK  GRANT SELECT ON TABLE vks.kv TO victim  -> rows=0
+OK  GRANT MODIFY ON TABLE vks.kv TO victim  -> rows=0
+OK  LIST ROLES  -> rows=4
+   ROW Row[attacker, false, true, {}, ALL]
+   ROW Row[cassandra, true, true, {}, ALL]
+   ROW Row[nogrant, false, true, {}, ALL]
+   ROW Row[victim, false, true, {}, ALL]
+OK  LIST ALL PERMISSIONS OF attacker  -> rows=1
+   ROW Row[attacker, attacker, <all keyspaces>, CREATE]
+OK  LIST ALL PERMISSIONS OF victim  -> rows=2
+   ROW Row[victim, victim, <table vks.kv>, SELECT]
+   ROW Row[victim, victim, <table vks.kv>, MODIFY]
+OK  LIST ALL PERMISSIONS OF nogrant  -> rows=0

@@ -1,0 +1,80 @@
+1795470611.988 16:50:11 start 3-b label=R1 heap=2048M arm=T cass=/mydata/s4/3b-U15/cassandra poison=delete/70000/1 wmax=600 stallcheck=W+30
+               total        used        free      shared  buff/cache   available
+Mem:           64249        1072       55224           0        7952       62817
+Swap:           8192           0        8192
+Filesystem                   1M-blocks  Used Available Use% Mounted on
+tmpfs                            32125     0     32125   0% /dev/shm
+/dev/mapper/emulab-node4--bs     39797  1275     36470   4% /mydata
+198:authenticator: PasswordAuthenticator
+217:authorizer: CassandraAuthorizer
+232:role_manager: CassandraRoleManager
+246:network_authorizer: AllowAllNetworkAuthorizer
+262:  class_name: AllowAllCIDRAuthorizer
+Archive:  /mydata/s4/3b-U15/cassandra/build/apache-cassandra-5.0.9-SNAPSHOT.jar
+  Length      Date    Time    Name
+---------  ---------- -----   ----
+    47012  2026-11-17 21:05   org/apache/cassandra/cql3/statements/ModificationStatement.class
+---------                     -------
+    47012                     1 file
+1795470662.665 16:51:02 native up=1 pid=359115
+-ea  -XX:G1HeapRegionSize=16m -Xms2048M -Xmx2048M -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/dev/shm/3b-U15/dump-R1/cassandra-1795470612-pid359115.hprof -XX:OnOutOfMemoryError=kill 
+ConcGCThreads=8 G1HeapRegionSize=16777216 MaxDirectMemorySize=16642998272 MaxHeapSize=2147483648 ParallelGCThreads=8 
+1795470674.973 16:51:14 superuser login ok after 4 tries
+CREATE KEYSPACE IF NOT EXISTS u15 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}
+CREATE TABLE IF NOT EXISTS u15.t (pk bigint, ck blob, v blob, PRIMARY KEY (pk, ck))
+CREATE KEYSPACE IF NOT EXISTS vks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}
+CREATE TABLE IF NOT EXISTS vks.kv (k int PRIMARY KEY, v blob)
+CREATE ROLE attacker WITH PASSWORD = '<pw>' AND LOGIN = true AND SUPERUSER = false
+GRANT MODIFY ON TABLE u15.t TO attacker
+CREATE ROLE victim WITH PASSWORD = '<pw>' AND LOGIN = true AND SUPERUSER = false
+GRANT SELECT ON KEYSPACE vks TO victim
+GRANT MODIFY ON KEYSPACE vks TO victim
+-- LIST ALL PERMISSIONS OF attacker
+   role=attacker resource=<table u15.t> permission=MODIFY
+-- LIST ALL PERMISSIONS OF victim
+   role=victim resource=<keyspace vks> permission=SELECT
+   role=victim resource=<keyspace vks> permission=MODIFY
+-- LIST ROLES
+   attacker super=False login=True
+   cassandra super=True login=True
+   victim super=False login=True
+no-credentials connect: NoHostAvailable: ('Unable to connect to any servers', {'127.0.0.1:9752': AuthenticationFailed('Remote end requires authentication')})
+SELECT u15.t                       Unauthorized: Error from server: code=2100 [Unauthorized] message="User attacker has no SELECT permission on <table u15.t> or any of its parents"
+SELECT vks.kv                      Unauthorized: Error from server: code=2100 [Unauthorized] message="User attacker has no SELECT permission on <table vks.kv> or any of its parents"
+INSERT vks.kv                      Unauthorized: Error from server: code=2100 [Unauthorized] message="User attacker has no MODIFY permission on <table vks.kv> or any of its parents"
+CREATE KEYSPACE                    Unauthorized: Error from server: code=2100 [Unauthorized] message="User attacker has no CREATE permission on <all keyspaces> or any of its parents"
+CREATE TABLE in u15                Unauthorized: Error from server: code=2100 [Unauthorized] message="User attacker has no CREATE permission on <all tables in u15> or any of its parents"
+ALTER TABLE u15.t                  Unauthorized: Error from server: code=2100 [Unauthorized] message="User attacker has no ALTER permission on <table u15.t> or any of its parents"
+INSERT u15.t small row (MODIFY)    ALLOWED
+DELETE u15.t small row (MODIFY)    ALLOWED
+SELECT system_views.settings       Unauthorized: Error from server: code=2100 [Unauthorized] message="User attacker has no SELECT permission on <table system_views.settings> or any of its p
+{"authenticator": "PasswordAuthenticator", "authorizer": "CassandraAuthorizer", "column_value_size_fail_threshold": null, "column_value_size_warn_threshold": null, "commit_failure_policy": "stop", "commitlog_segment_size": "32MiB", "commitlog_total_space": "8031MiB", "compaction_throughput": "64MiB/s", "concurrent_writes": "32", "counter_cache_size": "50MiB", "cql_start_time": "REQUEST", "credentials_validity": "2000ms", "disk_failure_policy": "stop", "hinted_handoff_enabled": "true", "key_cache_size": "100MiB", "max_mutation_size": "16384KiB", "max_value_size": "256MiB", "memtable_allocation_type": "heap_buffers", "memtable_cleanup_threshold": "0.33333334", "memtable_flush_writers": "2", "memtable_heap_space": "512MiB", "memtable_offheap_space": "512MiB", "native_transport_max_concurrent_connections": "-1", "native_transport_max_concurrent_connections_per_ip": "-1", "native_transport_max_concurrent_requests_in_bytes": "214748364", "native_transport_max_concurrent_requests_in_bytes_per_ip": "53687091", "native_transport_max_frame_size": "16MiB", "native_transport_max_request_data_in_flight": "214748364B", "native_transport_max_request_data_in_flight_per_ip": "53687091B", "native_transport_max_requests_per_second": "1000000", "native_transport_max_threads": "128", "native_transport_rate_limiting_enabled": "false", "native_transport_timeout": "12s", "network_authorizer": "AllowAllNetworkAuthorizer", "permissions_validity": "2000ms", "role_manager": "CassandraRoleManager", "roles_validity": "2000ms", "row_cache_size": "0MiB", "storage_compatibility_mode": "CASSANDRA_4", "table_compaction": {"class": "org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy", "max_threshold": "32", "min_threshold": "4"}, "table_memtable": null, "table_memtable_flush_period_in_ms": 0, "write_request_timeout": "2000ms"}
+1795470686.192 16:51:26 victim started pid=359735
+1795470716.202 16:51:56 quiesce
+1795470727.219 16:52:07 L0 done
+1795470747.253 16:52:27 W start sw0=0 applied0=2 v_applied0=596
+1795470747.786 16:52:27 clients 360116 360118 360120 360122 360124
+1795470778.352 16:52:58 stall check W+30: stalled=yes applied_delta10=0 issued_delta10=480 mutation_active=32 parked_in_allocate=32 MutationStage=31;Native-Transport-Requests=1 v_applied=727
+{"clients_by_address": {"127.0.0.1/attacker": 2, "127.0.0.1/cassandra": 2, "127.0.0.2/attacker": 2, "127.0.0.3/attacker": 2, "127.0.0.4/attacker": 2, "127.0.0.5/attacker": 2, "127.0.0.9/victim": 2}}
+1795470795.487 16:53:15 W stop: node death after 48 s
+{"kind": "data", "src": "127.0.0.2", "idx": 2, "stop": "stopfile", "rate": 12.0, "max_out": 32, "issued": 490, "capped": 67, "burst": 0, "ok": 126, "timeouts": 330, "errors": 34, "invalid_request": 0, "outstanding_after_drain": 0, "seconds": 46.4, "ok_per_s": 2.71, "first_errors": ["WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0 responses.\" info={'consistency': 'ONE', 'required_response", "WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0 responses.\" info={'consistency': 'ONE', 'required_response", "WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0 responses.\" info={'consistency': 'ONE', 'required_response"], "lat_ok_ms": {"p50": 57.4, "p99": 63.7, "max": 65.1}, "lat_timeout_ms": {"p50": 2012.3, "p99": 2486.8, "max": 2654.6}, "lat_error_ms": {"p50": 6880.4, "p99": 8209.3, "max": 8209.3}}
+{"kind": "data", "src": "127.0.0.3", "idx": 3, "stop": "stopfile", "rate": 12.0, "max_out": 32, "issued": 479, "capped": 80, "burst": 0, "ok": 128, "timeouts": 316, "errors": 35, "invalid_request": 0, "outstanding_after_drain": 0, "seconds": 46.5, "ok_per_s": 2.75, "first_errors": ["WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0 responses.\" info={'consistency': 'ONE', 'required_response", "WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0 responses.\" info={'consistency': 'ONE', 'required_response", "WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0 responses.\" info={'consistency': 'ONE', 'required_response"], "lat_ok_ms": {"p50": 57.7, "p99": 67.1, "max": 83.8}, "lat_timeout_ms": {"p50": 2013.6, "p99": 2379.4, "max": 2484.1}, "lat_error_ms": {"p50": 7898.9, "p99": 9562.5, "max": 9562.5}}
+{"kind": "data", "src": "127.0.0.4", "idx": 4, "stop": "stopfile", "rate": 12.0, "max_out": 32, "issued": 474, "capped": 85, "burst": 0, "ok": 128, "timeouts": 311, "errors": 35, "invalid_request": 0, "outstanding_after_drain": 0, "seconds": 46.5, "ok_per_s": 2.75, "first_errors": ["WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0 responses.\" info={'consistency': 'ONE', 'required_response", "WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0 responses.\" info={'consistency': 'ONE', 'required_response", "WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0 responses.\" info={'consistency': 'ONE', 'required_response"], "lat_ok_ms": {"p50": 57.3, "p99": 63.7, "max": 78.3}, "lat_timeout_ms": {"p50": 2013.2, "p99": 2383.6, "max": 2524.3}, "lat_error_ms": {"p50": 8306.8, "p99": 35308.5, "max": 35308.5}}
+{"kind": "data", "src": "127.0.0.5", "idx": 5, "stop": "stopfile", "rate": 12.0, "max_out": 32, "issued": 474, "capped": 85, "burst": 0, "ok": 128, "timeouts": 312, "errors": 34, "invalid_request": 0, "outstanding_after_drain": 0, "seconds": 46.6, "ok_per_s": 2.75, "first_errors": ["WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0 responses.\" info={'consistency': 'ONE', 'required_response", "WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0 responses.\" info={'consistency': 'ONE', 'required_response", "WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0 responses.\" info={'consistency': 'ONE', 'required_response"], "lat_ok_ms": {"p50": 57.8, "p99": 68.6, "max": 114.3}, "lat_timeout_ms": {"p50": 2012.1, "p99": 2371.1, "max": 2448.9}, "lat_error_ms": {"p50": 8352.1, "p99": 9683.8, "max": 9683.8}}
+{"kind": "poison", "mode": "delete", "bound_bytes": 70000, "src": "127.0.0.1", "stop": "stopfile", "rate": 1.0, "max_out": 4, "issued": 42, "capped": 5, "burst": 0, "ok": 12, "timeouts": 26, "errors": 4, "invalid_request": 0, "outstanding_after_drain": 0, "seconds": 46.4, "ok_per_s": 0.26, "first_errors": ["WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0 responses.\" info={'consistency': 'ONE', 'required_response", "WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0 responses.\" info={'consistency': 'ONE', 'required_response", "WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0 responses.\" info={'consistency': 'ONE', 'required_response"], "lat_ok_ms": {"p50": 7.8, "p99": 52.3, "max": 52.3}, "lat_timeout_ms": {"p50": 2002.6, "p99": 2153.7, "max": 2153.7}, "lat_error_ms": {"p50": 7241.7, "p99": 8239.1, "max": 8239.1}}
+1795470799.515 16:53:19 node DEAD after W
+1795470826.537 16:53:46 victim stopped: {"kind": "victim", "issued": 2654, "capped": 104, "outstanding_after": 0, "seconds": 137.9}
+1795470826.544 16:53:46 node stopped
+total 2025056
+drwxr-xr-x 2 jason92 misconfiguration         60 Nov 23 14:53 .
+drwxr-xr-x 4 jason92 misconfiguration         80 Nov 23 14:50 ..
+-rw------- 1 jason92 misconfiguration 2073653789 Nov 23 14:53 cassandra-1795470612-pid359115.hprof
+0	/dev/shm/3b-U15/R1/cdc_raw
+544M	/dev/shm/3b-U15/R1/commitlog
+584K	/dev/shm/3b-U15/R1/data
+0	/dev/shm/3b-U15/R1/hints
+0	/dev/shm/3b-U15/R1/saved_caches
+1795470826.760 16:53:46 dump cassandra-1795470612-pid359115.hprof 2073653789 B: hprofhist
+1795470834.347 16:53:54 hprofhist done
+1795470834.356 16:53:54 dump deleted after hprofhist: cassandra-1795470612-pid359115.hprof
+1795470834.942 16:53:54 done alive=0 why=node death stall=stalled=yes applied_delta10=0 issued_delta10=480 mutation_active=32 parked_in_allocate=32 MutationStage=31;Native-Transport-Requests=1 v_applied=727

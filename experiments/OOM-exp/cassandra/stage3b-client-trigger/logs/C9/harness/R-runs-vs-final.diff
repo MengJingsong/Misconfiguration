@@ -1,0 +1,114 @@
+--- ../c9b.R-runs.py	2026-11-23 16:56:15.144862272 -0500
++++ c9b.py	2026-11-23 16:56:15.160862224 -0500
+@@ -13,7 +13,8 @@
+ 
+ B = '/mydata/s4/3b-C9'
+ CH = '/mydata/s4/cassandra-base'
+-H = B + '/h'
++H = os.path.dirname(os.path.abspath(__file__))   # /mydata/s4/3b-C9/h (R runs) or h2 (data arm)
++ARM = os.environ.get('C9B_ARM', 'ddl')          # ddl: attacker = DDL role builds its own table; data: admin table, attacker SELECT only
+ NODE_CPUS, CLIENT_CPUS = '0-19', '20-31'
+ JPORT = 7199
+ NT = f'{CH}/bin/nodetool -h 127.0.0.1 -p {JPORT}'
+@@ -187,6 +188,13 @@
+              'CREATE TABLE vks.kv (k int PRIMARY KEY, v text)',
+              'GRANT SELECT ON KEYSPACE vks TO victim',
+              'GRANT MODIFY ON KEYSPACE vks TO victim']
++    if ARM == 'data':
++        # the admin's table holding an sstable backlog (compaction paused as stand-in for a backlog); attacker gets SELECT on it only
++        stmts = [x for x in stmts if 'GRANT CREATE ON ALL KEYSPACES' not in x]
++        stmts += ["CREATE KEYSPACE c9 WITH replication = {'class':'SimpleStrategy','replication_factor':1}",
++                  "CREATE TABLE c9.t (pk bigint PRIMARY KEY, v blob) WITH compaction = "
++                  "{'class':'SizeTieredCompactionStrategy','enabled':'false'} AND memtable_flush_period_in_ms = " + str(PERIOD_MS),
++                  'GRANT SELECT ON TABLE c9.t TO mallory']
+     for q in stmts:
+         s.execute(q); f.write(f'OK {q}\n')
+     for who in ('mallory', 'victim'):
+@@ -269,7 +277,7 @@
+     unit = f'c9b-{name}'
+     shutil.rmtree(inst, ignore_errors=True)
+     os.makedirs(inst)
+-    log(f'RUN {name}: empty data dir, B2 {HEAP}/{DIRECT}, period {PERIOD_MS} ms, load={open("/proc/loadavg").read().split()[:3]}')
++    log(f'RUN {name}: arm {ARM}, target {TARGET}, empty data dir, B2 {HEAP}/{DIRECT}, period {PERIOD_MS} ms, load={open("/proc/loadavg").read().split()[:3]}')
+     stopfile = rundir + '/victim.stop'
+     vic = samp = samp2 = rss = None
+     try:
+@@ -288,11 +296,18 @@
+                                shell=True, stdout=open(rundir + '/victim.out', 'w'), stderr=subprocess.STDOUT, start_new_session=True)
+         phase('victim_start')
+         time.sleep(60)
+-        phase('attack_prep')
+-        sh(f'taskset -c {CLIENT_CPUS} python3 {H}/c9b_attack.py prep --out {rundir} --period {PERIOD_MS}', timeout=300, check=True)
+-        phase('build_start')
+-        sh(f'taskset -c {CLIENT_CPUS} python3 {H}/c9b_attack.py build --out {rundir} --period {PERIOD_MS} --target {TARGET} --seed {seed}', timeout=1800, check=True)
+-        phase('build_end')
++        if ARM == 'data':
++            phase('attack_prep')     # admin load first (the backlog), then the attacker's checks
++            sh(f'C9B_USER=cassandra C9B_PW=cassandra taskset -c {CLIENT_CPUS} python3 {H}/c9b_attack.py build --out {rundir} --period {PERIOD_MS} '
++               f'--target {TARGET} --every 10 --seed {seed}', timeout=1800, check=True)
++            sh(f'taskset -c {CLIENT_CPUS} python3 {H}/c9b_attack.py dataprep --out {rundir}', timeout=300, check=True)
++            phase('build_start'); phase('build_end')
++        else:
++            phase('attack_prep')
++            sh(f'taskset -c {CLIENT_CPUS} python3 {H}/c9b_attack.py prep --out {rundir} --period {PERIOD_MS}', timeout=300, check=True)
++            phase('build_start')
++            sh(f'taskset -c {CLIENT_CPUS} python3 {H}/c9b_attack.py build --out {rundir} --period {PERIOD_MS} --target {TARGET} --seed {seed}', timeout=1800, check=True)
++            phase('build_end')
+         # observer (admin-side measurement only, not part of the attack)
+         live, pend, tpend = jcount()
+         rc, cs = sh(f'{NT} compactionstats', timeout=60, quiet=True)
+--- ../c9b_attack.R-runs.py	2026-11-23 16:56:15.148862260 -0500
++++ c9b_attack.py	2026-11-23 16:56:15.160862224 -0500
+@@ -13,7 +13,7 @@
+ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+ from c9b_drv import driver, connect
+ 
+-USER, PW = 'mallory', 'mallory-pw'
++USER, PW = os.environ.get('C9B_USER', 'mallory'), os.environ.get('C9B_PW', 'mallory-pw')   # data arm: the admin builds the table
+ 
+ 
+ def mk_log(path):
+@@ -76,6 +76,24 @@
+     cl.shutdown()
+ 
+ 
++def dataprep(a):
++    """data arm: the attacker (mallory, only SELECT on the admin's c9.t) checks what it can and cannot do"""
++    log = mk_log(a.out + '/attacker-prep.log')
++    cl, s = connect(USER, PW, timeout=60)
++    log(f'connected as {USER}')
++    for r in s.execute(f'LIST ALL PERMISSIONS OF {USER}'):
++        log(f'  permissions: {r.role} {r.resource} {r.permission}')
++    stmt(s, log, "CREATE KEYSPACE m1 WITH replication = {'class':'SimpleStrategy','replication_factor':1}")
++    stmt(s, log, "CREATE TABLE c9.m (pk bigint PRIMARY KEY)")
++    stmt(s, log, "ALTER TABLE c9.t WITH memtable_flush_period_in_ms = 0")
++    stmt(s, log, "INSERT INTO c9.t (pk, v) VALUES (1, 0x00)")
++    stmt(s, log, 'SELECT * FROM vks.kv LIMIT 1')
++    stmt(s, log, 'SELECT pk FROM c9.t LIMIT 1')
++    n = sstables_by_trace(s, log)
++    log(f'attacker-visible sstables of c9.t (trace): {n}')
++    cl.shutdown()
++
++
+ def build(a):
+     driver()
+     from cassandra.concurrent import execute_concurrent_with_args
+@@ -94,7 +112,7 @@
+         batch = [(rnd.getrandbits(64) - 2 ** 63, rnd.randbytes(300)) for _ in range(1000)]
+         execute_concurrent_with_args(s, ps, batch, concurrency=128, raise_on_first_error=True)
+         tick += 1; rows += 1000
+-        every = 25 if (n is not None and n > a.target - 300) else 250
++        every = a.every or (25 if (n is not None and n > a.target - 300) else 250)
+         if tick % every == 0:
+             n = sstables_by_trace(s, log)
+             log(f'tick {tick} rows {rows} at {time.time() - t0:.0f} s: attacker-visible sstables {n}')
+@@ -118,7 +136,8 @@
+     ap.add_argument('--target', type=int, default=2000)
+     ap.add_argument('--cap', type=float, default=1200)
+     ap.add_argument('--seed', type=int, default=9)
++    ap.add_argument('--every', type=int, default=0)
+     a = ap.parse_args()
+     os.makedirs(a.out, exist_ok=True)
+-    {'prep': prep, 'build': build}[a.step](a)
++    {'prep': prep, 'build': build, 'dataprep': dataprep}[a.step](a)
+     os._exit(0)

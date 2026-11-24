@@ -1,0 +1,40 @@
+endpoint: daemon-exit oom:java.lang.OutOfMemoryError: Java heap space
+stdout: java.lang.OutOfMemoryError: Java heap space
+stdout: Dumping heap to /mydata/s4/3b-R13/runs/D-ip5/cassandra-1795473152-pid760551.hprof ...
+stdout: Heap dump file created [2447990510 bytes in 70.108 secs]
+stdout: # java.lang.OutOfMemoryError: Java heap space
+stdout: #   Executing /bin/sh -c "kill -9 760551"...
+driver: 2026-11-23T15:34:23-0700 baseline done; attack start N=16 mode=L at_ms 1795473263813
+resolved: NativeTransportMaxConcurrentRequestsInBytes|214748364
+resolved: NativeTransportMaxConcurrentRequestsInBytesPerIp|53687091
+client processes 2, body 15785009 B, last established at 1795473264772
+responses 0 (VOID 0)
+  status x14: io_error@recv:[Errno_104]_Connection_reset_by_peer|server:-
+  status x2: io_error@rest:[Errno_104]_Connection_reset_by_peer|server:no
+client outstanding max (sum over procs, per s) 16; sent_first max 16
+admitted by limit 14 (C 214748364 / charge 14736433); K_client = min(sent_first, admitted) x charge = 206310062
+Batch-too-large ERROR lines in system.log*: 0
+jmx samples 8 (last at +5.1 s)
+K_server RequestsSize max 206310062; last 206310062; median(after baseline) 0; series(MB) 0 0 0 0 0 0 0 206
+PausedConnections max 0
+ConnectedNativeClients max 17; ProtocolException count max 0
+AuthSuccess count max 33; RequestDiscarded count max 0
+ClientRequest Write count max 179; timeouts max 0
+NTR active max 0; NTR pending max 0
+direct MemoryUsed max 261 MiB; netpool size max 218 MiB, overflow max 210 MiB
+last jmx row: 1795473269892,206310062,0,17,0,33,0,0,273607283,1659133664,179,0,0,228866850,220478242
+threads samples 13: max NTR 9, BatchMessage.execute 0, getMutations 0, wait 0, clog 0, memt 0, decode 14, verify 0
+  decode series: 0 0 0 0 0 0 14 14 0 0 0 0 0 | execute series: 0 0 0 0 0 0 0 0 0 0 0 0 0 | last sample: 0 0 0 0 0 0 0 0
+RssAnon max 2673 MiB
+GCs 59; heap after GC max 2048 MiB; last 5 after-GC: 1971 2003 1997 2013 2001
+  first-10 after-GC (baseline): 9 24 24 13 28 28 32 80 80 414
+  Full GCs 28: after-GC MiB 1326 1946 1982 1987 1995 2019 2022 2025 2036 2036 2036 2036 2036 2036 2036 2036 2036 2036 2036 2036 2036 2036 2036 2036 1909 1971 1997 2001
+pauses 59; STW share over last 60 s of GC log: 27%; Pause Full 28
+client cpu last sample: 1795473354  761157  0.2  9820; 761659  1.5 399052; 761660  1.5 399296; 762592  0.1  6752;
+client status counts status-p0.txt:
+    7 io_error@recv:[Errno_104]_Connection_reset_by_peer|server:-
+    1 io_error@rest:[Errno_104]_Connection_reset_by_peer|server:none(closed)
+client status counts status-p1.txt:
+    7 io_error@recv:[Errno_104]_Connection_reset_by_peer|server:-
+    1 io_error@rest:[Errno_104]_Connection_reset_by_peer|server:none(closed)
+dumps: cassandra-1795473152-pid760551.hprof (2334 MiB)

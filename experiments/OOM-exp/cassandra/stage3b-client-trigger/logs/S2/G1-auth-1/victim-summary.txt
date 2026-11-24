@@ -1,0 +1,132 @@
+node-1 end (n1.end): 1795473480685 2026-11-23T15:38:00.685-0700 HeapDumper
+attack start=1795473334082 node1-end/attack-end=1795473480685 (146.6 s after attack start) outcome: G1-auth-1: n1 OOM (HeapDumper) | n1 DEAD | attack end-start 170 s | n1.end-attack.start 146603 ms | client FINAL sent=206880 ok=201769 err=5111 NoHostAvailableException: All host(s) tried for query failed (tried: /127.0.0.1:9042 (com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown))
+
+V1 (node 1 = attacked coordinator)
+  before    57 s issued/s= 40.0 ok=2280 err=0 success=100.0% p50(med)=1.9ms p99(med)=4.0ms p99(max)=9.3ms max=9.3ms errors 
+  during   147 s issued/s= 40.0 ok=2005 err=3675 success= 34.1% p50(med)=831.4ms p99(med)=1845.0ms p99(max)=11971.1ms max=11971.1ms errors wto=317 opto=1294 nohost=1581 other=483 | e.g. NoHostAvailableException: All host(s) tried for query failed (tried: /127.0.0.1:9042 (com.datastax.driver.core.exceptions.BusyPoolException:
+  after     85 s issued/s= 40.0 ok=0 err=3601 success=  0.0% p50(med)=-1.0ms p99(med)=-1.0ms p99(max)=-1.0ms max=-1.0ms errors nohost=3601 | e.g. NoHostAvailableException: All host(s) tried for query failed (no host was tried)
+  timeline (5 s bins, rel. to attack start): t,issued,ok,err,max p99 ms
+      -60s   81   80    0      5.3
+      -55s  200  200    0      9.3
+      -50s  200  200    0      5.9
+      -45s  200  200    0      7.5
+      -40s  200  200    0      5.8
+      -35s  200  200    0      6.7
+      -30s  200  200    0      6.2
+      -25s  200  200    0      5.0
+      -20s  200  200    0      6.2
+      -15s  200  200    0      5.4
+      -10s  200  200    0      4.4
+       -5s  200  200    0      6.3
+       +0s  200  186    0    432.4
+       +5s  200   84   14   1845.0
+      +10s  200  283    0   7201.6
+      +15s  200  150    5   3270.7
+      +20s  200  177   72   3184.0
+      +25s  200   41   14   1363.3
+      +30s  200  113  114   5304.3
+      +35s  200    2    0   7711.0
+      +40s  200   72   34  11971.1
+      +45s  200  556   41  11423.9
+      +50s  200    0   27     -1.0
+      +55s  200  328    0   6342.3
+      +60s  200   13    0   2389.8
+      +65s  200    0    3     -1.0
+      +70s  200    0  189     -1.0
+      +75s  200    0  200     -1.0
+      +80s  200    0  200     -1.0
+      +85s  200    0  200     -1.0
+      +90s  200    0  200     -1.0
+      +95s  200    0  200     -1.0
+     +100s  200    0  581     -1.0
+     +105s  200    0  101     -1.0
+     +110s  200    0  200     -1.0
+     +115s  200    0  200     -1.0
+     +120s  200    0  200     -1.0
+     +125s  200    0  201     -1.0
+     +130s  200    0  199     -1.0
+     +135s  200    0  201     -1.0
+     +140s  200    0  200     -1.0
+     +145s  200    0  199     -1.0
+     +150s  200    0  401     -1.0
+     +155s  200    0  200     -1.0
+     +160s  200    0  200     -1.0
+     +165s  200    0  200     -1.0
+     +170s  200    0  200     -1.0
+     +175s  200    0  200     -1.0
+     +180s  200    0  200     -1.0
+     +185s  200    0  200     -1.0
+     +190s  200    0  200     -1.0
+     +195s  200    0  200     -1.0
+     +200s  200    0  200     -1.0
+     +205s  200    0  200     -1.0
+     +210s  200    0  200     -1.0
+     +215s  200    0  200     -1.0
+     +220s  200    0  200     -1.0
+     +225s  200    0  200     -1.0
+     +230s   80    0   80     -1.0
+
+V2 (nodes 2+3)
+  before    57 s issued/s= 40.0 ok=2280 err=0 success=100.0% p50(med)=2.5ms p99(med)=5.8ms p99(max)=11.5ms max=11.5ms errors 
+  during   147 s issued/s= 40.0 ok=5117 err=763 success= 87.0% p50(med)=2.0ms p99(med)=4.7ms p99(max)=2793.1ms max=2793.1ms errors wto=763 | e.g. WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency QUORUM (2 replica were required but only 1 acknowledged th
+  after     85 s issued/s= 40.0 ok=3400 err=0 success=100.0% p50(med)=1.8ms p99(med)=4.4ms p99(max)=61.9ms max=61.9ms errors 
+  timeline (5 s bins, rel. to attack start): t,issued,ok,err,max p99 ms
+      -60s   81   80    0     11.5
+      -55s  200  200    0     10.0
+      -50s  200  200    0      8.0
+      -45s  200  200    0      9.5
+      -40s  200  201    0      8.8
+      -35s  200  200    0      8.2
+      -30s  200  200    0      7.1
+      -25s  200  200    0      7.6
+      -20s  200  200    0      7.5
+      -15s  200  200    0      7.8
+      -10s  200  200    0      7.0
+       -5s  200  199    0      7.0
+       +0s  203  193    0     21.6
+       +5s  197  141   26    360.2
+      +10s  200  154   87   1985.5
+      +15s  200  122   37    102.1
+      +20s  200  177   44   2793.1
+      +25s  215  128   66   1160.0
+      +30s  185   93   92    107.8
+      +35s  215  108  108    109.5
+      +40s  185   92   93      5.1
+      +45s  200  173   33   1947.6
+      +50s  200   99   93      9.6
+      +55s  200  229   11   1972.3
+      +60s  211  211    0    709.5
+      +65s  189   95   56    279.5
+      +70s  200  222   17   1957.5
+      +75s  200  200    0      4.7
+      +80s  200  200    0      5.5
+      +85s  200  200    0      5.1
+      +90s  200  200    0      5.2
+      +95s  200  200    0      5.0
+     +100s  200  200    0      5.2
+     +105s  200  200    0      5.1
+     +110s  200  200    0      4.5
+     +115s  200  200    0      5.9
+     +120s  200  200    0      5.3
+     +125s  200  200    0      5.1
+     +130s  200  200    0      5.0
+     +135s  200  200    0      5.4
+     +140s  200  200    0      4.7
+     +145s  200  200    0      4.5
+     +150s  200  200    0     61.9
+     +155s  200  200    0     32.8
+     +160s  200  200    0      5.8
+     +165s  200  200    0      5.4
+     +170s  200  200    0      5.8
+     +175s  200  200    0      6.0
+     +180s  200  200    0      5.5
+     +185s  200  200    0      5.5
+     +190s  200  200    0      5.3
+     +195s  200  200    0      5.5
+     +200s  200  200    0      5.3
+     +205s  200  200    0      5.3
+     +210s  200  200    0      5.2
+     +215s  200  200    0      5.3
+     +220s  200  200    0      5.0
+     +225s  200  200    0     31.0
+     +230s   80   80    0      5.4

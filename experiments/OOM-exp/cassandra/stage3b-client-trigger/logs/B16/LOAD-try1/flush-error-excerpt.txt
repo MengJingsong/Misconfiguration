@@ -1,0 +1,23 @@
+ERROR [MemtablePostFlush:1] 2026-11-23T22:18:45,539 JVMStabilityInspector.java:70 - Exception in thread Thread[MemtablePostFlush:1,5,MemtablePostFlush]
+java.lang.AssertionError: Attempted serializing to buffer exceeded maximum of 65535 bytes: 65536
+	at org.apache.cassandra.utils.ByteBufferUtil.writeWithShortLength(ByteBufferUtil.java:366)
+	at org.apache.cassandra.io.sstable.metadata.StatsMetadata$StatsMetadataSerializer.serialize(StatsMetadata.java:444)
+	at org.apache.cassandra.io.sstable.metadata.StatsMetadata$StatsMetadataSerializer.serialize(StatsMetadata.java:308)
+	at org.apache.cassandra.io.sstable.metadata.MetadataSerializer.serialize(MetadataSerializer.java:104)
+	at org.apache.cassandra.io.sstable.format.StatsComponent.save(StatsComponent.java:116)
+	at org.apache.cassandra.io.sstable.format.SSTableWriter$TransactionalProxy.doPrepare(SSTableWriter.java:387)
+	at org.apache.cassandra.utils.concurrent.Transactional$AbstractTransactional.prepareToCommit(Transactional.java:168)
+	at org.apache.cassandra.io.sstable.format.SSTableWriter.prepareToCommit(SSTableWriter.java:282)
+	at org.apache.cassandra.io.sstable.SimpleSSTableMultiWriter.prepareToCommit(SimpleSSTableMultiWriter.java:101)
+	at org.apache.cassandra.db.ColumnFamilyStore$Flush.flushMemtable(ColumnFamilyStore.java:1334)
+	at org.apache.cassandra.db.ColumnFamilyStore$Flush.run(ColumnFamilyStore.java:1256)
+	at org.apache.cassandra.concurrent.ExecutionFailure$1.run(ExecutionFailure.java:133)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+WARN  [RMI TCP Connection(31)-127.0.0.1] 2026-11-23T22:18:45,547 StorageService.java:5934 - Caught exception while waiting for memtable flushes during shutdown hook
+java.lang.RuntimeException: java.lang.AssertionError: Attempted serializing to buffer exceeded maximum of 65535 bytes: 65536
+	at org.apache.cassandra.utils.Throwables.unchecked(Throwables.java:308)
+	at org.apache.cassandra.utils.Throwables.cleaned(Throwables.java:327)
+	at org.apache.cassandra.utils.FBUtilities.waitOnFuture(FBUtilities.java:555)

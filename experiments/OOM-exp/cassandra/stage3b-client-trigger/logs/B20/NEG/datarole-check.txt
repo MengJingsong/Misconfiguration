@@ -1,0 +1,16 @@
+connect as cassandra failed (NoHostAvailable); retry
+connect as cassandra failed (NoHostAvailable); retry
+connect as cassandra failed (NoHostAvailable); retry
+admin> CREATE ROLE datarole WITH PASSWORD = 'datarole-pw' AND LOGIN = true AND SUPERUSER = false
+admin> CREATE KEYSPACE dks WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+admin> CREATE TABLE dks.t (pk bigint, ck int, v blob, PRIMARY KEY (pk, ck))
+admin> GRANT SELECT ON TABLE dks.t TO datarole
+admin> GRANT MODIFY ON TABLE dks.t TO datarole
+perm> datarole | datarole | <table dks.t> | SELECT
+perm> datarole | datarole | <table dks.t> | MODIFY
+{
+ "insert": "ALLOWED",
+ "create_index": "Unauthorized: Error from server: code=2100 [Unauthorized] message=\"User datarole has no ALTER permission on <table dks.t> or any of its parents\"",
+ "alter_table": "Unauthorized: Error from server: code=2100 [Unauthorized] message=\"User datarole has no ALTER permission on <table dks.t> or any of its parents\"",
+ "create_table_in_dks": "Unauthorized: Error from server: code=2100 [Unauthorized] message=\"User datarole has no CREATE permission on <all tables in dks> or any of its parents\""
+}

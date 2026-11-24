@@ -1,0 +1,44 @@
+4864-INFO  [Service Thread] 2026-11-23T22:16:47,609 StatusLogger.java:121 - system.prepared_statements               4,441
+4865-INFO  [Native-Transport-Requests-26] 2026-11-23T22:17:21,973 NoSpamLogger.java:104 - ReadTimeoutException "Operation timed out - received only 0 responses." while executing SELECT * FROM system_auth.roles WHERE role = 'attacker' ALLOW FILTERING
+4866-ERROR [MutationStage-5] 2026-11-23T22:17:24,364 JVMStabilityInspector.java:70 - Exception in thread Thread[MutationStage-5,10,SharedPool]
+4867:java.lang.OutOfMemoryError: Java heap space
+4868-	at org.apache.cassandra.db.RangeTombstoneList.grow(RangeTombstoneList.java:735)
+4869-	at org.apache.cassandra.db.RangeTombstoneList.grow(RangeTombstoneList.java:705)
+4870-	at org.apache.cassandra.db.RangeTombstoneList.growToFree(RangeTombstoneList.java:688)
+4871-	at org.apache.cassandra.db.RangeTombstoneList.addInternal(RangeTombstoneList.java:669)
+4872-	at org.apache.cassandra.db.RangeTombstoneList.insertFrom(RangeTombstoneList.java:629)
+4873-	at org.apache.cassandra.db.RangeTombstoneList.add(RangeTombstoneList.java:176)
+4874-	at org.apache.cassandra.db.RangeTombstoneList.addAll(RangeTombstoneList.java:216)
+4875-	at org.apache.cassandra.db.MutableDeletionInfo.add(MutableDeletionInfo.java:142)
+4876-	at org.apache.cassandra.db.partitions.BTreePartitionUpdater.merge(BTreePartitionUpdater.java:120)
+4877-	at org.apache.cassandra.db.partitions.BTreePartitionUpdater.makeMergedPartition(BTreePartitionUpdater.java:82)
+4878-	at org.apache.cassandra.db.partitions.AtomicBTreePartition$Updater.tryUpdateData(AtomicBTreePartition.java:184)
+4879-	at org.apache.cassandra.db.partitions.AtomicBTreePartition$Updater.addAll(AtomicBTreePartition.java:165)
+4880-	at org.apache.cassandra.db.partitions.AtomicBTreePartition.addAll(AtomicBTreePartition.java:122)
+4881-	at org.apache.cassandra.db.memtable.SkipListMemtable.put(SkipListMemtable.java:130)
+4882-	at org.apache.cassandra.db.ColumnFamilyStore.apply(ColumnFamilyStore.java:1477)
+4883-	at org.apache.cassandra.db.CassandraTableWriteHandler.write(CassandraTableWriteHandler.java:38)
+4884-	at org.apache.cassandra.db.Keyspace.applyInternal(Keyspace.java:653)
+4885-	at org.apache.cassandra.db.Keyspace.apply(Keyspace.java:510)
+4886-	at org.apache.cassandra.db.Mutation.apply(Mutation.java:249)
+4887-	at org.apache.cassandra.db.Mutation.apply(Mutation.java:269)
+4888-	at org.apache.cassandra.service.StorageProxy$$Lambda$1632/0x0000000840830840.run(Unknown Source)
+4889-	at org.apache.cassandra.service.StorageProxy$4.runMayThrow(StorageProxy.java:1682)
+4890-	at org.apache.cassandra.service.StorageProxy$LocalMutationRunnable$1.runMayThrow(StorageProxy.java:2651)
+4891-	at org.apache.cassandra.service.StorageProxy$HintRunnable.run(StorageProxy.java:2721)
+4892-	at org.apache.cassandra.concurrent.FutureTask$2.call(FutureTask.java:124)
+4893-	at org.apache.cassandra.concurrent.FutureTask.call(FutureTask.java:61)
+4894-	at org.apache.cassandra.concurrent.FutureTaskWithResources.call(FutureTaskWithResources.java:54)
+4895-	at org.apache.cassandra.concurrent.FutureTask.run(FutureTask.java:71)
+4896-	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+4897-	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+4898-	at java.base/java.lang.Thread.run(Thread.java:829)
+4899-INFO  [ScheduledTasks:1] 2026-11-23T22:17:24,463 MessagingMetrics.java:207 - READ_REQ messages were dropped in last 5000 ms: 5 internal and 0 cross node. Mean internal dropped latency: 13484 ms and Mean cross-node dropped latency: 0 ms
+4900-INFO  [ScheduledTasks:1] 2026-11-23T22:17:24,463 StatusLogger.java:67 - Pool Name                       Active   Pending      Completed   Blocked  All Time Blocked
+4901-WARN  [Service Thread] 2026-11-23T22:17:24,463 GCInspector.java:284 - G1 Old Generation GC in 27603ms.  G1 Old Gen: 16412455824 -> 16064115816; 
+4902-INFO  [ScheduledTasks:1] 2026-11-23T22:17:24,463 StatusLogger.java:71 - ReadStage                            1         0           3189         0                 0
+4903-INFO  [ScheduledTasks:1] 2026-11-23T22:17:24,463 StatusLogger.java:71 - Native-Transport-Auth-Requests         0         0             21         0                 0
+4904-INFO  [ScheduledTasks:1] 2026-11-23T22:17:24,463 StatusLogger.java:71 - CompactionExecutor                   2        26            276         0                 0
+4905-INFO  [ScheduledTasks:1] 2026-11-23T22:17:24,463 StatusLogger.java:71 - SecondaryIndexExecutor               0         0              0         0                 0
+4906-INFO  [ScheduledTasks:1] 2026-11-23T22:17:24,463 StatusLogger.java:71 - MutationStage                       32      4541           6597         0                 0
+4907-INFO  [ScheduledTasks:1] 2026-11-23T22:17:24,464 StatusLogger.java:71 - MemtableReclaimMemory                0         0             43         0                 0

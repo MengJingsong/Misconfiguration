@@ -1,0 +1,436 @@
+# 3-b confirm U10: changes vs the case harness (cases/default_page_size--unpaged-aggregate-whole-partition/harness). Unchanged and reused: C2Sampler.java gcwin.py hprofhist.py hprofstacks.py steps.py logback-load.xml. Not used: batch.sh ic.sh fix-template.sh build-i2.sh i2.diff. New: setup-su.cql readback-su.cql victimsum.py (from logs/U8/harness).
+--- case-harness/U10Load.java	2026-11-23 20:16:45.119796083 -0500
++++ harness/U10Load.java	2026-11-23 20:17:06.887728447 -0500
+@@ -1,4 +1,9 @@
+-// U10 load client (pc82, loopback), adapted from U4Load. Java driver 3.12.1 (shaded), protocol v4, CL ONE,
++// U10 load client (pc82, loopback), adapted from U4Load.
++// 3-b confirm (ms0640, 2026-11-23): every mode logs in with -Du10.user / -Du10.pass (PasswordAuthenticator; empty user = no
++// credentials); run/cal use pk = i mod -Du10.parts (default 8); 'schema' is not used (the superuser makes the schema);
++// new modes:  su <host> <file>   (superuser) each non-comment line as a statement, rows printed; waits up to 120 s for login
++//             try <host> <stmt>  one statement as -Du10.user; prints RESULT OK / FAIL / CONNECT-FAIL
++//             victim <host> <rate/s> <stopfile> <out.csv>   victim workload on victimks.kv (100 B write / read by key, alternating) Java driver 3.12.1 (shaded), protocol v4, CL ONE,
+ // FallthroughRetryPolicy, socket read timeout 120 s. fetch "off" = setFetchSize(Integer.MAX_VALUE) (the driver then
+ // sends no PAGE_SIZE, server sees -1); a number = that fetch size.
+ //   java U10Load schema <host>
+@@ -14,7 +19,9 @@
+ import com.datastax.driver.core.exceptions.*;
+ import com.datastax.driver.core.policies.*;
+ import com.google.common.util.concurrent.*;
++import java.io.*;
+ import java.nio.ByteBuffer;
++import java.nio.file.*;
+ import java.util.*;
+ import java.util.concurrent.*;
+ import java.util.concurrent.atomic.*;
+@@ -23,12 +30,26 @@
+     static Cluster cluster(String host, int conns) {
+         PoolingOptions po = new PoolingOptions().setConnectionsPerHost(HostDistance.LOCAL, conns, conns)
+             .setMaxRequestsPerConnection(HostDistance.LOCAL, 4096).setMaxQueueSize(65536);
+-        return Cluster.builder().addContactPoint(host).withProtocolVersion(ProtocolVersion.V4)
++        Cluster.Builder b = Cluster.builder().addContactPoint(host).withProtocolVersion(ProtocolVersion.V4)
+             .withLoadBalancingPolicy(new WhiteListPolicy(new RoundRobinPolicy(),
+                 Collections.singletonList(new java.net.InetSocketAddress(host, 9042))))
+             .withSocketOptions(new SocketOptions().setReadTimeoutMillis(120000).setConnectTimeoutMillis(30000))
+             .withRetryPolicy(FallthroughRetryPolicy.INSTANCE)
+-            .withPoolingOptions(po).withoutJMXReporting().build();
++            .withPoolingOptions(po).withoutJMXReporting();
++        String u = System.getProperty("u10.user", ""), p = System.getProperty("u10.pass", "");
++        if (!u.isEmpty()) b = b.withCredentials(u, p);
++        return b.build();
++    }
++    static final int PARTS = Integer.getInteger("u10.parts", 8);
++    static void printRows(ResultSet rs) {
++        for (Row r : rs) {
++            StringBuilder sb = new StringBuilder("  row:");
++            for (int i = 0; i < r.getColumnDefinitions().size(); i++) {
++                String v; try { v = String.valueOf(r.getObject(i)); } catch (Throwable t) { v = "?"; }
++                sb.append(' ').append(r.getColumnDefinitions().getName(i)).append('=').append(v);
++            }
++            System.out.println(sb);
++        }
+     }
+ 
+     static int fetch(String f) { return f.equals("off") ? Integer.MAX_VALUE : Integer.parseInt(f); }
+@@ -62,6 +83,64 @@
+ 
+     public static void main(String[] a) throws Exception {
+         String host = a[1];
++        System.out.println("# as user=" + System.getProperty("u10.user", ""));
++        if (a[0].equals("su")) {
++            List<String> lines = Files.readAllLines(Paths.get(a[2]));
++            Cluster c = null; Session s = null; long until = System.currentTimeMillis() + 120000;
++            while (true) {
++                try { c = cluster(host, 1); s = c.connect(); break; }
++                catch (Throwable t) { if (c != null) c.close(); if (System.currentTimeMillis() > until) throw t;
++                                      System.out.println("# login not ready: " + err(t)); Thread.sleep(3000); }
++            }
++            for (String l : lines) {
++                l = l.trim(); if (l.isEmpty() || l.startsWith("#")) continue;
++                System.out.println("> " + l);
++                try { printRows(s.execute(l)); System.out.println("  OK"); } catch (Throwable t) { System.out.println("  FAIL " + err(t)); }
++            }
++            c.close(); return;
++        }
++        if (a[0].equals("try")) {
++            System.out.println("> " + a[2]);
++            try (Cluster c = cluster(host, 1); Session s = c.connect()) {
++                try { printRows(s.execute(a[2])); System.out.println("  RESULT OK"); } catch (Throwable t) { System.out.println("  RESULT FAIL " + err(t)); }
++            } catch (Throwable t) { System.out.println("  RESULT CONNECT-FAIL " + err(t)); }
++            return;
++        }
++        if (a[0].equals("victim")) {
++            double rate = Double.parseDouble(a[2]); File stop = new File(a[3]);
++            PrintWriter out = new PrintWriter(new FileWriter(a[4], true), false);
++            out.println("issue_ms,end_ms,op,result"); out.flush();
++            PoolingOptions po = new PoolingOptions().setConnectionsPerHost(HostDistance.LOCAL, 1, 1);
++            Cluster.Builder vb = Cluster.builder().addContactPoint(host).withProtocolVersion(ProtocolVersion.V4)
++                .withLoadBalancingPolicy(new WhiteListPolicy(new RoundRobinPolicy(), Collections.singletonList(new java.net.InetSocketAddress(host, 9042))))
++                .withSocketOptions(new SocketOptions().setReadTimeoutMillis(10000).setConnectTimeoutMillis(10000))
++                .withQueryOptions(new QueryOptions().setConsistencyLevel(ConsistencyLevel.ONE))
++                .withRetryPolicy(FallthroughRetryPolicy.INSTANCE).withReconnectionPolicy(new ConstantReconnectionPolicy(1000))
++                .withPoolingOptions(po).withoutJMXReporting();
++            String u = System.getProperty("u10.user", ""), pw = System.getProperty("u10.pass", "");
++            if (!u.isEmpty()) vb = vb.withCredentials(u, pw);
++            Cluster c = vb.build(); Session s = c.connect();
++            PreparedStatement ins = s.prepare("INSERT INTO victimks.kv (k, v) VALUES (?, ?)");
++            PreparedStatement sel = s.prepare("SELECT v FROM victimks.kv WHERE k = ?");
++            byte[] blob = new byte[100]; AtomicLong seq = new AtomicLong();
++            ScheduledExecutorService ex = Executors.newSingleThreadScheduledExecutor();
++            ex.scheduleAtFixedRate(() -> {
++                long i = seq.getAndIncrement(); int k = (int) ((i / 2) % 1000); final boolean w = (i % 2 == 0);
++                final long t0 = System.currentTimeMillis();
++                try {
++                    ResultSetFuture f = w ? s.executeAsync(ins.bind(k, ByteBuffer.wrap(blob))) : s.executeAsync(sel.bind(k));
++                    Futures.addCallback(f, new FutureCallback<ResultSet>() {
++                        public void onSuccess(ResultSet r) { synchronized (out) { out.println(t0 + "," + System.currentTimeMillis() + "," + (w ? "W" : "R") + ",ok"); } }
++                        public void onFailure(Throwable t) { synchronized (out) { out.println(t0 + "," + System.currentTimeMillis() + "," + (w ? "W" : "R") + "," + err(t)); } }
++                    }, MoreExecutors.directExecutor());
++                } catch (Throwable t) { synchronized (out) { out.println(t0 + "," + System.currentTimeMillis() + "," + (w ? "W" : "R") + "," + err(t)); } }
++            }, 0, (long) (1e6 / rate), TimeUnit.MICROSECONDS);
++            while (!stop.exists()) { Thread.sleep(500); synchronized (out) { out.flush(); } }
++            ex.shutdownNow(); Thread.sleep(11000);
++            synchronized (out) { out.flush(); out.close(); }
++            try { c.closeAsync(); } catch (Throwable t) {}
++            System.exit(0);
++        }
+         if (a[0].equals("schema")) {
+             try (Cluster c = cluster(host, 1); Session s = c.connect()) {
+                 s.execute("CREATE KEYSPACE IF NOT EXISTS u10 WITH replication = {'class':'SimpleStrategy','replication_factor':1}");
+@@ -151,7 +230,7 @@
+                 for (String ns : a[4].split(",")) {
+                     int n = Integer.parseInt(ns);
+                     for (int k = 0; k < reps; k++, i++) {
+-                        int pk = i % 8; long t0 = System.nanoTime();
++                        int pk = i % PARTS; long t0 = System.nanoTime();
+                         try {
+                             BoundStatement bs = ps.bind(pk, n); bs.setFetchSize(fetch(fs));
+                             long[] r = res(s.execute(bs), "agg");
+@@ -185,7 +264,7 @@
+                 try { if (!sem.tryAcquire(200, TimeUnit.MILLISECONDS)) continue; } catch (InterruptedException e) { return; }
+                 if (stop.get()) { sem.release(); return; }
+                 inflight.incrementAndGet();
+-                final long t0 = System.nanoTime(); final int n = curN.get(); final int pk = (int) (i++ % 8);
++                final long t0 = System.nanoTime(); final int n = curN.get(); final int pk = (int) (i++ % PARTS);
+                 BoundStatement bs = ps.bind(pk, n); bs.setFetchSize(fs);
+                 ResultSetFuture f = s.executeAsync(bs);
+                 Futures.addCallback(f, new FutureCallback<ResultSet>() {
+--- case-harness/victim-ctl.sh	2026-11-23 20:16:45.119796083 -0500
++++ harness/victim-ctl.sh	2026-11-23 20:17:22.719679257 -0500
+@@ -4,8 +4,11 @@
+ #   arm I2: A config on the diagnostic build $ROOT/tree-i2; arm LOAD: A config, empty node dir.
+ #   victim-ctl.sh start <label> <A|I1|I2|LOAD> <heap e.g. 2048M> <direct e.g. 1024M>   (explicit pair always)
+ #   victim-ctl.sh ready|read <label> [tag]|gc|hist <label> <tag>|stop|alive|oom|pid|ts <label>
++# 3-b confirm (ms0640, 2026-11-23): ROOT /mydata/s4/3b-U10; every arm sets authenticator PasswordAuthenticator and
++# authorizer CassandraAuthorizer (role_manager CassandraRoleManager is the shipped value, checked); arms A and LOAD only
++# (I1/I2 removed: interventions are not part of the confirm). LOAD = empty node dir; A = fresh clone of the template.
+ set -uo pipefail
+-ROOT=/mydata/s4/u10-w4
++ROOT=/mydata/s4/3b-U10
+ H=$ROOT/harness
+ NT="$ROOT/tree/bin/nodetool -h 127.0.0.1"
+ log(){ echo "[$(TZ=America/New_York date '+%F %T %Z')] $*"; }
+@@ -15,7 +18,6 @@
+ 
+ start(){
+   local L=$1 ARM=$2 HEAP=$3 DM=$4 R BUILD=$ROOT/tree; R=$(rd "$L")
+-  [ "$ARM" = I2 ] && BUILD=$ROOT/tree-i2
+   if pgrep -f 'java.*CassandraDaemon' >/dev/null; then log "REFUSE: a CassandraDaemon is already running"; pgrep -af 'java.*CassandraDaemon' | cut -c1-150; return 1; fi
+   rm -rf "$ROOT/node" "$R"; mkdir -p "$R/logs"
+   if [ "$ARM" = LOAD ]; then mkdir -p "$ROOT/node"/{data,commitlog,hints,saved_caches,cdc_raw}
+@@ -29,20 +31,23 @@
+     -e "s|^# hints_directory: /var/lib/cassandra/hints|hints_directory: $ROOT/node/hints|" \
+     -e "s|^# saved_caches_directory: /var/lib/cassandra/saved_caches|saved_caches_directory: $ROOT/node/saved_caches|" \
+     -e "s|^# cdc_raw_directory: /var/lib/cassandra/cdc_raw|cdc_raw_directory: $ROOT/node/cdc_raw|" \
++    -e "s|^authenticator: AllowAllAuthenticator|authenticator: PasswordAuthenticator|" \
++    -e "s|^authorizer: AllowAllAuthorizer|authorizer: CassandraAuthorizer|" \
+     "$y"
++  grep -q '^role_manager: CassandraRoleManager' "$y" || { log "role_manager not CassandraRoleManager"; return 1; }
++  grep -q '^authenticator: PasswordAuthenticator' "$y" && grep -q '^authorizer: CassandraAuthorizer' "$y" || { log "auth lines not set"; return 1; }
+   case $ARM in
+-    A|LOAD|I2) ;;
+-    I1) printf '# U10 arm I1 (intervention): the byte control that is off by default, switched on\nread_thresholds_enabled: true\nlocal_read_size_fail_threshold: 64MiB\n' >> "$y";;
++    A|LOAD) ;;
+     *) log "bad arm $ARM"; return 1;;
+   esac
+   diff "$ROOT/conf-pristine/cassandra.yaml" "$y" > "$R/yaml.diff"
+   local MM=$(( $(mib "$HEAP") + $(mib "$DM") + 8192 ))
+-  echo "label=$L arm=$ARM build=$BUILD heap=$HEAP direct=$DM scopeMemoryMax=${MM}M start=$(date -u +%FT%TZ)" > "$R/run.meta"
++  echo "label=$L arm=$ARM build=$BUILD heap=$HEAP direct=$DM scopeMemoryMax=${MM}M start=$(date -u +%FT%TZ) host=$(hostname -s) arch=$(uname -m)" > "$R/run.meta"
+   sha256sum "$BUILD"/build/apache-cassandra-*.jar >> "$R/run.meta" 2>&1
+   ( cd "$R" && CASSANDRA_CONF=$R/conf CASSANDRA_LOG_DIR=$R/logs MAX_HEAP_SIZE=$HEAP MAX_DIRECT_MEMORY_SIZE=$DM \
+     CASSANDRA_HEAPDUMP_DIR=$R \
+     JVM_EXTRA_OPTS="-XX:NativeMemoryTracking=summary -Xlog:gc=info,safepoint=info:file=$R/gc.log:time,uptime,level,tags:filecount=20,filesize=20m" \
+-    setsid nohup systemd-run --user --scope --unit="u10-$L-$(date +%s)" -p MemoryMax=${MM}M -p MemorySwapMax=0 \
++    setsid nohup systemd-run --user --scope --unit="3bu10-$L-$(date +%s)" -p MemoryMax=${MM}M -p MemorySwapMax=0 \
+       "$BUILD/bin/cassandra" -f < /dev/null > "$R/stdout.log" 2>&1 & )
+   local i p=""; for i in $(seq 1 30); do sleep 1; p=$(pid "$L"); [ -n "$p" ] && break; done
+   [ -z "$p" ] && { log "no java pid for $L"; return 1; }
+--- case-harness/load.sh	2026-11-23 20:16:45.119796083 -0500
++++ harness/load.sh	2026-11-23 20:17:22.719679257 -0500
+@@ -1,6 +1,8 @@
+ #!/usr/bin/env bash
+-# U10 client wrapper (pc82, loopback). Client JVM -Xmx4g in its own scope (MemoryMax=8G, isolation only).  load.sh <label> <U10Load args...>
+-ROOT=/mydata/s4/u10-w4; J=$ROOT/tree/build/lib/jars; L=$1; shift
++# U10 client wrapper (ms0640, loopback; 3-b confirm). Client JVM -Xmx2g in its own scope (MemoryMax=4G, isolation only).
++#   load.sh <label> <role: su|atk|vic|none|<user>:<pass>> <U10Load args...>    (u10.parts from $U10_PARTS, default 2)
++ROOT=/mydata/s4/3b-U10; J=$ROOT/tree/build/lib/jars; L=$1; ROLE=$2; shift 2
++case $ROLE in su) U=cassandra; P=cassandra;; atk) U=u10atk; P=atk-3bU10;; vic) U=u10victim; P=vic-3bU10;; none) U=; P=;; *) U=${ROLE%%:*}; P=${ROLE#*:};; esac
+ CP="$ROOT/cls:$J/cassandra-driver-core-3.12.1-shaded.jar:$J/guava-32.0.1-jre.jar:$J/metrics-core-4.2.28.jar:$ROOT/tree/lib/*"
+-exec systemd-run --user --scope --quiet --unit="u10-client-$L-$(date +%s%N | cut -c1-13)" -p MemoryMax=8G -p MemorySwapMax=0 \
+-  java -Xmx4g -cp "$CP" -Dlogback.configurationFile=$ROOT/harness/logback-load.xml U10Load "$@"
++exec systemd-run --user --scope --quiet --unit="3bu10-client-$L-$(date +%s%N | cut -c1-13)" -p MemoryMax=4G -p MemorySwapMax=0 \
++  java -Xmx2g -cp "$CP" -Du10.user="$U" -Du10.pass="$P" -Du10.parts=${U10_PARTS:-2} -Dlogback.configurationFile=$ROOT/harness/logback-load.xml U10Load "$@"
+--- case-harness/setup.sh	2026-11-23 20:16:45.119796083 -0500
++++ harness/setup.sh	2026-11-23 20:17:56.887573106 -0500
+@@ -1,14 +1,11 @@
+ #!/usr/bin/env bash
+-# U10 setup on pc82 (stage 2). Copies the built 5.0.9 tree out of /mydata/s4/cassandra-base (read only), keeps a
+-# pristine conf, copies this harness to the node and compiles the client and the sampler.
+-# ROOT is /mydata/s4/u10-w4 (amendment A1: the wave-4 session's work directory; the design named /mydata/u10).
++# U10 3-b confirm setup on ms0640. Copies the built 5.0.9 tree out of /mydata/s4/cassandra-base (read only), keeps a
++# pristine conf, compiles the client and the sampler (the harness is already in $ROOT/harness).
+ set -euo pipefail
+-ROOT=/mydata/s4/u10-w4
+-SRC=$(cd "$(dirname "$0")" && pwd)
+-mkdir -p "$ROOT"/{runs,cls}
++ROOT=/mydata/s4/3b-U10
++mkdir -p "$ROOT"/{runs,out,cls}
+ [ -d "$ROOT/tree" ] || cp -a /mydata/s4/cassandra-base "$ROOT/tree"
+ [ -d "$ROOT/conf-pristine" ] || cp -a "$ROOT/tree/conf" "$ROOT/conf-pristine"
+-rm -rf "$ROOT/harness"; cp -r "$SRC" "$ROOT/harness"
+ J=$ROOT/tree/build/lib/jars
+ CP="$J/cassandra-driver-core-3.12.1-shaded.jar:$J/guava-32.0.1-jre.jar:$J/metrics-core-4.2.28.jar:$ROOT/tree/lib/*"
+ javac -cp "$CP" -d "$ROOT/cls" "$ROOT/harness/U10Load.java" "$ROOT/harness/C2Sampler.java"
+--- case-harness/load-data.sh	2026-11-23 20:16:45.119796083 -0500
++++ harness/load-data.sh	2026-11-23 20:17:56.887573106 -0500
+@@ -1,15 +1,40 @@
+ #!/usr/bin/env bash
+-# U10 lifetime LOAD (8192M/4096M; not a reading): schema, 8 x 65,536 x 16,384 B rows (Random(1000+pk)) at 64 async
+-# inserts (CL ONE, 5 retries), flush, major compaction, drain, stop; then the template every measured lifetime is cloned from.
++# U10 3-b confirm lifetime LOAD (2048M/1024M = the T budget, auth on; not a reading). Empty node dir; the superuser runs
++# setup-su.cql (roles, admin schema u10.t, victim schema, grants); claim probes; then the ATTACKER (u10atk: SELECT+MODIFY on
++# u10.t only) writes P x 65,536 x 16,384 B rows (Random(1000+pk), 64 async prepared inserts, CL ONE, 5 retries) and verifies
++# them. No nodetool flush/compact (operator steps; stage 2 used them). The harness then drains and stops the node (a clean
++# stop, as the case's LOAD) and the node dir becomes the template every attack lifetime is cloned from.
++#   load-data.sh [P=2]
+ set -uo pipefail
+-ROOT=/mydata/s4/u10-w4; H=$ROOT/harness; V="bash $H/victim-ctl.sh"; NT="$ROOT/tree/bin/nodetool -h 127.0.0.1"
+-R=$ROOT/runs/LOAD
+-$V start LOAD LOAD 8192M 4096M && $V ready LOAD || exit 1
+-bash $H/load.sh LOAD schema 127.0.0.1
+-time bash $H/load.sh LOAD load 127.0.0.1 8 65536 16384
+-$NT flush u10; time $NT compact u10
+-$NT tablestats u10.t | grep -E "SSTable count|Space used \(live\)|Compacted partition (maximum|mean)|Number of partitions|Local write count"
+-$V stop LOAD
++P=${1:-2}; export U10_PARTS=$P
++ROOT=/mydata/s4/3b-U10; H=$ROOT/harness; V="bash $H/victim-ctl.sh"; NT="$ROOT/tree/bin/nodetool -h 127.0.0.1"
++C="bash $H/load.sh LOAD"; R=$ROOT/runs/LOAD
++log(){ echo "[$(TZ=America/New_York date '+%F %T %Z')] $*"; }
++$V start LOAD LOAD 2048M 1024M && $V ready LOAD || exit 1
++grep -E '^(authenticator|authorizer|role_manager|network_authorizer)' $R/conf/cassandra.yaml | tee $R/auth-yaml.txt
++log "superuser setup"; $C su su 127.0.0.1 $H/setup-su.cql > $R/setup-su.out 2>&1
++grep -E '^(>|  OK|  FAIL|  row)' $R/setup-su.out | grep -v 'system_views.settings\|row: name=' | head -40
++grep -E 'name=(authenticator|authorizer|role_manager|network_authorizer|read_thresholds_enabled|local_read_size|coordinator_read_size|page_size|partition_size|column_value_size|read_request_timeout|native_transport_max_frame_size|native_transport_max_request_data_in_flight|native_transport_rate_limiting_enabled|native_transport_max_concurrent_connections |memtable_heap_space|memtable_allocation_type|concurrent_reads|aggregation_subpage_size|default_page_size|tombstone)' $R/setup-su.out > $R/settings-readback.txt
++cat $R/settings-readback.txt
++log "claim probes"
++{
++  $C none try 127.0.0.1 "SELECT release_version FROM system.local"
++  $C u10atk:wrong try 127.0.0.1 "SELECT release_version FROM system.local"
++  $C atk try 127.0.0.1 "SELECT k FROM victimks.kv LIMIT 1"
++  $C atk try 127.0.0.1 "CREATE TABLE u10.t2 (pk int PRIMARY KEY, v blob)"
++  $C atk try 127.0.0.1 "CREATE KEYSPACE u10x WITH replication = {'class':'SimpleStrategy','replication_factor':1}"
++  $C atk try 127.0.0.1 "ALTER TABLE u10.t WITH comment = 'x'"
++  $C vic try 127.0.0.1 "SELECT ck FROM u10.t LIMIT 1"
++  $C atk try 127.0.0.1 "SELECT count(*) FROM u10.t WHERE pk = 0"
++} > $R/probes.out 2>&1
++grep -E '^(# as|>|  RESULT|  row)' $R/probes.out
++log "attacker load (u10atk) P=$P"
++time $C atk load 127.0.0.1 $P 65536 16384 > $R/load.out 2>&1; grep -E 'load (ok|FAIL)' $R/load.out | tail -5
++$C atk verify 127.0.0.1 $P > $R/verify.out 2>&1; grep '^verify' $R/verify.out
++$V ts LOAD | tee $R/tablestats.txt
++$V read LOAD end | cut -c1-240
+ grep -c "OutOfMemoryError" $R/logs/system.log
+-rm -rf $ROOT/template; cp -a $ROOT/node $ROOT/template; rm -rf $ROOT/template/saved_caches/*
+-du -sh $ROOT/template; ls -la $ROOT/template/data/u10/*/
++$V stop LOAD
++rm -rf $ROOT/template; mv $ROOT/node $ROOT/template; rm -rf $ROOT/template/saved_caches/*
++du -sh $ROOT/template $ROOT/template/commitlog; ls -la $ROOT/template/data/u10/*/ | head -30
++log "LOAD done"
+--- case-harness/run-arm.sh	2026-11-23 20:16:45.119796083 -0500
++++ harness/run-arm.sh	2026-11-23 20:18:34.819455273 -0500
+@@ -1,53 +1,64 @@
+ #!/usr/bin/env bash
+-# U10 one clean lifetime on pc82 (victim + client on the same node, loopback), adapted from U4's run-arm.sh.
+-#   run-arm.sh <label> <A|I1|I2> <heap> <direct> <fetch off|5000> <kind agg|grs> <steps "c:n:secs,...">
+-# 1 refuse if a CassandraDaemon runs; fresh clone of the template; start; ready (one retry if not ready)
+-# 2 GC + baseline reading, tablestats; 3 client in the background; readings every 10 s until the client ends or the
+-#   victim dies; T/M/I labels: one GC.class_histogram at load second 150 if alive
+-# 4 outcome (OOM lines, hprof, scope memory.events, timeouts), stop a survivor (drain + SIGTERM by PID), copy small files.
++# U10 3-b confirm: one clean lifetime on ms0640 with PasswordAuthenticator + CassandraAuthorizer (node + clients on loopback),
++# adapted from the case's run-arm.sh (stage 2).
++#   run-arm.sh <label> <steps "c:n:secs,..."> [P=2]
++# 1 refuse if a CassandraDaemon runs; fresh clone of the template (made by load-data.sh); start 2048M/1024M; ready
++# 2 superuser read-backs only (roles, permissions, system_views.settings); GC + baseline reading, tablestats
++# 3 victim role u10victim: 20 ops/s on victimks.kv, 60 s baseline before the attack
++# 4 attack client as u10atk: the case's closed loop (16 connections, paging off, agg = SELECT count(v) FROM u10.t WHERE pk = ?
++#   AND ck < ?, pk = i mod P); alive check every 2 s, readings every 10 s; one GC.class_histogram at +150 s if alive
++# 5 victim 60 s more after node death / client end; outcome (as the case); stop a survivor; dump scan, then delete the dump
+ set -uo pipefail
+-L=$1 ARM=$2 HEAP=$3 DIRECT=$4 FETCH=$5 KIND=$6 STEPS=$7
+-ROOT=/mydata/s4/u10-w4; H=$ROOT/harness; R=$ROOT/runs/$L
+-REPO=/proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/OOM-exp/cassandra/cases/default_page_size--unpaged-aggregate-whole-partition
+-V="bash $H/victim-ctl.sh"
++L=$1 STEPS=$2 P=${3:-2}; export U10_PARTS=$P
++ROOT=/mydata/s4/3b-U10; H=$ROOT/harness; R=$ROOT/runs/$L; O=$ROOT/out/$L
++V="bash $H/victim-ctl.sh"; C="bash $H/load.sh $L"
+ log(){ echo "[$(TZ=America/New_York date '+%F %T %Z')] $*"; }
+-log "ARM $L arm=$ARM heap=$HEAP direct=$DIRECT fetch=$FETCH kind=$KIND steps=$STEPS"
++log "ARM $L heap=2048M direct=1024M fetch=off kind=agg steps=$STEPS P=$P (auth on)"
+ ok=0
+ for try in 1 2; do
+-  $V start "$L" "$ARM" "$HEAP" "$DIRECT" || exit 1
++  $V start "$L" A 2048M 1024M || exit 1
+   if $V ready "$L"; then ok=1; break; fi
+   log "invalid start (try $try)"; $V stop "$L"; [ -d "$R" ] && mv "$R" "$R.badstart$try"
+ done
+ [ $ok = 1 ] || { echo "INVALID not-ready" > "$R/outcome"; exit 1; }
++grep -E '^(authenticator|authorizer|role_manager|network_authorizer)' "$R/conf/cassandra.yaml" | tee "$R/auth-yaml.txt"
++$C su su 127.0.0.1 $H/readback-su.cql > "$R/readback-su.out" 2>&1
++grep -E '^(>|  FAIL|  row: role|  row: role=)' "$R/readback-su.out" | head -20
++grep -E 'row: role=|row: name=(authenticator|authorizer|role_manager|read_thresholds_enabled|local_read_size_fail|page_size_fail|read_request_timeout)' "$R/readback-su.out" | cut -c1-200
+ sleep 5; $V gc "$L"; sleep 3; $V read "$L" base | cut -c1-220
+ $V ts "$L" | tee "$R/tablestats-before.txt"
+-( cd "$R" && setsid nohup bash "$H/load.sh" "$L" run 127.0.0.1 16 "$STEPS" "$FETCH" "$KIND" > client.csv 2> client.err < /dev/null & )
+-sleep 3; CP=$(pgrep -f "U10Load run 127.0.0.1 16 $STEPS $FETCH $KIND" | head -1); echo "$CP" > "$R/client.pid"
+-log "client pid $CP"
+-t0=$(date +%s); dead=0; histd=0; el=0
++( cd "$R" && setsid nohup bash $H/load.sh "$L-vic" vic victim 127.0.0.1 20 "$R/victim.stop" "$R/victim.csv" > victim.out 2>&1 < /dev/null & )
++sleep 3; VP=$(pgrep -f "U10Load victim 127.0.0.1 20 $R/victim.stop" | head -1); echo "$VP" > "$R/victim.pid"; log "victim client pid $VP; 60 s baseline"
++sleep 57; tail -2 "$R/victim.csv"
++( cd "$R" && setsid nohup bash $H/load.sh "$L" atk run 127.0.0.1 16 "$STEPS" off agg > client.csv 2> client.err < /dev/null & )
++t0ms=$(date +%s%3N); echo "$t0ms" > "$R/attack_t0_ms"
++sleep 2; CP=$(pgrep -f "U10Load run 127.0.0.1 16 $STEPS off agg" | head -1); echo "$CP" > "$R/client.pid"
++log "attack client pid $CP (t0 $t0ms)"
++t0=$(date +%s); dead=0; histd=0; el=0; lastread=0; deathms=0
+ while true; do
+-  sleep 10
++  sleep 2
+   el=$(( $(date +%s) - t0 ))
+-  if [ "$($V alive "$L")" != ALIVE ]; then log "VICTIM DEAD at +${el}s"; dead=1; break; fi
+-  $V read "$L" "t+$el" | cut -c1-260
+-  tail -1 "$R/client.csv" | cut -c1-200
+-  if [[ $L =~ ^[TMI][12]?- ]] && [ $histd = 0 ] && [ $el -ge 150 ]; then $V hist "$L" t150; histd=1; fi
++  if [ "$($V alive "$L")" != ALIVE ]; then deathms=$(date +%s%3N); log "VICTIM NODE DEAD at +${el}s"; dead=1; break; fi
++  if [ $(( el - lastread )) -ge 10 ]; then $V read "$L" "t+$el" | cut -c1-260; tail -1 "$R/client.csv" | cut -c1-200; lastread=$el; fi
++  if [ $histd = 0 ] && [ $el -ge 150 ]; then $V hist "$L" t150; histd=1; fi
+   kill -0 "$CP" 2>/dev/null || break
++  [ $el -ge 900 ] && { log "900 s stop"; break; }
+ done
++echo "$deathms" > "$R/death_ms"
+ for i in $(seq 1 40); do kill -0 "$CP" 2>/dev/null || break; sleep 1; done
+ kill "$CP" 2>/dev/null; sleep 1; kill -9 "$CP" 2>/dev/null
+ grep SUMMARY "$R/client.csv"; tail -3 "$R/client.err"
+ if [ $dead = 0 ] && [ "$($V alive "$L")" = ALIVE ]; then
+-  $V ts "$L" | tee "$R/tablestats-after.txt"
+-  sleep 5; $V read "$L" end-pre | cut -c1-220; $V gc "$L"; sleep 3; $V read "$L" end-post | cut -c1-220
++  $V ts "$L" | tee "$R/tablestats-after.txt"; sleep 3; $V read "$L" end | cut -c1-220
+ fi
++log "victim client: 60 s more"; sleep 60; touch "$R/victim.stop"
++for i in $(seq 1 30); do kill -0 "$VP" 2>/dev/null || break; sleep 1; done; kill -9 "$VP" 2>/dev/null
++python3 $H/victimsum.py "$R/victim.csv" "$t0ms" "$deathms" "$R/victim" > /dev/null
+ log "OOM/GC check"; $V oom "$L" > "$R/oom-check.txt" 2>&1; head -40 "$R/oom-check.txt"
+ $V stop "$L"
+ oomtype=$(grep -h -o -m1 "java.lang.OutOfMemoryError: [A-Za-z ]*" "$R/logs/system.log" "$R/stdout.log" 2>/dev/null | head -1)
+ lastline=$(grep -E '^[0-9]{13},' "$R/client.csv" | tail -1 | cut -d, -f2,3)
+ if [ $dead = 1 ] && [ -n "$oomtype" ]; then
+-  # step at death: the step in effect at the victim's last valid JMX sample (client lines are stamped at the END of
+-  # each second, so it is the first client line stamped >= that time; U4 amendment A3)
+   ls_t=$(grep -E '^[0-9]{13},[0-9]' "$R/samples.csv" | tail -1 | cut -d, -f1)
+   sc=$(awk -F, -v t="$ls_t" '/^[0-9]{13},/ && $1 >= t {print $2 " n=" $3; exit}' "$R/client.csv")
+   [ -z "$sc" ] && sc="$(echo $lastline | sed 's/,/ n=/')"
+@@ -58,19 +69,23 @@
+   echo "SURVIVED last_c=$(echo $lastline | sed 's/,/ n=/')" > "$R/outcome"
+ fi
+ cat "$R/outcome"
+-D=$REPO/logs/$L; mkdir -p "$D"
+-cp "$R"/{readings.csv,yaml.diff,run.meta,outcome,oom-check.txt,tablestats-before.txt,tablestats-after.txt} "$D"/ 2>/dev/null
+-gzip -c "$R/samples.csv" > "$D/samples.csv.gz"
+-cp "$R/memory.events.last" "$D/memory.events" 2>/dev/null
+-grep -E '^(t,|[0-9]{13},|SUMMARY)' "$R/client.csv" | gzip -c > "$D/client.csv.gz"
+-grep -h -m5 'Query cancelled' "$R/logs/debug.log" 2>/dev/null | cut -c1-400 > "$D/cancel-excerpt.txt"; [ -s "$D/cancel-excerpt.txt" ] || rm -f "$D/cancel-excerpt.txt"
+-tail -20 "$R/client.err" > "$D/client.err.tail" 2>/dev/null; [ -s "$D/client.err.tail" ] || rm -f "$D/client.err.tail"
+-grep -h -m3 -B2 -A25 'java\.lang\.OutOfMemoryError' "$R/logs/system.log" "$R/stdout.log" 2>/dev/null | head -120 > "$D/oom-excerpt.txt"
+-[ -s "$D/oom-excerpt.txt" ] || rm -f "$D/oom-excerpt.txt"
+-grep -v 'Node configuration' "$R/logs/system.log" | grep -h -m5 -i 'read_size\|local_read_size\|exceeded\|ReadSize' 2>/dev/null | cut -c1-400 > "$D/threshold-excerpt.txt"
+-[ -s "$D/threshold-excerpt.txt" ] || rm -f "$D/threshold-excerpt.txt"
+-[ -f "$R/histo-t150.txt" ] && head -40 "$R/histo-t150.txt" > "$D/histo-t150-top.txt"
+-python3 "$H/gcwin.py" "$R" > "$D/gcwin.txt"
+-python3 "$H/steps.py" "$R" > "$D/steps.txt" 2>&1
+-ls -la "$R" | grep -i 'hprof\|hs_err' > "$D/hprof.ls" || rm -f "$D/hprof.ls"
++for hp in "$R"/*.hprof; do
++  [ -f "$hp" ] || continue
++  ls -la "$hp" > "$R/hprof.ls"; log "dump scan $(basename "$hp")"
++  nice -n 10 python3 $H/hprofhist.py "$hp" 30 > "$R/hprofhist.txt" 2>&1
++  nice -n 10 python3 $H/hprofstacks.py "$hp" > "$R/hprofstacks-all.txt" 2>&1
++  grep -B1 -A14 'LocalDataResponse\|DataOutputBuffer\|AggregationQueryPager\|OutOfMemory' "$R/hprofstacks-all.txt" | head -150 > "$R/hprofstacks.txt"
++  rm -f -- "$hp"; log "dump deleted"
++done
++mkdir -p "$O"; find "${O:?}" -maxdepth 1 -type f -delete
++cp "$R"/{readings.csv,yaml.diff,run.meta,outcome,oom-check.txt,tablestats-before.txt,tablestats-after.txt,auth-yaml.txt,readback-su.out,victim-summary.json,victim-per-second.csv,victim.out,attack_t0_ms,death_ms,hprof.ls,hprofhist.txt,hprofstacks.txt} "$O"/ 2>/dev/null
++gzip -c "$R/samples.csv" > "$O/samples.csv.gz"; gzip -c "$R/victim.csv" > "$O/victim.csv.gz"
++cp "$R/memory.events.last" "$O/memory.events" 2>/dev/null
++grep -E '^(t,|[0-9]{13},|SUMMARY)' "$R/client.csv" | gzip -c > "$O/client.csv.gz"
++tail -20 "$R/client.err" > "$O/client.err.tail" 2>/dev/null; [ -s "$O/client.err.tail" ] || rm -f "$O/client.err.tail"
++grep -h -m3 -B2 -A25 'java\.lang\.OutOfMemoryError' "$R/logs/system.log" "$R/stdout.log" 2>/dev/null | head -120 > "$O/oom-excerpt.txt"; [ -s "$O/oom-excerpt.txt" ] || rm -f "$O/oom-excerpt.txt"
++grep -h -m5 'Query cancelled' "$R/logs/debug.log" 2>/dev/null | cut -c1-400 > "$O/cancel-excerpt.txt"; [ -s "$O/cancel-excerpt.txt" ] || rm -f "$O/cancel-excerpt.txt"
++[ -f "$R/histo-t150.txt" ] && head -40 "$R/histo-t150.txt" > "$O/histo-t150-top.txt"
++python3 "$H/gcwin.py" "$R" > "$O/gcwin.txt" 2>&1
++python3 "$H/steps.py" "$R" > "$O/steps.txt" 2>&1
+ log "END $L $(cat "$R/outcome")"
+--- case-harness/setup-su.cql	1969-12-31 19:00:00.000000000 -0500
++++ harness/setup-su.cql	2026-11-23 20:17:56.887573106 -0500
+@@ -0,0 +1,16 @@
++# 3-b confirm U10: everything the superuser (cassandra) does before the attack: two roles, the admin-made schema the data
++# role is granted on (the case's table, unchanged), the victim's own keyspace/table, the grants, read-backs.
++CREATE ROLE IF NOT EXISTS u10atk WITH PASSWORD = 'atk-3bU10' AND LOGIN = true AND SUPERUSER = false
++CREATE ROLE IF NOT EXISTS u10victim WITH PASSWORD = 'vic-3bU10' AND LOGIN = true AND SUPERUSER = false
++CREATE KEYSPACE IF NOT EXISTS u10 WITH replication = {'class':'SimpleStrategy','replication_factor':1}
++CREATE TABLE IF NOT EXISTS u10.t (pk int, ck int, v blob, PRIMARY KEY (pk, ck))
++GRANT SELECT ON TABLE u10.t TO u10atk
++GRANT MODIFY ON TABLE u10.t TO u10atk
++CREATE KEYSPACE IF NOT EXISTS victimks WITH replication = {'class':'SimpleStrategy','replication_factor':1}
++CREATE TABLE IF NOT EXISTS victimks.kv (k int PRIMARY KEY, v blob)
++GRANT SELECT ON TABLE victimks.kv TO u10victim
++GRANT MODIFY ON TABLE victimks.kv TO u10victim
++LIST ROLES
++LIST ALL PERMISSIONS OF u10atk
++LIST ALL PERMISSIONS OF u10victim
++SELECT name, value FROM system_views.settings
+--- case-harness/readback-su.cql	1969-12-31 19:00:00.000000000 -0500
++++ harness/readback-su.cql	2026-11-23 20:17:56.887573106 -0500
+@@ -0,0 +1,5 @@
++# 3-b confirm U10: read-only instrument reads by the superuser at the start of an attack lifetime (not part of the attack)
++LIST ROLES
++LIST ALL PERMISSIONS OF u10atk
++LIST ALL PERMISSIONS OF u10victim
++SELECT name, value FROM system_views.settings

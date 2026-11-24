@@ -1,0 +1,14 @@
+superuser login after 11 s
+OK CREATE ROLE mallory WITH LOGIN = true AND PASSWORD = 'mallory-pw'
+OK GRANT CREATE ON ALL KEYSPACES TO mallory
+OK CREATE ROLE victim WITH LOGIN = true AND PASSWORD = 'victim-pw'
+OK CREATE KEYSPACE vks WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+OK CREATE TABLE vks.kv (k int PRIMARY KEY, v text)
+OK GRANT SELECT ON KEYSPACE vks TO victim
+OK GRANT MODIFY ON KEYSPACE vks TO victim
+  mallory: mallory <all keyspaces> CREATE
+  victim: victim <keyspace vks> SELECT
+  victim: victim <keyspace vks> MODIFY
+  role: cassandra super=True login=True
+  role: mallory super=False login=True
+  role: victim super=False login=True

@@ -1,0 +1,25 @@
+CHECK none | login as null | ERR AuthenticationException: Authentication error on host /127.0.0.1:9042: Host /127.0.0.1:9042 requires authentication, but no authenticator found in Cluster configuration
+CHECK attacker-wrongpw | login as attacker | ERR AuthenticationException: Authentication error on host /127.0.0.1:9042: Provided username attacker and/or password are incorrect
+CHECK attacker | login as attacker | OK
+CHECK attacker | T k=2 paged (fetch 5000): paging refused for every role | ERR InvalidQueryException: Cannot page queries with both ORDER BY and a IN restriction on the partition key; you must either remove the ORDER BY or the IN and sort client side, or disable paging for this query
+CHECK attacker | T k=2 unpaged (fetch -1): the client's choice | OK rows=10 vbytes=2621440 ms=1103 first=[3/0 7/0 3/1 7/1 3/2 7/2 3/3 7/3 3/4 7/4]
+CHECK attacker | I k=2 (PER PARTITION LIMIT 10) unpaged | OK rows=10 vbytes=2621440 ms=35 first=[3/0 7/0 3/1 7/1 3/2 7/2 3/3 7/3 3/4 7/4]
+CHECK attacker | IN with 200 keys, ORDER BY, unpaged (partition_keys_in_select guardrail off for this role) | OK rows=0 vbytes=0 ms=48
+CHECK attacker | INSERT 256 KiB value (MODIFY) | OK rows=0 vbytes=0 ms=22
+CHECK attacker | INSERT 8 MiB value (no value-size guardrail for this role) | OK rows=0 vbytes=0 ms=110
+CHECK attacker | INSERT 17 MiB value (max_mutation_size 16 MiB applies) | ERR InvalidQueryException: Request is too big: length 17825888 exceeds maximum allowed length 16777216.
+CHECK attacker | CREATE TABLE in b17 (no CREATE) | ERR UnauthorizedException: User attacker has no CREATE permission on <all tables in b17> or any of its parents
+CHECK attacker | CREATE KEYSPACE (no CREATE) | ERR UnauthorizedException: User attacker has no CREATE permission on <all keyspaces> or any of its parents
+CHECK attacker | ALTER TABLE b17.t (no ALTER) | ERR UnauthorizedException: User attacker has no ALTER permission on <table b17.t> or any of its parents
+CHECK attacker | DROP TABLE b17.t (no DROP) | ERR UnauthorizedException: User attacker has no DROP permission on <table b17.t> or any of its parents
+CHECK attacker | SELECT vic.kv (another tenant's table) | ERR UnauthorizedException: User attacker has no SELECT permission on <table vic.kv> or any of its parents
+CHECK attacker | INSERT vic.kv (another tenant's table) | ERR UnauthorizedException: User attacker has no MODIFY permission on <table vic.kv> or any of its parents
+CHECK attacker | SELECT system_auth.roles | ERR UnauthorizedException: User attacker has no SELECT permission on <table system_auth.roles> or any of its parents
+CHECK attacker | LIST ALL PERMISSIONS OF attacker | OK rows=2 vbytes=0 ms=15
+CHECK reader | login as reader | OK
+CHECK reader | T k=2 unpaged (SELECT only) | OK rows=10 vbytes=2621440 ms=1051 first=[3/0 7/0 3/1 7/1 3/2 7/2 3/3 7/3 3/4 7/4]
+CHECK reader | INSERT into b17.t (no MODIFY) | ERR UnauthorizedException: User reader has no MODIFY permission on <table b17.t> or any of its parents
+CHECK tenant | login as tenant | OK
+CHECK tenant | SELECT b17.t (attacker's table) | ERR UnauthorizedException: User tenant has no SELECT permission on <table b17.t> or any of its parents
+CHECK tenant | SELECT vic.kv (own) | OK rows=1 vbytes=0 ms=7
+authcheck done

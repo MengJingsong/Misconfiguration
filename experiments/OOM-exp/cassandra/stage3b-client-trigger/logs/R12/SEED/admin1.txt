@@ -1,0 +1,33 @@
+OK   CREATE ROLE attacker WITH PASSWORD = '<redacted>' ...
+     void
+OK   CREATE ROLE victim WITH PASSWORD = '<redacted>' ...
+     void
+OK   CREATE KEYSPACE r12 WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+     schema_change
+OK   CREATE TABLE r12.t (k int, c int, v blob, PRIMARY KEY (k, c))
+     schema_change
+OK   GRANT SELECT ON TABLE r12.t TO attacker
+     void
+OK   GRANT MODIFY ON TABLE r12.t TO attacker
+     void
+OK   CREATE KEYSPACE vks WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+     schema_change
+OK   CREATE TABLE vks.t (k int PRIMARY KEY, v blob)
+     schema_change
+OK   GRANT SELECT ON TABLE vks.t TO victim
+     void
+OK   GRANT MODIFY ON TABLE vks.t TO victim
+     void
+OK   LIST ALL PERMISSIONS OF attacker
+     rows 2: role | username | resource | permission
+       attacker | attacker | <table r12.t> | SELECT
+       attacker | attacker | <table r12.t> | MODIFY
+OK   LIST ALL PERMISSIONS OF victim
+     rows 2: role | username | resource | permission
+       victim | victim | <table vks.t> | SELECT
+       victim | victim | <table vks.t> | MODIFY
+OK   LIST ROLES
+     rows 3: role | super | login | options | datacenters
+       attacker | False | True | {} | ALL
+       cassandra | True | True | {} | ALL
+       victim | False | True | {} | ALL

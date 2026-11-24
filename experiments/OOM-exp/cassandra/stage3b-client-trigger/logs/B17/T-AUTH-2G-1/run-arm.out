@@ -1,0 +1,57 @@
+[2026-11-23 17:30:13 EST] BATCH T-AUTH-2G-1 -> OOM type="java.lang.OutOfMemoryError: Java heap space" at+32s cancelled=0 last=[Q {"start":1795472980496,"end":1795472980497,"ms":0,"Q":"T","k":4,"thread":0,"fe
+8 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b3b17-T-AUTH-2G-1-1795472854.scope
+[2026-11-23 17:27:47 EST] ready T-AUTH-2G-1
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms2G -Xmx2G -XX:MaxDirectMemorySize=1024M -XX:HeapDumpPath=/mydata/s4/3b-B17/runs/T-AUTH-2G-1/cassandra-1795472854-pid396468.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-23 17:27:52 EST] GC.run T-AUTH-2G-1
+1795472876,base,nmtOtherKB=73561,nmtTotalKB=2599058,rssKB=2853592,rssAnonKB=2673992,scopeCurB=2767085568,scopeOomKill=0,1795472875659,92105256,75328040,75328040,0,0,0,-1,-1,58534824,0,-1,51,88,-1
+[2026-11-23 17:27:56 EST] victim tenant client pid 397004 (role tenant, 20 w/s + 20 r/s)
+victim seconds before attack: 63
+[2026-11-23 17:29:00 EST] ATTACK START role=attacker
+[2026-11-23 17:29:00 EST] client pid 397811
+/mydata/s4/3b-B17/harness/victim-ctl.sh: line 66: 396468 Killed                  CASSANDRA_CONF=$R/conf CASSANDRA_LOG_DIR=$R/logs MAX_HEAP_SIZE=$HEAP MAX_DIRECT_MEMORY_SIZE=$DIRECT CASSANDRA_HEAPDUMP_DIR=$R JVM_EXTRA_OPTS="-XX:NativeMemoryTracking=summary -Xlog:gc=info,safepoint=info:file=$R/gc.log:time,uptime,level,tags:filecount=20,filesize=20m" setsid nohup systemd-run --user --scope --unit="b3b17-$L-$(date +%s)" -p MemorySwapMax=0 "$BUILD/bin/cassandra" -f < /dev/null > "$R/stdout.log" 2>&1
+[2026-11-23 17:29:32 EST] VICTIM DEAD at +32s
+VSUMMARY secs=132 sent=5281 ok=3601 timeout=0 unavail=0 nohost=1577 other=103 skipped=0
+HOSTGONE
+SUMMARY secs=38 ok=6 err_readfail=0 err_readtimeout=0 err_invalid=0 err_other=2 inflight_left=0
+22:29:31 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 2000 milliseconds
+22:29:33 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 4000 milliseconds
+22:29:37 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 8000 milliseconds
+[2026-11-23 17:30:11 EST] OOM/GC check
+CompileCommand: dontinline org/apache/cassandra/io/util/RebufferingInputStream.readPrimitiveSlowly(I)J
+CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.address()J
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.length()I
+CompileCommand: inline org/apache/cassandra/db/rows/UnfilteredSerializer.serializeRowBody(Lorg/apache/cassandra/db/rows/Row;ILorg/apache/cassandra/db/rows/SerializationHelper;Lorg/apache/cassandra/io/util/DataOutputPlus;)V
+CompileCommand: inline org/apache/cassandra/io/util/Memory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/SafeMemory.checkBounds(JJ)V
+CompileCommand: inline org/apache/cassandra/io/util/TrackedDataInputPlus.checkCanRead(I)V
+CompileCommand: inline org/apache/cassandra/net/FrameDecoderWith8bHeader.decode(Ljava/util/Collection;Lorg/apache/cassandra/net/ShareableBytes;I)V
+CompileCommand: inline org/apache/cassandra/service/reads/repair/RowIteratorMergeListener.applyToPartition(ILjava/util/function/Consumer;)V
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.selectBoundary(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;II)I
+CompileCommand: inline org/apache/cassandra/utils/AsymmetricOrdering.strictnessOfLessThan(Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;)I
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.indexes(Lorg/apache/cassandra/utils/IFilter/FilterKey;)[J
+CompileCommand: inline org/apache/cassandra/utils/BloomFilter.setIndexes(JJIJ[J)V
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare(Ljava/nio/ByteBuffer;[B)I
+CompileCommand: inline org/apache/cassandra/utils/ByteBufferUtil.compare([BLjava/nio/ByteBuffer;)I
+--
+INFO  [Native-Transport-Requests-1] 2026-11-23T22:29:27,482 MonitoringTask.java:95 - Scheduling monitoring task with report interval of 5000 ms, max operations 50
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /mydata/s4/3b-B17/runs/T-AUTH-2G-1/cassandra-1795472854-pid396468.hprof ...
+Heap dump file created [1323201472 bytes in 1.805 secs]
+#
+# java.lang.OutOfMemoryError: Java heap space
+# -XX:OnOutOfMemoryError="kill -9 %p"
+#   Executing /bin/sh -c "kill -9 396468"...
+-rw------- 1 jason92 misconfiguration 1323201472 Nov 23 15:29 cassandra-1795472854-pid396468.hprof
+pauses=18 full_gcs=2 total_pause=0s max60=0% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=HeapDumper@113.827s,ReportJavaOutOfMemory@115.633s
+[2026-11-23 17:30:13 EST] stopped T-AUTH-2G-1
+OOM type="java.lang.OutOfMemoryError: Java heap space" at+32s cancelled=0 last=[Q {"start":1795472980496,"end":1795472980497,"ms":0,"Q":"T","k":4,"thread":0,"fetch":2147483647,"pks":"[12, 5, 11, 6]","rows":0,"first":"","vbytes":0,"err":"NoHostAvailableException","msg":"All host(s]
+attack.start=1795472940457 c-step.start=1795472966587 attack.end=1795472972618 (c-step length 6.031 s); victim 132 s
+  before: 57 s, sent 2280 (40.0/s), completed ok 2280 / err timeout 0, unavailable 0, nohost 0, other 0; skipped 0; success 100.0 % of completions, ok/s 40.0; seconds with 0 ok: 0; p50 median 1 ms, p99 max 171 ms, max 171 ms; inflight max 1
+  attack warm-up: 26 s, sent 1040 (40.0/s), completed ok 1040 / err timeout 0, unavailable 0, nohost 0, other 0; skipped 0; success 100.0 % of completions, ok/s 40.0; seconds with 0 ok: 0; p50 median 1.0 ms, p99 max 4 ms, max 4 ms; inflight max 1
+  attack test step: 6 s, sent 240 (40.0/s), completed ok 81 / err timeout 0, unavailable 0, nohost 57, other 103; skipped 0; success 33.6 % of completions, ok/s 13.5; seconds with 0 ok: 3; p50 median 1 ms, p99 max 82 ms, max 82 ms; inflight max 80
+      err: NoHostAvailableException: All host(s) tried for query failed (no host was tried)
+  after: 38 s, sent 1520 (40.0/s), completed ok 0 / err timeout 0, unavailable 0, nohost 1520, other 0; skipped 0; success 0.0 % of completions, ok/s 0.0; seconds with 0 ok: 38; p50 median NA ms, p99 max NA ms, max NA ms; inflight max 0
+      err: NoHostAvailableException: All host(s) tried for query failed (no host was tried)
+first degraded victim second: +30 s after attack start (ok 0, errs 0/0/17/103, max -1 ms)
+[2026-11-23 17:30:13 EST] END T-AUTH-2G-1 OOM type="java.lang.OutOfMemoryError: Java heap space" at+32s cancelled=0 last=[Q {"start":1795472980496,"end":1795472980497,"ms":0,"Q":"T","k":4,"thread":0,"fetch":2147483647,"pks":"[12, 5, 11, 6]","rows":0,"first":"","vbytes":0,"err":"NoHostAvailableException","msg":"All host(s]

@@ -1,0 +1,633 @@
+# as role: dataatk
+Exception in thread "main" com.datastax.driver.core.exceptions.ReadTimeoutException: Cassandra timeout during read query at consistency QUORUM (2 responses were required but only 1 replica responded). In case this was generated during read repair, the consistency level is not representative of the actual consistency.
+Caused by: com.datastax.driver.core.exceptions.ReadTimeoutException: Cassandra timeout during read query at consistency QUORUM (2 responses were required but only 1 replica responded). In case this was generated during read repair, the consistency level is not representative of the actual consistency.
+Caused by: com.datastax.driver.core.exceptions.ReadTimeoutException: Cassandra timeout during read query at consistency QUORUM (2 responses were required but only 1 replica responded). In case this was generated during read repair, the consistency level is not representative of the actual consistency.
+	... 26 more
+# as role: dataatk
+trace cl=QUORUM query=SELECT * FROM adm.t WHERE b = 1 ALLOW FILTERING tag=test rows=5000 valueBytes=10240000 ms=1341 rowTokenMin=-8258539176479455625 rowTokenMax=-8167543008293659085
+  ev 248us /127.0.0.1 [Native-Transport-Requests-1] Parsing SELECT * FROM adm.t WHERE b = 1 ALLOW FILTERING
+  ev 464us /127.0.0.1 [Native-Transport-Requests-1] Preparing statement
+  ev 816us /127.0.0.1 [Native-Transport-Requests-1] reading data from /127.0.0.3:7000
+  ev 1008us /127.0.0.1 [Messaging-EventLoop-3-4] Sending READ_REQ message to /127.0.0.3:7000 message size 122 bytes
+  ev 25us /127.0.0.3 [Messaging-EventLoop-3-6] READ_REQ message received from /127.0.0.1:7000
+  ev 1076us /127.0.0.1 [ReadStage-2] Executing single-partition query on role_permissions
+  ev 287us /127.0.0.3 [ReadStage-2] Executing single-partition query on role_permissions
+  ev 1163us /127.0.0.1 [ReadStage-2] Acquiring sstable references
+  ev 353us /127.0.0.3 [ReadStage-2] Acquiring sstable references
+  ev 1265us /127.0.0.1 [ReadStage-2] Skipped 0/0 non-slice-intersecting sstables, included 0 due to tombstones
+  ev 1455us /127.0.0.1 [ReadStage-2] Merged data from memtables and 0 sstables
+  ev 1536us /127.0.0.1 [ReadStage-2] Read 1 live rows and 0 tombstone cells
+  ev 2459us /127.0.0.1 [Messaging-EventLoop-3-11] READ_RSP message received from /127.0.0.3:7000
+  ev 473us /127.0.0.3 [ReadStage-2] Skipped 0/0 non-slice-intersecting sstables, included 0 due to tombstones
+  ev 2553us /127.0.0.1 [RequestResponseStage-5] Processing response from /127.0.0.3:7000
+  ev 630us /127.0.0.3 [ReadStage-2] Merged data from memtables and 0 sstables
+  ev 710us /127.0.0.3 [ReadStage-2] Read 1 live rows and 0 tombstone cells
+  ev 760us /127.0.0.3 [ReadStage-2] Enqueuing response to /127.0.0.1:7000
+  ev 872us /127.0.0.3 [Messaging-EventLoop-3-1] Sending READ_RSP message to /127.0.0.1:7000 message size 94 bytes
+  ev 3022us /127.0.0.1 [Native-Transport-Requests-1] reading data from /127.0.0.3:7000
+  ev 7us /127.0.0.3 [Messaging-EventLoop-3-6] READ_REQ message received from /127.0.0.1:7000
+  ev 3133us /127.0.0.1 [ReadStage-3] Executing single-partition query on role_permissions
+  ev 100us /127.0.0.3 [ReadStage-3] Executing single-partition query on role_permissions
+  ev 3132us /127.0.0.1 [Messaging-EventLoop-3-4] Sending READ_REQ message to /127.0.0.3:7000 message size 122 bytes
+  ev 163us /127.0.0.3 [ReadStage-3] Acquiring sstable references
+  ev 3189us /127.0.0.1 [ReadStage-3] Acquiring sstable references
+  ev 234us /127.0.0.3 [ReadStage-3] Skipped 0/0 non-slice-intersecting sstables, included 0 due to tombstones
+  ev 3282us /127.0.0.1 [ReadStage-3] Skipped 0/0 non-slice-intersecting sstables, included 0 due to tombstones
+  ev 296us /127.0.0.3 [ReadStage-3] Merged data from memtables and 0 sstables
+  ev 3360us /127.0.0.1 [ReadStage-3] Merged data from memtables and 0 sstables
+  ev 349us /127.0.0.3 [ReadStage-3] Read 0 live rows and 0 tombstone cells
+  ev 3412us /127.0.0.1 [ReadStage-3] Read 0 live rows and 0 tombstone cells
+  ev 396us /127.0.0.3 [ReadStage-3] Enqueuing response to /127.0.0.1:7000
+  ev 472us /127.0.0.3 [Messaging-EventLoop-3-1] Sending READ_RSP message to /127.0.0.1:7000 message size 40 bytes
+  ev 3959us /127.0.0.1 [Messaging-EventLoop-3-11] READ_RSP message received from /127.0.0.3:7000
+  ev 24us /127.0.0.3 [Messaging-EventLoop-3-6] READ_REQ message received from /127.0.0.1:7000
+  ev 4073us /127.0.0.1 [RequestResponseStage-4] Processing response from /127.0.0.3:7000
+  ev 135us /127.0.0.3 [ReadStage-3] Executing single-partition query on role_permissions
+  ev 4284us /127.0.0.1 [Native-Transport-Requests-1] reading data from /127.0.0.3:7000
+  ev 204us /127.0.0.3 [ReadStage-3] Acquiring sstable references
+  ev 4378us /127.0.0.1 [Messaging-EventLoop-3-4] Sending READ_REQ message to /127.0.0.3:7000 message size 120 bytes
+  ev 280us /127.0.0.3 [ReadStage-3] Skipped 0/0 non-slice-intersecting sstables, included 0 due to tombstones
+  ev 4385us /127.0.0.1 [ReadStage-3] Executing single-partition query on role_permissions
+  ev 4442us /127.0.0.1 [ReadStage-3] Acquiring sstable references
+  ev 4500us /127.0.0.1 [ReadStage-3] Skipped 0/0 non-slice-intersecting sstables, included 0 due to tombstones
+  ev 4559us /127.0.0.1 [ReadStage-3] Merged data from memtables and 0 sstables
+  ev 4605us /127.0.0.1 [ReadStage-3] Read 0 live rows and 0 tombstone cells
+  ev 5422us /127.0.0.1 [Messaging-EventLoop-3-11] READ_RSP message received from /127.0.0.3:7000
+  ev 342us /127.0.0.3 [ReadStage-3] Merged data from memtables and 0 sstables
+  ev 5549us /127.0.0.1 [RequestResponseStage-4] Processing response from /127.0.0.3:7000
+  ev 393us /127.0.0.3 [ReadStage-3] Read 0 live rows and 0 tombstone cells
+  ev 5814us /127.0.0.1 [Native-Transport-Requests-1] Computing ranges to query
+  ev 438us /127.0.0.3 [ReadStage-3] Enqueuing response to /127.0.0.1:7000
+  ev 563us /127.0.0.3 [Messaging-EventLoop-3-1] Sending READ_RSP message to /127.0.0.1:7000 message size 40 bytes
+  ev 6121us /127.0.0.1 [Native-Transport-Requests-1] Submitting range requests on 49 ranges with a concurrency of 1 (18212.4 rows per range expected)
+  ev 7us /127.0.0.3 [Messaging-EventLoop-3-6] RANGE_REQ message received from /127.0.0.1:7000
+  ev 6295us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(9116695661365208627,-8948337320652264943])
+  ev 6409us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.2:7000,(9116695661365208627,-8948337320652264943])
+  ev 6421us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 6519us /127.0.0.1 [Native-Transport-Requests-1] Submitted 1 concurrent range requests
+  ev 6553us /127.0.0.1 [Messaging-EventLoop-3-1] Sending RANGE_REQ message to /127.0.0.2:7000 message size 119 bytes
+  ev 239us /127.0.0.3 [ReadStage-4] Executing seq scan across 3 sstables for (min(-9223372036854775808), max(-8948337320652264943)]
+  ev 27us /127.0.0.2 [Messaging-EventLoop-3-1] RANGE_REQ message received from /127.0.0.1:7000
+  ev 475us /127.0.0.2 [ReadStage-1] Executing seq scan across 3 sstables for (min(-9223372036854775808), max(-8948337320652264943)]
+  ev 106609us /127.0.0.2 [ReadStage-1] Read 14967 live rows and 0 tombstone cells
+  ev 114511us /127.0.0.1 [Messaging-EventLoop-3-9] RANGE_RSP message received from /127.0.0.2:7000
+  ev 106970us /127.0.0.2 [ReadStage-1] Enqueuing response to /127.0.0.1:7000
+  ev 114791us /127.0.0.1 [RequestResponseStage-2] Processing response from /127.0.0.2:7000
+  ev 107175us /127.0.0.2 [Messaging-EventLoop-3-1] Sending RANGE_RSP message to /127.0.0.1:7000 message size 40 bytes
+  ev 128515us /127.0.0.3 [ReadStage-4] Read 14967 live rows and 0 tombstone cells
+  ev 128888us /127.0.0.3 [ReadStage-4] Enqueuing response to /127.0.0.1:7000
+  ev 129071us /127.0.0.3 [Messaging-EventLoop-3-1] Sending RANGE_RSP message to /127.0.0.1:7000 message size 40 bytes
+  ev 136076us /127.0.0.1 [Messaging-EventLoop-3-11] RANGE_RSP message received from /127.0.0.3:7000
+  ev 136319us /127.0.0.1 [RequestResponseStage-3] Processing response from /127.0.0.3:7000
+  ev 136742us /127.0.0.1 [Native-Transport-Requests-1] Didn't get any response rows; new concurrent requests: 48
+  ev 136845us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.1:7000,(-8948337320652264943,-8712067380442142911])
+  ev 136981us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.2:7000,(-8948337320652264943,-8712067380442142911])
+  ev 23us /127.0.0.3 [Messaging-EventLoop-3-6] RANGE_REQ message received from /127.0.0.1:7000
+  ev 14us /127.0.0.2 [Messaging-EventLoop-3-1] RANGE_REQ message received from /127.0.0.1:7000
+  ev 137042us /127.0.0.1 [Messaging-EventLoop-3-13] Sending RANGE_REQ message to /127.0.0.1:7000 message size 119 bytes
+  ev 297us /127.0.0.2 [ReadStage-1] Executing seq scan across 3 sstables for (max(-8948337320652264943), max(-8712067380442142911)]
+  ev 137079us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.1:7000,(-8712067380442142911,-8258547796004310175])
+  ev 297us /127.0.0.2 [Messaging-EventLoop-3-1] RANGE_REQ message received from /127.0.0.1:7000
+  ev 137082us /127.0.0.1 [Messaging-EventLoop-3-1] Sending RANGE_REQ message to /127.0.0.2:7000 message size 119 bytes
+  ev 137154us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(-8712067380442142911,-8258547796004310175])
+  ev 137253us /127.0.0.1 [Messaging-EventLoop-3-13] Sending RANGE_REQ message to /127.0.0.1:7000 message size 119 bytes
+  ev 137296us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 137296us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(-8258547796004310175,-7885984920981913402])
+  ev 137359us /127.0.0.1 [Messaging-EventLoop-3-16] RANGE_REQ message received from /127.0.0.1:7000
+  ev 137399us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.2:7000,(-8258547796004310175,-7885984920981913402])
+  ev 137436us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 137511us /127.0.0.1 [Messaging-EventLoop-3-16] RANGE_REQ message received from /127.0.0.1:7000
+  ev 137514us /127.0.0.1 [Messaging-EventLoop-3-1] Sending RANGE_REQ message to /127.0.0.2:7000 message size 119 bytes
+  ev 137539us /127.0.0.1 [ReadStage-4] Executing seq scan across 3 sstables for (max(-8948337320652264943), max(-8712067380442142911)]
+  ev 137539us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.1:7000,(-7885984920981913402,-7647726390669079513])
+  ev 137639us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.2:7000,(-7885984920981913402,-7647726390669079513])
+  ev 137658us /127.0.0.1 [Messaging-EventLoop-3-13] Sending RANGE_REQ message to /127.0.0.1:7000 message size 119 bytes
+  ev 137669us /127.0.0.1 [ReadStage-2] Executing seq scan across 3 sstables for (max(-8712067380442142911), max(-8258547796004310175)]
+  ev 137743us /127.0.0.1 [Messaging-EventLoop-3-1] Sending RANGE_REQ message to /127.0.0.2:7000 message size 119 bytes
+  ev 137822us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.1:7000,(-7647726390669079513,-7240696391261883159])
+  ev 137846us /127.0.0.1 [Messaging-EventLoop-3-16] RANGE_REQ message received from /127.0.0.1:7000
+  ev 230us /127.0.0.3 [Messaging-EventLoop-3-6] RANGE_REQ message received from /127.0.0.1:7000
+  ev 510us /127.0.0.2 [ReadStage-2] Executing seq scan across 3 sstables for (max(-8258547796004310175), max(-7885984920981913402)]
+  ev 137949us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(-7647726390669079513,-7240696391261883159])
+  ev 311us /127.0.0.3 [ReadStage-4] Executing seq scan across 3 sstables for (max(-8712067380442142911), max(-8258547796004310175)]
+  ev 543us /127.0.0.2 [Messaging-EventLoop-3-1] RANGE_REQ message received from /127.0.0.1:7000
+  ev 137963us /127.0.0.1 [Messaging-EventLoop-3-13] Sending RANGE_REQ message to /127.0.0.1:7000 message size 119 bytes
+  ev 435us /127.0.0.3 [ReadStage-2] Executing seq scan across 3 sstables for (max(-8258547796004310175), max(-7885984920981913402)]
+  ev 917us /127.0.0.2 [ReadStage-3] Executing seq scan across 3 sstables for (max(-7885984920981913402), max(-7647726390669079513)]
+  ev 138051us /127.0.0.1 [ReadStage-3] Executing seq scan across 3 sstables for (max(-7885984920981913402), max(-7647726390669079513)]
+  ev 1012us /127.0.0.3 [Messaging-EventLoop-3-6] RANGE_REQ message received from /127.0.0.1:7000
+  ev 1230us /127.0.0.2 [Messaging-EventLoop-3-1] RANGE_REQ message received from /127.0.0.1:7000
+  ev 138076us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 138127us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.1:7000,(-6747858381592018410,-6423024458649532365])
+  ev 138193us /127.0.0.1 [Messaging-EventLoop-3-16] RANGE_REQ message received from /127.0.0.1:7000
+  ev 138218us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.2:7000,(-6747858381592018410,-6423024458649532365])
+  ev 138240us /127.0.0.1 [Messaging-EventLoop-3-13] Sending RANGE_REQ message to /127.0.0.1:7000 message size 119 bytes
+  ev 138361us /127.0.0.1 [Messaging-EventLoop-3-1] Sending RANGE_REQ message to /127.0.0.2:7000 message size 119 bytes
+  ev 138393us /127.0.0.1 [ReadStage-5] Executing seq scan across 3 sstables for (max(-7647726390669079513), max(-6747858381592018410)]
+  ev 138409us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.1:7000,(-5827722089689133114,-5347268577423952825])
+  ev 138510us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(-5827722089689133114,-5347268577423952825])
+  ev 138564us /127.0.0.1 [Messaging-EventLoop-3-13] Sending RANGE_REQ message to /127.0.0.1:7000 message size 119 bytes
+  ev 138583us /127.0.0.1 [Messaging-EventLoop-3-16] RANGE_REQ message received from /127.0.0.1:7000
+  ev 138668us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(-4611352884713059184,-4201647188239274733])
+  ev 138748us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 138763us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.2:7000,(-4611352884713059184,-4201647188239274733])
+  ev 138789us /127.0.0.1 [ReadStage-8] Executing seq scan across 3 sstables for (max(-6747858381592018410), max(-5827722089689133114)]
+  ev 138831us /127.0.0.1 [Messaging-EventLoop-3-16] RANGE_REQ message received from /127.0.0.1:7000
+  ev 138898us /127.0.0.1 [Messaging-EventLoop-3-1] Sending RANGE_REQ message to /127.0.0.2:7000 message size 119 bytes
+  ev 1314us /127.0.0.3 [ReadStage-3] Executing seq scan across 3 sstables for (max(-7647726390669079513), max(-6747858381592018410)]
+  ev 1484us /127.0.0.2 [ReadStage-4] Executing seq scan across 3 sstables for (max(-6747858381592018410), max(-5827722089689133114)]
+  ev 138903us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 1901us /127.0.0.3 [Messaging-EventLoop-3-6] RANGE_REQ message received from /127.0.0.1:7000
+  ev 1903us /127.0.0.2 [Messaging-EventLoop-3-1] RANGE_REQ message received from /127.0.0.1:7000
+  ev 138916us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.1:7000,(-4201647188239274733,-3950657760176147085])
+  ev 2192us /127.0.0.3 [Messaging-EventLoop-3-6] RANGE_REQ message received from /127.0.0.1:7000
+  ev 2138us /127.0.0.2 [Messaging-EventLoop-3-1] RANGE_REQ message received from /127.0.0.1:7000
+  ev 138989us /127.0.0.1 [ReadStage-7] Executing seq scan across 3 sstables for (max(-5827722089689133114), max(-4611352884713059184)]
+  ev 2379us /127.0.0.2 [ReadStage-6] Executing seq scan across 3 sstables for (max(-4201647188239274733), max(-3950657760176147085)]
+  ev 139035us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.2:7000,(-4201647188239274733,-3950657760176147085])
+  ev 2397us /127.0.0.2 [ReadStage-5] Executing seq scan across 3 sstables for (max(-4611352884713059184), max(-4201647188239274733)]
+  ev 139053us /127.0.0.1 [Messaging-EventLoop-3-13] Sending RANGE_REQ message to /127.0.0.1:7000 message size 119 bytes
+  ev 139167us /127.0.0.1 [Messaging-EventLoop-3-1] Sending RANGE_REQ message to /127.0.0.2:7000 message size 119 bytes
+  ev 139177us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.1:7000,(-3950657760176147085,-3531980077265457527])
+  ev 139301us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(-3950657760176147085,-3531980077265457527])
+  ev 139323us /127.0.0.1 [Messaging-EventLoop-3-13] Sending RANGE_REQ message to /127.0.0.1:7000 message size 119 bytes
+  ev 139369us /127.0.0.1 [Messaging-EventLoop-3-16] RANGE_REQ message received from /127.0.0.1:7000
+  ev 139424us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 139439us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(-3531980077265457527,-3084408737367577139])
+  ev 139515us /127.0.0.1 [ReadStage-6] Executing seq scan across 3 sstables for (max(-4201647188239274733), max(-3950657760176147085)]
+  ev 139568us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.2:7000,(-3531980077265457527,-3084408737367577139])
+  ev 139577us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 139565us /127.0.0.1 [Messaging-EventLoop-3-16] RANGE_REQ message received from /127.0.0.1:7000
+  ev 139704us /127.0.0.1 [Messaging-EventLoop-3-1] Sending RANGE_REQ message to /127.0.0.2:7000 message size 119 bytes
+  ev 139805us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.1:7000,(-3084408737367577139,-2781702836997132705])
+  ev 139919us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.2:7000,(-3084408737367577139,-2781702836997132705])
+  ev 2222us /127.0.0.3 [ReadStage-7] Executing seq scan across 3 sstables for (max(-5827722089689133114), max(-4611352884713059184)]
+  ev 139935us /127.0.0.1 [ReadStage-9] Executing seq scan across 3 sstables for (max(-3950657760176147085), max(-3531980077265457527)]
+  ev 2390us /127.0.0.3 [ReadStage-8] Executing seq scan across 3 sstables for (max(-4611352884713059184), max(-4201647188239274733)]
+  ev 139939us /127.0.0.1 [Messaging-EventLoop-3-13] Sending RANGE_REQ message to /127.0.0.1:7000 message size 119 bytes
+  ev 2542us /127.0.0.3 [Messaging-EventLoop-3-6] RANGE_REQ message received from /127.0.0.1:7000
+  ev 140070us /127.0.0.1 [Messaging-EventLoop-3-1] Sending RANGE_REQ message to /127.0.0.2:7000 message size 119 bytes
+  ev 2720us /127.0.0.3 [Messaging-EventLoop-3-6] RANGE_REQ message received from /127.0.0.1:7000
+  ev 140116us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(-1321095828506330055,-796665863876426197])
+  ev 2732us /127.0.0.3 [ReadStage-6] Executing seq scan across 3 sstables for (max(-3950657760176147085), max(-3531980077265457527)]
+  ev 140227us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.2:7000,(-1321095828506330055,-796665863876426197])
+  ev 2998us /127.0.0.3 [Messaging-EventLoop-3-6] RANGE_REQ message received from /127.0.0.1:7000
+  ev 140243us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 3198us /127.0.0.3 [Messaging-EventLoop-3-6] RANGE_REQ message received from /127.0.0.1:7000
+  ev 140287us /127.0.0.1 [Messaging-EventLoop-3-16] RANGE_REQ message received from /127.0.0.1:7000
+  ev 140355us /127.0.0.1 [Messaging-EventLoop-3-1] Sending RANGE_REQ message to /127.0.0.2:7000 message size 119 bytes
+  ev 140363us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(-381028204304786318,-12685012678011000])
+  ev 140397us /127.0.0.1 [ReadStage-11] Executing seq scan across 3 sstables for (max(-3084408737367577139), max(-1321095828506330055)]
+  ev 140486us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.1:7000,(-381028204304786318,-12685012678011000])
+  ev 140504us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 140622us /127.0.0.1 [Messaging-EventLoop-3-13] Sending RANGE_REQ message to /127.0.0.1:7000 message size 119 bytes
+  ev 140644us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.1:7000,(-12685012678011000,268908724007568582])
+  ev 140737us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.2:7000,(-12685012678011000,268908724007568582])
+  ev 140756us /127.0.0.1 [Messaging-EventLoop-3-13] Sending RANGE_REQ message to /127.0.0.1:7000 message size 119 bytes
+  ev 140859us /127.0.0.1 [Messaging-EventLoop-3-1] Sending RANGE_REQ message to /127.0.0.2:7000 message size 119 bytes
+  ev 3374us /127.0.0.3 [ReadStage-5] Executing seq scan across 3 sstables for (max(-3531980077265457527), max(-3084408737367577139)]
+  ev 140878us /127.0.0.1 [Messaging-EventLoop-3-16] RANGE_REQ message received from /127.0.0.1:7000
+  ev 140899us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(268908724007568582,830652142367194826])
+  ev 141009us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.2:7000,(268908724007568582,830652142367194826])
+  ev 141023us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 141045us /127.0.0.1 [ReadStage-12] Executing seq scan across 3 sstables for (max(-381028204304786318), max(-12685012678011000)]
+  ev 141070us /127.0.0.1 [Messaging-EventLoop-3-16] RANGE_REQ message received from /127.0.0.1:7000
+  ev 141128us /127.0.0.1 [Messaging-EventLoop-3-1] Sending RANGE_REQ message to /127.0.0.2:7000 message size 119 bytes
+  ev 141177us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(1227974994715907617,1619795951326253050])
+  ev 141279us /127.0.0.1 [ReadStage-10] Executing seq scan across 3 sstables for (max(-12685012678011000), max(268908724007568582)]
+  ev 141287us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.1:7000,(1227974994715907617,1619795951326253050])
+  ev 141300us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 141424us /127.0.0.1 [Messaging-EventLoop-3-13] Sending RANGE_REQ message to /127.0.0.1:7000 message size 119 bytes
+  ev 141445us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(1887932019704611879,2252779774799387173])
+  ev 141543us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.2:7000,(1887932019704611879,2252779774799387173])
+  ev 141553us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 141650us /127.0.0.1 [Messaging-EventLoop-3-16] RANGE_REQ message received from /127.0.0.1:7000
+  ev 141671us /127.0.0.1 [Messaging-EventLoop-3-1] Sending RANGE_REQ message to /127.0.0.2:7000 message size 119 bytes
+  ev 141681us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.1:7000,(2252779774799387173,2486395710661350705])
+  ev 141791us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.2:7000,(2252779774799387173,2486395710661350705])
+  ev 141810us /127.0.0.1 [Messaging-EventLoop-3-13] Sending RANGE_REQ message to /127.0.0.1:7000 message size 119 bytes
+  ev 141832us /127.0.0.1 [ReadStage-14] Executing seq scan across 3 sstables for (max(1227974994715907617), max(1887932019704611879)]
+  ev 141901us /127.0.0.1 [Messaging-EventLoop-3-1] Sending RANGE_REQ message to /127.0.0.2:7000 message size 119 bytes
+  ev 141914us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.1:7000,(2486395710661350705,2866077472220725955])
+  ev 142020us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(2486395710661350705,2866077472220725955])
+  ev 142029us /127.0.0.1 [Messaging-EventLoop-3-16] RANGE_REQ message received from /127.0.0.1:7000
+  ev 142038us /127.0.0.1 [Messaging-EventLoop-3-13] Sending RANGE_REQ message to /127.0.0.1:7000 message size 119 bytes
+  ev 142134us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 142169us /127.0.0.1 [ReadStage-15] Executing seq scan across 3 sstables for (max(2252779774799387173), max(2486395710661350705)]
+  ev 142205us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(2866077472220725955,3230670631192875837])
+  ev 142260us /127.0.0.1 [Messaging-EventLoop-3-16] RANGE_REQ message received from /127.0.0.1:7000
+  ev 142296us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.2:7000,(2866077472220725955,3230670631192875837])
+  ev 142309us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 142412us /127.0.0.1 [ReadStage-16] Executing seq scan across 3 sstables for (max(2486395710661350705), max(2866077472220725955)]
+  ev 142433us /127.0.0.1 [Messaging-EventLoop-3-1] Sending RANGE_REQ message to /127.0.0.2:7000 message size 119 bytes
+  ev 142469us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(3946982858617884462,4377994339548552545])
+  ev 142574us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.1:7000,(3946982858617884462,4377994339548552545])
+  ev 142598us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 142699us /127.0.0.1 [Messaging-EventLoop-3-13] Sending RANGE_REQ message to /127.0.0.1:7000 message size 119 bytes
+  ev 142720us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(4644711773044313083,5044925088469493381])
+  ev 142815us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.2:7000,(4644711773044313083,5044925088469493381])
+  ev 142906us /127.0.0.1 [Messaging-EventLoop-3-16] RANGE_REQ message received from /127.0.0.1:7000
+  ev 5570us /127.0.0.2 [Messaging-EventLoop-3-1] RANGE_REQ message received from /127.0.0.1:7000
+  ev 142928us /127.0.0.1 [Messaging-EventLoop-3-1] Sending RANGE_REQ message to /127.0.0.2:7000 message size 119 bytes
+  ev 5962us /127.0.0.2 [Messaging-EventLoop-3-1] RANGE_REQ message received from /127.0.0.1:7000
+  ev 142939us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.1:7000,(5044925088469493381,5297184685192562345])
+  ev 6179us /127.0.0.2 [Messaging-EventLoop-3-1] RANGE_REQ message received from /127.0.0.1:7000
+  ev 142997us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 6353us /127.0.0.2 [Messaging-EventLoop-3-1] RANGE_REQ message received from /127.0.0.1:7000
+  ev 143048us /127.0.0.1 [ReadStage-17] Executing seq scan across 3 sstables for (max(3946982858617884462), max(4644711773044313083)]
+  ev 143050us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.2:7000,(5044925088469493381,5297184685192562345])
+  ev 143067us /127.0.0.1 [Messaging-EventLoop-3-13] Sending RANGE_REQ message to /127.0.0.1:7000 message size 119 bytes
+  ev 143279us /127.0.0.1 [Messaging-EventLoop-3-16] RANGE_REQ message received from /127.0.0.1:7000
+  ev 143298us /127.0.0.1 [Messaging-EventLoop-3-1] Sending RANGE_REQ message to /127.0.0.2:7000 message size 119 bytes
+  ev 143311us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.1:7000,(5297184685192562345,5740753673279251372])
+  ev 143419us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(5297184685192562345,5740753673279251372])
+  ev 143436us /127.0.0.1 [Messaging-EventLoop-3-13] Sending RANGE_REQ message to /127.0.0.1:7000 message size 119 bytes
+  ev 143530us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 143545us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(5740753673279251372,6102481773159541939])
+  ev 143633us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.2:7000,(5740753673279251372,6102481773159541939])
+  ev 143648us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 143661us /127.0.0.1 [Messaging-EventLoop-3-16] RANGE_REQ message received from /127.0.0.1:7000
+  ev 143745us /127.0.0.1 [Messaging-EventLoop-3-1] Sending RANGE_REQ message to /127.0.0.2:7000 message size 119 bytes
+  ev 143755us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.1:7000,(6102481773159541939,6354561202121520562])
+  ev 143863us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.2:7000,(6102481773159541939,6354561202121520562])
+  ev 6510us /127.0.0.2 [Messaging-EventLoop-3-1] RANGE_REQ message received from /127.0.0.1:7000
+  ev 143880us /127.0.0.1 [Messaging-EventLoop-3-13] Sending RANGE_REQ message to /127.0.0.1:7000 message size 119 bytes
+  ev 6691us /127.0.0.2 [Messaging-EventLoop-3-1] RANGE_REQ message received from /127.0.0.1:7000
+  ev 143972us /127.0.0.1 [Messaging-EventLoop-3-1] Sending RANGE_REQ message to /127.0.0.2:7000 message size 119 bytes
+  ev 6846us /127.0.0.2 [Messaging-EventLoop-3-1] RANGE_REQ message received from /127.0.0.1:7000
+  ev 144031us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.1:7000,(6354561202121520562,6832050783971463631])
+  ev 6998us /127.0.0.2 [Messaging-EventLoop-3-1] RANGE_REQ message received from /127.0.0.1:7000
+  ev 144086us /127.0.0.1 [Messaging-EventLoop-3-16] RANGE_REQ message received from /127.0.0.1:7000
+  ev 7188us /127.0.0.2 [Messaging-EventLoop-3-1] RANGE_REQ message received from /127.0.0.1:7000
+  ev 144130us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(6354561202121520562,6832050783971463631])
+  ev 7347us /127.0.0.2 [Messaging-EventLoop-3-1] RANGE_REQ message received from /127.0.0.1:7000
+  ev 144146us /127.0.0.1 [Messaging-EventLoop-3-13] Sending RANGE_REQ message to /127.0.0.1:7000 message size 119 bytes
+  ev 144231us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 144277us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(7676427431462625389,8171766544577787362])
+  ev 144357us /127.0.0.1 [Messaging-EventLoop-3-16] RANGE_REQ message received from /127.0.0.1:7000
+  ev 144366us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.2:7000,(7676427431462625389,8171766544577787362])
+  ev 144377us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 144477us /127.0.0.1 [Messaging-EventLoop-3-1] Sending RANGE_REQ message to /127.0.0.2:7000 message size 119 bytes
+  ev 144509us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(8476256102123755671,8836275246755045436])
+  ev 144729us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.1:7000,(8476256102123755671,8836275246755045436])
+  ev 144742us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 144829us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.3:7000,(9116695661365208627,-8948337320652264943])
+  ev 144834us /127.0.0.1 [Messaging-EventLoop-3-13] Sending RANGE_REQ message to /127.0.0.1:7000 message size 119 bytes
+  ev 144925us /127.0.0.1 [Native-Transport-Requests-1] Enqueuing request to Full(/127.0.0.2:7000,(9116695661365208627,-8948337320652264943])
+  ev 7498us /127.0.0.2 [Messaging-EventLoop-3-1] RANGE_REQ message received from /127.0.0.1:7000
+  ev 144936us /127.0.0.1 [Messaging-EventLoop-3-4] Sending RANGE_REQ message to /127.0.0.3:7000 message size 119 bytes
+  ev 7689us /127.0.0.2 [Messaging-EventLoop-3-1] RANGE_REQ message received from /127.0.0.1:7000
+  ev 145018us /127.0.0.1 [Native-Transport-Requests-1] Submitted 31 concurrent range requests
+  ev 7874us /127.0.0.2 [Messaging-EventLoop-3-1] RANGE_REQ message received from /127.0.0.1:7000
+  ev 145042us /127.0.0.1 [Messaging-EventLoop-3-1] Sending RANGE_REQ message to /127.0.0.2:7000 message size 119 bytes
+  ev 8059us /127.0.0.2 [Messaging-EventLoop-3-1] RANGE_REQ message received from /127.0.0.1:7000
+  ev 145049us /127.0.0.1 [Messaging-EventLoop-3-16] RANGE_REQ message received from /127.0.0.1:7000
+  ev 145441us /127.0.0.1 [ReadStage-18] Executing seq scan across 3 sstables for (max(5044925088469493381), max(5297184685192562345)]
+  ev 145458us /127.0.0.1 [ReadStage-20] Executing seq scan across 3 sstables for (max(6102481773159541939), max(6354561202121520562)]
+  ev 145458us /127.0.0.1 [ReadStage-19] Executing seq scan across 3 sstables for (max(5297184685192562345), max(5740753673279251372)]
+  ev 146780us /127.0.0.1 [ReadStage-22] Executing seq scan across 3 sstables for (max(6354561202121520562), max(7676427431462625389)]
+  ev 9582us /127.0.0.2 [ReadStage-12] Executing seq scan across 3 sstables for (max(-12685012678011000), max(268908724007568582)]
+  ev 9573us /127.0.0.2 [ReadStage-13] Executing seq scan across 3 sstables for (max(268908724007568582), max(1227974994715907617)]
+  ev 9573us /127.0.0.2 [ReadStage-11] Executing seq scan across 3 sstables for (max(1887932019704611879), max(2252779774799387173)]
+  ev 9573us /127.0.0.2 [ReadStage-10] Executing seq scan across 3 sstables for (max(-3084408737367577139), max(-1321095828506330055)]
+  ev 9637us /127.0.0.2 [ReadStage-9] Executing seq scan across 3 sstables for (max(2252779774799387173), max(2486395710661350705)]
+  ev 10889us /127.0.0.2 [ReadStage-15] Executing seq scan across 3 sstables for (max(2866077472220725955), max(3946982858617884462)]
+  ev 10912us /127.0.0.2 [ReadStage-14] Executing seq scan across 3 sstables for (max(4644711773044313083), max(5044925088469493381)]
+  ev 10964us /127.0.0.2 [ReadStage-18] Executing seq scan across 3 sstables for (max(5044925088469493381), max(5297184685192562345)]
+  ev 11753us /127.0.0.3 [Messaging-EventLoop-3-6] RANGE_REQ message received from /127.0.0.1:7000
+  ev 12152us /127.0.0.3 [Messaging-EventLoop-3-6] RANGE_REQ message received from /127.0.0.1:7000
+  ev 12333us /127.0.0.3 [Messaging-EventLoop-3-6] RANGE_REQ message received from /127.0.0.1:7000
+  ev 12464us /127.0.0.3 [Messaging-EventLoop-3-6] RANGE_REQ message received from /127.0.0.1:7000
+  ev 12591us /127.0.0.3 [Messaging-EventLoop-3-6] RANGE_REQ message received from /127.0.0.1:7000
+  ev 12740us /127.0.0.3 [Messaging-EventLoop-3-6] RANGE_REQ message received from /127.0.0.1:7000
+  ev 12893us /127.0.0.3 [Messaging-EventLoop-3-6] RANGE_REQ message received from /127.0.0.1:7000
+  ev 13083us /127.0.0.3 [Messaging-EventLoop-3-6] RANGE_REQ message received from /127.0.0.1:7000
+  ev 13236us /127.0.0.3 [Messaging-EventLoop-3-6] RANGE_REQ message received from /127.0.0.1:7000
+  ev 13362us /127.0.0.3 [Messaging-EventLoop-3-6] RANGE_REQ message received from /127.0.0.1:7000
+  ev 13493us /127.0.0.3 [Messaging-EventLoop-3-6] RANGE_REQ message received from /127.0.0.1:7000
+  ev 13661us /127.0.0.3 [Messaging-EventLoop-3-6] RANGE_REQ message received from /127.0.0.1:7000
+  ev 13792us /127.0.0.3 [Messaging-EventLoop-3-6] RANGE_REQ message received from /127.0.0.1:7000
+  ev 154900us /127.0.0.1 [ReadStage-21] Executing seq scan across 3 sstables for (max(8476256102123755671), max(9116695661365208627)]
+  ev 17516us /127.0.0.2 [ReadStage-16] Executing seq scan across 3 sstables for (max(5740753673279251372), max(6102481773159541939)]
+  ev 17516us /127.0.0.2 [ReadStage-19] Executing seq scan across 3 sstables for (max(6102481773159541939), max(6354561202121520562)]
+  ev 17516us /127.0.0.2 [ReadStage-20] Executing seq scan across 3 sstables for (max(7676427431462625389), max(8476256102123755671)]
+  ev 18658us /127.0.0.2 [ReadStage-17] Executing seq scan across 3 sstables for (max(9116695661365208627), min(-9223372036854775808))
+  ev 23349us /127.0.0.3 [ReadStage-15] Executing seq scan across 3 sstables for (max(268908724007568582), max(1227974994715907617)]
+  ev 23325us /127.0.0.3 [ReadStage-9] Executing seq scan across 3 sstables for (max(-1321095828506330055), max(-381028204304786318)]
+  ev 23358us /127.0.0.3 [ReadStage-11] Executing seq scan across 3 sstables for (max(1227974994715907617), max(1887932019704611879)]
+  ev 23325us /127.0.0.3 [ReadStage-1] Executing seq scan across 3 sstables for (max(-381028204304786318), max(-12685012678011000)]
+  ev 23401us /127.0.0.3 [ReadStage-21] Executing seq scan across 3 sstables for (max(1887932019704611879), max(2252779774799387173)]
+  ev 23785us /127.0.0.3 [ReadStage-12] Executing seq scan across 3 sstables for (max(2486395710661350705), max(2866077472220725955)]
+  ev 23785us /127.0.0.3 [ReadStage-13] Executing seq scan across 3 sstables for (max(2866077472220725955), max(3946982858617884462)]
+  ev 23807us /127.0.0.3 [ReadStage-18] Executing seq scan across 3 sstables for (max(3946982858617884462), max(4644711773044313083)]
+  ev 24361us /127.0.0.3 [ReadStage-22] Executing seq scan across 3 sstables for (max(5297184685192562345), max(5740753673279251372)]
+  ev 24418us /127.0.0.3 [ReadStage-30] Executing seq scan across 3 sstables for (max(5740753673279251372), max(6102481773159541939)]
+  ev 25381us /127.0.0.2 [ReadStage-8] Executing seq scan across 3 sstables for (max(-1321095828506330055), max(-381028204304786318)]
+  ev 25381us /127.0.0.2 [ReadStage-7] Executing seq scan across 3 sstables for (max(-3531980077265457527), max(-3084408737367577139)]
+  ev 33465us /127.0.0.3 [ReadStage-20] Executing seq scan across 3 sstables for (max(6354561202121520562), max(7676427431462625389)]
+  ev 33465us /127.0.0.3 [ReadStage-28] Executing seq scan across 3 sstables for (max(7676427431462625389), max(8476256102123755671)]
+  ev 41366us /127.0.0.3 [ReadStage-29] Executing seq scan across 3 sstables for (max(8476256102123755671), max(9116695661365208627)]
+  ev 251990us /127.0.0.1 [ReadStage-5] Read 5000 live rows and 0 tombstone cells
+  ev 252382us /127.0.0.1 [ReadStage-5] Enqueuing response to /127.0.0.1:7000
+  ev 252792us /127.0.0.1 [Messaging-OUT-/127.0.0.1:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414557 bytes
+  ev 273612us /127.0.0.1 [Messaging-EventLoop-3-1] RANGE_RSP message received from /127.0.0.1:7000
+  ev 275537us /127.0.0.1 [ReadStage-3] Read 5000 live rows and 0 tombstone cells
+  ev 275833us /127.0.0.1 [ReadStage-3] Enqueuing response to /127.0.0.1:7000
+  ev 276108us /127.0.0.1 [Messaging-OUT-/127.0.0.1:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414511 bytes
+  ev 279234us /127.0.0.1 [RequestResponseStage-13] Processing response from /127.0.0.1:7000
+  ev 305911us /127.0.0.1 [ReadStage-14] Read 5000 live rows and 0 tombstone cells
+  ev 306265us /127.0.0.1 [ReadStage-14] Enqueuing response to /127.0.0.1:7000
+  ev 306545us /127.0.0.1 [Messaging-OUT-/127.0.0.1:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414521 bytes
+  ev 307623us /127.0.0.1 [Messaging-EventLoop-3-1] RANGE_RSP message received from /127.0.0.1:7000
+  ev 307697us /127.0.0.1 [ReadStage-18] Read 5000 live rows and 0 tombstone cells
+  ev 307919us /127.0.0.1 [ReadStage-18] Enqueuing response to /127.0.0.1:7000
+  ev 311035us /127.0.0.1 [ReadStage-8] Read 5000 live rows and 0 tombstone cells
+  ev 311398us /127.0.0.1 [ReadStage-8] Enqueuing response to /127.0.0.1:7000
+  ev 313243us /127.0.0.1 [RequestResponseStage-14] Processing response from /127.0.0.1:7000
+  ev 318134us /127.0.0.1 [ReadStage-21] Read 5000 live rows and 0 tombstone cells
+  ev 318470us /127.0.0.1 [ReadStage-21] Enqueuing response to /127.0.0.1:7000
+  ev 320786us /127.0.0.1 [ReadStage-10] Read 5000 live rows and 0 tombstone cells
+  ev 321062us /127.0.0.1 [ReadStage-10] Enqueuing response to /127.0.0.1:7000
+  ev 338962us /127.0.0.1 [ReadStage-11] Read 5000 live rows and 0 tombstone cells
+  ev 339328us /127.0.0.1 [ReadStage-11] Enqueuing response to /127.0.0.1:7000
+  ev 339600us /127.0.0.1 [ReadStage-12] Read 5000 live rows and 0 tombstone cells
+  ev 339869us /127.0.0.1 [ReadStage-12] Enqueuing response to /127.0.0.1:7000
+  ev 349172us /127.0.0.1 [Messaging-EventLoop-3-1] RANGE_RSP message received from /127.0.0.1:7000
+  ev 349193us /127.0.0.1 [Messaging-OUT-/127.0.0.1:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414547 bytes
+  ev 351825us /127.0.0.1 [ReadStage-17] Read 5000 live rows and 0 tombstone cells
+  ev 352186us /127.0.0.1 [ReadStage-17] Enqueuing response to /127.0.0.1:7000
+  ev 354431us /127.0.0.1 [RequestResponseStage-12] Processing response from /127.0.0.1:7000
+  ev 356151us /127.0.0.1 [ReadStage-22] Read 5000 live rows and 0 tombstone cells
+  ev 356402us /127.0.0.1 [ReadStage-22] Enqueuing response to /127.0.0.1:7000
+  ev 357804us /127.0.0.1 [ReadStage-19] Read 5000 live rows and 0 tombstone cells
+  ev 358081us /127.0.0.1 [ReadStage-19] Enqueuing response to /127.0.0.1:7000
+  ev 222489us /127.0.0.2 [ReadStage-5] Read 5000 live rows and 0 tombstone cells
+  ev 223769us /127.0.0.2 [ReadStage-5] Enqueuing response to /127.0.0.1:7000
+  ev 224513us /127.0.0.2 [Messaging-OUT-/127.0.0.2:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414299 bytes
+  ev 368681us /127.0.0.1 [ReadStage-6] Read 5000 live rows and 0 tombstone cells
+  ev 369035us /127.0.0.1 [ReadStage-6] Enqueuing response to /127.0.0.1:7000
+  ev 370946us /127.0.0.1 [Messaging-EventLoop-3-1] RANGE_RSP message received from /127.0.0.1:7000
+  ev 370999us /127.0.0.1 [Messaging-OUT-/127.0.0.1:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414510 bytes
+  ev 376032us /127.0.0.1 [RequestResponseStage-6] Processing response from /127.0.0.1:7000
+  ev 382620us /127.0.0.1 [ReadStage-4] Read 12882 live rows and 0 tombstone cells
+  ev 382881us /127.0.0.1 [ReadStage-4] Enqueuing response to /127.0.0.1:7000
+  ev 383052us /127.0.0.1 [Messaging-EventLoop-3-13] Sending RANGE_RSP message to /127.0.0.1:7000 message size 40 bytes
+  ev 383222us /127.0.0.1 [Messaging-EventLoop-3-16] RANGE_RSP message received from /127.0.0.1:7000
+  ev 383283us /127.0.0.1 [RequestResponseStage-22] Processing response from /127.0.0.1:7000
+  ev 383671us /127.0.0.1 [ReadStage-20] Read 5000 live rows and 0 tombstone cells
+  ev 383795us /127.0.0.1 [ReadStage-20] Enqueuing response to /127.0.0.1:7000
+  ev 385812us /127.0.0.1 [Messaging-EventLoop-3-10] RANGE_RSP message received from /127.0.0.2:7000
+  ev 387130us /127.0.0.1 [ReadStage-15] Read 5000 live rows and 0 tombstone cells
+  ev 387386us /127.0.0.1 [ReadStage-15] Enqueuing response to /127.0.0.1:7000
+  ev 389522us /127.0.0.1 [Messaging-OUT-/127.0.0.1:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414554 bytes
+  ev 389534us /127.0.0.1 [Messaging-EventLoop-3-1] RANGE_RSP message received from /127.0.0.1:7000
+  ev 390897us /127.0.0.1 [RequestResponseStage-20] Processing response from /127.0.0.2:7000
+  ev 394743us /127.0.0.1 [RequestResponseStage-4] Processing response from /127.0.0.1:7000
+  ev 395287us /127.0.0.1 [ReadStage-16] Read 5000 live rows and 0 tombstone cells
+  ev 395623us /127.0.0.1 [ReadStage-16] Enqueuing response to /127.0.0.1:7000
+  ev 405609us /127.0.0.1 [ReadStage-9] Read 5000 live rows and 0 tombstone cells
+  ev 406093us /127.0.0.1 [ReadStage-9] Enqueuing response to /127.0.0.1:7000
+  ev 411091us /127.0.0.1 [Messaging-OUT-/127.0.0.1:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414542 bytes
+  ev 411152us /127.0.0.1 [Messaging-EventLoop-3-1] RANGE_RSP message received from /127.0.0.1:7000
+  ev 416228us /127.0.0.1 [RequestResponseStage-4] Processing response from /127.0.0.1:7000
+  ev 420674us /127.0.0.1 [ReadStage-7] Read 5000 live rows and 0 tombstone cells
+  ev 421019us /127.0.0.1 [ReadStage-7] Enqueuing response to /127.0.0.1:7000
+  ev 430036us /127.0.0.1 [Messaging-EventLoop-3-1] RANGE_RSP message received from /127.0.0.1:7000
+  ev 430052us /127.0.0.1 [Messaging-OUT-/127.0.0.1:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414569 bytes
+  ev 435651us /127.0.0.1 [RequestResponseStage-3] Processing response from /127.0.0.1:7000
+  ev 452255us /127.0.0.1 [Messaging-EventLoop-3-1] RANGE_RSP message received from /127.0.0.1:7000
+  ev 452281us /127.0.0.1 [Messaging-OUT-/127.0.0.1:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414531 bytes
+  ev 457256us /127.0.0.1 [RequestResponseStage-4] Processing response from /127.0.0.1:7000
+  ev 472637us /127.0.0.1 [Messaging-EventLoop-3-1] RANGE_RSP message received from /127.0.0.1:7000
+  ev 472670us /127.0.0.1 [Messaging-OUT-/127.0.0.1:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414529 bytes
+  ev 477697us /127.0.0.1 [RequestResponseStage-3] Processing response from /127.0.0.1:7000
+  ev 349275us /127.0.0.3 [ReadStage-19] Executing seq scan across 3 sstables for (max(4644711773044313083), max(5044925088469493381)]
+  ev 492382us /127.0.0.1 [Messaging-EventLoop-3-1] RANGE_RSP message received from /127.0.0.1:7000
+  ev 492445us /127.0.0.1 [Messaging-OUT-/127.0.0.1:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414529 bytes
+  ev 497754us /127.0.0.1 [RequestResponseStage-4] Processing response from /127.0.0.1:7000
+  ev 365276us /127.0.0.3 [ReadStage-15] Read 5000 live rows and 0 tombstone cells
+  ev 365769us /127.0.0.3 [ReadStage-15] Enqueuing response to /127.0.0.1:7000
+  ev 366111us /127.0.0.3 [Messaging-OUT-/127.0.0.3:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414227 bytes
+  ev 370643us /127.0.0.2 [ReadStage-19] Read 5000 live rows and 0 tombstone cells
+  ev 371031us /127.0.0.2 [ReadStage-19] Enqueuing response to /127.0.0.1:7000
+  ev 371171us /127.0.0.2 [ReadStage-18] Read 5000 live rows and 0 tombstone cells
+  ev 371381us /127.0.0.2 [ReadStage-18] Enqueuing response to /127.0.0.1:7000
+  ev 371429us /127.0.0.2 [Messaging-OUT-/127.0.0.2:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414286 bytes
+  ev 511801us /127.0.0.1 [Messaging-OUT-/127.0.0.1:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414507 bytes
+  ev 511787us /127.0.0.1 [Messaging-EventLoop-3-1] RANGE_RSP message received from /127.0.0.1:7000
+  ev 377876us /127.0.0.2 [ReadStage-20] Read 5000 live rows and 0 tombstone cells
+  ev 515984us /127.0.0.1 [RequestResponseStage-3] Processing response from /127.0.0.1:7000
+  ev 387199us /127.0.0.2 [Messaging-OUT-/127.0.0.2:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414301 bytes
+  ev 524978us /127.0.0.1 [Messaging-EventLoop-3-10] RANGE_RSP message received from /127.0.0.2:7000
+  ev 531356us /127.0.0.1 [ReadStage-2] Read 24816 live rows and 0 tombstone cells
+  ev 393430us /127.0.0.2 [ReadStage-20] Enqueuing response to /127.0.0.1:7000
+  ev 531688us /127.0.0.1 [ReadStage-2] Enqueuing response to /127.0.0.1:7000
+  ev 531703us /127.0.0.1 [Messaging-EventLoop-3-1] RANGE_RSP message received from /127.0.0.1:7000
+  ev 531773us /127.0.0.1 [Messaging-OUT-/127.0.0.1:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414538 bytes
+  ev 531864us /127.0.0.1 [Messaging-EventLoop-3-13] Sending RANGE_RSP message to /127.0.0.1:7000 message size 40 bytes
+  ev 532101us /127.0.0.1 [Messaging-EventLoop-3-16] RANGE_RSP message received from /127.0.0.1:7000
+  ev 532178us /127.0.0.1 [RequestResponseStage-2] Processing response from /127.0.0.1:7000
+  ev 533263us /127.0.0.1 [RequestResponseStage-3] Processing response from /127.0.0.2:7000
+  ev 536916us /127.0.0.1 [RequestResponseStage-5] Processing response from /127.0.0.1:7000
+  ev 553015us /127.0.0.1 [Messaging-OUT-/127.0.0.1:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414535 bytes
+  ev 553006us /127.0.0.1 [Messaging-EventLoop-3-1] RANGE_RSP message received from /127.0.0.1:7000
+  ev 416820us /127.0.0.2 [ReadStage-2] Read 5000 live rows and 0 tombstone cells
+  ev 417626us /127.0.0.2 [ReadStage-2] Enqueuing response to /127.0.0.1:7000
+  ev 557418us /127.0.0.1 [RequestResponseStage-5] Processing response from /127.0.0.1:7000
+  ev 562008us /127.0.0.1 [Messaging-EventLoop-3-10] RANGE_RSP message received from /127.0.0.2:7000
+  ev 424663us /127.0.0.2 [Messaging-OUT-/127.0.0.2:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414308 bytes
+  ev 566486us /127.0.0.1 [RequestResponseStage-5] Processing response from /127.0.0.2:7000
+  ev 430957us /127.0.0.2 [ReadStage-1] Read 12882 live rows and 0 tombstone cells
+  ev 433236us /127.0.0.2 [ReadStage-1] Enqueuing response to /127.0.0.1:7000
+  ev 570901us /127.0.0.1 [Messaging-EventLoop-3-1] RANGE_RSP message received from /127.0.0.1:7000
+  ev 433572us /127.0.0.2 [Messaging-EventLoop-3-1] Sending RANGE_RSP message to /127.0.0.1:7000 message size 40 bytes
+  ev 570927us /127.0.0.1 [Messaging-OUT-/127.0.0.1:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414544 bytes
+  ev 571206us /127.0.0.1 [Messaging-EventLoop-3-9] RANGE_RSP message received from /127.0.0.2:7000
+  ev 571345us /127.0.0.1 [RequestResponseStage-2] Processing response from /127.0.0.2:7000
+  ev 575755us /127.0.0.1 [RequestResponseStage-5] Processing response from /127.0.0.1:7000
+  ev 445966us /127.0.0.2 [ReadStage-12] Read 5000 live rows and 0 tombstone cells
+  ev 584044us /127.0.0.1 [Messaging-EventLoop-3-10] RANGE_RSP message received from /127.0.0.2:7000
+  ev 446649us /127.0.0.2 [Messaging-OUT-/127.0.0.2:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414347 bytes
+  ev 447135us /127.0.0.2 [ReadStage-12] Enqueuing response to /127.0.0.1:7000
+  ev 447593us /127.0.0.2 [ReadStage-3] Read 5000 live rows and 0 tombstone cells
+  ev 447908us /127.0.0.2 [ReadStage-3] Enqueuing response to /127.0.0.1:7000
+  ev 449648us /127.0.0.2 [ReadStage-6] Read 5000 live rows and 0 tombstone cells
+  ev 449857us /127.0.0.2 [ReadStage-6] Enqueuing response to /127.0.0.1:7000
+  ev 588753us /127.0.0.1 [Messaging-OUT-/127.0.0.1:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414523 bytes
+  ev 588747us /127.0.0.1 [Messaging-EventLoop-3-1] RANGE_RSP message received from /127.0.0.1:7000
+  ev 588928us /127.0.0.1 [RequestResponseStage-3] Processing response from /127.0.0.2:7000
+  ev 593460us /127.0.0.1 [RequestResponseStage-5] Processing response from /127.0.0.1:7000
+  ev 606276us /127.0.0.1 [Messaging-OUT-/127.0.0.1:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414575 bytes
+  ev 606265us /127.0.0.1 [Messaging-EventLoop-3-1] RANGE_RSP message received from /127.0.0.1:7000
+  ev 470424us /127.0.0.2 [ReadStage-7] Read 5000 live rows and 0 tombstone cells
+  ev 471491us /127.0.0.2 [ReadStage-7] Enqueuing response to /127.0.0.1:7000
+  ev 611115us /127.0.0.1 [RequestResponseStage-5] Processing response from /127.0.0.1:7000
+  ev 473565us /127.0.0.2 [ReadStage-8] Read 5000 live rows and 0 tombstone cells
+  ev 474706us /127.0.0.2 [ReadStage-4] Read 5000 live rows and 0 tombstone cells
+  ev 475322us /127.0.0.2 [ReadStage-4] Enqueuing response to /127.0.0.1:7000
+  ev 475390us /127.0.0.2 [Messaging-OUT-/127.0.0.2:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414354 bytes
+  ev 612884us /127.0.0.1 [Messaging-EventLoop-3-10] RANGE_RSP message received from /127.0.0.2:7000
+  ev 479685us /127.0.0.2 [ReadStage-8] Enqueuing response to /127.0.0.1:7000
+  ev 618029us /127.0.0.1 [RequestResponseStage-5] Processing response from /127.0.0.2:7000
+  ev 488061us /127.0.0.2 [ReadStage-17] Read 5000 live rows and 0 tombstone cells
+  ev 626487us /127.0.0.1 [Messaging-OUT-/127.0.0.1:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414561 bytes
+  ev 488449us /127.0.0.2 [ReadStage-17] Enqueuing response to /127.0.0.1:7000
+  ev 626484us /127.0.0.1 [Messaging-EventLoop-3-1] RANGE_RSP message received from /127.0.0.1:7000
+  ev 492344us /127.0.0.2 [ReadStage-9] Read 5000 live rows and 0 tombstone cells
+  ev 630756us /127.0.0.1 [RequestResponseStage-2] Processing response from /127.0.0.1:7000
+  ev 493089us /127.0.0.2 [ReadStage-9] Enqueuing response to /127.0.0.1:7000
+  ev 632167us /127.0.0.1 [Messaging-EventLoop-3-10] RANGE_RSP message received from /127.0.0.2:7000
+  ev 494827us /127.0.0.2 [Messaging-OUT-/127.0.0.2:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414279 bytes
+  ev 495545us /127.0.0.2 [ReadStage-10] Read 5000 live rows and 0 tombstone cells
+  ev 495768us /127.0.0.2 [ReadStage-10] Enqueuing response to /127.0.0.1:7000
+  ev 636320us /127.0.0.1 [RequestResponseStage-2] Processing response from /127.0.0.2:7000
+  ev 500898us /127.0.0.2 [ReadStage-14] Read 5000 live rows and 0 tombstone cells
+  ev 501856us /127.0.0.2 [ReadStage-15] Read 5000 live rows and 0 tombstone cells
+  ev 502018us /127.0.0.2 [ReadStage-15] Enqueuing response to /127.0.0.1:7000
+  ev 502895us /127.0.0.2 [ReadStage-16] Read 5000 live rows and 0 tombstone cells
+  ev 503051us /127.0.0.2 [ReadStage-16] Enqueuing response to /127.0.0.1:7000
+  ev 643735us /127.0.0.1 [Messaging-EventLoop-3-1] RANGE_RSP message received from /127.0.0.1:7000
+  ev 508226us /127.0.0.2 [ReadStage-13] Read 5000 live rows and 0 tombstone cells
+  ev 508579us /127.0.0.2 [ReadStage-13] Enqueuing response to /127.0.0.1:7000
+  ev 647170us /127.0.0.1 [Messaging-EventLoop-3-10] RANGE_RSP message received from /127.0.0.2:7000
+  ev 509830us /127.0.0.2 [Messaging-OUT-/127.0.0.2:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414327 bytes
+  ev 647728us /127.0.0.1 [RequestResponseStage-2] Processing response from /127.0.0.1:7000
+  ev 511321us /127.0.0.2 [ReadStage-11] Read 5000 live rows and 0 tombstone cells
+  ev 511514us /127.0.0.2 [ReadStage-11] Enqueuing response to /127.0.0.1:7000
+  ev 651464us /127.0.0.1 [RequestResponseStage-3] Processing response from /127.0.0.2:7000
+  ev 517381us /127.0.0.2 [ReadStage-14] Enqueuing response to /127.0.0.1:7000
+  ev 659553us /127.0.0.1 [Messaging-EventLoop-3-10] RANGE_RSP message received from /127.0.0.2:7000
+  ev 522161us /127.0.0.2 [Messaging-OUT-/127.0.0.2:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414281 bytes
+  ev 663383us /127.0.0.1 [RequestResponseStage-2] Processing response from /127.0.0.2:7000
+  ev 671870us /127.0.0.1 [Messaging-EventLoop-3-10] RANGE_RSP message received from /127.0.0.2:7000
+  ev 534485us /127.0.0.2 [Messaging-OUT-/127.0.0.2:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414322 bytes
+  ev 676113us /127.0.0.1 [RequestResponseStage-3] Processing response from /127.0.0.2:7000
+  ev 685994us /127.0.0.1 [Messaging-EventLoop-3-10] RANGE_RSP message received from /127.0.0.2:7000
+  ev 549063us /127.0.0.2 [Messaging-OUT-/127.0.0.2:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414330 bytes
+  ev 689987us /127.0.0.1 [RequestResponseStage-3] Processing response from /127.0.0.2:7000
+  ev 698799us /127.0.0.1 [Messaging-EventLoop-3-10] RANGE_RSP message received from /127.0.0.2:7000
+  ev 561406us /127.0.0.2 [Messaging-OUT-/127.0.0.2:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414293 bytes
+  ev 702317us /127.0.0.1 [RequestResponseStage-2] Processing response from /127.0.0.2:7000
+  ev 711208us /127.0.0.1 [Messaging-EventLoop-3-10] RANGE_RSP message received from /127.0.0.2:7000
+  ev 573700us /127.0.0.2 [Messaging-OUT-/127.0.0.2:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414296 bytes
+  ev 715164us /127.0.0.1 [RequestResponseStage-3] Processing response from /127.0.0.2:7000
+  ev 722903us /127.0.0.1 [Messaging-EventLoop-3-10] RANGE_RSP message received from /127.0.0.2:7000
+  ev 585466us /127.0.0.2 [Messaging-OUT-/127.0.0.2:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414305 bytes
+  ev 726538us /127.0.0.1 [RequestResponseStage-2] Processing response from /127.0.0.2:7000
+  ev 735994us /127.0.0.1 [Messaging-EventLoop-3-10] RANGE_RSP message received from /127.0.0.2:7000
+  ev 598630us /127.0.0.2 [Messaging-OUT-/127.0.0.2:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414280 bytes
+  ev 599682us /127.0.0.3 [ReadStage-40] Executing seq scan across 3 sstables for (max(9116695661365208627), min(-9223372036854775808))
+  ev 740326us /127.0.0.1 [RequestResponseStage-3] Processing response from /127.0.0.2:7000
+  ev 749070us /127.0.0.1 [Messaging-EventLoop-3-10] RANGE_RSP message received from /127.0.0.2:7000
+  ev 611707us /127.0.0.3 [ReadStage-5] Read 5000 live rows and 0 tombstone cells
+  ev 611698us /127.0.0.2 [Messaging-OUT-/127.0.0.2:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414295 bytes
+  ev 612058us /127.0.0.3 [ReadStage-5] Enqueuing response to /127.0.0.1:7000
+  ev 754037us /127.0.0.1 [RequestResponseStage-2] Processing response from /127.0.0.2:7000
+  ev 764859us /127.0.0.1 [Messaging-EventLoop-3-10] RANGE_RSP message received from /127.0.0.2:7000
+  ev 627487us /127.0.0.2 [Messaging-OUT-/127.0.0.2:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414314 bytes
+  ev 769692us /127.0.0.1 [RequestResponseStage-2] Processing response from /127.0.0.2:7000
+  ev 638870us /127.0.0.3 [ReadStage-6] Read 5000 live rows and 0 tombstone cells
+  ev 639226us /127.0.0.3 [ReadStage-6] Enqueuing response to /127.0.0.1:7000
+  ev 780053us /127.0.0.1 [Messaging-EventLoop-3-10] RANGE_RSP message received from /127.0.0.2:7000
+  ev 642746us /127.0.0.2 [Messaging-OUT-/127.0.0.2:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414291 bytes
+  ev 784857us /127.0.0.1 [RequestResponseStage-3] Processing response from /127.0.0.2:7000
+  ev 787277us /127.0.0.1 [Messaging-EventLoop-3-12] RANGE_RSP message received from /127.0.0.3:7000
+  ev 649695us /127.0.0.3 [Messaging-OUT-/127.0.0.3:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414245 bytes
+  ev 652351us /127.0.0.3 [ReadStage-11] Read 5000 live rows and 0 tombstone cells
+  ev 652683us /127.0.0.3 [ReadStage-11] Enqueuing response to /127.0.0.1:7000
+  ev 791524us /127.0.0.1 [RequestResponseStage-6] Processing response from /127.0.0.3:7000
+  ev 795929us /127.0.0.1 [Messaging-EventLoop-3-10] RANGE_RSP message received from /127.0.0.2:7000
+  ev 658576us /127.0.0.2 [Messaging-OUT-/127.0.0.2:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414311 bytes
+  ev 660031us /127.0.0.3 [ReadStage-3] Read 5000 live rows and 0 tombstone cells
+  ev 660345us /127.0.0.3 [ReadStage-3] Enqueuing response to /127.0.0.1:7000
+  ev 800086us /127.0.0.1 [RequestResponseStage-6] Processing response from /127.0.0.2:7000
+  ev 808153us /127.0.0.1 [Messaging-EventLoop-3-10] RANGE_RSP message received from /127.0.0.2:7000
+  ev 812072us /127.0.0.1 [RequestResponseStage-6] Processing response from /127.0.0.2:7000
+  ev 687943us /127.0.0.3 [ReadStage-21] Read 5000 live rows and 0 tombstone cells
+  ev 688251us /127.0.0.3 [ReadStage-21] Enqueuing response to /127.0.0.1:7000
+  ev 698186us /127.0.0.3 [ReadStage-18] Read 5000 live rows and 0 tombstone cells
+  ev 698977us /127.0.0.3 [ReadStage-28] Read 5000 live rows and 0 tombstone cells
+  ev 699537us /127.0.0.3 [ReadStage-28] Enqueuing response to /127.0.0.1:7000
+  ev 705232us /127.0.0.3 [ReadStage-20] Read 5000 live rows and 0 tombstone cells
+  ev 705405us /127.0.0.3 [ReadStage-20] Enqueuing response to /127.0.0.1:7000
+  ev 845927us /127.0.0.1 [Messaging-EventLoop-3-12] RANGE_RSP message received from /127.0.0.3:7000
+  ev 708279us /127.0.0.3 [Messaging-OUT-/127.0.0.3:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414251 bytes
+  ev 709178us /127.0.0.3 [ReadStage-18] Enqueuing response to /127.0.0.1:7000
+  ev 710967us /127.0.0.3 [ReadStage-22] Read 5000 live rows and 0 tombstone cells
+  ev 850216us /127.0.0.1 [RequestResponseStage-2] Processing response from /127.0.0.3:7000
+  ev 713101us /127.0.0.3 [ReadStage-22] Enqueuing response to /127.0.0.1:7000
+  ev 715898us /127.0.0.3 [ReadStage-12] Read 5000 live rows and 0 tombstone cells
+  ev 716117us /127.0.0.3 [ReadStage-12] Enqueuing response to /127.0.0.1:7000
+  ev 720792us /127.0.0.3 [ReadStage-30] Read 5000 live rows and 0 tombstone cells
+  ev 722117us /127.0.0.3 [ReadStage-7] Read 5000 live rows and 0 tombstone cells
+  ev 722256us /127.0.0.3 [ReadStage-2] Read 5000 live rows and 0 tombstone cells
+  ev 722291us /127.0.0.3 [ReadStage-7] Enqueuing response to /127.0.0.1:7000
+  ev 722477us /127.0.0.3 [ReadStage-2] Enqueuing response to /127.0.0.1:7000
+  ev 722506us /127.0.0.3 [ReadStage-13] Read 5000 live rows and 0 tombstone cells
+  ev 722640us /127.0.0.3 [ReadStage-13] Enqueuing response to /127.0.0.1:7000
+  ev 723896us /127.0.0.3 [ReadStage-30] Enqueuing response to /127.0.0.1:7000
+  ev 725736us /127.0.0.3 [ReadStage-8] Read 5000 live rows and 0 tombstone cells
+  ev 725854us /127.0.0.3 [ReadStage-8] Enqueuing response to /127.0.0.1:7000
+  ev 732169us /127.0.0.3 [ReadStage-29] Read 5000 live rows and 0 tombstone cells
+  ev 732423us /127.0.0.3 [ReadStage-29] Enqueuing response to /127.0.0.1:7000
+  ev 739243us /127.0.0.3 [ReadStage-9] Read 5000 live rows and 0 tombstone cells
+  ev 739518us /127.0.0.3 [ReadStage-9] Enqueuing response to /127.0.0.1:7000
+  ev 887134us /127.0.0.1 [Messaging-EventLoop-3-12] RANGE_RSP message received from /127.0.0.3:7000
+  ev 749511us /127.0.0.3 [Messaging-OUT-/127.0.0.3:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414243 bytes
+  ev 747267us /127.0.0.3 [ReadStage-1] Read 5000 live rows and 0 tombstone cells
+  ev 751194us /127.0.0.3 [ReadStage-1] Enqueuing response to /127.0.0.1:7000
+  ev 892105us /127.0.0.1 [RequestResponseStage-3] Processing response from /127.0.0.3:7000
+  ev 905959us /127.0.0.1 [Messaging-EventLoop-3-12] RANGE_RSP message received from /127.0.0.3:7000
+  ev 768301us /127.0.0.3 [Messaging-OUT-/127.0.0.3:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414200 bytes
+  ev 910710us /127.0.0.1 [RequestResponseStage-3] Processing response from /127.0.0.3:7000
+  ev 780405us /127.0.0.3 [ReadStage-19] Read 5000 live rows and 0 tombstone cells
+  ev 781156us /127.0.0.3 [ReadStage-19] Enqueuing response to /127.0.0.1:7000
+  ev 922662us /127.0.0.1 [Messaging-EventLoop-3-12] RANGE_RSP message received from /127.0.0.3:7000
+  ev 785047us /127.0.0.3 [Messaging-OUT-/127.0.0.3:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414233 bytes
+  ev 926617us /127.0.0.1 [RequestResponseStage-2] Processing response from /127.0.0.3:7000
+  ev 937045us /127.0.0.1 [Messaging-EventLoop-3-12] RANGE_RSP message received from /127.0.0.3:7000
+  ev 799430us /127.0.0.3 [Messaging-OUT-/127.0.0.3:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414204 bytes
+  ev 799721us /127.0.0.3 [ReadStage-40] Read 5000 live rows and 0 tombstone cells
+  ev 799891us /127.0.0.3 [ReadStage-40] Enqueuing response to /127.0.0.1:7000
+  ev 941066us /127.0.0.1 [RequestResponseStage-2] Processing response from /127.0.0.3:7000
+  ev 949279us /127.0.0.1 [Messaging-EventLoop-3-12] RANGE_RSP message received from /127.0.0.3:7000
+  ev 811626us /127.0.0.3 [Messaging-OUT-/127.0.0.3:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414280 bytes
+  ev 952893us /127.0.0.1 [RequestResponseStage-5] Processing response from /127.0.0.3:7000
+  ev 961499us /127.0.0.1 [Messaging-EventLoop-3-12] RANGE_RSP message received from /127.0.0.3:7000
+  ev 823874us /127.0.0.3 [Messaging-OUT-/127.0.0.3:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414277 bytes
+  ev 965332us /127.0.0.1 [RequestResponseStage-2] Processing response from /127.0.0.3:7000
+  ev 973894us /127.0.0.1 [Messaging-EventLoop-3-12] RANGE_RSP message received from /127.0.0.3:7000
+  ev 836244us /127.0.0.3 [Messaging-OUT-/127.0.0.3:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414214 bytes
+  ev 977518us /127.0.0.1 [RequestResponseStage-5] Processing response from /127.0.0.3:7000
+  ev 986031us /127.0.0.1 [Messaging-EventLoop-3-12] RANGE_RSP message received from /127.0.0.3:7000
+  ev 848409us /127.0.0.3 [Messaging-OUT-/127.0.0.3:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414200 bytes
+  ev 990076us /127.0.0.1 [RequestResponseStage-2] Processing response from /127.0.0.3:7000
+  ev 857523us /127.0.0.3 [ReadStage-4] Read 24816 live rows and 0 tombstone cells
+  ev 857819us /127.0.0.3 [ReadStage-4] Enqueuing response to /127.0.0.1:7000
+  ev 857971us /127.0.0.3 [Messaging-EventLoop-3-1] Sending RANGE_RSP message to /127.0.0.1:7000 message size 40 bytes
+  ev 995872us /127.0.0.1 [Messaging-EventLoop-3-11] RANGE_RSP message received from /127.0.0.3:7000
+  ev 996015us /127.0.0.1 [RequestResponseStage-2] Processing response from /127.0.0.3:7000
+  ev 998769us /127.0.0.1 [Messaging-EventLoop-3-12] RANGE_RSP message received from /127.0.0.3:7000
+  ev 861123us /127.0.0.3 [Messaging-OUT-/127.0.0.3:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414309 bytes
+  ev 1002366us /127.0.0.1 [RequestResponseStage-4] Processing response from /127.0.0.3:7000
+  ev 1011356us /127.0.0.1 [Messaging-EventLoop-3-12] RANGE_RSP message received from /127.0.0.3:7000
+  ev 873759us /127.0.0.3 [Messaging-OUT-/127.0.0.3:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414235 bytes
+  ev 1015023us /127.0.0.1 [RequestResponseStage-5] Processing response from /127.0.0.3:7000
+  ev 1023884us /127.0.0.1 [Messaging-EventLoop-3-12] RANGE_RSP message received from /127.0.0.3:7000
+  ev 886287us /127.0.0.3 [Messaging-OUT-/127.0.0.3:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414205 bytes
+  ev 1027515us /127.0.0.1 [RequestResponseStage-5] Processing response from /127.0.0.3:7000
+  ev 1036486us /127.0.0.1 [Messaging-EventLoop-3-12] RANGE_RSP message received from /127.0.0.3:7000
+  ev 898873us /127.0.0.3 [Messaging-OUT-/127.0.0.3:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414260 bytes
+  ev 1040220us /127.0.0.1 [RequestResponseStage-5] Processing response from /127.0.0.3:7000
+  ev 1050018us /127.0.0.1 [Messaging-EventLoop-3-12] RANGE_RSP message received from /127.0.0.3:7000
+  ev 912400us /127.0.0.3 [Messaging-OUT-/127.0.0.3:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414259 bytes
+  ev 1053753us /127.0.0.1 [RequestResponseStage-5] Processing response from /127.0.0.3:7000
+  ev 1062842us /127.0.0.1 [Messaging-EventLoop-3-12] RANGE_RSP message received from /127.0.0.3:7000
+  ev 925240us /127.0.0.3 [Messaging-OUT-/127.0.0.3:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414235 bytes
+  ev 1067395us /127.0.0.1 [RequestResponseStage-2] Processing response from /127.0.0.3:7000
+  ev 1076339us /127.0.0.1 [Messaging-EventLoop-3-12] RANGE_RSP message received from /127.0.0.3:7000
+  ev 938738us /127.0.0.3 [Messaging-OUT-/127.0.0.3:7000->/127.0.0.1:7000-LARGE_MESSAGES] Sending RANGE_RSP message to /127.0.0.1:7000 message size 10414230 bytes
+  ev 1080120us /127.0.0.1 [RequestResponseStage-5] Processing response from /127.0.0.3:7000
+  ev 1088957us /127.0.0.1 [Messaging-EventLoop-3-12] RANGE_RSP message received from /127.0.0.3:7000
+  ev 1092697us /127.0.0.1 [RequestResponseStage-5] Processing response from /127.0.0.3:7000
+trace duration_us=1266367

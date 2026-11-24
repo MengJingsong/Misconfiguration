@@ -1,0 +1,218 @@
+{
+ "label": "R1",
+ "mode": "life",
+ "args": [
+  "life",
+  "R1",
+  "T",
+  "2G",
+  "long",
+  "6500"
+ ],
+ "shm": true,
+ "cotenancy": {
+  "daemons": "none",
+  "MemAvailable_MiB": 63414
+ },
+ "start": {
+  "pid": 645907,
+  "up_s": 87,
+  "unit": "u14-3b-r1-1795470413",
+  "cgroup": "/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/u14-3b-r1-1795470413.scope",
+  "memory.max": "8589934592",
+  "swap.max": "0",
+  "scope_ok": true,
+  "flags": {
+   "-XX:+UseG1GC": true,
+   "-XX:G1HeapRegionSize=16m": true,
+   "-XX:+AlwaysPreTouch": true,
+   "-XX:+HeapDumpOnOutOfMemoryError": true,
+   "-XX:OnOutOfMemoryError=kill -9 %p": true,
+   "-Xmx2G": true
+  },
+  "flags_ok": true,
+  "MaxDirectMemorySize": [
+   "-XX:MaxDirectMemorySize=15872M"
+  ],
+  "xmx": [
+   "-Xmx2G"
+  ],
+  "xms": [
+   "-Xms2G"
+  ],
+  "heapdump": [
+   "-XX:HeapDumpPath=/mydata/s4/3b-U14/dumps/R1/cassandra-1795470414-pid645907.hprof"
+  ]
+ },
+ "settings": {
+  "values": {
+   "authenticator": "PasswordAuthenticator",
+   "authorizer": "CassandraAuthorizer",
+   "role_manager": "CassandraRoleManager",
+   "tables_warn_threshold": "-1",
+   "tables_fail_threshold": "-1",
+   "keyspaces_fail_threshold": "-1",
+   "memtable_allocation_type": "heap_buffers",
+   "memtable_heap_space": "512MiB",
+   "key_cache_size": "100MiB",
+   "counter_cache_size": "50MiB",
+   "prepared_statements_cache_size": "10MiB",
+   "auto_snapshot": "true",
+   "num_tokens": "16",
+   "columns_per_table_fail_threshold": "-1"
+  },
+  "ok": true
+ },
+ "setup": {
+  "cmd": "setup3b",
+  "args": [
+   "ks",
+   "victimks"
+  ],
+  "start_ms": 1795470503554,
+  "login_wait_s": 0.3,
+  "statements": [
+   "CREATE ROLE IF NOT EXISTS u14 WITH PASSWORD = 'u14pw' AND LOGIN = true AND SUPERUSER = false",
+   "CREATE ROLE IF NOT EXISTS victim WITH PASSWORD = 'victimpw' AND LOGIN = true AND SUPERUSER = false",
+   "CREATE KEYSPACE IF NOT EXISTS \"ks\" WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}",
+   "GRANT CREATE ON KEYSPACE \"ks\" TO u14",
+   "CREATE KEYSPACE IF NOT EXISTS \"victimks\" WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}",
+   "CREATE TABLE IF NOT EXISTS \"victimks\".kv (k int PRIMARY KEY, v blob)",
+   "GRANT SELECT ON TABLE \"victimks\".kv TO victim",
+   "GRANT MODIFY ON TABLE \"victimks\".kv TO victim"
+  ],
+  "roles": [
+   [
+    "cassandra",
+    true,
+    true
+   ],
+   [
+    "u14",
+    false,
+    true
+   ],
+   [
+    "victim",
+    false,
+    true
+   ]
+  ],
+  "perms": {
+   "u14": [
+    [
+     "u14",
+     "<keyspace ks>",
+     "CREATE"
+    ]
+   ],
+   "victim": [
+    [
+     "victim",
+     "<table victimks.kv>",
+     "SELECT"
+    ],
+    [
+     "victim",
+     "<table victimks.kv>",
+     "MODIFY"
+    ]
+   ]
+  },
+  "ks": "ks",
+  "seconds": 1.29
+ },
+ "victim_start_ms": 1795470504924,
+ "checkpoint s0": {
+  "tag": "s0",
+  "n_ok": null,
+  "ms": 1795470518599,
+  "L1": 56153792,
+  "L": 56012328,
+  "K": 0,
+  "mbeans": 12375,
+  "perms_u14": {
+   "rows": 1,
+   "table_ALL_rows": 0,
+   "other": [
+    "<keyspace ks> CREATE"
+   ]
+  },
+  "secs": 3.6
+ },
+ "attack_start_ms": 1795470580068,
+ "client 1-6500": {
+  "cmd": "create",
+  "args": [
+   "ks",
+   "long",
+   "1",
+   "6500",
+   "/mydata/s4/3b-U14/logs/R1",
+   "645907",
+   "2400"
+  ],
+  "start_ms": 1795470581133,
+  "ok": 4012,
+  "rejected": 0,
+  "error": 0,
+  "timeout_tries": 0,
+  "drops_ok": 0,
+  "last_ok_i": 4012,
+  "last_ok_ms": 1795473132021,
+  "stopped": "ddl_cap",
+  "ddl_seconds": 2402.0,
+  "seconds": 2550.98
+ },
+ "real_oom_in_stdout": [],
+ "namecheck": {
+  "cmd": "namecheck",
+  "args": [
+   "ks"
+  ],
+  "start_ms": 1795473159665,
+  "ks_len": 2,
+  "table_len": 222,
+  "table": "t00001xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "seconds": 0.32
+ },
+ "checkpoint end": {
+  "tag": "end",
+  "n_ok": null,
+  "ms": 1795473182382,
+  "L1": 1971507064,
+  "L": 1971691408,
+  "K": 4012,
+  "mbeans": 870943,
+  "perms_u14": {
+   "rows": 28085,
+   "table_ALL_rows": 28084,
+   "other": [
+    "<keyspace ks> CREATE"
+   ]
+  },
+  "secs": 39.3
+ },
+ "U_end": {
+  "tag": "end",
+  "n_ok": null,
+  "ms": 1795473182382,
+  "L1": 1971507064,
+  "L": 1971691408,
+  "K": 4012,
+  "mbeans": 870943,
+  "perms_u14": {
+   "rows": 28085,
+   "table_ALL_rows": 28084,
+   "other": [
+    "<keyspace ks> CREATE"
+   ]
+  },
+  "secs": 39.3
+ },
+ "victim_stop_ms": 1795473211272,
+ "end": {
+  "daemons_left": "647568 bash -c until grep -qE \"\\] (DONE|FAIL)\" /mydata/s4/3b-U14/logs/R1/session.log; do sleep 5; done; cat /mydata/s4/3b-U14/logs/plan3b.out; grep -E \"client"
+ },
+ "DONE": true
+}

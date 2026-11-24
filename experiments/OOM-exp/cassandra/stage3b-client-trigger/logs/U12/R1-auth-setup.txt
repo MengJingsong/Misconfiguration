@@ -1,0 +1,22 @@
+
+1795469865197 login not ready: AuthenticationException: Authentication error on host /127.0.0.1:9042: Provided username cassandra and/or password are incorrect
+1795469869257 login not ready: AuthenticationException: Authentication error on host /127.0.0.1:9042: Provided username cassandra and/or password are incorrect
+1795469872182 logged in as cassandra
+1795469872547 ok: CREATE KEYSPACE u12 WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+1795469873285 ok: CREATE TABLE u12.t (pk int, ck int, m map<int, blob>, PRIMARY KEY (pk, ck))
+1795469873521 ok: CREATE KEYSPACE vks WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+1795469874050 ok: CREATE TABLE vks.kv (k int PRIMARY KEY, v blob)
+1795469874246 ok: CREATE ROLE attacker WITH PASSWORD = 'attacker-pw-3b' AND LOGIN = true
+1795469874268 ok: GRANT MODIFY ON TABLE u12.t TO attacker
+1795469874435 ok: CREATE ROLE victim WITH PASSWORD = 'victim-pw-3b' AND LOGIN = true
+1795469874454 ok: GRANT SELECT ON KEYSPACE vks TO victim
+1795469874473 ok: GRANT MODIFY ON KEYSPACE vks TO victim
+1795469874473 > LIST ROLES
+    Row[attacker, false, true, {}, ALL]
+    Row[cassandra, true, true, {}, ALL]
+    Row[victim, false, true, {}, ALL]
+1795469874500 > LIST ALL PERMISSIONS OF attacker
+    Row[attacker, attacker, <table u12.t>, MODIFY]
+1795469874518 > LIST ALL PERMISSIONS OF victim
+    Row[victim, victim, <keyspace vks>, SELECT]
+    Row[victim, victim, <keyspace vks>, MODIFY]

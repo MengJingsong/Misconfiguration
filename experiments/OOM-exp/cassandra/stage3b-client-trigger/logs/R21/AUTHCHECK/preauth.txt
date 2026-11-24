@@ -1,0 +1,14 @@
+P1 OPTIONS -> SUPPORTED (102 bytes)
+P2 QUERY(write 8 KiB) before STARTUP -> ERROR code=0x000a 'Unexpected message QUERY, expecting STARTUP or OPTIONS'
+P3 STARTUP (conn 2) -> AUTHENTICATE 'org.apache.cassandra.auth.PasswordAuthenticator'
+P4 QUERY(write) after AUTHENTICATE, no AUTH_RESPONSE -> ERROR code=0x000a 'Unexpected message QUERY, expecting SASL_RESPONSE'
+P5 STARTUP (conn 3) -> AUTHENTICATE 'org.apache.cassandra.auth.PasswordAuthenticator'
+P6 AUTH_RESPONSE wrong password -> ERROR code=0x0100 'Provided username attacker and/or password are incorrect'
+P7 QUERY(write) after failed auth -> ERROR code=0x000a 'Unexpected message QUERY, expecting SASL_RESPONSE'
+P8 STARTUP (conn 4) -> AUTHENTICATE 'org.apache.cassandra.auth.PasswordAuthenticator'
+P9 REGISTER before auth -> ERROR code=0x000a 'Unexpected message REGISTER, expecting SASL_RESPONSE'
+P10 QUERY(SELECT) before auth -> ERROR code=0x000a 'Unexpected message QUERY, expecting SASL_RESPONSE'
+P11 STARTUP (conn 5, control) -> AUTHENTICATE 'org.apache.cassandra.auth.PasswordAuthenticator'
+P12 AUTH_RESPONSE correct attacker password (control) -> AUTH_SUCCESS (4 bytes)
+P13 QUERY(write) after auth (control) -> RESULT kind=1 (4 bytes)
+preauth done

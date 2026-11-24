@@ -1,0 +1,485 @@
+# 3-b changes against the stage-2 harness (../../../../cases/memtable_heap_space--stale-btree-updater-pins-discarded-memtables/harness/)
+# Unchanged and used as is: Jmx.java, hprof_scan.py, hprof_reach.py, hprof_refs.py, logback-client.xml; analyze.py with its path changed to /mydata/s4/3b-R21
+--- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/OOM-exp/cassandra/cases/memtable_heap_space--stale-btree-updater-pins-discarded-memtables/harness/run.py	2026-11-21 02:07:09.749279000 -0500
++++ /tmp/claude-20001/-proj-misconfiguration-PG0-git-repos-Misconfiguration/de4db2e5-e43d-584e-8554-a8f15e261a7a/scratchpad/3b-R21/harness/run3b.py	2026-11-23 17:39:49.056922492 -0500
+@@ -1,5 +1,20 @@
+ #!/usr/bin/env python3
+-"""R21 stage-2 lifetime driver (R21 design §2.5, frozen sha256 4efd3a2d...): R16's run.py with (a) a build argument U/P selecting
++"""R21 3-b confirm driver (ms0611, 2026-11-23), derived from the stage-2 run.py below by these changes only:
++(1) W = /mydata/s4/3b-R21, one build (tree = copy of /mydata/s4/cassandra-base, the unmodified 5.0.9 aarch64 jar), arm T, 2 GiB;
++(2) cassandra.yaml additionally sets authenticator: PasswordAuthenticator, authorizer: CassandraAuthorizer, role_manager:
++    CassandraRoleManager (security settings; every capacity setting stays shipped); cluster_name r21-3b;
++(3) the shipped superuser (cassandra) is used only for: probe, settings read-back, client.py admin (roles attacker/tenant, the admin
++    schema ks.t and the tenant's vic.kv, the GRANTs, LIST ALL PERMISSIONS) and one system_views.clients read at attack +2 s;
++(4) the attacker role (SELECT + MODIFY on ks.t only) runs HotGen (env R21_USER/R21_PASS); the victim role tenant (SELECT + MODIFY on
++    vic.kv only) runs R21Victim at 20 writes/s + 20 reads/s from 60 s before the attack until 30 s after the node is gone (or the
++    attack ends);
++(5) dumps are analysed inline after the lifetime (hprof_scan.py, hprof_reach.py, hprof_refs.py discarded 4 on the OOM dump) and
++    deleted; no reachq.sh queue;
++(6) mode authcheck <label>: start, admin, preauth.py (hand-made frames) and client.py authcheck as the attacker, stop (claim checks;
++    not an attack lifetime).
++usage: run3b.py life <label> U T 2G | run3b.py authcheck <label> | run3b.py down
++Below, the stage-2 text.
++R21 stage-2 lifetime driver (R21 design §2.5, frozen sha256 4efd3a2d...): R16's run.py with (a) a build argument U/P selecting
+ /mydata/s4/r21/cassandra-u or cassandra-p (build, jar sha256 and the javap of BTree$Updater.reset() in summary.json); (b) arms T (hot,
+ cw 32), I (hot, cw 4), C (perthread, cw 32), Q (quad: pk = thread mod 4, cw 32); (c) the node scope WITHOUT MemoryMax (MemorySwapMax=0
+ only; memory.max must read 'max'); (d) every OOM dump and every end dump moved to /mydata/s4/r21/dumps/<label>--<tag>.hprof for
+@@ -16,8 +31,11 @@
+ system.log, debug.log, gc.log*, stdout.txt, scan-*.json, yaml.diff, jvm-cmdline.txt, memory.events)."""
+ import json, os, re, shutil, subprocess, sys, threading, time
+ 
+-W = '/mydata/s4/r21'
+-BUILDS = {'U': W + '/cassandra-u', 'P': W + '/cassandra-p'}
++W = '/mydata/s4/3b-R21'
++BUILDS = {'U': W + '/tree'}
++ATKPW, TENPW = 'atk-3b-R21', 'ten-3b-R21'
++AUTH = ['authenticator: PasswordAuthenticator', 'authorizer: CassandraAuthorizer',
++        'role_manager: CassandraRoleManager']
+ JAR = 'build/apache-cassandra-5.0.9-SNAPSHOT.jar'
+ C = BUILDS['U']   # replaced by the lifetime's build below
+ DUMPS = W + '/dumps'
+@@ -55,11 +73,13 @@
+ OOMWAIT = {'15872M': 600}
+ 
+ args = sys.argv[1:]
+-if not args or args[0] not in ('life', 'idle', 'shakedown', 'down'):
++if not args or args[0] not in ('life', 'authcheck', 'down'):
+     sys.exit(__doc__)
+ mode = args[0]
+-if mode in ('life', 'idle'):
++if mode == 'life':
+     label, BUILD = args[1], args[2]
++elif mode == 'authcheck':
++    label, BUILD = args[1], 'U'
+ elif mode == 'shakedown':
+     BUILD = args[1]
+     label = f'shakedown-{BUILD}' + ('-selftest' if len(args) > 2 and args[2] == 'selftest' else '')
+@@ -155,6 +175,7 @@
+ def fail(msg):
+     note('FAIL', msg)
+     stop_client()
++    stop_victim()
+     stop_samplers()
+     stop_node()
+     collect()
+@@ -162,9 +183,9 @@
+     sys.exit(1)
+ 
+ 
+-def client(*a, timeout=300, quiet=False):
++def client(*a, timeout=300, quiet=False, user='cassandra', pw='cassandra'):
+     rc, out = sh(f'python3 -I {HARNESS}/client.py {ADDR} ' + ' '.join(str(x) for x in a), timeout=timeout, check=False,
+-                 env=dict(os.environ, CASSANDRA_HOME=C), quiet=quiet, cwd='/')
++                 env=dict(os.environ, CASSANDRA_HOME=C, R21_USER=user, R21_PASS=pw), quiet=quiet, cwd='/')
+     js = [l for l in out.splitlines() if l.startswith('{')]
+     return json.loads(js[-1]) if js else None
+ 
+@@ -291,7 +312,7 @@
+     for d in ('logs', 'data', 'commitlog', 'hints', 'saved_caches', 'cdc_raw', 'dump'):
+         os.makedirs(f'{RD}/{d}')
+     shutil.copytree(C + '/conf', RD + '/conf')
+-    lines = ['cluster_name: r21', f'listen_address: {ADDR}', f'rpc_address: {ADDR}',
++    lines = AUTH + ['cluster_name: r21-3b', f'listen_address: {ADDR}', f'rpc_address: {ADDR}',
+              'seed_provider:', '  - class_name: org.apache.cassandra.locator.SimpleSeedProvider', '    parameters:', f'      - seeds: "{ADDR}:7000"',
+              'data_file_directories:', f'    - {RD}/data', f'commitlog_directory: {RD}/commitlog', f'hints_directory: {RD}/hints',
+              f'saved_caches_directory: {RD}/saved_caches', f'cdc_raw_directory: {RD}/cdc_raw']
+@@ -310,7 +331,7 @@
+         else:
+             skip = False
+         out.append(l)
+-    open(RD + '/conf/cassandra.yaml', 'w').write('\n'.join(out) + '\n# ---- r21 lines ----\n' + '\n'.join(lines) + '\n')
++    open(RD + '/conf/cassandra.yaml', 'w').write('\n'.join(out) + '\n# ---- r21 3-b lines (auth + environment) ----\n' + '\n'.join(lines) + '\n')
+     sh(f'diff {C}/conf/cassandra.yaml {RD}/conf/cassandra.yaml > {LOGS}/yaml.diff; true', check=False)
+ 
+ 
+@@ -334,7 +355,7 @@
+                MAX_HEAP_SIZE=heap, XDG_RUNTIME_DIR=f'/run/user/{os.getuid()}')
+     for k in ('HEAP_NEWSIZE', 'JVM_EXTRA_OPTS', 'JVM_OPTS', 'CASSANDRA_INCLUDE'):
+         env.pop(k, None)
+-    unit = f'r21-{label.lower()}-{int(time.time())}'
++    unit = f'r21n3b-{label.lower()}-{int(time.time())}'
+     cmd = (f"systemd-run --user --scope --unit={unit} -p MemorySwapMax=0 "
+            f"bash -c 'ulimit -n 100000 && exec bin/cassandra -f -p {RD}/cassandra.pid' > {RD}/stdout.txt 2>&1")
+     log('+ ' + cmd)
+@@ -344,7 +365,7 @@
+         time.sleep(3)
+         if NODE['popen'].poll() is not None:
+             fail(f'node died during start (exit {NODE["popen"].returncode})')
+-        if pid_of() and 'Starting listening for CQL clients' in (readf(RD + '/logs/system.log') or '') and client('probe', quiet=True, timeout=60):
++        if pid_of() and 'Starting listening for CQL clients' in (readf(RD + '/logs/system.log') or '') and 'release_version' in (client('probe', quiet=True, timeout=60) or {}):
+             break
+     else:
+         fail('node not serving after 300 s (invalid lifetime)')
+@@ -375,7 +396,11 @@
+              'memtable_flush_writers', 'concurrent_writes', 'concurrent_counter_writes', 'native_transport_max_request_data_in_flight',
+              'native_transport_max_request_data_in_flight_per_ip', 'native_transport_max_message_size', 'write_request_timeout',
+              'max_mutation_size', 'commitlog_segment_size', 'commitlog_total_space', 'native_transport_throw_on_overload',
+-             'hinted_handoff_enabled', 'key_cache_size', 'batch_size_fail_threshold', 'native_transport_timeout']
++             'hinted_handoff_enabled', 'key_cache_size', 'batch_size_fail_threshold', 'native_transport_timeout',
++             'authenticator', 'authorizer', 'role_manager', 'network_authorizer', 'audit_logging_options_enabled',
++             'native_transport_rate_limiting_enabled', 'native_transport_max_concurrent_connections',
++             'native_transport_max_concurrent_connections_per_ip', 'roles_validity', 'permissions_validity',
++             'memtable_heap_space', 'concurrent_reads', 'native_transport_max_threads', 'batch_size_warn_threshold']
+     got = client('settings', *names, quiet=True)
+     s = got and got.get('settings') or {}
+     exp = {'memtable_allocation_type': 'heap_buffers', 'memtable_heap_space': POOL[heap],
+@@ -383,6 +408,10 @@
+     for k, v in exp.items():
+         log(f'EXPECTED {k}={v} GOT {s.get(k)} {"OK" if s.get(k) == v else "MISMATCH"}')
+     ok = all(s.get(k) == v for k, v in exp.items())
++    auth_ok = 'PasswordAuthenticator' in str(s.get('authenticator')) and 'CassandraAuthorizer' in str(s.get('authorizer')) \
++        and 'CassandraRoleManager' in str(s.get('role_manager'))
++    log(f'AUTH authenticator={s.get("authenticator")} authorizer={s.get("authorizer")} role_manager={s.get("role_manager")} {"OK" if auth_ok else "MISMATCH"}')
++    ok = ok and auth_ok
+     note('settings', {'values': s, 'expected': exp, 'ok': ok})
+     if not ok:
+         fail('settings read-back differs')
+@@ -407,23 +436,81 @@
+     return out
+ 
+ 
++VIC = {'popen': None, 'stop': None}
++
++
++def start_victim():
++    VIC['stop'] = f'{LOGS}/victim.stop'
++    cmd = (f"systemd-run --user --scope --unit=r21v3b-{label.lower()}-{int(time.time())} -p MemoryMax=1G -p MemorySwapMax=0 "
++           f"java -Xmx256m -Dlogback.configurationFile={HARNESS}/logback-client.xml -cp '{W}/cls:{C}/build/lib/jars/*' R21Victim run 20 20 "
++           f"{VIC['stop']} 1500 > {LOGS}/victim.out 2>{LOGS}/victim.err")
++    log('+ ' + cmd)
++    VIC['popen'] = subprocess.Popen(cmd, shell=True, cwd='/', env=dict(os.environ, XDG_RUNTIME_DIR=f'/run/user/{os.getuid()}',
++                                                                     R21_USER='tenant', R21_PASS=TENPW))
++    note('victim_start', {'ms': int(time.time() * 1000), 'rate': '20 writes/s + 20 reads/s', 'role': 'tenant'})
++
++
++def stop_victim():
++    p = VIC['popen']
++    if p is None:
++        return
++    open(VIC['stop'], 'w').close()
++    try:
++        p.wait(timeout=20)
++    except subprocess.TimeoutExpired:
++        out = sh(f"pgrep -f 'R21Victim run .* {LOGS}/victim.stop'", check=False, quiet=True)[1].split()
++        for x in out:
++            subprocess.run(['kill', '-9', x])
++        try:
++            p.wait(timeout=10)
++        except subprocess.TimeoutExpired:
++            p.kill()
++    VIC['popen'] = None
++    note('victim_end', {'ms': int(time.time() * 1000), 'tail': (readf(LOGS + '/victim.out') or '')[-300:]})
++
++
++def victim_setup():
++    rc, out = sh(f"java -Xmx256m -Dlogback.configurationFile={HARNESS}/logback-client.xml -cp '{W}/cls:{C}/build/lib/jars/*' R21Victim setup 1000",
++                 check=False, timeout=300, cwd='/', env=dict(os.environ, R21_USER='tenant', R21_PASS=TENPW), quiet=True)
++    note('victim_setup', {'rc': rc, 'out': out.strip().splitlines()[-1:] if out.strip() else None})
++    if rc != 0:
++        fail('victim setup failed')
++
++
++def analyze_dump(path, tag):
++    """3-b: scan, reach (and refs on the OOM dump) inline, JSONs to LOGS, then delete the dump"""
++    t0 = time.time()
++    sz = os.path.getsize(path)
++    sh(f'python3 -I {HARNESS}/hprof_scan.py {path} > {LOGS}/scan-{tag}.json 2> {LOGS}/scan-{tag}.err', check=False, timeout=3600, cwd='/')
++    t1 = time.time()
++    sh(f'python3 -I {HARNESS}/hprof_reach.py {path} > {LOGS}/reach-{tag}.json 2> {LOGS}/reach-{tag}.err', check=False, timeout=3600, cwd='/')
++    t2 = time.time()
++    if tag == 'oom':
++        sh(f'python3 -I {HARNESS}/hprof_refs.py {path} 4 discarded > {LOGS}/refs-disc-{tag}.json 2> {LOGS}/refs-{tag}.err', check=False,
++           timeout=3600, cwd='/')
++    t3 = time.time()
++    os.remove(path)
++    open(f'{LOGS}/reachq-{tag}.txt', 'w').write(f'dump={path} bytes={sz} scan_s={round(t1-t0)} reach_s={round(t2-t1)} refs_s={round(t3-t2)} deleted=1\n')
++    note('dump_analysed ' + tag, {'bytes': sz, 'scan_s': round(t1 - t0), 'reach_s': round(t2 - t1), 'refs_s': round(t3 - t2), 'deleted': True})
++
++
++PENDING = []
++
++
+ def queue_dump(path, tag, scanonly=False):
+-    """R21 (d): move the dump to the analysis queue (reachq.sh); the first OOM dump of each build+arm also gets hprof_refs.py"""
++    """3-b: move the dump to DUMPS; analysed inline by analyze_pending() once the victim and the node are stopped"""
+     os.makedirs(DUMPS, exist_ok=True)
+     dst = f'{DUMPS}/{label}--{tag}.hprof'
+     st = os.stat(path)
+-    flag = None
+-    if tag == 'oom' and mode == 'life':
+-        flag = f'{W}/refs-flag-{BUILD}{args[3]}'
+-        if os.path.exists(flag):
+-            flag = None
+-        else:
+-            open(flag, 'w').write(label + '\n')
+-            open(dst + '.refs', 'w').close()
+-    if scanonly:
+-        open(dst + '.scanonly', 'w').close()
+     shutil.move(path, dst)
+-    note('dump_queued ' + tag, {'file': dst, 'bytes': st.st_size, 'refs': bool(flag), 'scanonly': scanonly})
++    PENDING.append((dst, tag))
++    note('dump_kept_for_analysis ' + tag, {'file': dst, 'bytes': st.st_size})
++
++
++def analyze_pending():
++    while PENDING:
++        d, t = PENDING.pop(0)
++        analyze_dump(d, t)
+ 
+ 
+ def queue_wait():
+@@ -454,8 +541,7 @@
+     nulls = [x for x in blk if 'putfield' in x]
+     note('build', {'build': BUILD, 'tree': C, 'jar_sha256': sha, 'reset_putfields': nulls,
+                    'reset_nulls_updateF': any('updateF' in x for x in nulls), 'reset_nulls_comparator': any('comparator' in x for x in nulls)})
+-    exp = {'U': '570b5249d9b9a43f6809eb3da562737492192026f974b2edbd20e94bea90176e',
+-           'P': '5817c26b8fbb4af726a56816f746699f9007f083c7230f42ee47c5120ee2d609'}[BUILD]
++    exp = {'U': 'e55f4f2974cb6120712a5cdfbbed9ee1ba25d97b887cbe71b64fd194f3b5a942'}[BUILD]   # ms0611 aarch64 base jar
+     if sha != exp or (BUILD == 'P') != any('updateF' in x for x in nulls):
+         fail('build differs from the planned one')
+ 
+@@ -508,11 +594,12 @@
+         os.remove(HG['stop'])
+     except OSError:
+         pass
+-    cmd = (f"systemd-run --user --scope --unit=r21c-{label.lower()}-{int(time.time())} -p MemoryMax=4G -p MemorySwapMax=0 "
++    cmd = (f"systemd-run --user --scope --unit=r21c3b-{label.lower()}-{int(time.time())} -p MemoryMax=4G -p MemorySwapMax=0 "
+            f"java -Xmx3g -Dlogback.configurationFile={HARNESS}/logback-client.xml -cp '{W}/cls:{C}/build/lib/jars/*' HotGen {nips} {tpi} {R} {wmode} {secs} {LOGS}/hotgen.csv {HG['stop']}"
+            + (f' {rate}' if rate else ' 0') + (' --gate-selftest' if selftest else '') + f" > {LOGS}/hotgen.out 2>&1")
+     log('+ ' + cmd)
+-    HG['popen'] = subprocess.Popen(cmd, shell=True, cwd='/', env=dict(os.environ, XDG_RUNTIME_DIR=f'/run/user/{os.getuid()}'))
++    HG['popen'] = subprocess.Popen(cmd, shell=True, cwd='/', env=dict(os.environ, XDG_RUNTIME_DIR=f'/run/user/{os.getuid()}',
++                                                                    R21_USER='attacker', R21_PASS=ATKPW))
+ 
+ 
+ def node_oom_path(t_work, limit=300):
+@@ -560,20 +647,26 @@
+     pid, cg = start(heap, arm)
+     build_info()
+     readback(arm, heap)
+-    sc = client('schema', quiet=True)
+-    note('schema', sc)
+-    if not sc or 'ks' in str(sc.get('error', '')):
+-        fail('schema failed')
++    sc = client('admin', ATKPW, TENPW, quiet=True)
++    note('admin (superuser)', sc)
++    if not sc or 'error' in sc:
++        fail('admin setup failed')
++    victim_setup()
+     sh(f'bin/nodetool -h 127.0.0.1 -p {JMXPORT} setlogginglevel org.apache.cassandra.db.memtable.SkipListMemtable TRACE', check=False)
+     start_samplers(pid, cg)
+     time.sleep(15)
+     note('L0', hist2(pid, 's0'))
+     time.sleep(10)
++    start_victim()
++    time.sleep(60)
+     wmode = WMODE[arm]
+     secs = 240
+     t_work = time.time()
+     note('workload_start', {'ms': int(t_work * 1000), 'mode': wmode, 'R': R, 'S_MiB': R * 8192 / 1048576, 'secs': secs, 'rate': rate})
++    open(LOGS + '/attack.start', 'w').write(str(int(t_work * 1000)))
+     start_client(4, 9, R, wmode, secs, rate)
++    CLQ = {'p': None}
++    oom_first_ms = None
+     ips_seen, checked, last_ok_ms, last_req = set(), False, time.time(), -1
+     gated_max = 0
+     outcome = None
+@@ -582,6 +675,12 @@
+         el = time.time() - t_work
+         if el < 40 and len(ips_seen) < 4:
+             ips_seen |= set(ss_clients('t%d' % int(el)))
++        if CLQ['p'] is None and el >= 2:
++            CLQ['p'] = subprocess.Popen(f"timeout 60 python3 -I {HARNESS}/client.py {ADDR} clients > {LOGS}/clients-attack.json 2>&1",
++                                        shell=True, cwd='/', env=dict(os.environ, CASSANDRA_HOME=C, R21_USER='cassandra', R21_PASS='cassandra'))
++        if oom_first_ms is None and oom_seen():
++            oom_first_ms = int(time.time() * 1000)
++            note('oom_seen', {'ms': oom_first_ms, 'since_attack_s': round(time.time() - t_work, 1)})
+         st = stats_last()
+         if st and st['req_ok'] != last_req:
+             last_req, last_ok_ms = st['req_ok'], time.time()
+@@ -631,19 +730,30 @@
+             stop_samplers()
+             subprocess.run(['kill', '-9', str(pid)])
+             wait_death(30)
++            stop_victim()
+             collect()
+             note('flush_lines', [l[-300:] for l in flush_lines()][:150])
+             finish()
+             return
+     if outcome == 'node_gone':
++        t_gone = time.time()
++        open(LOGS + '/attack.end', 'w').write(str(int(t_gone * 1000)))
+         node_oom_path(t_work, OOMWAIT.get(heap, 300))
+-        # first-trigger fallback (writer stacks in the dump) is read by analyze.py from scan-oom.json after reachq.sh
++        # the victim keeps sending for 30 s after the node is gone (its view of the outage)
++        while time.time() - t_gone < 30:
++            time.sleep(1)
++        stop_victim()
++        if CLQ['p'] is not None and CLQ['p'].poll() is None:
++            CLQ['p'].kill()
++        analyze_pending()
+         finish()
+         return
+     # surviving lifetime
+     stop_client()
++    open(LOGS + '/attack.end', 'w').write(str(int(time.time() * 1000)))
+     note('client_end', stats_last())
+-    time.sleep(10)
++    time.sleep(30)
++    stop_victim()
+     note('U_end', hist2(pid, 'end'))
+     note('flush_lines', [l[-300:] for l in flush_lines()][:150])
+     if heap != '15872M':
+@@ -654,6 +764,7 @@
+         collect()
+         if os.path.exists(f'{RD}/dump/end.hprof'):
+             queue_dump(f'{RD}/dump/end.hprof', 'end')
++        analyze_pending()
+     else:
+         stop_samplers()
+         stop_node()
+@@ -661,108 +772,38 @@
+     finish()
+ 
+ 
+-def live_dump(pid, tag):
+-    rc, out = sh(f'jcmd {pid} GC.heap_dump {RD}/dump/{tag}.hprof', check=False, timeout=1200, cwd='/')
+-    note('dump ' + tag, {'rc': rc, 'out': out[-200:]})
+-    if os.path.exists(f'{RD}/dump/{tag}.hprof'):
+-        queue_dump(f'{RD}/dump/{tag}.hprof', tag)
+-
+-
+-def mode_idle():
+-    """R21 §2.6 idle-retention reading: 2 GiB, all defaults, perthread R = 160"""
+-    heap, arm, R = '2G', 'C', 160
+-    queue_wait()
+-    pid, cg = start(heap, arm)
+-    build_info()
+-    readback(arm, heap)
+-    sc = client('schema', quiet=True)
+-    note('schema', sc)
+-    if not sc or 'ks' in str(sc.get('error', '')):
+-        fail('schema failed')
+-    sh(f'bin/nodetool -h 127.0.0.1 -p {JMXPORT} setlogginglevel org.apache.cassandra.db.memtable.SkipListMemtable TRACE', check=False)
+-    start_samplers(pid, cg)
+-    time.sleep(15)
+-    note('L0', hist2(pid, 's0'))
+-    time.sleep(10)
+-    for n in (1, 2, 3):
+-        t_work = time.time()
+-        note(f'cycle{n}_start', {'ms': int(t_work * 1000), 'mode': 'perthread', 'R': R, 'secs': 60})
+-        start_client(4, 9, R, 'perthread', 60)
+-        while HG['popen'].poll() is None and time.time() - t_work < 150:
+-            if pid_of() is None or oom_seen():
+-                break
+-            time.sleep(1)
+-        if pid_of() is None or oom_seen():
+-            note('workload_outcome', {'outcome': 'node_gone', 'cycle': n, 'at_s': round(time.time() - t_work)})
+-            node_oom_path(t_work)
+-            finish()
+-            return
+-        stop_client()
+-        note(f'cycle{n}_client_end', stats_last())
+-        shutil.copy(LOGS + '/hotgen.csv', LOGS + f'/hotgen-c{n}.csv')
+-        rc, out = sh(f'bin/nodetool -h 127.0.0.1 -p {JMXPORT} flush', check=False, timeout=300)
+-        note(f'cycle{n}_flush', {'rc': rc, 'at_s': round(time.time() - t_work)})
+-        time.sleep(30)
+-        note(f'hist c{n}', hist2(pid, f'c{n}'))
+-        live_dump(pid, f'c{n}')
+-    t_idle = time.time()
+-    while time.time() - t_idle < 300:
+-        if pid_of() is None:
+-            fail('node gone during the 300 s idle')
+-        time.sleep(2)
+-    note('hist idle300', hist2(pid, 'idle300'))
+-    live_dump(pid, 'idle300')
+-    note('flush_lines', [l[-300:] for l in flush_lines()][:150])
+-    stop_samplers()
+-    stop_node()
+-    collect()
+-    finish()
+-
+-
+-def mode_shakedown(selftest):
++def mode_authcheck():
++    """claim checks (not an attack lifetime): auth on, admin setup, pre-auth frames, attacker's allowed/denied operations"""
+     pid, cg = start('2G', 'T')
+     build_info()
+     readback('T', '2G')
+-    note('schema', client('schema', quiet=True))
+-    start_samplers(pid, cg)
+-    start_client(4, 9, 64, 'perthread', 20, 0, selftest)
+-    ips = set()
+-    for i in range(18):
+-        time.sleep(1)
+-        ips |= set(ss_clients('t%d' % i))
+-    note('shakedown_client_ips', sorted(ips))
+-    HG['popen'].wait(timeout=180)
+-    HG['popen'] = None
+-    note('client_end', stats_last())
+-    note('hotgen_out', (readf(LOGS + '/hotgen.out') or '')[-600:])
+-    rows = sampler_rows()
+-    note('sampler_last', rows[-1] if rows else None)
+-    if not selftest:
+-        # Step A (7): time hprof_reach.py on the shakedown's end dump (not a reading; the dump is deleted)
+-        rc, out = sh(f'jcmd {pid} GC.heap_dump {RD}/dump/end.hprof', check=False, timeout=1200, cwd='/')
+-        t0 = time.time()
+-        rc, out = sh(f'python3 -I {HARNESS}/hprof_reach.py {RD}/dump/end.hprof', check=False, timeout=1800, cwd='/', quiet=True)
+-        note('reach_timing', {'seconds': round(time.time() - t0, 1), 'bytes': os.path.getsize(f'{RD}/dump/end.hprof'),
+-                              'out': out[-900:]})
+-        os.remove(f'{RD}/dump/end.hprof')
++    sc = client('admin', ATKPW, TENPW, quiet=True)
++    note('admin (superuser)', sc)
++    if not sc or 'error' in sc:
++        fail('admin setup failed')
++    rc, out = sh(f'python3 -I {HARNESS}/preauth.py {ADDR} {ATKPW}', check=False, timeout=180, cwd='/', quiet=True)
++    open(LOGS + '/preauth.txt', 'w').write(out)
++    note('preauth', out.strip().splitlines())
++    ac = client('authcheck', quiet=True, user='attacker', pw=ATKPW)
++    note('authcheck (attacker)', ac)
++    time.sleep(2)
++    lines = [l for l in (readf(RD + '/logs/system.log') or '').splitlines() if 'atch' in l and ('WARN' in l or 'ERROR' in l)]
++    note('batch_log_lines', lines[:20])
+     errs = [l for l in (readf(RD + '/logs/system.log') or '').splitlines() if l.startswith('ERROR')]
+     note('system_log_errors', errs[:10])
+-    stop_samplers()
+     stop_node()
+     collect()
+     finish()
+ 
+ 
+ try:
+-    sh(f'mkdir -p {W}/cls && javac -d {W}/cls {HARNESS}/Jmx.java && javac -cp "{C}/build/lib/jars/*" -d {W}/cls {HARNESS}/HotGen.java',
++    sh(f'mkdir -p {W}/cls && javac -d {W}/cls {HARNESS}/Jmx.java && javac -cp "{C}/build/lib/jars/*" -d {W}/cls {HARNESS}/HotGen.java {HARNESS}/R21Victim.java',
+        cwd='/', quiet=True)
+     if mode == 'down':
+         stop_node()
+         note('down', daemons() or 'none')
+-    elif mode == 'shakedown':
+-        mode_shakedown(len(args) > 2 and args[2] == 'selftest')
+-    elif mode == 'idle':
+-        mode_idle()
++    elif mode == 'authcheck':
++        mode_authcheck()
+     else:
+         arm, heap = args[3], args[4]
+         if arm not in WMODE:
+--- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/OOM-exp/cassandra/cases/memtable_heap_space--stale-btree-updater-pins-discarded-memtables/harness/HotGen.java	2026-11-21 02:03:29.093798000 -0500
++++ /tmp/claude-20001/-proj-misconfiguration-PG0-git-repos-Misconfiguration/de4db2e5-e43d-584e-8554-a8f15e261a7a/scratchpad/3b-R21/harness/HotGen.java	2026-11-23 17:36:51.713467389 -0500
+@@ -25,6 +25,8 @@
+ import com.datastax.shaded.netty.bootstrap.Bootstrap;
+ 
+ /**
++ * R21 3-b confirm (ms0611, 2026-11-23): stage-2 HotGen with ONE change: every Cluster logs in with the role named by env
++ * R21_USER / R21_PASS (PasswordAuthenticator; the attacker role holds only SELECT + MODIFY on ks.t). Below, the stage-2 text.
+  * R21 stage-2 load generator (R21 design §2.5): R16's HotGen unchanged plus mode quad (pk = global thread number mod 4; the
+  * gate polls the same pk). Below, R16's text.
+  * R16 stage-2 load generator (design §2.5): B18's HotGen plus the gate.
+@@ -94,6 +96,7 @@
+                                                     .setMaxRequestsPerConnection(HostDistance.LOCAL, 2048);
+             cls[i] = Cluster.builder().addContactPoint("127.0.0.1").withPort(9042).withProtocolVersion(ProtocolVersion.V4)
+                             .withPoolingOptions(po).withNettyOptions(no)
++                            .withCredentials(System.getenv("R21_USER"), System.getenv("R21_PASS"))   // 3-b: the attacker role
+                             .withSocketOptions(new SocketOptions().setReadTimeoutMillis(30_000).setConnectTimeoutMillis(30_000))
+                             .build();
+             ss[i] = cls[i].connect();

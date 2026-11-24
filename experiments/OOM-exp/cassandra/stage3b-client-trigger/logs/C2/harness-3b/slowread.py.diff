@@ -1,0 +1,33 @@
+--- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/OOM-exp/cassandra/cases/convergence/coordinator_read_size_fail_threshold-concurrent-reads/harness/slowread.py	2026-11-12 09:53:43.850778000 -0500
++++ slowread.py	2026-11-23 16:42:10.974938000 -0500
+@@ -7,8 +7,10 @@
+ <drainKBps_per_conn> KiB/s (token bucket; 0 = unlimited). Every complete response is replaced by a new
+ request on the same stream (closed loop). SO_RCVBUF is set to <rcvbuf> before connect (client choice).
+ Prints one CSV line per second: t,outstanding,responses,errors,MBps,lastErr ; ends with SUMMARY.
+-Each read is the same 3.5 MiB single-page read as C2Load; only the client's drain rate differs."""
+-import random, selectors, socket, struct, sys, time
++Each read is the same 3.5 MiB single-page read as C2Load; only the client's drain rate differs.
++3-b confirm (2026-11-23): env C2_USER / C2_PASS -> after STARTUP the client answers AUTHENTICATE with a SASL PLAIN
++AUTH_RESPONSE and expects AUTH_SUCCESS (PasswordAuthenticator), i.e. every connection logs in as that role."""
++import os, random, selectors, socket, struct, sys, time
+ 
+ host, conns, steps, secs, kbps = sys.argv[1], int(sys.argv[2]), [tuple(int(x) for x in st.split(':')) for st in sys.argv[3].split(',')], float(sys.argv[4]), float(sys.argv[5])
+ rcvbuf = int(sys.argv[6]) if len(sys.argv) > 6 else 65536
+@@ -42,8 +44,15 @@
+         s.sock.sendall(startup())
+         hdr = s.recvn(9)
+         _, _, _, op, ln = struct.unpack('>BBhBi', hdr)
+-        s.recvn(ln)
+-        assert op == 0x02, 'expected READY, got opcode %d' % op
++        body = s.recvn(ln)
++        if op == 0x03:  # AUTHENTICATE -> SASL PLAIN
++            tok = b'\0' + os.environ['C2_USER'].encode() + b'\0' + os.environ['C2_PASS'].encode()
++            s.sock.sendall(frame(0, 0x0F, struct.pack('>i', len(tok)) + tok))
++            _, _, _, op, ln = struct.unpack('>BBhBi', s.recvn(9))
++            body = s.recvn(ln)
++            assert op == 0x10, 'expected AUTH_SUCCESS, got opcode %d %r' % (op, body[:120])
++        else:
++            assert op == 0x02, 'expected READY, got opcode %d' % op
+         s.sock.setblocking(False)
+         s.buf = bytearray(); s.need = None; s.tokens = 0.0; s.last = time.time()
+         s.out = 0; s.nstreams = 0

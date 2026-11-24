@@ -1,0 +1,16 @@
+superuser login after 11 s
+OK CREATE ROLE mallory WITH LOGIN = true AND PASSWORD = 'mallory-pw'
+OK CREATE ROLE victim WITH LOGIN = true AND PASSWORD = 'victim-pw'
+OK CREATE KEYSPACE vks WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+OK CREATE TABLE vks.kv (k int PRIMARY KEY, v text)
+OK GRANT SELECT ON KEYSPACE vks TO victim
+OK GRANT MODIFY ON KEYSPACE vks TO victim
+OK CREATE KEYSPACE c9 WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+OK CREATE TABLE c9.t (pk bigint PRIMARY KEY, v blob) WITH compaction = {'class':'SizeTieredCompactionStrategy','enabled':'false'} AND memtable_flush_period_in_ms = 200
+OK GRANT SELECT ON TABLE c9.t TO mallory
+  mallory: mallory <table c9.t> SELECT
+  victim: victim <keyspace vks> SELECT
+  victim: victim <keyspace vks> MODIFY
+  role: cassandra super=True login=True
+  role: mallory super=False login=True
+  role: victim super=False login=True

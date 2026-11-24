@@ -1,0 +1,152 @@
+[2026-11-23 17:19:39 EST] started LOAD pid 615366 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b3b16-LOAD-1795472378.scope
+[2026-11-23 17:20:29 EST] ready LOAD
+-XX:+HeapDumpOnOutOfMemoryError -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:G1NewSizePercent=50 -XX:MaxGCPauseMillis=300 -Xms8G -Xmx8G -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/3b-B16/runs/LOAD/cassandra-1795472378-pid615366.hprof -XX:NativeMemoryTracking=summary -XX:-HeapDumpOnOutOfMemoryError -XX:OnOutOfMemoryError=kill 
+resolved: -XX:MaxDirectMemorySize=16642998272 -XX:MaxHeapSize=8589934592
+[2026-11-23 17:20:31 EST] admin-setup (superuser cassandra)
+admin login retry 0: AuthenticationException: Authentication error on host /127.0.0.1:9042: Provided username cassandra and/or password are incorrect
+admin login retry 1: AuthenticationException: Authentication error on host /127.0.0.1:9042: Provided username cassandra and/or password are incorrect
+15:20:43 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+admin: CREATE ROLE IF NOT EXISTS attacker WITH PASSWORD = '…' AND LOGIN = true AND SUPERUSER = false
+admin: CREATE ROLE IF NOT EXISTS tenant WITH PASSWORD = '…' AND LOGIN = true AND SUPERUSER = false
+admin: CREATE ROLE IF NOT EXISTS reader WITH PASSWORD = '…' AND LOGIN = true AND SUPERUSER = false
+admin: CREATE KEYSPACE IF NOT EXISTS b16 WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+admin: CREATE TABLE IF NOT EXISTS b16.t (pk int, ck text, v int, PRIMARY KEY (pk, ck))
+admin: CREATE TABLE IF NOT EXISTS b16.m (pk int, ck text, v int, PRIMARY KEY (pk, ck))
+admin: CREATE KEYSPACE IF NOT EXISTS vic WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+admin: CREATE TABLE IF NOT EXISTS vic.kv (k int PRIMARY KEY, v text)
+admin: GRANT SELECT ON TABLE b16.t TO attacker
+admin: GRANT MODIFY ON TABLE b16.t TO attacker
+admin: GRANT SELECT ON TABLE b16.m TO attacker
+admin: GRANT MODIFY ON TABLE b16.m TO attacker
+admin: GRANT SELECT ON TABLE vic.kv TO tenant
+admin: GRANT MODIFY ON TABLE vic.kv TO tenant
+admin: GRANT SELECT ON TABLE b16.t TO reader
+perm attacker: <table b16.m> SELECT
+perm attacker: <table b16.m> MODIFY
+perm attacker: <table b16.t> SELECT
+perm attacker: <table b16.t> MODIFY
+perm tenant: <table vic.kv> SELECT
+perm tenant: <table vic.kv> MODIFY
+perm reader: <table b16.t> SELECT
+role attacker superuser=false login=true member_of=[]
+role cassandra superuser=true login=true member_of=[]
+role tenant superuser=false login=true member_of=[]
+role reader superuser=false login=true member_of=[]
+[2026-11-23 17:20:50 EST] load t (role attacker)
+load t sent=40000 done=39980 err=0 s=12
+load t sent=45000 done=44980 err=0 s=13
+load ok tbl=t ranges=49999 boundBytes=12000 done=49999 errors=0 secs=15
+1795472473,after-t,nmtOtherKB=326925,nmtTotalKB=9229607,rssKB=9015112,rssAnonKB=8984984,scopeCurB=9802420224,scopeOomKill=0,1795472472326,3062531584,965379584,0,0,0,2597,0,0,49527939,0,-1,327,0,-1
+[2026-11-23 17:21:13 EST] load m (role attacker)
+load m sent=40000 done=39940 err=0 s=4
+load m sent=45000 done=44940 err=0 s=4
+load ok tbl=m ranges=49999 boundBytes=1000 done=49999 errors=0 secs=4
+[2026-11-23 17:21:24 EST] tenant setup (role tenant)
+15:21:27 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+victim setup ok keys=1000 count=1000
+		Table: kv
+		SSTable count: 0
+		Old SSTable count: 0
+		Space used (live): 0
+		Number of partitions (estimate): 999
+		Memtable cell count: 1000
+		Memtable data size: 149000
+		Compacted partition maximum bytes: 0
+		Table: m
+		SSTable count: 0
+		Old SSTable count: 0
+		Space used (live): 0
+		Number of partitions (estimate): 0
+		Memtable cell count: 49999
+		Memtable data size: 8
+		Compacted partition maximum bytes: 0
+		Table: t
+		SSTable count: 3
+		Old SSTable count: 0
+		Space used (live): 366140293
+		Number of partitions (estimate): 2
+		Memtable cell count: 5299
+		Memtable data size: 8
+		Compacted partition maximum bytes: 386857368
+INFO  [PerDiskMemtableFlushWriter_0:2] 2026-11-23T22:20:46,337 Flushing.java:179 - Completed flushing /mydata/s4/3b-B16/node/data/system_schema/columns-24101c25a2ae3af787c1b40ee1aca33f/nb-7-big-Data.db (101B) for commitlog position CommitLogPosition(
+INFO  [PerDiskMemtableFlushWriter_0:1] 2026-11-23T22:20:46,492 Flushing.java:179 - Completed flushing /mydata/s4/3b-B16/node/data/system_schema/tables-afddfb9dbc1e30688056eed6c302ba09/nb-7-big-Data.db (423B) for commitlog position CommitLogPosition(s
+INFO  [PerDiskMemtableFlushWriter_0:2] 2026-11-23T22:20:46,610 Flushing.java:179 - Completed flushing /mydata/s4/3b-B16/node/data/system_schema/keyspaces-abac5682dea631c5b535b3d6cffd0fb6/nb-10-big-Data.db (113B) for commitlog position CommitLogPositi
+INFO  [SlabPoolCleaner] 2026-11-23T22:20:59,481 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='b16', ColumnFamily='t') to free up room. Used total: 0.33/0.00, live: 0.33/0.00, flushing: 0.00/0.00, this: 0.33/0.00
+INFO  [SlabPoolCleaner] 2026-11-23T22:20:59,483 ColumnFamilyStore.java:1055 - Enqueuing flush of b16.t, Reason: MEMTABLE_LIMIT, Usage: 684.216MiB (33%) on-heap, 0B (0%) off-heap
+INFO  [PerDiskMemtableFlushWriter_0:1] 2026-11-23T22:21:02,767 Flushing.java:179 - Completed flushing /mydata/s4/3b-B16/node/data/b16/t-201f0ea0e78c11f189b1772f75d145a4/nb-1-big-Data.db (341.452MiB) for commitlog position CommitLogPosition(segmentId=
+INFO  [SlabPoolCleaner] 2026-11-23T22:21:03,708 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='b16', ColumnFamily='t') to free up room. Used total: 0.67/0.00, live: 0.33/0.00, flushing: 0.33/0.00, this: 0.33/0.00
+INFO  [SlabPoolCleaner] 2026-11-23T22:21:03,709 ColumnFamilyStore.java:1055 - Enqueuing flush of b16.t, Reason: MEMTABLE_LIMIT, Usage: 683.292MiB (33%) on-heap, 0B (0%) off-heap
+INFO  [PerDiskMemtableFlushWriter_0:2] 2026-11-23T22:21:06,553 Flushing.java:179 - Completed flushing /mydata/s4/3b-B16/node/data/b16/t-201f0ea0e78c11f189b1772f75d145a4/nb-2-big-Data.db (341.447MiB) for commitlog position CommitLogPosition(segmentId=
+INFO  [SlabPoolCleaner] 2026-11-23T22:21:07,926 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='b16', ColumnFamily='t') to free up room. Used total: 0.67/0.00, live: 0.33/0.00, flushing: 0.33/0.00, this: 0.33/0.00
+INFO  [SlabPoolCleaner] 2026-11-23T22:21:07,927 ColumnFamilyStore.java:1055 - Enqueuing flush of b16.t, Reason: MEMTABLE_LIMIT, Usage: 683.292MiB (33%) on-heap, 0B (0%) off-heap
+INFO  [PerDiskMemtableFlushWriter_0:1] 2026-11-23T22:21:10,304 Flushing.java:179 - Completed flushing /mydata/s4/3b-B16/node/data/b16/t-201f0ea0e78c11f189b1772f75d145a4/nb-3-big-Data.db (341.448MiB) for commitlog position CommitLogPosition(segmentId=
+[2026-11-23 17:21:37 EST] read-back (role attacker)
+one tbl=m OK rows=0 ms=847 fullyFetched=true warnings=[Read 0 live rows and 99998 tombstone cells for query SELECT * FROM b16.m WHERE pk = 0 LIMIT 5000 ALLOW FILTERING; token -3485513579396041028 (see tombstone_warn_threshold)]
+one tbl=t OK rows=0 ms=4656 fullyFetched=true warnings=[Read 0 live rows and 99998 tombstone cells for query SELECT * FROM b16.t WHERE pk = 0 LIMIT 5000 ALLOW FILTERING; token -3485513579396041028 (see tombstone_warn_threshold)]
+readback t TombstoneScannedHistogram.Max=105778
+readback t TombstoneScannedHistogram.Count=1
+readback t TombstoneFailures.Count=0
+readback t LocalReadSize.Max=0
+readback t LocalReadSize.Count=0
+readback t LocalReadSizeAborts.Count=0
+readback m TombstoneScannedHistogram.Max=105778
+readback m TombstoneScannedHistogram.Count=1
+readback m TombstoneFailures.Count=0
+readback m LocalReadSize.Max=0
+readback m LocalReadSize.Count=0
+readback m LocalReadSizeAborts.Count=0
+WARN  [ReadStage-2] 2026-11-23T22:21:41,450 ReadCommand.java:644 - Read 0 live rows and 99998 tombstone cells for query SELECT * FROM b16.m WHERE pk = 0 LIMIT 5000 ALLOW FILTERING; token -3485513579396041028 (see tombstone_warn_threshold)
+WARN  [ReadStage-2] 2026-11-23T22:21:51,865 ReadCommand.java:644 - Read 0 live rows and 99998 tombstone cells for query SELECT * FROM b16.t WHERE pk = 0 LIMIT 5000 ALLOW FILTERING; token -3485513579396041028 (see tombstone_warn_threshold)
+[2026-11-23 17:22:40 EST] authcheck
+LOGIN null/null -> AuthenticationException: Authentication error on host /127.0.0.1:9042: Host /127.0.0.1:9042 requires authentication; but no authenticator found in Cluster configuration
+LOGIN attacker/wrong -> AuthenticationException: Authentication error on host /127.0.0.1:9042: Provided username attacker and/or password are incorrect
+15:22:48 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+CHECK attacker [CREATE KEYSPACE x3b WITH replication = {'class':'SimpleStrategy','replication_factor':1}] -> UnauthorizedException: User attacker has no CREATE permission on <all keyspaces> or any of its parents
+CHECK attacker [CREATE TABLE b16.x3b (pk int PRIMARY KEY)] -> UnauthorizedException: User attacker has no CREATE permission on <all tables in b16> or any of its parents
+CHECK attacker [ALTER TABLE b16.t WITH gc_grace_seconds = 0] -> UnauthorizedException: User attacker has no ALTER permission on <table b16.t> or any of its parents
+CHECK attacker [DROP TABLE b16.t] -> UnauthorizedException: User attacker has no DROP permission on <table b16.t> or any of its parents
+CHECK attacker [SELECT * FROM vic.kv LIMIT 1] -> UnauthorizedException: User attacker has no SELECT permission on <table vic.kv> or any of its parents
+CHECK attacker [SELECT role FROM system_auth.roles] -> UnauthorizedException: User attacker has no SELECT permission on <table system_auth.roles> or any of its parents
+CHECK attacker [SELECT table_name, gc_grace_seconds FROM system_schema.tables WHERE keyspace_name = 'b16'] -> OK rows=2
+  schema b16.m gc_grace_seconds=864000
+  schema b16.t gc_grace_seconds=864000
+15:22:50 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+CHECK tenant [SELECT * FROM b16.t WHERE pk = 0] -> UnauthorizedException: User tenant has no SELECT permission on <table b16.t> or any of its parents
+CHECK tenant [SELECT * FROM vic.kv LIMIT 1] -> OK rows=1
+15:22:53 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+CHECK reader [DELETE FROM b16.t WHERE pk = 0 AND ck >= 'a' AND ck <= 'b'] -> UnauthorizedException: User reader has no MODIFY permission on <table b16.t> or any of its parents
+CHECK reader [SELECT * FROM b16.m WHERE pk = 0] -> UnauthorizedException: User reader has no SELECT permission on <table b16.m> or any of its parents
+authcheck done
+[2026-11-23 17:22:56 EST] preauth frames
+P1 OPTIONS -> SUPPORTED (102 bytes)
+P2 QUERY(T) before STARTUP -> ERROR code=0x000a 'Unexpected message QUERY, expecting STARTUP or OPTIONS'
+P2b STARTUP on the same connection after P2 -> connection reset by server (ConnectionResetError)
+P3 STARTUP (conn 2) -> AUTHENTICATE 'org.apache.cassandra.auth.PasswordAuthenticator'
+P4 QUERY(T) after AUTHENTICATE, no AUTH_RESPONSE -> ERROR code=0x000a 'Unexpected message QUERY, expecting SASL_RESPONSE'
+P4b AUTH_RESPONSE wrong password after P4 -> ERROR code=0x0100 'Provided username attacker and/or password are incorrect'
+P5 STARTUP (conn 3) -> AUTHENTICATE 'org.apache.cassandra.auth.PasswordAuthenticator'
+P6 AUTH_RESPONSE wrong password -> ERROR code=0x0100 'Provided username attacker and/or password are incorrect'
+P7 QUERY(T) after failed auth -> ERROR code=0x000a 'Unexpected message QUERY, expecting SASL_RESPONSE'
+P8 STARTUP (conn 4) -> AUTHENTICATE 'org.apache.cassandra.auth.PasswordAuthenticator'
+P9 REGISTER before auth -> ERROR code=0x000a 'Unexpected message REGISTER, expecting SASL_RESPONSE'
+P10 QUERY(range DELETE) before auth -> ERROR code=0x000a 'Unexpected message QUERY, expecting SASL_RESPONSE'
+P11 STARTUP (conn 5, control) -> AUTHENTICATE 'org.apache.cassandra.auth.PasswordAuthenticator'
+P12 AUTH_RESPONSE correct attacker password (control) -> AUTH_SUCCESS (4 bytes)
+P13 QUERY(SELECT * FROM b16.m WHERE pk = 0) after auth (control; m, not t) -> RESULT kind=65696 (205 bytes)
+preauth done
+1795472578,end,nmtOtherKB=326793,nmtTotalKB=9239469,rssKB=9383972,rssAnonKB=9007016,scopeCurB=9931538432,scopeOomKill=0,1795472578345,3317665184,3149893024,0,0,0,6235,0,0,49407312,0,-1,528,0,-1
+[2026-11-23 17:23:12 EST] stopped LOAD
+1
+397M	/mydata/s4/3b-B16/template
+-rw-r--r-- 1 jason92 misconfiguration 1214106 Nov 23 15:23 nb-1-big-Data.db
+-rw-r--r-- 1 jason92 misconfiguration 3122618 Nov 23 15:23 nb-1-big-Index.db
+-rw-r--r-- 1 jason92 misconfiguration   2522373 Nov 23 15:21 nb-1-big-Data.db
+-rw-r--r-- 1 jason92 misconfiguration 119323479 Nov 23 15:21 nb-1-big-Index.db
+-rw-r--r-- 1 jason92 misconfiguration   2517916 Nov 23 15:21 nb-2-big-Data.db
+-rw-r--r-- 1 jason92 misconfiguration 119323479 Nov 23 15:21 nb-2-big-Index.db
+-rw-r--r-- 1 jason92 misconfiguration   2518004 Nov 23 15:21 nb-3-big-Data.db
+-rw-r--r-- 1 jason92 misconfiguration 119323479 Nov 23 15:21 nb-3-big-Index.db
+-rw-r--r-- 1 jason92 misconfiguration    891107 Nov 23 15:23 nb-4-big-Data.db
+-rw-r--r-- 1 jason92 misconfiguration  42448636 Nov 23 15:23 nb-4-big-Index.db
+/dev/mapper/emulab-node3--bs   39G  6.8G   31G  19% /mydata
+[2026-11-23 17:23:13 EST] LOAD end

@@ -1,0 +1,25 @@
+338-INFO  [PerDiskMemtableFlushWriter_0:3] 2026-11-23T21:52:34,180 Flushing.java:179 - Completed flushing /dev/shm/3b-U15/R1/data/u15/t-025e77b0e78811f1b3a05d7c7c616afd/nb-1-big-Data.db (170.074MiB) for commitlog position CommitLogPosition(segmentId=1795470620213, position=15732984)
+339-ERROR [MemtablePostFlush:1] 2026-11-23T21:52:34,272 JVMStabilityInspector.java:70 - Exception in thread Thread[MemtablePostFlush:1,5,MemtablePostFlush]
+340:java.lang.AssertionError: Attempted serializing to buffer exceeded maximum of 65535 bytes: 70000
+341-	at org.apache.cassandra.utils.ByteBufferUtil.writeWithShortLength(ByteBufferUtil.java:366)
+342-	at org.apache.cassandra.io.sstable.metadata.StatsMetadata$StatsMetadataSerializer.serialize(StatsMetadata.java:436)
+343-	at org.apache.cassandra.io.sstable.metadata.StatsMetadata$StatsMetadataSerializer.serialize(StatsMetadata.java:308)
+344-	at org.apache.cassandra.io.sstable.metadata.MetadataSerializer.serialize(MetadataSerializer.java:104)
+345-	at org.apache.cassandra.io.sstable.format.StatsComponent.save(StatsComponent.java:116)
+346-	at org.apache.cassandra.io.sstable.format.SSTableWriter$TransactionalProxy.doPrepare(SSTableWriter.java:387)
+347-	at org.apache.cassandra.utils.concurrent.Transactional$AbstractTransactional.prepareToCommit(Transactional.java:168)
+348-	at org.apache.cassandra.io.sstable.format.SSTableWriter.prepareToCommit(SSTableWriter.java:282)
+349-	at org.apache.cassandra.io.sstable.SimpleSSTableMultiWriter.prepareToCommit(SimpleSSTableMultiWriter.java:101)
+350-	at org.apache.cassandra.db.ColumnFamilyStore$Flush.flushMemtable(ColumnFamilyStore.java:1334)
+351-	at org.apache.cassandra.db.ColumnFamilyStore$Flush.run(ColumnFamilyStore.java:1256)
+352-	at org.apache.cassandra.concurrent.ExecutionFailure$1.run(ExecutionFailure.java:133)
+353-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+354-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+355-	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+356-	at java.base/java.lang.Thread.run(Thread.java:829)
+357-ERROR [MemtablePostFlush:1] 2026-11-23T21:52:34,280 JVMStabilityInspector.java:70 - Exception in thread Thread[MemtablePostFlush:1,5,MemtablePostFlush]
+358-java.lang.NullPointerException: null
+359-	at org.apache.cassandra.utils.memory.MemtableCleanerThread$Clean.apply(MemtableCleanerThread.java:97)
+360-	at org.apache.cassandra.utils.concurrent.ListenerList$CallbackBiConsumerListener.run(ListenerList.java:244)
+361-	at org.apache.cassandra.concurrent.ImmediateExecutor.execute(ImmediateExecutor.java:140)
+362-	at org.apache.cassandra.utils.concurrent.ListenerList.safeExecute(ListenerList.java:166)

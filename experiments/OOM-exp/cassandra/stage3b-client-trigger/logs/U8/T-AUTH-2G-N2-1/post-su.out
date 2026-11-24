@@ -1,0 +1,46 @@
+# as user=cassandra
+18:03:06.241 [main] ERROR com.datastax.driver.core.SchemaParser -- Error parsing schema for table u8.t: Cluster.getMetadata().getKeyspace("u8").getTable("t") will be missing or incomplete
+java.lang.IllegalArgumentException: Could not parse type name vector<boolean, 16000000>
+	at com.datastax.driver.core.DataTypeCqlNameParser.parse(DataTypeCqlNameParser.java:235)
+	at com.datastax.driver.core.TableMetadata.build(TableMetadata.java:313)
+	at com.datastax.driver.core.SchemaParser.buildTables(SchemaParser.java:304)
+	at com.datastax.driver.core.SchemaParser.buildKeyspaces(SchemaParser.java:205)
+	at com.datastax.driver.core.SchemaParser.refresh(SchemaParser.java:111)
+	at com.datastax.driver.core.ControlConnection.refreshSchema(ControlConnection.java:419)
+	at com.datastax.driver.core.ControlConnection.tryConnect(ControlConnection.java:326)
+	at com.datastax.driver.core.ControlConnection.reconnectInternal(ControlConnection.java:237)
+	at com.datastax.driver.core.ControlConnection.connect(ControlConnection.java:111)
+	at com.datastax.driver.core.Cluster$Manager.negotiateProtocolVersionAndConnect(Cluster.java:1815)
+	at com.datastax.driver.core.Cluster$Manager.init(Cluster.java:1728)
+	at com.datastax.driver.core.Cluster.init(Cluster.java:216)
+	at com.datastax.driver.core.Cluster.connectAsync(Cluster.java:389)
+	at com.datastax.driver.core.Cluster.connectAsync(Cluster.java:368)
+	at com.datastax.driver.core.Cluster.connect(Cluster.java:313)
+	at U8Client.main(U8Client.java:66)
+> LIST ALL PERMISSIONS OF u8atk
+  row: role=u8atk username=u8atk resource=<all keyspaces> permission=CREATE
+  row: role=u8atk username=u8atk resource=<keyspace u8> permission=CREATE
+  row: role=u8atk username=u8atk resource=<keyspace u8> permission=ALTER
+  row: role=u8atk username=u8atk resource=<keyspace u8> permission=DROP
+  row: role=u8atk username=u8atk resource=<keyspace u8> permission=SELECT
+  row: role=u8atk username=u8atk resource=<keyspace u8> permission=MODIFY
+  row: role=u8atk username=u8atk resource=<keyspace u8> permission=AUTHORIZE
+  row: role=u8atk username=u8atk resource=<keyspace u8> permission=UNMASK
+  row: role=u8atk username=u8atk resource=<keyspace u8> permission=SELECT_MASKED
+  row: role=u8atk username=u8atk resource=<table u8.t> permission=ALTER
+  row: role=u8atk username=u8atk resource=<table u8.t> permission=DROP
+  row: role=u8atk username=u8atk resource=<table u8.t> permission=SELECT
+  row: role=u8atk username=u8atk resource=<table u8.t> permission=MODIFY
+  row: role=u8atk username=u8atk resource=<table u8.t> permission=AUTHORIZE
+  row: role=u8atk username=u8atk resource=<table u8.t> permission=UNMASK
+  row: role=u8atk username=u8atk resource=<table u8.t> permission=SELECT_MASKED
+  row: role=u8atk username=u8atk resource=<all functions in u8> permission=CREATE
+  row: role=u8atk username=u8atk resource=<all functions in u8> permission=ALTER
+  row: role=u8atk username=u8atk resource=<all functions in u8> permission=DROP
+  row: role=u8atk username=u8atk resource=<all functions in u8> permission=AUTHORIZE
+  row: role=u8atk username=u8atk resource=<all functions in u8> permission=EXECUTE
+  OK
+> SELECT keyspace_name, table_name, column_name, type FROM system_schema.columns WHERE keyspace_name = 'u8'
+  row: keyspace_name=u8 table_name=t column_name=pk type=int
+  row: keyspace_name=u8 table_name=t column_name=v type=vector<boolean, 16000000>
+  OK

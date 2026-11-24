@@ -204,7 +204,12 @@ on the local node (`/mydata/j1` is gone). Hadoop: no phase-2 cases yet, so no st
 **Stage 3-b — client trigger check (added and analysed 2026-11-23, owner).** Could an ordinary authenticated user
 (native protocol, defaults) trigger each true positive? Analysis of the 30 Cassandra true positives, nothing run: 22
 client-triggerable alone (2 pre-auth, 15 data role, 5 DDL role), 7 given an outside condition, 1 not (R18). Results in
-`OOM-exp/cassandra/stage3b-client-trigger/` and the `_INDEX.md` Client (stage 3-b) column. Open: optional confirm runs.
+`OOM-exp/cassandra/stage3b-client-trigger/` and the `_INDEX.md` Client (stage 3-b) column. **Confirm runs (same day,
+owner-approved, 23 cases on 10 nodes, auth on, least-privilege attacker + victim role): 20 confirmed, 3 partly** — R13
+is not pre-auth (multi-frame v5 refused before auth) but any login with no grants; U7 under CassandraAuthorizer ends in
+GC service loss with recovery, not OOM (0/3); U14 OOM 1 of 2 runs. C10 drops to data role; C9 also data role given
+≈ 220 sstables. New privilege level `login role, no grants` (R13, R20). Every node left with no processes and only small
+logs under `/mydata/s4/3b-<ID>/`. Open: repetition across nodes, B21 fan-out, B20/U14 cluster-wide reach.
 
 **Other open work:**
 - 342 candidate rows are `open` (2026-11-23, after wave 6 and OC-579). All of OC-63…577 are now triaged (2026-11-18 and 2026-11-20 files); the 11-18

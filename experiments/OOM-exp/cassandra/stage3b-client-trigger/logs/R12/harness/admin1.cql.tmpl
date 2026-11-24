@@ -1,0 +1,14 @@
+-- 3-b confirm R12: run as the default superuser `cassandra` (roles, admin-made schema, grants). @APW@/@VPW@ are filled on the node.
+CREATE ROLE attacker WITH PASSWORD = '@APW@' AND LOGIN = true AND SUPERUSER = false
+CREATE ROLE victim WITH PASSWORD = '@VPW@' AND LOGIN = true AND SUPERUSER = false
+CREATE KEYSPACE r12 WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+CREATE TABLE r12.t (k int, c int, v blob, PRIMARY KEY (k, c))
+GRANT SELECT ON TABLE r12.t TO attacker
+GRANT MODIFY ON TABLE r12.t TO attacker
+CREATE KEYSPACE vks WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+CREATE TABLE vks.t (k int PRIMARY KEY, v blob)
+GRANT SELECT ON TABLE vks.t TO victim
+GRANT MODIFY ON TABLE vks.t TO victim
+LIST ALL PERMISSIONS OF attacker
+LIST ALL PERMISSIONS OF victim
+LIST ROLES

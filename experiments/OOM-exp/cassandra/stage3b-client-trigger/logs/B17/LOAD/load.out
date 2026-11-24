@@ -1,0 +1,78 @@
+[2026-11-23 17:25:00 EST] started LOAD pid 394348 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b3b17-LOAD-1795472699.scope
+[2026-11-23 17:25:41 EST] ready LOAD
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms8G -Xmx8G -XX:MaxDirectMemorySize=4096M -XX:HeapDumpPath=/mydata/s4/3b-B17/runs/LOAD/cassandra-1795472700-pid394348.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-23 17:25:51 EST] admin-setup (superuser)
+ADMIN ok: CREATE ROLE IF NOT EXISTS attacker WITH PASSWORD = '***' AND LOGIN = true AND SUPERUSER = false
+ADMIN ok: CREATE ROLE IF NOT EXISTS tenant WITH PASSWORD = '***' AND LOGIN = true AND SUPERUSER = false
+ADMIN ok: CREATE ROLE IF NOT EXISTS reader WITH PASSWORD = '***' AND LOGIN = true AND SUPERUSER = false
+ADMIN ok: CREATE KEYSPACE IF NOT EXISTS b17 WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+ADMIN ok: CREATE TABLE IF NOT EXISTS b17.t (pk int, ck int, v blob, PRIMARY KEY (pk, ck))
+ADMIN ok: CREATE KEYSPACE IF NOT EXISTS vic WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+ADMIN ok: CREATE TABLE IF NOT EXISTS vic.kv (k int PRIMARY KEY, v text)
+ADMIN ok: GRANT SELECT ON TABLE b17.t TO attacker
+ADMIN ok: GRANT MODIFY ON TABLE b17.t TO attacker
+ADMIN ok: GRANT SELECT ON TABLE vic.kv TO tenant
+ADMIN ok: GRANT MODIFY ON TABLE vic.kv TO tenant
+ADMIN ok: GRANT SELECT ON TABLE b17.t TO reader
+PERM attacker: role=attacker resource=<table b17.t> permission=SELECT
+PERM attacker: role=attacker resource=<table b17.t> permission=MODIFY
+PERM tenant: role=tenant resource=<table vic.kv> permission=SELECT
+PERM tenant: role=tenant resource=<table vic.kv> permission=MODIFY
+PERM reader: role=reader resource=<table b17.t> permission=SELECT
+ROLE attacker superuser=false login=true
+ROLE cassandra superuser=true login=true
+ROLE tenant superuser=false login=true
+ROLE reader superuser=false login=true
+admin-setup ok
+[2026-11-23 17:25:56 EST] load start (role attacker)
+load ok parts=16 rows=1024 size=262144 done=16384 retries=46 failed=0
+
+real	0m22.313s
+user	0m45.744s
+sys	0m6.077s
+[2026-11-23 17:26:19 EST] load end
+[2026-11-23 17:26:19 EST] victim tenant setup (role tenant)
+victim setup ok keys=1000 count=1000
+[2026-11-23 17:26:24 EST] verify (role attacker)
+verify pk=0 rows=1024
+verify pk=1 rows=1024
+verify pk=2 rows=1024
+verify pk=3 rows=1024
+verify pk=4 rows=1024
+verify pk=5 rows=1024
+verify pk=6 rows=1024
+verify pk=7 rows=1024
+verify pk=8 rows=1024
+verify pk=9 rows=1024
+verify pk=10 rows=1024
+verify pk=11 rows=1024
+verify pk=12 rows=1024
+verify pk=13 rows=1024
+verify pk=14 rows=1024
+verify pk=15 rows=1024
+verify total_rows=16384 pk0_rows=1024 pk0_value_bytes=268435456 content_match=3/3 ms=1928
+[2026-11-23 17:26:57 EST] compaction pending=0 after 20 s
+		SSTable count: 4
+		Old SSTable count: 0
+		Space used (live): 4178595760
+		SSTable Compression Ratio: 1.00452
+		Number of partitions (estimate): 17
+		Memtable data size: 137911422
+		Compression metadata off heap memory used: 2030000
+		Compacted partition maximum bytes: 268650950
+		Compacted partition mean bytes: 225443417
+flush+compaction log lines for b17: 142
+INFO  [CompactionExecutor:2] 2026-11-23T22:25:53,448 CompactionTask.java:274 - Compacted (d8369710-e78c-11f1-a607-198780b82f5b) 4 sstables to [/mydata/s4/3b-B17/node/data/system_schema/columns-24101c25a2ae3af787c1b40ee1aca33f/nb-5-big,] to level=0.  8.055KiB to 7.790KiB (~96% of original) in 36ms.  
+INFO  [CompactionExecutor:1] 2026-11-23T22:25:53,448 CompactionTask.java:274 - Compacted (d83844c0-e78c-11f1-a607-198780b82f5b) 4 sstables to [/mydata/s4/3b-B17/node/data/system_schema/tables-afddfb9dbc1e30688056eed6c302ba09/nb-5-big,] to level=0.  4.303KiB to 3.756KiB (~87% of original) in 24ms.  R
+INFO  [CompactionExecutor:1] 2026-11-23T22:25:53,694 CompactionTask.java:274 - Compacted (d85df530-e78c-11f1-a607-198780b82f5b) 4 sstables to [/mydata/s4/3b-B17/node/data/system_schema/keyspaces-abac5682dea631c5b535b3d6cffd0fb6/nb-9-big,] to level=0.  634B to 294B (~46% of original) in 24ms.  Read T
+INFO  [CompactionExecutor:1] 2026-11-23T22:26:49,153 CompactionTask.java:274 - Compacted (e0a7b140-e78c-11f1-a607-198780b82f5b) 4 sstables to [/mydata/s4/3b-B17/node/data/b17/t-d8318e00e78c11f1a607198780b82f5b/nb-6-big,] to level=0.  1.544GiB to 1.540GiB (~99% of original) in 41,576ms.  Read Through
+INFO  [CompactionExecutor:2] 2026-11-23T22:26:57,182 CompactionTask.java:274 - Compacted (e63114d0-e78c-11f1-a607-198780b82f5b) 4 sstables to [/mydata/s4/3b-B17/node/data/b17/t-d8318e00e78c11f1a607198780b82f5b/nb-11-big,] to level=0.  1.566GiB to 1.566GiB (~100% of original) in 40,317ms.  Read Throu
+[2026-11-23 17:27:11 EST] stopped LOAD
+1
+4.1G	/mydata/s4/3b-B17/template
+-rw-r--r-- 1 jason92 misconfiguration  405027833 Nov 23 15:26 nb-10-big-Data.db
+-rw-r--r-- 1 jason92 misconfiguration 1681212622 Nov 23 15:26 nb-11-big-Data.db
+-rw-r--r-- 1 jason92 misconfiguration  436102754 Nov 23 15:26 nb-12-big-Data.db
+-rw-r--r-- 1 jason92 misconfiguration  138520503 Nov 23 15:27 nb-13-big-Data.db
+-rw-r--r-- 1 jason92 misconfiguration 1653821316 Nov 23 15:26 nb-6-big-Data.db
+LOADDONE

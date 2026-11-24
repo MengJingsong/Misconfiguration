@@ -1,0 +1,47 @@
+endpoint: daemon-exit oom:java.lang.OutOfMemoryError: Java heap space
+stdout: java.lang.OutOfMemoryError: Java heap space
+stdout: Dumping heap to /mydata/s4/3b-R13/runs/L-2/cassandra-1795472161-pid749211.hprof ...
+stdout: Heap dump file created [2313096991 bytes in 79.653 secs]
+stdout: # java.lang.OutOfMemoryError: Java heap space
+stdout: #   Executing /bin/sh -c "kill -9 749211"...
+driver: 2026-11-23T15:17:52-0700 baseline done; attack start N=16 mode=L at_ms 1795472272961
+resolved: NativeTransportMaxConcurrentRequestsInBytes|214748364
+resolved: NativeTransportMaxConcurrentRequestsInBytesPerIp|53687091
+client processes 2, body 15785009 B, last established at 1795472273949
+responses 44 (VOID 0)
+  status x23: ERR:0x2500:Prepared_query_with_ID_3bc5e8d20b1c1c891389f814dd
+  status x21: ERR:0x2500:Prepared_query_with_ID_3d135c6f4550bed7154966ff30
+  status x13: io_error@recv:[Errno_104]_Connection_reset_by_peer|server:-
+  status x3: io_error@rest:[Errno_104]_Connection_reset_by_peer|server:no
+response latency ms: min 10392 median 18634 max 76284
+first response +16.5 s, last response +120.8 s after last established
+response rate 0.36 /s over first..last response
+client outstanding max (sum over procs, per s) 16; sent_first max 16
+admitted by limit 14 (C 214748364 / charge 14736433); K_client = min(sent_first, admitted) x charge = 206310062
+Batch-too-large ERROR lines in system.log*: 0
+jmx samples 19 (last at +60.2 s)
+K_server RequestsSize max 206310150; last 206310062; median(after baseline) 206310062; series(MB) 0 0 0 0 0 0 0 206 206 206 206 206 206 206 206 206 206 206 206
+PausedConnections max 0
+ConnectedNativeClients max 18; ProtocolException count max 0
+AuthSuccess count max 35; RequestDiscarded count max 0
+ClientRequest Write count max 193; timeouts max 2
+NTR active max 1; NTR pending max 0
+direct MemoryUsed max 285 MiB; netpool size max 816 MiB, overflow max 808 MiB
+last jmx row: 1795472334117,206310062,-33,17,0,35,0,0,258481777,1390412080,193,2,0,855434030,847176503
+threads samples 20: max NTR 10, BatchMessage.execute 0, getMutations 0, wait 0, clog 0, memt 0, decode 14, verify 0
+  decode series: 0 0 0 0 0 0 14 13 11 14 12 9 11 14 14 14 0 0 0 0 | execute series: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | last sample: 0 0 0 0 0 0 0 0
+RssAnon max 2773 MiB
+GCs 102; heap after GC max 2048 MiB; last 5 after-GC: 2041 2041 2041 2041 1790
+  first-10 after-GC (baseline): 9 24 24 13 29 29 32 74 80 418
+  Full GCs 51: after-GC MiB 1337 1941 1981 1986 1996 1803 1732 1752 1562 1522 688 1472 1531 1745 1736 1513 1547 894 1683 1315 1334 1533 1150 1314 1976 2006 2021 2029 2041 2041 2041 2041 2041 2041 2041 2041 2041 2041 2041 2041
+pauses 102; STW share over last 60 s of GC log: 99%; Pause Full 51
+client cpu last sample: 1795472424  750060  0.1  9824; 750542  2.1 399196; 750543  2.3 399204; 752493  0.1  6732;
+client status counts status-p0.txt:
+    21 ERR:0x2500:Prepared_query_with_ID_3d135c6f4550bed7154966ff306dba62_not_found_(either_the_q
+    7 io_error@recv:[Errno_104]_Connection_reset_by_peer|server:-
+    1 io_error@rest:[Errno_104]_Connection_reset_by_peer|server:none(closed)
+client status counts status-p1.txt:
+    23 ERR:0x2500:Prepared_query_with_ID_3bc5e8d20b1c1c891389f814dd25b373_not_found_(either_the_q
+    6 io_error@recv:[Errno_104]_Connection_reset_by_peer|server:-
+    2 io_error@rest:[Errno_104]_Connection_reset_by_peer|server:none(closed)
+dumps: cassandra-1795472161-pid749211.hprof (2205 MiB)

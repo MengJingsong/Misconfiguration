@@ -1,0 +1,8 @@
+privcheck want=deny PASS got=Unauthorized: Error from server: code=2100 [Unauthorized] message="User u7atk has no SELECT permission on <table u7.t> or any of its parents" :: SELECT * FROM u7.t LIMIT 1
+privcheck want=deny PASS got=Unauthorized: Error from server: code=2100 [Unauthorized] message="User u7atk has no SELECT permission on <table vks.t> or any of its parents" :: SELECT * FROM vks.t LIMIT 1
+privcheck want=deny PASS got=Unauthorized: Error from server: code=2100 [Unauthorized] message="User u7atk has no MODIFY permission on <table vks.t> or any of its parents" :: INSERT INTO vks.t (k, v) VALUES (1, 0x00)
+privcheck want=deny PASS got=Unauthorized: Error from server: code=2100 [Unauthorized] message="User u7atk has no CREATE permission on <all keyspaces> or any of its parents" :: CREATE KEYSPACE x WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+privcheck want=deny PASS got=Unauthorized: Error from server: code=2100 [Unauthorized] message="User u7atk has no CREATE permission on <all tables in u7> or any of its parents" :: CREATE TABLE u7.t2 (k int PRIMARY KEY)
+privcheck want=deny PASS got=Unauthorized: Error from server: code=2100 [Unauthorized] message="User u7atk has no ALTER permission on <table u7.t> or any of its parents" :: ALTER TABLE u7.t ADD w int
+privcheck want=deny PASS got=Unauthorized: Error from server: code=2100 [Unauthorized] message="User u7atk has no AUTHORIZE permission on <table u7.t> or any of its parents" :: GRANT SELECT ON TABLE u7.t TO u7atk
+privcheck want=allow PASS got=OK :: UPDATE u7.t SET v = 1 WHERE k = -1 AND c = -1

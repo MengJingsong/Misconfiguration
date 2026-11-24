@@ -1,0 +1,369 @@
+# 3-b R20 harness changes vs the case harness (cases/ErrorCollector_errorMsgs--humongous-trigger-matched-set-4GiB/harness/). New files: confirm.sh (series driver), vsum.py (victim windows).
+--- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/OOM-exp/cassandra/cases/ErrorCollector_errorMsgs--humongous-trigger-matched-set-4GiB/harness/client.py	2026-11-21 02:00:52.717584000 -0500
++++ /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/OOM-exp/cassandra/stage3b-client-trigger/logs/R20/harness/client.py	2026-11-23 18:25:06.892516000 -0500
+@@ -56,17 +56,36 @@
+     return code, body[6:6 + l].decode('utf-8', 'replace')
+ 
+ 
++OP_AUTHENTICATE, OP_AUTH_RESPONSE, OP_AUTH_SUCCESS = 0x03, 0x0F, 0x10
++AUTH = {'user': None, 'password': None}   # 3-b R20: set by --user/--password (PasswordAuthenticator, SASL PLAIN)
++
++
+ class Conn:
+-    def __init__(self, timeout=60):
++    """3-b R20: STARTUP, then (PasswordAuthenticator) AUTHENTICATE -> AUTH_RESPONSE(PLAIN) -> AUTH_SUCCESS.
++    user=False: stop after AUTHENTICATE (an unauthenticated connection, for the pre-auth check)."""
++    def __init__(self, timeout=60, user=None, password=None, src='127.0.0.1'):
++        user = AUTH['user'] if user is None else user
++        password = AUTH['password'] if password is None else password
+         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+         s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+-        s.bind(('127.0.0.1', 0))
++        s.bind((src, 0))
+         s.settimeout(timeout)
+         s.connect((HOST, PORT))
+-        self.s = s
++        self.s = s; self.authenticated = False
+         s.sendall(frame(OP_STARTUP, struct.pack('>H', 1) + sstr('CQL_VERSION') + sstr('3.0.0')))
+         op, b = self.recv()
+-        if op != OP_READY:
++        if op == OP_AUTHENTICATE:
++            if user is False:
++                return
++            if not user:
++                raise RuntimeError('server asks for authentication; no --user')
++            tok = b'\0' + user.encode() + b'\0' + password.encode()
++            s.sendall(frame(OP_AUTH_RESPONSE, lstr_b(tok)))
++            op, b = self.recv()
++            if op != OP_AUTH_SUCCESS:
++                raise RuntimeError('auth: op %d %s' % (op, err_text(b) if op == 0 else ''))
++            self.authenticated = True
++        elif op != OP_READY:
+             raise RuntimeError('startup: op %d %s' % (op, err_text(b) if op == 0 else ''))
+ 
+     def recv(self):
+@@ -88,6 +107,66 @@
+             raise RuntimeError('%x %s' % err_text(b))
+         return b
+ 
++    def query_raw(self, q):
++        """-> (op, body) without raising (3-b checks)"""
++        self.s.sendall(frame(OP_QUERY, lstr_b(q if isinstance(q, bytes) else q.encode()) + struct.pack('>HB', 1, 0)))
++        return self.recv()
++
++
++def _opt(b, p):
++    t = struct.unpack_from('>H', b, p)[0]; p += 2
++    if t == 0x0000:
++        l = struct.unpack_from('>H', b, p)[0]; return ('custom', b[p + 2:p + 2 + l].decode()), p + 2 + l
++    if t in (0x0020, 0x0022):
++        sub, p = _opt(b, p); return (t, sub), p
++    if t == 0x0021:
++        k, p = _opt(b, p); v, p = _opt(b, p); return (t, k, v), p
++    return t, p
++
++
++def _val(t, v):
++    if v is None: return 'null'
++    if t in (0x0001, 0x000D): return v.decode('utf-8', 'replace')
++    if t == 0x0004: return str(bool(v[0]))
++    if t == 0x0009: return str(struct.unpack('>i', v)[0])
++    if isinstance(t, tuple) and t[0] in (0x0020, 0x0022, 0x0021):
++        n = struct.unpack_from('>i', v)[0]; p = 4; out = []
++        for _ in range(n):
++            items = []
++            for sub in (t[1:] if t[0] == 0x0021 else (t[1],)):
++                l = struct.unpack_from('>i', v, p)[0]; p += 4; items.append(_val(sub, v[p:p + l] if l >= 0 else None)); p += max(l, 0)
++            out.append(':'.join(items))
++        return '{' + ','.join(out) + '}'
++    return v.hex()
++
++
++def rows(body):
++    """decode a RESULT Rows body -> (column names, list of rows of strings); other kinds -> (None, kind)"""
++    kind = struct.unpack_from('>i', body)[0]
++    if kind != 2: return None, kind
++    flags, nc = struct.unpack_from('>ii', body, 4); p = 12
++    if flags & 0x0002:
++        l = struct.unpack_from('>i', body, p)[0]; p += 4 + max(l, 0)
++    glob_spec = flags & 0x0001
++    if glob_spec:
++        for _ in range(2):
++            l = struct.unpack_from('>H', body, p)[0]; p += 2 + l
++    cols = []
++    for _ in range(nc):
++        if not glob_spec:
++            for _ in range(2):
++                l = struct.unpack_from('>H', body, p)[0]; p += 2 + l
++        l = struct.unpack_from('>H', body, p)[0]; name = body[p + 2:p + 2 + l].decode(); p += 2 + l
++        t, p = _opt(body, p); cols.append((name, t))
++    n = struct.unpack_from('>i', body, p)[0]; p += 4; out = []
++    for _ in range(n):
++        r = []
++        for name, t in cols:
++            l = struct.unpack_from('>i', body, p)[0]; p += 4
++            r.append(_val(t, body[p:p + l] if l >= 0 else None)); p += max(l, 0)
++        out.append(r)
++    return [c[0] for c in cols], out
++
+ 
+ def payload(p, L=None):
+     """-> (opcode, query bytes)"""
+@@ -199,6 +278,153 @@
+     tlog.write('trig2-%d response %d latency_ms %d %s\n' % (j, time.time() * 1000, (time.time() - ts) * 1000, res))
+ 
+ 
++# ---- 3-b R20 additions (2026-11-23): superuser setup, auth shakedown, victim workload ----
++ATK_USER, ATK_PW = 'attacker', 'atk-3bR20'
++VIC_USER, VIC_PW = 'victim', 'vic-3bR20'
++SETUP_STMTS = [
++    "CREATE ROLE %s WITH PASSWORD = '%s' AND LOGIN = true" % (ATK_USER, ATK_PW),
++    "CREATE ROLE %s WITH PASSWORD = '%s' AND LOGIN = true" % (VIC_USER, VIC_PW),
++    "CREATE KEYSPACE victim_ks WITH replication = {'class':'SimpleStrategy','replication_factor':1}",
++    "CREATE TABLE victim_ks.t (k int PRIMARY KEY, v text)",
++    "GRANT SELECT ON TABLE victim_ks.t TO %s" % VIC_USER,
++    "GRANT MODIFY ON TABLE victim_ks.t TO %s" % VIC_USER,
++]
++LIST_STMTS = ["LIST ROLES", "LIST ALL PERMISSIONS OF %s" % ATK_USER, "LIST ALL PERMISSIONS OF %s" % VIC_USER,
++              "LIST ALL PERMISSIONS"]
++
++
++def show(c, q, out):
++    op, b = c.query_raw(q)
++    if op == OP_ERROR:
++        out.write('%s\n  -> ERROR 0x%04x %s\n' % (q, *err_text(b))); return
++    cols, r = rows(b)
++    if cols is None:
++        out.write('%s\n  -> RESULT kind %s\n' % (q, r)); return
++    out.write('%s\n  -> %s\n' % (q, ' | '.join(cols)))
++    for row in r: out.write('     %s\n' % ' | '.join(row))
++
++
++def do_setup(out):
++    """superuser (default cassandra/cassandra, created ~10 s after start) creates the two roles, the victim's keyspace
++    and table, and the victim's grants; the attacker gets LOGIN only (no GRANT)."""
++    dl = time.time() + 120; c = None; last = ''
++    while time.time() < dl:
++        try:
++            c = Conn(user='cassandra', password='cassandra'); break
++        except Exception as e:
++            last = str(e)[:200]; time.sleep(2)
++    if c is None:
++        out.write('superuser login failed: %s\n' % last); return 1
++    out.write('# superuser cassandra logged in at %d\n' % (time.time() * 1000))
++    for q in SETUP_STMTS:
++        op, b = c.query_raw(q)
++        out.write('%s -> %s\n' % (q, ('ERROR 0x%04x %s' % err_text(b)) if op == OP_ERROR else 'ok'))
++        if op == OP_ERROR: return 1
++    for q in LIST_STMTS: show(c, q, out)
++    c.s.close(); return 0
++
++
++def timed(c, q):
++    t = time.time(); op, b = c.query_raw(q); dt = time.time() - t
++    return dt, (('ERROR 0x%04x %s' % err_text(b))[:200] if op == OP_ERROR else 'op%d' % op)
++
++
++def do_shake(out, L):
++    """the 3-b auth checks (no attack): authorizer enforcing for the attacker; H/C at L as the attacker; a QUERY on an
++    unauthenticated connection; the victim's own reads/writes."""
++    a = Conn(user=ATK_USER, password=ATK_PW, timeout=120)
++    out.write('attacker login: authenticated=%s\n' % a.authenticated)
++    for q in ("SELECT * FROM victim_ks.t", "INSERT INTO victim_ks.t (k, v) VALUES (1, 'x')",
++              "CREATE KEYSPACE atk_ks WITH replication = {'class':'SimpleStrategy','replication_factor':1}",
++              "SELECT * FROM system_auth.roles"):
++        dt, r = timed(a, q); out.write('attacker %s -> %s (%.0f ms)\n' % (q, r, dt * 1000))
++    show(a, "LIST ALL PERMISSIONS OF %s" % ATK_USER, out)
++    for p in ('H', 'H', 'C', 'C'):
++        _, q = payload(p, L); dt, r = timed(a, q)
++        out.write('attacker payload %s len %d -> %s (%.3f s; per char %.2f us)\n' % (p, len(q), r[:120], dt, dt / len(q) * 1e6))
++    a.s.close()
++    # unauthenticated connection: STARTUP answered AUTHENTICATE; then a QUERY (payload C at L) without AUTH_RESPONSE
++    u = Conn(user=False, timeout=60)
++    out.write('unauthenticated conn: authenticated=%s\n' % u.authenticated)
++    for p in ('C', 'H'):
++        _, q = payload(p, L)
++        try:
++            dt, r = timed(u, q); out.write('unauth payload %s len %d -> %s (%.3f s)\n' % (p, len(q), r, dt))
++        except Exception as e:
++            out.write('unauth payload %s -> io %s\n' % (p, str(e)[:100])); break
++    try: u.s.close()
++    except Exception: pass
++    # wrong password
++    try:
++        Conn(user=ATK_USER, password='wrong'); out.write('wrong password: accepted (!)\n')
++    except Exception as e:
++        out.write('wrong password -> %s\n' % str(e)[:160])
++    v = Conn(user=VIC_USER, password=VIC_PW, src='127.0.0.2')
++    for q in ("INSERT INTO victim_ks.t (k, v) VALUES (1, 'v1')", "SELECT v FROM victim_ks.t WHERE k = 1"):
++        dt, r = timed(v, q); out.write('victim %s -> %s (%.1f ms)\n' % (q, r, dt * 1000))
++    v.s.close(); return 0
++
++
++def do_victim(out_dir, rate, stopfile, req_timeout=5.0):
++    """steady light workload as role victim from source IP 127.0.0.2: alternating INSERT / SELECT by key (1,000 keys),
++    CL ONE, one connection, one request at a time at `rate` slots per second; a slot that cannot start on time
++    (previous request still out) is 'missed'. Timeout or I/O error -> close and reconnect on the next slot.
++    victim.txt per second: epoch_s slots ok err timeout connfail missed p50_ms p99_ms max_ms;
++    victim-events.txt: errors and state changes."""
++    vt = open(os.path.join(out_dir, 'victim.txt'), 'a', buffering=1)
++    ev = open(os.path.join(out_dir, 'victim-events.txt'), 'a', buffering=1)
++    vt.write('# victim start %d rate %.1f/s timeout %.1f s src 127.0.0.2 role %s\n' % (time.time() * 1000, rate, req_timeout, VIC_USER))
++    vt.write('# epoch_s slots ok err timeout connfail missed p50_ms p99_ms max_ms\n')
++    iv = 1.0 / rate; nxt = time.time(); c = None; i = 0
++    cur = int(nxt); b = dict(slots=0, ok=0, err=0, timeout=0, connfail=0, missed=0, lat=[]); state = None
++
++    def flush(sec):
++        l = sorted(b['lat']); n = len(l)
++        p = lambda q: ('%.1f' % l[min(n - 1, int(q * n))]) if n else '-'
++        vt.write('%d %d %d %d %d %d %d %s %s %s\n' % (sec, b['slots'], b['ok'], b['err'], b['timeout'], b['connfail'],
++                                                     b['missed'], p(0.5), p(0.99), ('%.1f' % l[-1]) if n else '-'))
++        for k in b: b[k] = [] if k == 'lat' else 0
++
++    def note(st, msg):
++        nonlocal state
++        if st != state:
++            ev.write('%d %s %s\n' % (time.time() * 1000, st, msg[:200])); state = st
++    while not os.path.exists(stopfile):
++        now = time.time()
++        if now < nxt:
++            time.sleep(nxt - now); now = time.time()
++        sec = int(now)
++        while cur < sec:
++            flush(cur); cur += 1
++        if now - nxt > iv:   # behind: count the slots that could not start
++            m = int((now - nxt) / iv); b['missed'] += m; nxt += m * iv
++        b['slots'] += 1; nxt += iv; i += 1
++        if c is None:
++            try:
++                c = Conn(user=VIC_USER, password=VIC_PW, src='127.0.0.2', timeout=req_timeout)
++                note('connected', '')
++            except Exception as e:
++                b['connfail'] += 1; c = None; note('connfail', str(e)); continue
++        k = (i // 2) % 1000
++        q = ("INSERT INTO victim_ks.t (k, v) VALUES (%d, 'value-%d')" % (k, i)) if i % 2 == 0 else ("SELECT v FROM victim_ks.t WHERE k = %d" % k)
++        t = time.time()
++        try:
++            op, body = c.query_raw(q)
++        except socket.timeout:
++            b['timeout'] += 1; note('timeout', q); c.s.close(); c = None; continue
++        except Exception as e:
++            b['connfail'] += 1; note('ioerror', str(e)); 
++            try: c.s.close()
++            except Exception: pass
++            c = None; continue
++        b['lat'].append((time.time() - t) * 1000)
++        if op == OP_ERROR:
++            b['err'] += 1; note('error', 'ERROR 0x%04x %s' % err_text(body))
++        else:
++            b['ok'] += 1; note('ok', '')
++    flush(cur); vt.write('# victim end %d\n' % (time.time() * 1000)); return 0
++
++
+ FULL = re.compile(r'GC\((\d+)\) Pause Full \(([^)]*)\) (\d+)M->(\d+)M\((\d+)M\) ([\d.]+)ms')
+ 
+ 
+@@ -240,7 +466,18 @@
+     ap.add_argument('--trig2-n', type=int, default=0, help='R20: k2 wave-2 trigger connections, payload-C frame pre-sent minus its last byte')
+     ap.add_argument('--trig2-presend-s', type=float, default=10.0, help='R20: pre-send instant (s after load start)')
+     ap.add_argument('--trig2-at', default='none', help='R20: none | sat:<gc.log>:<heap MiB>:<free MiB> | gc:<gc.log>:<heap MiB> | fixed:<s after load start>')
++    ap.add_argument('--user'); ap.add_argument('--password')
++    ap.add_argument('--setup', action='store_true'); ap.add_argument('--shake', action='store_true')
++    ap.add_argument('--victim', action='store_true'); ap.add_argument('--rate', type=float, default=20.0)
++    ap.add_argument('--stopfile')
+     a = ap.parse_args()
++    AUTH['user'] = a.user; AUTH['password'] = a.password
++    if a.setup:
++        return do_setup(open(os.path.join(a.out, 'auth-setup.txt'), 'a', buffering=1))
++    if a.shake:
++        return do_shake(open(os.path.join(a.out, 'auth-shake.txt'), 'a', buffering=1), a.len or 1048576)
++    if a.victim:
++        return do_victim(a.out, a.rate, a.stopfile)
+     if a.ddl:
+         c = Conn()
+         c.query("CREATE KEYSPACE IF NOT EXISTS r15 WITH replication = {'class':'SimpleStrategy','replication_factor':1}")
+--- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/OOM-exp/cassandra/cases/ErrorCollector_errorMsgs--humongous-trigger-matched-set-4GiB/harness/run.sh	2026-11-21 02:01:33.084588000 -0500
++++ /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/OOM-exp/cassandra/stage3b-client-trigger/logs/R20/harness/run.sh	2026-11-23 18:25:06.894327000 -0500
+@@ -1,12 +1,15 @@
+ #!/usr/bin/env bash
+-# R20 run driver (from R15's run.sh, 2026-11-21; R15's from U6's).
++# 3-b R20 confirm driver (2026-11-23, ms0625): R20's run.sh with PasswordAuthenticator + CassandraAuthorizer in the
++# instance conf, a superuser setup step (roles, victim keyspace, grants), a victim workload as role 'victim' from
++# 127.0.0.2 (60-s before window, 60-s after window), the attack as role 'attacker' (LOGIN, no grants), arm S0A (auth
++# shakedown), disk guard 8 GiB (this node's /mydata is 39 GB). R20 run driver (from R15's run.sh, 2026-11-21; R15's from U6's).
+ # Usage: run.sh <run-id> <base|iv> <heap e.g. 2G> <H|C|S0|S0iv> <N> <k1> <trig-spec> <hold> [len|-] [trig-max-s] [k2] [trig2-spec]
+ #   trig-spec: none | gc (detector on this run's gc.log) | fixed:<s> | fixedfrom:<run-id> (that run's t_trig offset)
+ #   hold: <s after t_trig1 (t_trig2 when k1 = 0)> | holdfrom:<T-run> = max(300, 2 x (t_OOM - t_trig of it) + 60), 600 if it did not OOM
+ #   trig2-spec (R20 wave 2, pre-sent frames): - | sat:<free MiB> | gc | fixed:<s>
+ # Layout: $W/cassandra (base copy, shipped conf), $W/cassandra-iv, $W/harness, $W/runs/<run-id>.
+ set -u
+-W=/mydata/s4/r20; H=$W/harness
++W=/mydata/s4/3b-R20; H=$W/harness
+ RID=$1; BUILD=$2; HEAP=$3; ARM=$4; N=$5; K=$6; TSPEC=$7; HOLD=$8; LEN=${9:-}; TMAX=${10:-300}; K2=${11:-0}; T2SPEC=${12:--}
+ [ "$LEN" = "-" ] && LEN=""
+ case $HEAP in *M) HMIB=${HEAP%M};; *G) HMIB=$(( ${HEAP%G} * 1024 ));; esac; HG=$(( HMIB / 1024 ))
+@@ -24,7 +27,7 @@
+ md5sum $T/conf/cassandra.yaml $T/conf/jvm11-server.options $T/conf/cassandra-env.sh $T/conf/jvm-server.options $T/build/apache-cassandra-5.0.9-SNAPSHOT.jar > $R/conf-md5.txt
+ rm -rf $T/data $T/logs
+ ( ulimit -n 100000; cd $T; exec env MAX_HEAP_SIZE=$HEAP CASSANDRA_HEAPDUMP_DIR=$R setsid nohup systemd-run --user --scope -p MemorySwapMax=0 \
+-    --unit=r20-$RID -- bin/cassandra -f > $R/stdout.txt 2>&1 < /dev/null ) &
++    --unit=3bR20-$RID -- bin/cassandra -f > $R/stdout.txt 2>&1 < /dev/null ) &
+ PID=
+ for i in $(seq 1 150); do
+   sleep 2
+@@ -44,9 +47,22 @@
+   org.apache.cassandra.db:type=StorageService NativeTransportMaxConcurrentRequestsInBytesPerIp >> $R/resolved.txt 2>&1
+ grep -o -E "native_transport_max_frame_size=[^;]*;|native_transport_max_message_size=[^;]*;|native_transport_max_threads=[^;]*;|max_mutation_size=[^;]*;" $T/logs/system.log | sort -u >> $R/resolved.txt
+ setsid nohup bash $H/monitor.sh $PID $R $STOP < /dev/null > $R/monitor.err 2>&1 &
+-sleep 20
++grep -E "^(authenticator|authorizer|role_manager|network_authorizer):" $T/conf/cassandra.yaml > $R/auth-conf.txt
++grep -o -E "(authenticator|authorizer|role_manager|network_authorizer)=[^;]*;" $T/logs/system.log | sort -u >> $R/auth-conf.txt
++python3 -I $H/client.py --setup --out $R > $R/setup.err 2>&1 || { log "INVALID: auth setup failed"; kill $PID; sleep 10; kill -9 $PID 2>/dev/null; touch $STOP; exit 1; }
++log "auth setup done (roles attacker/victim, victim_ks.t, grants)"
++setsid nohup python3 -I $H/client.py --victim --rate 20 --stopfile $R/VSTOP --out $R < /dev/null > $R/victim.err 2>&1 &
++VPID=$!; echo $VPID > $R/victim.pid
++log "victim started pid $VPID; 60-s before window"
++sleep 60
+ LA=""; [ -n "$LEN" ] && LA="--len $LEN"
+ case $ARM in
++S0A)
++  log "S0A auth shakedown"
++  python3 -I $H/client.py --shake --out $R $LA > $R/shake.err 2>&1; log "shake rc=$?"
++  sleep 10
++  CP=""
++  ;;
+ S0|S0iv)
+   jmap -histo:live $PID > $R/histo-idle.txt 2>&1
+   PL="H C"; [ "$ARM" = S0iv ] && PL="H"
+@@ -82,7 +98,7 @@
+     TA="$TA --trig-max $TMAX"
+   fi
+   log "baseline done; client start N=$N k=$K $TA $T2A"
+-  python3 -I $H/client.py --payload $ARM --n $N --trig-n $K $TA $T2A --hold-s $HOLD $MR --out $R --tag p0 $LA > $R/client-p0.err 2>&1 &
++  python3 -I $H/client.py --user attacker --password atk-3bR20 --payload $ARM --n $N --trig-n $K $TA $T2A --hold-s $HOLD $MR --out $R --tag p0 $LA > $R/client-p0.err 2>&1 &
+   CP=$!
+   ;;
+ esac
+@@ -92,7 +108,7 @@
+   sleep 1
+   if [ -z "$OOMSEEN" ] && grep -qF "java.lang.OutOfMemoryError" $R/stdout.txt; then OOMSEEN=1; log "OOM line seen in stdout"; fi
+   f=$(df -BM --output=avail /mydata | tail -1 | tr -dc 0-9)
+-  if [ "$f" -lt 51200 ]; then DISK="disk-guard(${f}M)"; log "DISK GUARD: stopping client"; for c in $CP; do kill $c; done; fi
++  if [ "$f" -lt 8192 ]; then DISK="disk-guard(${f}M)"; log "DISK GUARD: stopping client"; for c in $CP; do kill $c; done; fi
+ done
+ if kill -0 $PID 2>/dev/null; then
+   log "client ended; daemon alive (hold end) $DISK"
+@@ -114,10 +130,12 @@
+   kill -0 $PID 2>/dev/null && { log "kill -9"; kill -9 $PID; }
+ fi
+ log "daemon stopped"
++sleep 60; touch $R/VSTOP; for i in $(seq 1 20); do kill -0 $VPID 2>/dev/null || break; sleep 1; done; kill $VPID 2>/dev/null
++log "victim stopped (60-s after window)"
+ for c in $CP; do wait $c 2>/dev/null; done
+ touch $STOP
+ sleep 3
+-for i in $(seq 1 30); do systemctl --user is-active r20-$RID.scope >/dev/null 2>&1 || break; sleep 1; done
++for i in $(seq 1 30); do systemctl --user is-active 3bR20-$RID.scope >/dev/null 2>&1 || break; sleep 1; done
+ grep -qF "java.lang.OutOfMemoryError" $R/stdout.txt && END="$END oom:$(grep -m1 -F "java.lang.OutOfMemoryError" $R/stdout.txt | head -c 160)"
+ log "END $END"
+ cp $T/logs/system.log* $T/logs/gc.log* $R/ 2>/dev/null

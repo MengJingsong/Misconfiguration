@@ -1,0 +1,63 @@
+LiveSSTableCount (JMX) 250; pending compactions 0; c9.t pending 0
+Data.db files 250; size bytes min 41477 median 322600 max 465642; below 256 KiB: 23
+debug.log lines with MEMTABLE_PERIOD_EXPIRED: 250
+compactionstats:
+concurrent compactors            2          
+pending tasks                    0          
+compactions completed            6          
+data compacted                   56530      
+compressed data compacted        18043      
+compactions aborted              0          
+compactions reduced              0          
+sstables dropped from compaction 0          
+15 minute rate                   0.36/minute
+mean rate                        137.37/hour
+compaction throughput (MiB/s)    64.0       
+
+== /mydata/s4/3b-C9/inst/smoke3/data/c9/t-f7ae1be0e78711f1a5d18330454eef72/nb-1-big-Data.db
+SSTable: /mydata/s4/3b-C9/inst/smoke3/data/c9/t-f7ae1be0e78711f1a5d18330454eef72/nb-1-big
+First token: -9157630481263453893 (-4767325380207278965)
+Last token: 9115765736002183017 (130539203755175169)
+Estimated droppable tombstones: 0.0
+
+== /mydata/s4/3b-C9/inst/smoke3/data/c9/t-f7ae1be0e78711f1a5d18330454eef72/nb-126-big-Data.db
+SSTable: /mydata/s4/3b-C9/inst/smoke3/data/c9/t-f7ae1be0e78711f1a5d18330454eef72/nb-126-big
+First token: -9166012910718754482 (-37417025824147950)
+Last token: 9205760899951557145 (2869786987300795734)
+Estimated droppable tombstones: 0.0
+
+== /mydata/s4/3b-C9/inst/smoke3/data/c9/t-f7ae1be0e78711f1a5d18330454eef72/nb-250-big-Data.db
+SSTable: /mydata/s4/3b-C9/inst/smoke3/data/c9/t-f7ae1be0e78711f1a5d18330454eef72/nb-250-big
+First token: -9221978830622338046 (-3904375707758393194)
+Last token: 9218252449168846104 (-4512107862184389641)
+Estimated droppable tombstones: 0.0
+
+
+DESCRIBE TABLE c9.t (as mallory):
+
+
+
+CREATE TABLE c9.t (
+    pk bigint PRIMARY KEY,
+    v blob
+) WITH additional_write_policy = '99p'
+    AND allow_auto_snapshot = true
+    AND bloom_filter_fp_chance = 0.01
+    AND caching = {'keys': 'ALL', 'rows_per_partition': 'NONE'}
+    AND cdc = false
+    AND comment = ''
+    AND compaction = {'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'enabled': 'false', 'max_threshold': '32', 'min_threshold': '4'}
+    AND compression = {'chunk_length_in_kb': '16', 'class': 'org.apache.cassandra.io.compress.LZ4Compressor'}
+    AND memtable = 'default'
+    AND crc_check_chance = 1.0
+    AND default_time_to_live = 0
+    AND extensions = {}
+    AND gc_grace_seconds = 864000
+    AND incremental_backups = true
+    AND max_index_interval = 2048
+    AND memtable_flush_period_in_ms = 200
+    AND min_index_interval = 128
+    AND read_repair = 'BLOCKING'
+    AND speculative_retry = '99p';
+
+after restart: LiveSSTableCount 250

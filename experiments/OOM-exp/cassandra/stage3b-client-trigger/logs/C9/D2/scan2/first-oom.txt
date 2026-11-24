@@ -1,0 +1,48 @@
+INFO  [Service Thread] 2026-11-23T22:44:45,766 GCInspector.java:286 - G1 Old Generation GC in 959ms.  G1 Eden Space: 134217728 -> 0; G1 Old Gen: 105079440 -> 108464456; 
+ERROR [ReadStage-68] 2026-11-23T22:44:45,772 JVMStabilityInspector.java:70 - Exception in thread Thread[ReadStage-68,10,SharedPool]
+java.lang.OutOfMemoryError: Direct buffer memory
+	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+	at org.apache.cassandra.io.compress.BufferType$2.allocate(BufferType.java:35)
+	at org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer.getBlock(ThreadLocalReadAheadBuffer.java:84)
+	at org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer.allocateBuffer(ThreadLocalReadAheadBuffer.java:76)
+	at org.apache.cassandra.io.util.CompressedChunkReader$ScanCompressedReader.allocateResources(CompressedChunkReader.java:204)
+	at org.apache.cassandra.io.util.CompressedChunkReader$Standard.forScan(CompressedChunkReader.java:244)
+	at org.apache.cassandra.io.util.CompressedChunkReader.instantiateRebufferer(CompressedChunkReader.java:95)
+	at org.apache.cassandra.io.util.FileHandle.instantiateRebufferer(FileHandle.java:204)
+	at org.apache.cassandra.io.util.FileHandle.createReader(FileHandle.java:156)
+	at org.apache.cassandra.io.util.FileHandle.createReaderForScan(FileHandle.java:139)
+	at org.apache.cassandra.io.sstable.format.SSTableReader.openDataReaderForScan(SSTableReader.java:1385)
+	at org.apache.cassandra.io.sstable.format.SSTableScanner.<init>(SSTableScanner.java:78)
+	at org.apache.cassandra.io.sstable.format.big.BigTableScanner.<init>(BigTableScanner.java:62)
+	at org.apache.cassandra.io.sstable.format.big.BigTableScanner.getScanner(BigTableScanner.java:53)
+	at org.apache.cassandra.io.sstable.format.big.BigTableReader.partitionIterator(BigTableReader.java:149)
+	at org.apache.cassandra.io.sstable.format.big.BigTableReader.partitionIterator(BigTableReader.java:85)
+	at org.apache.cassandra.db.PartitionRangeReadCommand.queryStorage(PartitionRangeReadCommand.java:340)
+	at org.apache.cassandra.db.ReadCommand.executeLocally(ReadCommand.java:452)
+	at org.apache.cassandra.service.StorageProxy$LocalReadRunnable.runMayThrow(StorageProxy.java:2209)
+	at org.apache.cassandra.service.StorageProxy$DroppableRunnable.run(StorageProxy.java:2608)
+	at org.apache.cassandra.concurrent.ExecutionFailure$2.run(ExecutionFailure.java:163)
+	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+INFO  [ReadStage-68] 2026-11-23T22:44:45,802 HeapUtils.java:61 - Trying to log the heap histogram using jcmd
+INFO  [ReadStage-20] 2026-11-23T22:44:46,038 NoSpamLogger.java:104 - Maximum memory usage reached (512.000MiB) for chunk-cache buffer pool, cannot allocate chunk of 8.000MiB
+INFO  [Service Thread] 2026-11-23T22:44:46,418 GCInspector.java:286 - G1 Old Generation GC in 329ms.  G1 Eden Space: 150994944 -> 0; G1 Old Gen: 105126744 -> 106704344; 
+INFO  [Service Thread] 2026-11-23T22:44:47,028 GCInspector.java:286 - G1 Old Generation GC in 510ms.  G1 Eden Space: 67108864 -> 0; G1 Old Gen: 106513392 -> 108371976; 
+INFO  [Service Thread] 2026-11-23T22:44:48,107 GCInspector.java:286 - G1 Old Generation GC in 811ms.  G1 Eden Space: 33554432 -> 0; G1 Old Gen: 108681128 -> 109526088; 
+INFO  [ReadStage-68] 2026-11-23T22:44:48,023 HeapUtils.java:181 - 1800561:
+ num     #instances         #bytes  class name (module)
+-------------------------------------------------------
+   1:        117252       34075760  [B (java.base@11.0.33)
+   2:          5703       14639832  [I (java.base@11.0.33)
+   3:         46007       13952544  [Ljava.lang.Object; (java.base@11.0.33)
+   4:          8737       11125360  [J (java.base@11.0.33)
+   5:         99444        2386656  java.lang.String (java.base@11.0.33)
+   6:         12403        1477600  java.lang.Class (java.base@11.0.33)
+   7:         43502        1392064  java.util.HashMap$Node (java.base@11.0.33)
+   8:         39243        1255776  java.util.concurrent.ConcurrentHashMap$Node (java.base@11.0.33)
+   9:         47996        1151904  javax.management.ObjectName$Property (java.management@11.0.33)
+  10:         16840        1077760  java.nio.DirectByteBuffer (java.base@11.0.33)
+  11:         20035         961680  java.nio.HeapByteBuffer (java.base@11.0.33)

@@ -1,0 +1,99 @@
+[2026-11-23 16:39:12 EST] started LOAD pid 312640 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b3b21-LOAD-1795469951.scope
+[2026-11-23 16:39:52 EST] ready LOAD
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms8G -Xmx8G -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/3b-B21/runs/LOAD/cassandra-1795469951-pid312640.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-23 16:39:52 EST] admin-setup (superuser)
+ADMIN login as superuser cassandra ok
+ADMIN OK CREATE ROLE IF NOT EXISTS attacker WITH PASSWORD = 'atk-3b-B21' AND LOGIN = true AND SUPERUSER = false
+ADMIN OK CREATE ROLE IF NOT EXISTS tenant WITH PASSWORD = 'ten-3b-B21' AND LOGIN = true AND SUPERUSER = false
+ADMIN OK CREATE ROLE IF NOT EXISTS reader WITH PASSWORD = 'rd-3b-B21' AND LOGIN = true AND SUPERUSER = false
+ADMIN OK CREATE ROLE IF NOT EXISTS ddl WITH PASSWORD = 'ddl-3b-B21' AND LOGIN = true AND SUPERUSER = false
+ADMIN OK CREATE ROLE IF NOT EXISTS ddlks WITH PASSWORD = 'ddlks-3b-B21' AND LOGIN = true AND SUPERUSER = false
+ADMIN OK CREATE KEYSPACE IF NOT EXISTS b21 WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+ADMIN OK CREATE TABLE IF NOT EXISTS b21.docs (id int PRIMARY KEY, emb vector<float, 16>, body text)
+ADMIN OK CREATE INDEX IF NOT EXISTS docs_emb ON b21.docs(emb) USING 'sai'
+ADMIN OK CREATE KEYSPACE IF NOT EXISTS vic WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+ADMIN OK CREATE TABLE IF NOT EXISTS vic.kv (k int PRIMARY KEY, v text)
+ADMIN OK GRANT SELECT ON TABLE b21.docs TO attacker
+ADMIN OK GRANT MODIFY ON TABLE b21.docs TO attacker
+ADMIN OK GRANT SELECT ON TABLE vic.kv TO tenant
+ADMIN OK GRANT MODIFY ON TABLE vic.kv TO tenant
+ADMIN OK GRANT SELECT ON TABLE b21.docs TO reader
+ADMIN OK GRANT CREATE ON ALL KEYSPACES TO ddl
+ADMIN OK GRANT CREATE ON KEYSPACE b21 TO ddlks
+ROLE Row[attacker, false, true, NULL]
+ROLE Row[cassandra, true, true, NULL]
+ROLE Row[tenant, false, true, NULL]
+ROLE Row[ddl, false, true, NULL]
+ROLE Row[ddlks, false, true, NULL]
+ROLE Row[reader, false, true, NULL]
+PERM attacker <table b21.docs> SELECT
+PERM attacker <table b21.docs> MODIFY
+PERM tenant <table vic.kv> SELECT
+PERM tenant <table vic.kv> MODIFY
+PERM reader <table b21.docs> SELECT
+PERM ddl <all keyspaces> CREATE
+PERM ddlks <keyspace b21> CREATE
+admin-setup done
+[2026-11-23 16:40:09 EST] load start (role attacker)
+load progress 500 s=0
+load progress 1000 s=1
+load progress 1500 s=2
+load progress 2000 s=2
+load progress 2500 s=3
+load progress 3000 s=4
+load progress 3500 s=5
+load progress 4000 s=5
+load ok table=docs rows=4000 chars=122880 done=4000 retries=0 failed=0 secs=5
+[2026-11-23 16:40:19 EST] victim tenant setup (role tenant)
+victim setup ok keys=1000 count=1000
+		SSTable count: 0
+		Old SSTable count: 0
+		Space used (live): 0
+		Number of partitions (estimate): 3999
+		Memtable cell count: 4000
+		Memtable data size: 492052000
+[2026-11-23 16:40:27 EST] verify (role attacker)
+verify index docs_emb kind=CUSTOM options={class_name=sai, target=emb}
+verify sai_column_indexes n/a: com.datastax.driver.core.exceptions.UnauthorizedException: User attacker has no SELECT permission on <table system_views.sai_column_indexes> or any of its parents
+verify count(*)=4000
+verify scan rows=4000 distinct=4000 value_chars=491520000 body_match=5/5
+INFO  [SecondaryIndexManagement:1] 2026-11-23T21:40:05,771 ColumnFamilyStore.java:1055 - Enqueuing flush of system.IndexInfo, Reason: INTERNALLY_FORCED, Usage: 447B (0%) on-heap, 0B (0%) off-heap
+INFO  [PerDiskMemtableFlushWriter_0:1] 2026-11-23T21:40:05,776 Flushing.java:179 - Completed flushing /mydata/s4/3b-B21/node/data/system/IndexInfo-9f5c6374d48532299a0a5094af9ad1e3/nb-1-big-Data.db (32B) for commitlog position CommitLogPosition(segmen
+INFO  [Native-Transport-Requests-6] 2026-11-23T21:40:05,788 ColumnFamilyStore.java:1055 - Enqueuing flush of system_schema.keyspaces, Reason: INTERNALLY_FORCED, Usage: 695B (0%) on-heap, 0B (0%) off-heap
+INFO  [PerDiskMemtableFlushWriter_0:2] 2026-11-23T21:40:05,792 Flushing.java:179 - Completed flushing /mydata/s4/3b-B21/node/data/system_schema/keyspaces-abac5682dea631c5b535b3d6cffd0fb6/nb-8-big-Data.db (113B) for commitlog position CommitLogPositio
+INFO  [Native-Transport-Requests-6] 2026-11-23T21:40:05,857 ColumnFamilyStore.java:1055 - Enqueuing flush of system_schema.column_masks, Reason: INTERNALLY_FORCED, Usage: 757B (0%) on-heap, 0B (0%) off-heap
+INFO  [PerDiskMemtableFlushWriter_0:1] 2026-11-23T21:40:05,862 Flushing.java:179 - Completed flushing /mydata/s4/3b-B21/node/data/system_schema/column_masks-738cc5ed01683268b9d1853d4bc278af/nb-3-big-Data.db (40B) for commitlog position CommitLogPosit
+INFO  [Native-Transport-Requests-6] 2026-11-23T21:40:05,870 ColumnFamilyStore.java:1055 - Enqueuing flush of system_schema.columns, Reason: INTERNALLY_FORCED, Usage: 1.736KiB (0%) on-heap, 0B (0%) off-heap
+INFO  [PerDiskMemtableFlushWriter_0:2] 2026-11-23T21:40:05,875 Flushing.java:179 - Completed flushing /mydata/s4/3b-B21/node/data/system_schema/columns-24101c25a2ae3af787c1b40ee1aca33f/nb-6-big-Data.db (101B) for commitlog position CommitLogPosition(
+INFO  [Native-Transport-Requests-6] 2026-11-23T21:40:05,883 ColumnFamilyStore.java:1055 - Enqueuing flush of system_schema.tables, Reason: INTERNALLY_FORCED, Usage: 2.695KiB (0%) on-heap, 0B (0%) off-heap
+INFO  [PerDiskMemtableFlushWriter_0:1] 2026-11-23T21:40:05,888 Flushing.java:179 - Completed flushing /mydata/s4/3b-B21/node/data/system_schema/tables-afddfb9dbc1e30688056eed6c302ba09/nb-7-big-Data.db (423B) for commitlog position CommitLogPosition(s
+INFO  [Native-Transport-Requests-6] 2026-11-23T21:40:05,895 ColumnFamilyStore.java:1055 - Enqueuing flush of system_schema.keyspaces, Reason: INTERNALLY_FORCED, Usage: 695B (0%) on-heap, 0B (0%) off-heap
+INFO  [PerDiskMemtableFlushWriter_0:2] 2026-11-23T21:40:05,900 Flushing.java:179 - Completed flushing /mydata/s4/3b-B21/node/data/system_schema/keyspaces-abac5682dea631c5b535b3d6cffd0fb6/nb-10-big-Data.db (113B) for commitlog position CommitLogPositi
+[2026-11-23 16:40:53 EST] stopped LOAD
+1
+474M	/mydata/s4/3b-B21/template
+total 483860
+drwxr-xr-x 2 jason92 misconfiguration      4096 Nov 23 14:40 .
+drwxr-xr-x 3 jason92 misconfiguration      4096 Nov 23 14:40 ..
+-rw-r--r-- 1 jason92 misconfiguration    240231 Nov 23 14:40 nb-1-big-CompressionInfo.db
+-rw-r--r-- 1 jason92 misconfiguration 494108072 Nov 23 14:40 nb-1-big-Data.db
+-rw-r--r-- 1 jason92 misconfiguration        10 Nov 23 14:40 nb-1-big-Digest.crc32
+-rw-r--r-- 1 jason92 misconfiguration      5016 Nov 23 14:40 nb-1-big-Filter.db
+-rw-r--r-- 1 jason92 misconfiguration     45797 Nov 23 14:40 nb-1-big-Index.db
+-rw-r--r-- 1 jason92 misconfiguration        24 Nov 23 14:40 nb-1-big-SAI+aa+docs_emb+ColumnComplete.db
+-rw-r--r-- 1 jason92 misconfiguration     48460 Nov 23 14:40 nb-1-big-SAI+aa+docs_emb+CompressedVectors.db
+-rw-r--r-- 1 jason92 misconfiguration       292 Nov 23 14:40 nb-1-big-SAI+aa+docs_emb+Meta.db
+-rw-r--r-- 1 jason92 misconfiguration     96039 Nov 23 14:40 nb-1-big-SAI+aa+docs_emb+PostingLists.db
+-rw-r--r-- 1 jason92 misconfiguration    800039 Nov 23 14:40 nb-1-big-SAI+aa+docs_emb+TermsData.db
+-rw-r--r-- 1 jason92 misconfiguration         0 Nov 23 14:40 nb-1-big-SAI+aa+GroupComplete.db
+-rw-r--r-- 1 jason92 misconfiguration       250 Nov 23 14:40 nb-1-big-SAI+aa+GroupMeta.db
+-rw-r--r-- 1 jason92 misconfiguration       280 Nov 23 14:40 nb-1-big-SAI+aa+PartitionKeyBlockOffsets.db
+-rw-r--r-- 1 jason92 misconfiguration     16970 Nov 23 14:40 nb-1-big-SAI+aa+PartitionKeyBlocks.db
+-rw-r--r-- 1 jason92 misconfiguration        87 Nov 23 14:40 nb-1-big-SAI+aa+PartitionToSize.db
+-rw-r--r-- 1 jason92 misconfiguration        29 Nov 23 14:40 nb-1-big-SAI+aa+RowToPartition.db
+-rw-r--r-- 1 jason92 misconfiguration     32422 Nov 23 14:40 nb-1-big-SAI+aa+RowToToken.db
+-rw-r--r-- 1 jason92 misconfiguration     14385 Nov 23 14:40 nb-1-big-Statistics.db
+-rw-r--r-- 1 jason92 misconfiguration       552 Nov 23 14:40 nb-1-big-Summary.db
+-rw-r--r-- 1 jason92 misconfiguration       402 Nov 23 14:40 nb-1-big-TOC.txt
+2
+LOADDONE

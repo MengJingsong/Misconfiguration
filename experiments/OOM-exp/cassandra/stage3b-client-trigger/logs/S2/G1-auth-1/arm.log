@@ -1,0 +1,21 @@
+[2026-11-23 17:34:00 EST] args: label=G1-auth-1 load=90 obs=300 vpost=60 vrate=40 heap=2G x3 RF=3 CL=ONE 8x256 blob 11000
+INFO  [OptionalTasks:1] 2026-11-23T22:33:49,879 CassandraRoleManager.java:454 - Created default superuser role 'cassandra'
+[2026-11-23 17:34:18 EST] admin done: 0 errors
+[2026-11-23 17:34:28 EST] probes: 9 refusals
+[2026-11-23 17:34:34 EST] victim preload rows=10000 errors=0
+[2026-11-23 17:34:34 EST] victim + samplers started; attack in 60 s
+[2026-11-23 17:35:34 EST] attack start (as attacker)
+[2026-11-23 17:38:04 EST] n1 DEAD
+[2026-11-23 17:38:24 EST] attack client exited 155 s after start: FINAL sent=206880 ok=201769 err=5111 NoHostAvailableException: All host(s) tried for query failed (tried: /127.0.0.1:9042 (com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown))
+[2026-11-23 17:38:24 EST] victim observed 60 s after n1's death
+n1 DEAD
+n2 ALIVE
+n3 ALIVE
+[2026-11-23 17:39:42 EST] stopped n2 (324043)
+[2026-11-23 17:39:52 EST] stopped n3 (324181)
+G1-auth-1: n1 OOM (HeapDumper) | n1 DEAD | attack end-start 170 s | n1.end-attack.start 146603 ms | client FINAL sent=206880 ok=201769 err=5111 NoHostAvailableException: All host(s) tried for query failed (tried: /127.0.0.1:9042 (com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown))
+n1: 0 OOMError lines in system.log | pauses=494 max_after_any=2028MiB(99.0%) full_gcs=314 max_after_full=2014MiB(98.3%) ReportJavaOutOfMemory=1 | full>95%: n=306 window=93s pause=83s (90%) service_loss=not met | pauses=494 total_pause=95s max60=100% longest>=90%win=102s 169-271s (92s paused) service_loss(all STW)=MET oom_marks=HeapDumper@267.289s,ReportJavaOutOfMemory@270.875s
+n2: 0 OOMError lines in system.log | pauses=27 max_after_any=2028MiB(99.0%) full_gcs=4 max_after_full=816MiB(39.8%) ReportJavaOutOfMemory=0 | full>95%: n=0 window=0s pause=0s (0%) service_loss=not met | pauses=27 total_pause=3s max60=5% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=none
+n3: 0 OOMError lines in system.log | pauses=23 max_after_any=2028MiB(99.0%) full_gcs=3 max_after_full=835MiB(40.8%) ReportJavaOutOfMemory=0 | full>95%: n=0 window=0s pause=0s (0%) service_loss=not met | pauses=23 total_pause=2s max60=2% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=none
+[2026-11-23 17:40:05 EST] dump n1 scanned and deleted
+[2026-11-23 17:40:05 EST] done G1-auth-1

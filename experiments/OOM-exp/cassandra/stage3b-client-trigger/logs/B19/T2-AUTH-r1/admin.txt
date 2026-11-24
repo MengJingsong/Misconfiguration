@@ -1,0 +1,42 @@
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+ADMIN login as cassandra after 10812 ms
+ADMIN ok: CREATE ROLE IF NOT EXISTS tenant WITH PASSWORD = '…' AND LOGIN = true AND SUPERUSER = false
+ADMIN ok: CREATE KEYSPACE IF NOT EXISTS vic WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+ADMIN ok: CREATE TABLE IF NOT EXISTS vic.kv (k int PRIMARY KEY, v text)
+ADMIN ok: GRANT SELECT ON TABLE vic.kv TO tenant
+ADMIN ok: GRANT MODIFY ON TABLE vic.kv TO tenant
+ADMIN LIST ALL PERMISSIONS:
+    Row[cassandra, cassandra, <keyspace vic>, CREATE]
+    Row[cassandra, cassandra, <keyspace vic>, ALTER]
+    Row[cassandra, cassandra, <keyspace vic>, DROP]
+    Row[cassandra, cassandra, <keyspace vic>, SELECT]
+    Row[cassandra, cassandra, <keyspace vic>, MODIFY]
+    Row[cassandra, cassandra, <keyspace vic>, AUTHORIZE]
+    Row[cassandra, cassandra, <keyspace vic>, UNMASK]
+    Row[cassandra, cassandra, <keyspace vic>, SELECT_MASKED]
+    Row[cassandra, cassandra, <table vic.kv>, ALTER]
+    Row[cassandra, cassandra, <table vic.kv>, DROP]
+    Row[cassandra, cassandra, <table vic.kv>, SELECT]
+    Row[cassandra, cassandra, <table vic.kv>, MODIFY]
+    Row[cassandra, cassandra, <table vic.kv>, AUTHORIZE]
+    Row[cassandra, cassandra, <table vic.kv>, UNMASK]
+    Row[cassandra, cassandra, <table vic.kv>, SELECT_MASKED]
+    Row[cassandra, cassandra, <all functions in vic>, CREATE]
+    Row[cassandra, cassandra, <all functions in vic>, ALTER]
+    Row[cassandra, cassandra, <all functions in vic>, DROP]
+    Row[cassandra, cassandra, <all functions in vic>, AUTHORIZE]
+    Row[cassandra, cassandra, <all functions in vic>, EXECUTE]
+    Row[cassandra, cassandra, <role tenant>, ALTER]
+    Row[cassandra, cassandra, <role tenant>, DROP]
+    Row[cassandra, cassandra, <role tenant>, AUTHORIZE]
+    Row[cassandra, cassandra, <role tenant>, DESCRIBE]
+    Row[tenant, tenant, <table vic.kv>, SELECT]
+    Row[tenant, tenant, <table vic.kv>, MODIFY]
+ADMIN LIST ROLES:
+    Row[cassandra, true, true, {}, ALL]
+    Row[tenant, false, true, {}, ALL]
+ADMIN SELECT role, is_superuser, can_login, member_of FROM system_auth.roles:
+    Row[cassandra, true, true, NULL]
+    Row[tenant, false, true, NULL]

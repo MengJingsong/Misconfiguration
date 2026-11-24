@@ -1,0 +1,10 @@
+--- orig/Poll.java	2026-11-23 16:47:40.062429065 -0500
++++ h/Poll.java	2026-11-23 16:48:43.614235132 -0500
+@@ -44,6 +44,7 @@
+             {"dropped_mut", M + "type=DroppedMessage,scope=MUTATION_REQ,name=Dropped"},
+             {"wr_timeouts", M + "type=ClientRequest,scope=Write,name=Timeouts"},
+             {"cl_size", M + "type=CommitLog,name=TotalCommitLogSize"},
++            {"v_applied", M + "type=Table,keyspace=vks,scope=kv,name=WriteLatency"}, // 3-b confirm: the victim table's applied writes
+         };
+         try (JMXConnector c = JMXConnectorFactory.connect(url))
+         {

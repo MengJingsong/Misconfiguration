@@ -1,0 +1,12 @@
+HOSTGONE
+SUMMARY secs=34 ok=3 err_readfail=0 err_timeout=0 err_invalid=0 err_other=19 inflight_left=0 rows=3000 vbytes=368640000
+== one:T:1000:100:3:0
+  T limit=1000 fetch=100: n=3 ok=3 errs={} ms=[3022, 2469, 2421] rows=[1000] pages=[1] warns=[1] vbytes_ok=352 MiB | heap max 1809 MiB, old-postGC max 81 MiB, NTR act max 1, RS act max 1, direct max 176 MiB, lm pending max 117 MiB, lm completed +352 MiB, lm overload drops +0
+     warn: Top-K queries do not support paging and the page size is set to 100, which is less than LIMIT 1000. The page size has been set to 1000 to match the LIMIT.
+== idle:20000
+== run:T:1000:100:12/120
+  T limit=1000 fetch=100: n=19 ok=0 errs={'TransportException': 12, 'NoHostAvailableException': 7} ms=(0, 5243, 5254) rows=[] pages=[] warns=[] vbytes_ok=0 MiB | no samples
+     err: TransportException: [/127.0.0.1:9042] Connection has been closed
+     err: TransportException: [/127.0.0.1:9042] Connection has been closed
+     err: TransportException: [/127.0.0.1:9042] Connection has been closed
+  run c=12: 6 s ok=0 q/s=0.00 value MiB/s=0.0 step errs(rf,to,inv,oth)=[0, 0, 0, 19] inflight med=12 | no samples

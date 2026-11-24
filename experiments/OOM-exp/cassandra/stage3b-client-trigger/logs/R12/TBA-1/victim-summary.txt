@@ -1,0 +1,7 @@
+phase | from..to (s rel. attack) | requests | ok %% | ok r / w | p50 | p99 | max | errors
+before | -60.0..+0.0 | 772 | 0.0 | 0/384 , 0/388 | - | - | - | io:AttributeError x772
+during (attack..endpoint) | +0.0..+17.0 | 149 | 0.0 | 0/76 , 0/73 | - | - | - | io:AttributeError x137, io:ConnectionRefusedError x8, io:ConnectionResetError x4
+after (endpoint..+60 s) | +17.0..+80.0 | 1253 | 0.0 | 0/626 , 0/627 | - | - | - | io:ConnectionRefusedError x1253
+node down to restart CQL up | +80.0..+93.4 | 252 | 0.0 | 0/126 , 0/126 | - | - | - | io:ConnectionRefusedError x232, io:AttributeError x20
+after restart (CQL up..daemon stopped) | +93.4..+153.4 | 772 | 0.0 | 0/386 , 0/386 | - | - | - | io:AttributeError x772
+last victim ok before the outage: -1795473081.9 s; first victim error after attack start: +0.3 s; first ok after the outage: -1795473081.9 s (restart_start +83.3, restart_cql_up +93.4); outage 0.0 s

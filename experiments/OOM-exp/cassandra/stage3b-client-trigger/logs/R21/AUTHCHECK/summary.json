@@ -1,0 +1,280 @@
+{
+ "label": "AUTHCHECK",
+ "mode": "authcheck",
+ "args": [
+  "authcheck",
+  "AUTHCHECK"
+ ],
+ "cotenancy": {
+  "daemons": "none",
+  "MemAvailable_MiB": 63434
+ },
+ "start": {
+  "pid": 622922,
+  "up_s": 66,
+  "unit": "r21n3b-authcheck-1795473621",
+  "cgroup": "/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/r21n3b-authcheck-1795473621.scope",
+  "memory.max": "max",
+  "swap.max": "0",
+  "scope_ok": true,
+  "flags": {
+   "-XX:+UseG1GC": true,
+   "-XX:G1HeapRegionSize=16m": true,
+   "-XX:+HeapDumpOnOutOfMemoryError": true,
+   "-XX:OnOutOfMemoryError=kill -9 %p": true,
+   "-Xmx2G": true,
+   "-XX:G1NewSizePercent=50": true,
+   "-XX:MaxGCPauseMillis=300": true
+  },
+  "flags_ok": true,
+  "MaxDirectMemorySize": [
+   "-XX:MaxDirectMemorySize=15872M"
+  ],
+  "HeapDumpPath": [
+   "-XX:HeapDumpPath=/mydata/s4/3b-R21/run/dump/cassandra-1795473622-pid622922.hprof"
+  ],
+  "xmx": [
+   "-Xmx2G"
+  ],
+  "xms": [
+   "-Xms2G"
+  ],
+  "xmn": []
+ },
+ "build": {
+  "build": "U",
+  "tree": "/mydata/s4/3b-R21/tree",
+  "jar_sha256": "e55f4f2974cb6120712a5cdfbbed9ee1ba25d97b887cbe71b64fd194f3b5a942",
+  "reset_putfields": [],
+  "reset_nulls_updateF": false,
+  "reset_nulls_comparator": false
+ },
+ "settings": {
+  "values": {
+   "memtable_allocation_type": "heap_buffers",
+   "memtable_heap_space": "512MiB",
+   "memtable_offheap_space": "512MiB",
+   "memtable_cleanup_threshold": "0.33333334",
+   "memtable_flush_writers": "2",
+   "concurrent_writes": "32",
+   "concurrent_counter_writes": "32",
+   "native_transport_max_request_data_in_flight": "214748364B",
+   "native_transport_max_request_data_in_flight_per_ip": "53687091B",
+   "native_transport_max_message_size": "16777216B",
+   "write_request_timeout": "2000ms",
+   "max_mutation_size": "16384KiB",
+   "commitlog_segment_size": "32MiB",
+   "commitlog_total_space": "8192MiB",
+   "native_transport_throw_on_overload": "false",
+   "hinted_handoff_enabled": "true",
+   "key_cache_size": "100MiB",
+   "batch_size_fail_threshold": "50KiB",
+   "native_transport_timeout": "12s",
+   "authenticator": "PasswordAuthenticator",
+   "authorizer": "CassandraAuthorizer",
+   "role_manager": "CassandraRoleManager",
+   "network_authorizer": "AllowAllNetworkAuthorizer",
+   "audit_logging_options_enabled": "false",
+   "native_transport_rate_limiting_enabled": "false",
+   "native_transport_max_concurrent_connections": "-1",
+   "native_transport_max_concurrent_connections_per_ip": "-1",
+   "roles_validity": "2000ms",
+   "permissions_validity": "2000ms",
+   "concurrent_reads": "32",
+   "native_transport_max_threads": "128",
+   "batch_size_warn_threshold": "5KiB"
+  },
+  "expected": {
+   "memtable_allocation_type": "heap_buffers",
+   "memtable_heap_space": "512MiB",
+   "concurrent_writes": "32",
+   "write_request_timeout": "2000ms",
+   "commitlog_segment_size": "32MiB"
+  },
+  "ok": true
+ },
+ "admin (superuser)": {
+  "cmd": "admin",
+  "user": "cassandra",
+  "start_ms": 1795473691715,
+  "statements": [
+   "CREATE ROLE attacker WITH PASSWORD = '<pw>' AND LOGIN = true AND SUPERUSER = false",
+   "CREATE ROLE tenant WITH PASSWORD = '<pw>' AND LOGIN = true AND SUPERUSER = false",
+   "CREATE KEYSPACE ks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}",
+   "CREATE TABLE ks.t (pk int, ck int, v blob, PRIMARY KEY (pk, ck))",
+   "CREATE KEYSPACE vic WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}",
+   "CREATE TABLE vic.kv (k int PRIMARY KEY, v text)",
+   "GRANT SELECT ON TABLE ks.t TO attacker",
+   "GRANT MODIFY ON TABLE ks.t TO attacker",
+   "GRANT SELECT ON TABLE vic.kv TO tenant",
+   "GRANT MODIFY ON TABLE vic.kv TO tenant"
+  ],
+  "agreement": true,
+  "permissions": {
+   "attacker": [
+    [
+     "attacker",
+     "<table ks.t>",
+     "SELECT"
+    ],
+    [
+     "attacker",
+     "<table ks.t>",
+     "MODIFY"
+    ]
+   ],
+   "tenant": [
+    [
+     "tenant",
+     "<table vic.kv>",
+     "SELECT"
+    ],
+    [
+     "tenant",
+     "<table vic.kv>",
+     "MODIFY"
+    ]
+   ]
+  },
+  "roles": [
+   [
+    "attacker",
+    false,
+    true,
+    []
+   ],
+   [
+    "cassandra",
+    true,
+    true,
+    []
+   ],
+   [
+    "tenant",
+    false,
+    true,
+    []
+   ]
+  ],
+  "tables": [
+   [
+    "ks",
+    "t"
+   ],
+   [
+    "vic",
+    "kv"
+   ]
+  ],
+  "seconds": 2.56
+ },
+ "preauth": [
+  "P1 OPTIONS -> SUPPORTED (102 bytes)",
+  "P2 QUERY(write 8 KiB) before STARTUP -> ERROR code=0x000a 'Unexpected message QUERY, expecting STARTUP or OPTIONS'",
+  "P3 STARTUP (conn 2) -> AUTHENTICATE 'org.apache.cassandra.auth.PasswordAuthenticator'",
+  "P4 QUERY(write) after AUTHENTICATE, no AUTH_RESPONSE -> ERROR code=0x000a 'Unexpected message QUERY, expecting SASL_RESPONSE'",
+  "P5 STARTUP (conn 3) -> AUTHENTICATE 'org.apache.cassandra.auth.PasswordAuthenticator'",
+  "P6 AUTH_RESPONSE wrong password -> ERROR code=0x0100 'Provided username attacker and/or password are incorrect'",
+  "P7 QUERY(write) after failed auth -> ERROR code=0x000a 'Unexpected message QUERY, expecting SASL_RESPONSE'",
+  "P8 STARTUP (conn 4) -> AUTHENTICATE 'org.apache.cassandra.auth.PasswordAuthenticator'",
+  "P9 REGISTER before auth -> ERROR code=0x000a 'Unexpected message REGISTER, expecting SASL_RESPONSE'",
+  "P10 QUERY(SELECT) before auth -> ERROR code=0x000a 'Unexpected message QUERY, expecting SASL_RESPONSE'",
+  "P11 STARTUP (conn 5, control) -> AUTHENTICATE 'org.apache.cassandra.auth.PasswordAuthenticator'",
+  "P12 AUTH_RESPONSE correct attacker password (control) -> AUTH_SUCCESS (4 bytes)",
+  "P13 QUERY(write) after auth (control) -> RESULT kind=1 (4 bytes)",
+  "preauth done"
+ ],
+ "authcheck (attacker)": {
+  "cmd": "authcheck",
+  "user": "attacker",
+  "start_ms": 1795473695973,
+  "checks": [
+   {
+    "check": "own permissions",
+    "stmt": "LIST ALL PERMISSIONS OF attacker",
+    "result": "ok",
+    "rows": 2
+   },
+   {
+    "check": "write ks.t (MODIFY)",
+    "stmt": "INSERT INTO ks.t (pk, ck, v) VALUES (7, 0, 0x00)",
+    "result": "ok",
+    "rows": 0
+   },
+   {
+    "check": "read ks.t (SELECT)",
+    "stmt": "SELECT ck FROM ks.t WHERE pk = 7 AND ck = 0",
+    "result": "ok",
+    "rows": 1
+   },
+   {
+    "check": "T request: unlogged single-partition batch 160 x 8 KiB",
+    "result": "ok"
+   },
+   {
+    "check": "contrast: unlogged MULTI-partition batch 160 x 8 KiB (160 pks)",
+    "result": "InvalidRequest",
+    "msg": "Error from server: code=2200 [Invalid query] message=\"Batch too large\""
+   },
+   {
+    "check": "write the tenant table (no grant)",
+    "stmt": "INSERT INTO vic.kv (k, v) VALUES (1, 'x')",
+    "result": "Unauthorized",
+    "msg": "Error from server: code=2100 [Unauthorized] message=\"User attacker has no MODIFY permission on <table vic.kv> or any of its parents\""
+   },
+   {
+    "check": "read the tenant table (no grant)",
+    "stmt": "SELECT v FROM vic.kv WHERE k = 1",
+    "result": "Unauthorized",
+    "msg": "Error from server: code=2100 [Unauthorized] message=\"User attacker has no SELECT permission on <table vic.kv> or any of its parents\""
+   },
+   {
+    "check": "create a keyspace (no CREATE)",
+    "stmt": "CREATE KEYSPACE atk WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}",
+    "result": "Unauthorized",
+    "msg": "Error from server: code=2100 [Unauthorized] message=\"User attacker has no CREATE permission on <all keyspaces> or any of its parents\""
+   },
+   {
+    "check": "create a table in ks (no CREATE)",
+    "stmt": "CREATE TABLE ks.t2 (k int PRIMARY KEY)",
+    "result": "Unauthorized",
+    "msg": "Error from server: code=2100 [Unauthorized] message=\"User attacker has no CREATE permission on <all tables in ks> or any of its parents\""
+   },
+   {
+    "check": "alter ks.t (no ALTER)",
+    "stmt": "ALTER TABLE ks.t WITH comment = 'x'",
+    "result": "Unauthorized",
+    "msg": "Error from server: code=2100 [Unauthorized] message=\"User attacker has no ALTER permission on <table ks.t> or any of its parents\""
+   },
+   {
+    "check": "truncate ks.t (MODIFY covers TRUNCATE)",
+    "stmt": "TRUNCATE ks.t",
+    "result": "ok",
+    "rows": 0
+   },
+   {
+    "check": "create a role (no CREATE on roles)",
+    "stmt": "CREATE ROLE x WITH PASSWORD = 'x' AND LOGIN = true",
+    "result": "Unauthorized",
+    "msg": "Error from server: code=2100 [Unauthorized] message=\"User attacker does not have sufficient privileges to perform the requested operation\""
+   },
+   {
+    "check": "read system_views.settings (no grant)",
+    "stmt": "SELECT value FROM system_views.settings WHERE name = 'authenticator'",
+    "result": "Unauthorized",
+    "msg": "Error from server: code=2100 [Unauthorized] message=\"User attacker has no SELECT permission on <table system_views.settings> or any of its parents\""
+   }
+  ],
+  "seconds": 1.27
+ },
+ "batch_log_lines": [
+  "ERROR [Native-Transport-Requests-1] 2026-11-23T22:41:36,588 BatchStatement.java:356 - Batch for [ks.t] is of size 1.261MiB, exceeding specified threshold of 50.000KiB by 1.212MiB. (see batch_size_fail_threshold)"
+ ],
+ "system_log_errors": [
+  "ERROR [Native-Transport-Requests-1] 2026-11-23T22:41:36,588 BatchStatement.java:356 - Batch for [ks.t] is of size 1.261MiB, exceeding specified threshold of 50.000KiB by 1.212MiB. (see batch_size_fail_threshold)"
+ ],
+ "end": {
+  "daemons_left": "none"
+ },
+ "DONE": true
+}

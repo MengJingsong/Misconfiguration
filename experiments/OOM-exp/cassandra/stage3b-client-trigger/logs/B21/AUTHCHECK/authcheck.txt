@@ -1,0 +1,75 @@
+C1a no-credentials connect ERR -> AuthenticationException: Authentication error on host /127.0.0.1:9042: Host /127.0.0.1:9042 requires authentication, but no authenticator found in Cluster configuration
+C1b wrong-password connect ERR -> AuthenticationException: Authentication error on host /127.0.0.1:9042: Provided username attacker and/or password are incorrect
+C2 attacker login ok
+C2a T-LIMIT10 OK cl=ONE fetch=100 rows=10 pages=1 vbytes=1228800 ms=47 warnings=[]  q=SELECT id, body FROM b21.docs ORDER BY emb ANN OF [..] LIMIT 10
+C2b T-LIMIT1000-fetch100 (page-size override) OK cl=ONE fetch=100 rows=1000 pages=1 vbytes=122880000 ms=2662 warnings=[Top-K queries do not support paging and the page size is set to 100, which is less than LIMIT 1000. The page size has been set to 1000 to match the LIMIT.]  q=SELECT id, body FROM b21.docs ORDER BY emb ANN OF [..] LIMIT 1000
+C2c T-LIMIT1001 (MAX_TOP_K) ERR cl=ONE -> InvalidQueryException: Use of ANN OF in an ORDER BY clause requires a LIMIT that is not greater than 1000. LIMIT was 1001  q=SELECT id, body FROM b21.docs ORDER BY emb ANN OF [..] LIMIT 1001
+C2d T-LIMIT1000 CL QUORUM (downgrade) OK cl=QUORUM fetch=100 rows=1000 pages=1 vbytes=122880000 ms=2381 warnings=[Top-K queries can only be run with consistency level ONE / LOCAL_ONE / NODE_LOCAL. Consistency level QUORUM was requested. Downgrading the consistency level to ONE., Top-K queries do not support paging and the page size is set to 100, which is less than LIMIT 1000. The page size has been set to 1000 to match the LIMIT.]  q=SELECT id, body FROM b21.docs ORDER BY emb ANN OF [..] LIMIT 1000
+C2e T-LIMIT1000 CL ALL (downgrade) OK cl=ALL fetch=100 rows=1000 pages=1 vbytes=122880000 ms=2366 warnings=[Top-K queries can only be run with consistency level ONE / LOCAL_ONE / NODE_LOCAL. Consistency level ALL was requested. Downgrading the consistency level to ONE., Top-K queries do not support paging and the page size is set to 100, which is less than LIMIT 1000. The page size has been set to 1000 to match the LIMIT.]  q=SELECT id, body FROM b21.docs ORDER BY emb ANN OF [..] LIMIT 1000
+C2f T-LIMIT1000 fetch 5000 OK cl=ONE fetch=5000 rows=1000 pages=1 vbytes=122880000 ms=2305 warnings=[]  q=SELECT id, body FROM b21.docs ORDER BY emb ANN OF [..] LIMIT 1000
+C2g OK insert b21.docs id=900000 body=122880 chars
+21:43:14 WARN  c.d.d.core.Cluster - Re-preparing already prepared query is generally an anti-pattern and will likely affect performance. Consider preparing the statement only once. Query='INSERT INTO b21.docs (id, emb, body) VALUES (?, ?, ?)'
+C2h OK insert b21.docs id=900001 body=1048576 chars
+21:43:14 WARN  c.d.d.core.Cluster - Re-preparing already prepared query is generally an anti-pattern and will likely affect performance. Consider preparing the statement only once. Query='INSERT INTO b21.docs (id, emb, body) VALUES (?, ?, ?)'
+C2i OK insert b21.docs id=900002 body=8388608 chars
+C2j ERR CREATE INDEX docs_body ON b21.docs(body) USING 'sai'  -> UnauthorizedException: User attacker has no ALTER permission on <table b21.docs> or any of its parents
+C2k ERR CREATE TABLE b21.mine (id int PRIMARY KEY, emb vector<float, 16>, body text)  -> UnauthorizedException: User attacker has no CREATE permission on <all tables in b21> or any of its parents
+C2l ERR CREATE KEYSPACE atk WITH replication = {'class':'SimpleStrategy','replication_factor':1}  -> UnauthorizedException: User attacker has no CREATE permission on <all keyspaces> or any of its parents
+C2m ERR SELECT k FROM vic.kv LIMIT 1  -> UnauthorizedException: User attacker has no SELECT permission on <table vic.kv> or any of its parents
+C2n ERR INSERT INTO vic.kv (k, v) VALUES (1, 'x')  -> UnauthorizedException: User attacker has no MODIFY permission on <table vic.kv> or any of its parents
+C2o ERR SELECT count(*) FROM system_auth.roles  -> UnauthorizedException: User attacker has no SELECT permission on <table system_auth.roles> or any of its parents
+C2p ERR DROP TABLE b21.docs  -> UnauthorizedException: User attacker has no DROP permission on <table b21.docs> or any of its parents
+C3a reader T-LIMIT1000-fetch100 OK cl=ONE fetch=100 rows=1000 pages=1 vbytes=123805696 ms=2405 warnings=[Top-K queries do not support paging and the page size is set to 100, which is less than LIMIT 1000. The page size has been set to 1000 to match the LIMIT.]  q=SELECT id, body FROM b21.docs ORDER BY emb ANN OF [..] LIMIT 1000
+C3b reader ERR insert b21.docs id=900010 body=100 -> UnauthorizedException: User reader has no MODIFY permission on <table b21.docs> or any of its parents
+C4a OK CREATE KEYSPACE ddl1 WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+C4b OK CREATE TABLE ddl1.docs (id int PRIMARY KEY, emb vector<float, 16>, body text)
+C4c OK CREATE INDEX ddl1_emb ON ddl1.docs(emb) USING 'sai'
+C4d OK insert ddl1.docs id=1 body=122880 chars
+C4e ddl T-LIMIT1000 own table OK cl=ONE fetch=100 rows=1 pages=1 vbytes=122880 ms=8 warnings=[Top-K queries do not support paging and the page size is set to 100, which is less than LIMIT 1000. The page size has been set to 1000 to match the LIMIT.]  q=SELECT id, body FROM ddl1.docs ORDER BY emb ANN OF [..] LIMIT 1000
+C4f ERR SELECT id FROM b21.docs LIMIT 1  -> UnauthorizedException: User ddl has no SELECT permission on <table b21.docs> or any of its parents
+C5a OK CREATE TABLE ddl1.s (id int PRIMARY KEY, t text)
+C5b OK CREATE INDEX ddl1_s_t ON ddl1.s(t) USING 'sai'
+C5c ddl insert 9 KiB into SAI text ERR -> InvalidQueryException: Guardrail sai_string_term_size violated: Value of column 't' has size 9216, this exceeds the failure threshold of 8192.
+C5d superuser insert 9 KiB into SAI text OK
+C6a OK CREATE TABLE b21.own (id int PRIMARY KEY, emb vector<float, 16>, body text)
+C6b OK CREATE INDEX own_emb ON b21.own(emb) USING 'sai'
+C6c OK insert b21.own id=1 body=122880 chars
+C6d ddlks T own table OK cl=ONE fetch=100 rows=1 pages=1 vbytes=122880 ms=8 warnings=[]  q=SELECT id, body FROM b21.own ORDER BY emb ANN OF [..] LIMIT 10
+C6e ERR CREATE KEYSPACE ks2 WITH replication = {'class':'SimpleStrategy','replication_factor':1}  -> UnauthorizedException: User ddlks has no CREATE permission on <all keyspaces> or any of its parents
+C4g PERM ddl <all keyspaces> CREATE
+C4g PERM ddl <keyspace ddl1> CREATE
+C4g PERM ddl <keyspace ddl1> ALTER
+C4g PERM ddl <keyspace ddl1> DROP
+C4g PERM ddl <keyspace ddl1> SELECT
+C4g PERM ddl <keyspace ddl1> MODIFY
+C4g PERM ddl <keyspace ddl1> AUTHORIZE
+C4g PERM ddl <keyspace ddl1> UNMASK
+C4g PERM ddl <keyspace ddl1> SELECT_MASKED
+C4g PERM ddl <table ddl1.docs> ALTER
+C4g PERM ddl <table ddl1.docs> DROP
+C4g PERM ddl <table ddl1.docs> SELECT
+C4g PERM ddl <table ddl1.docs> MODIFY
+C4g PERM ddl <table ddl1.docs> AUTHORIZE
+C4g PERM ddl <table ddl1.docs> UNMASK
+C4g PERM ddl <table ddl1.docs> SELECT_MASKED
+C4g PERM ddl <table ddl1.s> ALTER
+C4g PERM ddl <table ddl1.s> DROP
+C4g PERM ddl <table ddl1.s> SELECT
+C4g PERM ddl <table ddl1.s> MODIFY
+C4g PERM ddl <table ddl1.s> AUTHORIZE
+C4g PERM ddl <table ddl1.s> UNMASK
+C4g PERM ddl <table ddl1.s> SELECT_MASKED
+C4g PERM ddl <all functions in ddl1> CREATE
+C4g PERM ddl <all functions in ddl1> ALTER
+C4g PERM ddl <all functions in ddl1> DROP
+C4g PERM ddl <all functions in ddl1> AUTHORIZE
+C4g PERM ddl <all functions in ddl1> EXECUTE
+C6f PERM ddlks <keyspace b21> CREATE
+C6f PERM ddlks <table b21.own> ALTER
+C6f PERM ddlks <table b21.own> DROP
+C6f PERM ddlks <table b21.own> SELECT
+C6f PERM ddlks <table b21.own> MODIFY
+C6f PERM ddlks <table b21.own> AUTHORIZE
+C6f PERM ddlks <table b21.own> UNMASK
+C6f PERM ddlks <table b21.own> SELECT_MASKED
+authcheck done

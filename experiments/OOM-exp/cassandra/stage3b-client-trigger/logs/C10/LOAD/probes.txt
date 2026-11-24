@@ -1,0 +1,79 @@
+== raw frames, no login
+connection 1: STARTUP, then QUERY / PREPARE / OPTIONS without authenticating
+  STARTUP                                    -> AUTHENTICATE org.apache.cassandra.auth.PasswordAuthenticator
+  QUERY (attack query) before AUTH_RESPONSE  -> ERROR code=0x000A msg="Unexpected message QUERY, expecting SASL_RESPONSE"
+  PREPARE (attack query)                     -> ERROR code=0x000A msg="Unexpected message PREPARE, expecting SASL_RESPONSE"
+  OPTIONS                                    -> ERROR code=0x000A msg="Unexpected message OPTIONS, expecting SASL_RESPONSE"
+connection 2: QUERY before STARTUP
+  QUERY (attack query) before STARTUP        -> ERROR code=0x000A msg="Unexpected message QUERY, expecting STARTUP or OPTIONS"
+connection 3: STARTUP, AUTH_RESPONSE with a wrong password, then QUERY
+  STARTUP                                    -> AUTHENTICATE org.apache.cassandra.auth.PasswordAuthenticator
+  AUTH_RESPONSE attacker/wrong-password      -> ERROR code=0x0100 msg="Provided username attacker and/or password are incorrect"
+  QUERY (attack query)                       -> ERROR code=0x000A msg="Unexpected message QUERY, expecting SASL_RESPONSE"
+== driver, no credentials
+# as role: 
+ERR connect -> AuthenticationException: Authentication error on host /127.0.0.1:9042: Host /127.0.0.1:9042 requires authentication, but no authenticator found in Cluster configuration
+== nogrant
+# as role: nogrant
+# role 'nogrant': LOGIN only, no GRANT at all
+OK  SELECT broadcast_address, tokens FROM system.local  -> rows=1
+   ROW Row[/127.0.0.1, [-1321095828506330055, -2288460071584865553, -3531980077265457527, -4611352884713059184, -5347268577423952825, -6423024458649532365, -7240696391261883159, -8258547796004310175, 1887932019704611879, 268908724007568582, 2866077472220725955, 4644711773044313083, 5740753673279251372, 6832050783971463631, 7676427431462625389, 9116695661365208627]]
+OK  SELECT peer, tokens FROM system.peers  -> rows=2
+   ROW Row[/127.0.0.3, [-12685012678011000, -3084408737367577139, -4201647188239274733, -4915942652636935726, -6747858381592018410, -7885984920981913402, -8948337320652264943, 1619795951326253050, 2252779774799387173, 3230670631192875837, 4377994339548552545, 5044925088469493381, 6102481773159541939, 7344920087839674092, 8171766544577787362, 8836275246755045436]]
+   ROW Row[/127.0.0.2, [-1732579036667941617, -2781702836997132705, -381028204304786318, -3950657760176147085, -5827722089689133114, -7647726390669079513, -796665863876426197, -8712067380442142911, 1227974994715907617, 2486395710661350705, 3520696357336755072, 3946982858617884462, 5297184685192562345, 6354561202121520562, 830652142367194826, 8476256102123755671]]
+OK  SELECT peer, tokens FROM system.peers_v2  -> rows=2
+   ROW Row[/127.0.0.3, [-12685012678011000, -3084408737367577139, -4201647188239274733, -4915942652636935726, -6747858381592018410, -7885984920981913402, -8948337320652264943, 1619795951326253050, 2252779774799387173, 3230670631192875837, 4377994339548552545, 5044925088469493381, 6102481773159541939, 7344920087839674092, 8171766544577787362, 8836275246755045436]]
+   ROW Row[/127.0.0.2, [-1732579036667941617, -2781702836997132705, -381028204304786318, -3950657760176147085, -5827722089689133114, -7647726390669079513, -796665863876426197, -8712067380442142911, 1227974994715907617, 2486395710661350705, 3520696357336755072, 3946982858617884462, 5297184685192562345, 6354561202121520562, 830652142367194826, 8476256102123755671]]
+ERR CREATE KEYSPACE probe_ng WITH replication = {'class':'SimpleStrategy','replication_factor':1}  -> UnauthorizedException: User nogrant has no CREATE permission on <all keyspaces> or any of its parents
+ERR SELECT pk FROM c10.t LIMIT 1  -> UnauthorizedException: User nogrant has no SELECT permission on <table c10.t> or any of its parents
+ERR SELECT * FROM c10.t WHERE b = 1 LIMIT 1 ALLOW FILTERING  -> UnauthorizedException: User nogrant has no SELECT permission on <table c10.t> or any of its parents
+ERR SELECT k FROM vks.kv LIMIT 1  -> UnauthorizedException: User nogrant has no SELECT permission on <table vks.kv> or any of its parents
+OK  SELECT session_id FROM system_traces.sessions LIMIT 1  -> rows=0
+== attacker
+# as role: attacker
+# role 'attacker' (CREATE ON ALL KEYSPACES; owner of c10): isolation from the victim, tracing tables, system tables
+ERR SELECT k FROM vks.kv LIMIT 1  -> UnauthorizedException: User attacker has no SELECT permission on <table vks.kv> or any of its parents
+ERR INSERT INTO vks.kv (k, v) VALUES (1, 0x00)  -> UnauthorizedException: User attacker has no MODIFY permission on <table vks.kv> or any of its parents
+OK  SELECT session_id FROM system_traces.sessions LIMIT 1  -> rows=0
+OK  SELECT count(*) FROM system_traces.events LIMIT 1  -> rows=1
+   ROW Row[0]
+OK  SELECT peer, tokens FROM system.peers LIMIT 1  -> rows=1
+   ROW Row[/127.0.0.3, [-12685012678011000, -3084408737367577139, -4201647188239274733, -4915942652636935726, -6747858381592018410, -7885984920981913402, -8948337320652264943, 1619795951326253050, 2252779774799387173, 3230670631192875837, 4377994339548552545, 5044925088469493381, 6102481773159541939, 7344920087839674092, 8171766544577787362, 8836275246755045436]]
+OK  SELECT pk, b FROM c10.t LIMIT 2  -> rows=2
+   ROW Row[870550, 0]
+   ROW Row[562418, 0]
+ERR GRANT SELECT ON TABLE vks.kv TO attacker  -> UnauthorizedException: User attacker has no AUTHORIZE permission on <table vks.kv> or any of its parents
+ERR ALTER KEYSPACE vks WITH replication = {'class':'SimpleStrategy','replication_factor':1}  -> UnauthorizedException: User attacker has no ALTER permission on <keyspace vks> or any of its parents
+== victim
+# as role: victim
+# role 'victim' (SELECT, MODIFY on vks.kv)
+OK  SELECT k FROM vks.kv LIMIT 1  -> rows=1
+   ROW Row[4317]
+ERR SELECT pk FROM c10.t LIMIT 1  -> UnauthorizedException: User victim has no SELECT permission on <table c10.t> or any of its parents
+== admin view
+# as role: cassandra
+# superuser, after the attacker made its schema: what the attacker holds now (creator auto-grants)
+OK  LIST ALL PERMISSIONS OF attacker  -> rows=21
+   ROW Row[attacker, attacker, <all keyspaces>, CREATE]
+   ROW Row[attacker, attacker, <keyspace c10>, CREATE]
+   ROW Row[attacker, attacker, <keyspace c10>, ALTER]
+   ROW Row[attacker, attacker, <keyspace c10>, DROP]
+   ROW Row[attacker, attacker, <keyspace c10>, SELECT]
+   ROW Row[attacker, attacker, <keyspace c10>, MODIFY]
+   ROW Row[attacker, attacker, <keyspace c10>, AUTHORIZE]
+   ROW Row[attacker, attacker, <keyspace c10>, UNMASK]
+   ROW Row[attacker, attacker, <keyspace c10>, SELECT_MASKED]
+   ROW Row[attacker, attacker, <table c10.t>, ALTER]
+   ROW Row[attacker, attacker, <table c10.t>, DROP]
+   ROW Row[attacker, attacker, <table c10.t>, SELECT]
+   ROW Row[attacker, attacker, <table c10.t>, MODIFY]
+   ROW Row[attacker, attacker, <table c10.t>, AUTHORIZE]
+   ROW Row[attacker, attacker, <table c10.t>, UNMASK]
+   ROW Row[attacker, attacker, <table c10.t>, SELECT_MASKED]
+   ROW Row[attacker, attacker, <all functions in c10>, CREATE]
+   ROW Row[attacker, attacker, <all functions in c10>, ALTER]
+   ROW Row[attacker, attacker, <all functions in c10>, DROP]
+   ROW Row[attacker, attacker, <all functions in c10>, AUTHORIZE]
+   ROW Row[attacker, attacker, <all functions in c10>, EXECUTE]
+OK  SELECT keyspace_name, replication FROM system_schema.keyspaces WHERE keyspace_name = 'c10'  -> rows=1
+   ROW Row[c10, {class=org.apache.cassandra.locator.SimpleStrategy, replication_factor=1}]

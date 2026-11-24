@@ -1,0 +1,38 @@
+[2026-11-23 16:51:56 EST] run R2 start; free 710G on /mydata; RAM avail 124 GiB
+[2026-11-23 16:51:58 EST] started R2-a pid 358327
+[2026-11-23 16:52:36 EST] ready R2-a
+[2026-11-23 16:52:46 EST] admin setup rc=0 (11 statements)
+[2026-11-23 16:52:51 EST] phase baseline
+[2026-11-23 16:53:51 EST] sizes: wide 4000 rows, small 1000000 partitions
+[2026-11-23 16:53:51 EST] phase schema
+[2026-11-23 16:53:54 EST] schema: {"created": "atk.t"}; negative: {"select_other_tenant": "Unauthorized: Error from server: code=2100 [Unauthorized] message=\"User attacker has no SELECT permission on <table vks.kv> or any of its parents\"", "create_keyspace": "Unauthorized: Error from server: code=2100 [Unauthorized] message=\"User attacker has no CREATE permissi
+[2026-11-23 16:53:54 EST] phase load-wide
+[2026-11-23 16:53:58 EST] wide chunk 0: {"kind": "wide", "rows": [0, 500], "ok": 500, "missing": 0, "writes_sent": 500, "messages": {}, "seconds": 3.4}; node ALIVE
+[2026-11-23 16:54:15 EST] wide chunk 1: {"kind": "wide", "rows": [500, 1000], "ok": 500, "missing": 0, "writes_sent": 555, "messages": {"pass0 WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0 ; node ALIVE
+[2026-11-23 16:54:21 EST] wide chunk 2: {"kind": "wide", "rows": [1000, 1500], "ok": 500, "missing": 0, "writes_sent": 500, "messages": {}, "seconds": 4.8}; node ALIVE
+[2026-11-23 16:54:36 EST] wide chunk 3: {"kind": "wide", "rows": [1500, 2000], "ok": 500, "missing": 0, "writes_sent": 551, "messages": {"pass0 WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0; node ALIVE
+[2026-11-23 16:54:48 EST] wide chunk 4: {"kind": "wide", "rows": [2000, 2500], "ok": 500, "missing": 0, "writes_sent": 518, "messages": {"pass0 WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0; node ALIVE
+[2026-11-23 16:54:59 EST] wide chunk 5: {"kind": "wide", "rows": [2500, 3000], "ok": 500, "missing": 0, "writes_sent": 516, "messages": {"pass0 WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0; node ALIVE
+[2026-11-23 16:55:07 EST] wide chunk 6: {"kind": "wide", "rows": [3000, 3500], "ok": 500, "missing": 0, "writes_sent": 500, "messages": {}, "seconds": 7.8}; node ALIVE
+[2026-11-23 16:55:22 EST] wide chunk 7: {"kind": "wide", "rows": [3500, 4000], "ok": 500, "missing": 0, "writes_sent": 544, "messages": {"pass0 WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0; node ALIVE
+[2026-11-23 16:55:22 EST] phase load-small
+[2026-11-23 16:56:35 EST] small part 0: {"kind": "small", "rows": [1, 250001], "ok": 250000, "missing": 0, "writes_sent": 250000, "messages": {}, "seconds": 72.1}
+[2026-11-23 16:56:35 EST] small part 1: {"kind": "small", "rows": [250001, 500001], "ok": 250000, "missing": 0, "writes_sent": 250000, "messages": {}, "seconds": 72.5}
+[2026-11-23 16:56:35 EST] small part 2: {"kind": "small", "rows": [500001, 750001], "ok": 250000, "missing": 0, "writes_sent": 250000, "messages": {}, "seconds": 72.0}
+[2026-11-23 16:56:35 EST] small part 3: {"kind": "small", "rows": [750001, 1000001], "ok": 250000, "missing": 0, "writes_sent": 250000, "messages": {}, "seconds": 70.3}
+[2026-11-23 16:56:35 EST] phase settle
+[2026-11-23 16:57:38 EST] pre-trigger: 8 sstables; compactions: 0 active
+[2026-11-23 16:57:39 EST] phase trigger
+[2026-11-23 16:58:58 EST] attack endpoint: OOM after endpoint_seconds=78.9
+[2026-11-23 16:58:58 EST] phase down
+/mydata/s4/3b-B20/harness/victim-ctl.sh: line 45: 358327 Killed                  CASSANDRA_CONF=$R/conf CASSANDRA_LOG_DIR=$R/logs MAX_HEAP_SIZE=$HEAP MAX_DIRECT_MEMORY_SIZE=$DIRECT CASSANDRA_HEAPDUMP_DIR=$R JVM_EXTRA_OPTS="$EXTRA" setsid nohup systemd-run --user --scope --unit="3bB20-$L-$(date +%s)" -p MemorySwapMax=0 "$BUILD/bin/cassandra" -f < /dev/null > "$R/stdout.log" 2>&1
+[2026-11-23 16:59:36 EST] kcalc-attack (9 sstables): RESULT meanPartitionSize=4913.092 meanCells=1 meanRowsPerPartition=1 meanRowSize=4913.091965540172 K=6829
+[2026-11-23 17:00:21 EST] phase restart
+[2026-11-23 17:00:22 EST] started R2-r pid 371346
+/mydata/s4/3b-B20/harness/victim-ctl.sh: line 45: 371346 Killed                  CASSANDRA_CONF=$R/conf CASSANDRA_LOG_DIR=$R/logs MAX_HEAP_SIZE=$HEAP MAX_DIRECT_MEMORY_SIZE=$DIRECT CASSANDRA_HEAPDUMP_DIR=$R JVM_EXTRA_OPTS="$EXTRA" setsid nohup systemd-run --user --scope --unit="3bB20-$L-$(date +%s)" -p MemorySwapMax=0 "$BUILD/bin/cassandra" -f < /dev/null > "$R/stdout.log" 2>&1
+[2026-11-23 17:02:20 EST] restart endpoint: OOM after endpoint_seconds=118.5 (from restart command)
+[2026-11-23 17:02:20 EST] phase restart-down
+[2026-11-23 17:02:45 EST] kcalc-restart (6 sstables): RESULT meanPartitionSize=4913.092 meanCells=1 meanRowsPerPartition=1 meanRowSize=4913.091965540172 K=6829
+[2026-11-23 17:03:15 EST] phase end
+4.2G	/mydata/s4/3b-B20/work
+[2026-11-23 17:03:40 EST] done R2

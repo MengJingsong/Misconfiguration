@@ -1,0 +1,43 @@
+--- stdout OOM / dump / kill lines
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /mydata/s4/3b-R13/runs/L-1/cassandra-1795471674-pid745938.hprof ...
+Heap dump file created [2492018277 bytes in 66.940 secs]
+# java.lang.OutOfMemoryError: Java heap space
+# -XX:OnOutOfMemoryError="kill -9 %p"
+#   Executing /bin/sh -c "kill -9 745938"...
+--- system.log WARN/ERROR (first 15, cut)
+WARN  [main] 2026-11-23T22:07:59,273 DatabaseDescriptor.java:727 - Only 28.731GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+WARN  [main] 2026-11-23T22:08:08,059 SystemKeyspace.java:1265 - No host ID found, created 8910f8d6-0ed7-4ede-bd55-bd51e9103b7c (Note: This should happen exactly once per node).
+WARN  [Service Thread] 2026-11-23T22:09:49,929 GCInspector.java:284 - G1 Young Generation GC in 1122ms.  G1 Eden Space: 939524096 -> 0; G1 Old Gen: 314765312 -> 1962934272; 
+WARN  [Service Thread] 2026-11-23T22:09:54,784 GCInspector.java:284 - G1 Old Generation GC in 3351ms.  Compressed Class Space: 8116584 -> 7587200; G1 Old Gen: 2147483648 -> 1392553640; Metaspace: 69853648 -> 67821032
+WARN  [Service Thread] 2026-11-23T22:09:59,571 GCInspector.java:284 - G1 Old Generation GC in 3853ms.  G1 Old Gen: 2063642280 -> 1802193760; 
+WARN  [Service Thread] 2026-11-23T22:10:04,129 GCInspector.java:284 - G1 Old Generation GC in 3597ms.  G1 Old Gen: 2070629216 -> 1822657456; 
+WARN  [Service Thread] 2026-11-23T22:10:06,594 GCInspector.java:284 - G1 Old Generation GC in 1251ms.  G1 Old Gen: 2074315696 -> 1813877352; 
+WARN  [Service Thread] 2026-11-23T22:10:09,669 GCInspector.java:284 - G1 Young Generation GC in 1237ms.  G1 Eden Space: 1073741824 -> 0; G1 Old Gen: 967090304 -> 2040832128; G1 Survivor Space: 0 -> 16777216; 
+WARN  [Service Thread] 2026-11-23T22:10:09,732 GCInspector.java:284 - G1 Old Generation GC in 1349ms.  G1 Old Gen: 2040832128 -> 1346940848; G1 Survivor Space: 16777216 -> 0; 
+WARN  [Service Thread] 2026-11-23T22:10:12,941 GCInspector.java:284 - G1 Young Generation GC in 1068ms.  G1 Eden Space: 704643072 -> 0; G1 Old Gen: 1346940848 -> 2051583920; 
+WARN  [Service Thread] 2026-11-23T22:10:12,980 GCInspector.java:284 - G1 Old Generation GC in 1944ms.  G1 Old Gen: 2051583920 -> 1811760512; 
+WARN  [Service Thread] 2026-11-23T22:10:15,455 GCInspector.java:284 - G1 Old Generation GC in 1871ms.  G1 Old Gen: 2096973184 -> 2078416288; 
+--- completions (first 5 / last 3 lines, cut)
+1795471792139 10 4764 ERR:0x2500:Prepared_query_with_ID_8200085b17378f5d3e10507704754d3f_not_found_(either_the_query_was_not_prepared_on_this_host_(maybe_the_host_has_been_restarted?)_or_you_ha k=11000000
+1795471794819 5 7338 ERR:0x2500:Prepared_query_with_ID_f115debf8d7c598097344025b36e05f5_not_found_(either_the_query_was_not_prepared_on_this_host_(maybe_the_host_has_been_restarted?)_or_you_ha k=6000000
+1795471797304 15 9855 ERR:0x2500:Prepared_query_with_ID_8200085b17378f5d3e10507704754d3f_not_found_(either_the_query_was_not_prepared_on_this_host_(maybe_the_host_has_been_restarted?)_or_you_ha k=16000000
+1795471799658 4 12205 ERR:0x2500:Prepared_query_with_ID_f115debf8d7c598097344025b36e05f5_not_found_(either_the_query_was_not_prepared_on_this_host_(maybe_the_host_has_been_restarted?)_or_you_ha k=5000000
+1795471802212 8 14737 ERR:0x2500:Prepared_query_with_ID_8200085b17378f5d3e10507704754d3f_not_found_(either_the_query_was_not_prepared_on_this_host_(maybe_the_host_has_been_restarted?)_or_you_ha k=9000000
+1795471897951 3 110408 io_error@recv:[Errno_104]_Connection_reset_by_peer|server:- k=4000000
+1795471897951 8 95657 io_error@recv:[Errno_104]_Connection_reset_by_peer|server:- k=9000001
+1795471897951 9 93520 io_error@recv:[Errno_104]_Connection_reset_by_peer|server:- k=10000001
+--- completions lines: 31
+--- gc Full pauses (last 12)
+[2026-11-23T15:10:30.030-0700][155.502s][745938][746058][info ] GC(46) Pause Full (G1 Evacuation Pause) 2036M->2036M(2048M) 1900.546ms
+[2026-11-23T15:10:31.997-0700][157.469s][745938][746058][info ] GC(48) Pause Full (G1 Evacuation Pause) 2036M->2036M(2048M) 1958.678ms
+[2026-11-23T15:10:33.911-0700][159.383s][745938][746058][info ] GC(49) Pause Full (G1 Evacuation Pause) 2036M->2036M(2048M) 1913.539ms
+[2026-11-23T15:10:36.126-0700][161.598s][745938][746058][info ] GC(51) Pause Full (G1 Evacuation Pause) 2036M->2036M(2048M) 2206.472ms
+[2026-11-23T15:10:38.070-0700][163.542s][745938][746058][info ] GC(52) Pause Full (G1 Evacuation Pause) 2036M->2036M(2048M) 1943.024ms
+[2026-11-23T15:10:40.025-0700][165.497s][745938][746058][info ] GC(54) Pause Full (G1 Evacuation Pause) 2036M->2036M(2048M) 1946.740ms
+[2026-11-23T15:10:42.226-0700][167.698s][745938][746058][info ] GC(55) Pause Full (G1 Evacuation Pause) 2036M->2036M(2048M) 2200.080ms
+[2026-11-23T15:10:44.248-0700][169.720s][745938][746058][info ] GC(57) Pause Full (G1 Evacuation Pause) 2036M->2036M(2048M) 2013.596ms
+[2026-11-23T15:10:46.166-0700][171.638s][745938][746058][info ] GC(58) Pause Full (G1 Evacuation Pause) 2036M->2036M(2048M) 1917.450ms
+[2026-11-23T15:10:48.257-0700][173.729s][745938][746058][info ] GC(61) Pause Full (G1 Evacuation Pause) 2036M->2036M(2048M) 2080.186ms
+[2026-11-23T15:10:50.212-0700][175.685s][745938][746058][info ] GC(62) Pause Full (G1 Evacuation Pause) 2036M->2036M(2048M) 1955.055ms
+[2026-11-23T15:10:52.193-0700][177.665s][745938][746058][info ] GC(64) Pause Full (G1 Evacuation Pause) 2036M->1956M(2048M) 1971.647ms

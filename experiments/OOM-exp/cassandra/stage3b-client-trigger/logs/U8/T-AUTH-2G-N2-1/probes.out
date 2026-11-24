@@ -1,0 +1,18 @@
+# as user=
+> SELECT release_version FROM system.local
+  RESULT CONNECT-FAIL AuthenticationException:Authentication error on host /127.0.0.1:9042: Host /127.0.0.1:9042 requires authentication; but no authenticator found in Cluster configuration
+# as user=u8atk
+> SELECT release_version FROM system.local
+  RESULT CONNECT-FAIL AuthenticationException:Authentication error on host /127.0.0.1:9042: Provided username u8atk and/or password are incorrect
+# as user=u8atk
+> SELECT k FROM victimks.kv LIMIT 1
+  RESULT FAIL UnauthorizedException:User u8atk has no SELECT permission on <table victimks.kv> or any of its parents
+# as user=u8victim
+> CREATE TABLE victimks.x (pk int PRIMARY KEY, v vector<boolean, 16000000>)
+  RESULT FAIL UnauthorizedException:User u8victim has no CREATE permission on <all tables in victimks> or any of its parents
+# as user=u8victim
+> CREATE KEYSPACE u8v WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+  RESULT FAIL UnauthorizedException:User u8victim has no CREATE permission on <all keyspaces> or any of its parents
+# as user=u8nogrant
+> CREATE KEYSPACE u8n WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+  RESULT FAIL UnauthorizedException:User u8nogrant has no CREATE permission on <all keyspaces> or any of its parents

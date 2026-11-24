@@ -1,0 +1,16 @@
+superuser: CREATE KEYSPACE IF NOT EXISTS u7 WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+superuser: CREATE TABLE IF NOT EXISTS u7.t (k int, c int, v int, PRIMARY KEY (k, c))
+superuser: CREATE KEYSPACE IF NOT EXISTS vks WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+superuser: CREATE TABLE IF NOT EXISTS vks.t (k int PRIMARY KEY, v blob)
+superuser: CREATE ROLE IF NOT EXISTS u7atk WITH PASSWORD = 'atkpw' AND LOGIN = true AND SUPERUSER = false
+superuser: CREATE ROLE IF NOT EXISTS victim WITH PASSWORD = 'vicpw' AND LOGIN = true AND SUPERUSER = false
+superuser: GRANT MODIFY ON TABLE u7.t TO u7atk
+superuser: GRANT SELECT ON KEYSPACE vks TO victim
+superuser: GRANT MODIFY ON KEYSPACE vks TO victim
+perm u7atk|u7atk|<table u7.t>|MODIFY
+perm victim|victim|<keyspace vks>|SELECT
+perm victim|victim|<keyspace vks>|MODIFY
+role cassandra|True|True|{}|ALL
+role u7atk|False|True|{}|ALL
+role victim|False|True|{}|ALL
+ddl ok t=1795469899146

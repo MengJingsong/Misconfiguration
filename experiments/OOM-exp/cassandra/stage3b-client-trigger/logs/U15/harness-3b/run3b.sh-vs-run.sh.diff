@@ -1,0 +1,197 @@
+--- orig/run.sh	2026-11-23 16:47:40.062429065 -0500
++++ h/run3b.sh	2026-11-23 16:49:39.358065174 -0500
+@@ -1,47 +1,43 @@
+ #!/bin/bash
+-# U15 stage-2 run driver (from R22's run.sh; design §2.5). usage: bash run.sh <label> <heap 2048M|4096M|8192M|15872M> <arm T|C|I|D1|PCAS> [wmax_s]
+-#   Phases: start node (unmodified build; arm I: patched build) -> schema -> settings read-back -> Q (10 s, L0 histogram, 10 s)
+-#   -> W: 4 data clients (127.0.0.2..5, 12/s each, <= 32 outstanding, 1 MiB values, ck = 0x01||seq) + poison client (127.0.0.1):
+-#        T, I: DELETE ... ck > 70,000 x 0x00, 1/s;  C: same with 65,000 B;  D1: the 70,000-B DELETE once;  PCAS: 70,000-B INSERT IF NOT EXISTS 1/s.
+-#   Stall check at W+30/60/90/150 s (2/4/8/15.5 GiB): applied delta over last 10 s, data issued over last 10 s, MutationStage active,
+-#   one jcmd Thread.print (threads in MemtableAllocator$SubAllocator.allocate).
+-#   Stop: node death, or wmax (T default 600 s at <= 4 GiB, 900 s above; other arms: the given W_C). If alive: L1 histogram, kill.
+-#   The dump (if any) is read by hprofhist.py in place (tmpfs); the first T dump at 2 GiB is kept on /mydata, every other dump deleted.
+-# Launch detached: ( setsid nohup bash run.sh ... < /dev/null > /dev/null 2>&1 & ); progress in <run>/logs/driver.log, marker <run>/DONE.
+-# Node under systemd-run --user --scope -p MemorySwapMax=0, taskset 24-31; data, commit log, hints, caches on /dev/shm/u15/<label>.
++# U15 stage 3-b confirm run driver (from the stage-2 run.sh, arm T only). usage: bash run3b.sh <label> <heap 2048M> [wmax_s]
++# Changes from stage-2 run.sh (each marked "3-b"):
++#   - node ms0617 (aarch64, 8 CPUs): no CPU pinning (stage 2 pinned the node to 8 of 40 CPUs); resource floor H + 8 GiB RAM, 8 GiB /dev/shm;
++#   - cassandra.yaml: authenticator PasswordAuthenticator, authorizer CassandraAuthorizer, role_manager CassandraRoleManager
++#     (shipped value, written explicitly); every capacity setting as shipped; node JVM with TZ=UTC (system.log in UTC as stage 2);
++#   - superuser (cassandra) only for: setup (admin schema u15.t, victim keyspace vks.kv, roles, GRANTs), the settings read-back and
++#     the system_views.clients check (instruments);
++#   - attacker role (MODIFY on u15.t only) runs the probe, the 4 data clients and the poison client (CQL_USER=attacker);
++#   - victim role (SELECT, MODIFY on keyspace vks) runs a steady 20 ops/s 1 KiB INSERT / SELECT stream from 127.0.0.9, starting
++#     >= 60 s before W, running until 30 s after W stops (or the node dies);
++#   - every heap dump is read by hprofhist.py and deleted (none kept).
+ set -u
+-LABEL=$1; HEAP=$2; ARM=$3
+-BASE=/mydata/s4/u15; RUN=$BASE/$LABEL; SHM=/dev/shm/u15/$LABEL; DUMP=/dev/shm/u15/dump-$LABEL
+-if [ "$ARM" = I ]; then CASS=$BASE/cassandra-patched; else CASS=$BASE/cassandra; fi
++LABEL=$1; HEAP=$2; ARM=T
++BASE=/mydata/s4/3b-U15; RUN=$BASE/$LABEL; SHM=/dev/shm/3b-U15/$LABEL; DUMP=/dev/shm/3b-U15/dump-$LABEL
++CASS=$BASE/cassandra
+ H=$(dirname "$(readlink -f "$0")")
+-NODE_CPUS=24-31; DATA_CPUS=(12 13 14 15); POISON_CPU=16; POLL_CPU=17
+ SP=7720; SSLP=7721; NP=9752; JMX=7809
+ HMB=${HEAP%M}
+ case $HMB in 2048) SC=30;; 4096) SC=60;; 8192) SC=90;; *) SC=150;; esac
+ if [ $HMB -le 4096 ]; then WT=600; else WT=900; fi
+-WMAX=${4:-$WT}
+-case $ARM in
+-  T|I) PMODE=delete; PSIZE=70000; PRATE=1;;
+-  C)   PMODE=delete; PSIZE=65000; PRATE=1;;
+-  D1)  PMODE=once;   PSIZE=70000; PRATE=1;;
+-  PCAS) PMODE=cas;   PSIZE=70000; PRATE=1;;
+-  *) echo "bad arm"; exit 1;;
+-esac
++WMAX=${3:-$WT}
++PMODE=delete; PSIZE=70000; PRATE=1
++SUPW=cassandra
++export ATT_PASS="att-$(head -c 6 /dev/urandom | od -An -tx1 | tr -d ' \n')" VIC_PASS="vic-$(head -c 6 /dev/urandom | od -An -tx1 | tr -d ' \n')"
+ rm -rf "$RUN" "$SHM" "$DUMP"; mkdir -p "$RUN"/{logs,hist} "$SHM"/{data,commitlog,hints,saved_caches,cdc_raw} "$DUMP"
+ LOG=$RUN/logs/driver.log
+ log() { echo "$(date +%s.%N | cut -c1-14) $(TZ=America/New_York date +%T) $*" >> "$LOG"; }
+ col() { # value of column $1 in the last complete poll row
+   tail -2 "$RUN/logs/poll.log" | awk -v h="$(head -1 "$RUN/logs/poll.log")" -v want="$1" 'BEGIN{n=split(h,a," "); for(i=1;i<=n;i++) if(a[i]==want) c=i} NF==n && $1 ~ /^[0-9]+$/ {v=$c} END{print v}'; }
+-log "start label=$LABEL heap=$HEAP arm=$ARM cass=$CASS poison=$PMODE/$PSIZE/$PRATE wmax=$WMAX stallcheck=W+$SC"
+-ps -eo pid,comm,args | awk '$2=="java" && /CassandraDaemon/' | cut -c1-250 >> "$LOG"
+-free -m >> "$LOG"; df -m /dev/shm >> "$LOG"
++log "start 3-b label=$LABEL heap=$HEAP arm=$ARM cass=$CASS poison=$PMODE/$PSIZE/$PRATE wmax=$WMAX stallcheck=W+$SC"
++ps -eo pid,comm,args | awk '$2=="java"' | cut -c1-250 >> "$LOG"
++free -m >> "$LOG"; df -m /dev/shm /mydata >> "$LOG"
+ AVAIL=$(free -m | awk '/^Mem:/{print $7}'); SHMF=$(df -m --output=avail /dev/shm | tail -1)
+-if [ "$AVAIL" -lt $((HMB + 40960)) ] || [ "$SHMF" -lt 40960 ]; then log "resources short avail=$AVAIL shm=$SHMF, abort"; echo resources > "$RUN/DONE"; exit 1; fi
++if [ "$AVAIL" -lt $((HMB + 8192)) ] || [ "$SHMF" -lt 8192 ]; then log "resources short avail=$AVAIL shm=$SHMF, abort"; echo resources > "$RUN/DONE"; exit 1; fi
+ if ps -eo comm,args | awk '$1=="java" && /CassandraDaemon/' | grep -q .; then log "another CassandraDaemon runs, abort"; echo othernode > "$RUN/DONE"; exit 1; fi
+ for p in $SP $SSLP $NP $JMX; do ss -ltn | awk '{print $4}' | grep -q ":$p\$" && { log "port $p busy, abort"; echo busy > "$RUN/DONE"; exit 1; }; done
+ cp -a "$CASS/conf" "$RUN/conf"
+ Y=$RUN/conf/cassandra.yaml
+-sed -i -e "s|^cluster_name:.*|cluster_name: 'u15-$LABEL'|" \
++sed -i -e "s|^cluster_name:.*|cluster_name: 'u15-3b-$LABEL'|" \
+        -e "s|^storage_port:.*|storage_port: $SP|" -e "s|^ssl_storage_port:.*|ssl_storage_port: $SSLP|" \
+        -e "s|^native_transport_port:.*|native_transport_port: $NP|" \
+        -e "s|- seeds: \"127.0.0.1:7000\"|- seeds: \"127.0.0.1:$SP\"|" \
+@@ -50,12 +46,17 @@
+        -e "s|^# cdc_raw_directory:.*|cdc_raw_directory: $SHM/cdc_raw|" \
+        -e "s|^# saved_caches_directory:.*|saved_caches_directory: $SHM/saved_caches|" "$Y"
+ sed -i -e "s|^# data_file_directories:|data_file_directories:\n    - $SHM/data\n# (orig) data_file_directories:|" "$Y"
++# 3-b: authentication and authorization on (security settings, not capacity constraints)
++sed -i -e "s|^authenticator:.*|authenticator: PasswordAuthenticator|" \
++       -e "s|^authorizer:.*|authorizer: CassandraAuthorizer|" \
++       -e "s|^role_manager:.*|role_manager: CassandraRoleManager|" "$Y"
+ sed -i -e 's|^JMX_PORT="7199"|JMX_PORT="'$JMX'"|' "$RUN/conf/cassandra-env.sh"
+ echo "-Xlog:gc*=info,gc+heap=debug,safepoint=info:file=$RUN/logs/gc.log:time,uptime,level,tags:filecount=50,filesize=20M" >> "$RUN/conf/jvm-server.options"
+ (cd "$CASS/conf" && diff -r . "$RUN/conf") > "$RUN/logs/conf.diff" 2>&1
++grep -n "^authenticator\|^authorizer\|^role_manager\|^network_authorizer\|^  class_name: AllowAllCIDR" "$Y" >> "$LOG"
+ unzip -l "$(ls $CASS/build/apache-cassandra-*.jar | grep -v -e javadoc -e sources | head -1)" 'org/apache/cassandra/cql3/statements/ModificationStatement.class' >> "$LOG" 2>&1
+ export CASSANDRA_CONF=$RUN/conf CASSANDRA_LOG_DIR=$RUN/logs MAX_HEAP_SIZE=$HEAP CASSANDRA_HEAPDUMP_DIR=$DUMP
+-( setsid nohup systemd-run --user --scope -p MemorySwapMax=0 taskset -c $NODE_CPUS "$CASS/bin/cassandra" -f \
++( TZ=UTC setsid nohup systemd-run --user --scope -p MemorySwapMax=0 "$CASS/bin/cassandra" -f \
+     < /dev/null > "$RUN/logs/stdout.txt" 2>&1 & )
+ ok=0
+ for i in $(seq 1 90); do
+@@ -66,11 +67,11 @@
+ [ -z "$PID" ] && PID=$(ps -eo pid,comm,args | awk '$2=="java" && /CassandraDaemon/' | grep -F -- "$RUN/logs" | awk '{print $1}' | head -1)
+ echo "$PID" > "$RUN/pid.txt"
+ log "native up=$ok pid=$PID"
+-CPIDS=""
++CPIDS=""; VPID=""
+ stopnode() {
+   [ -n "${POLLPID:-}" ] && kill "$POLLPID" 2>/dev/null
+   [ -n "${RSSPID:-}" ] && kill "$RSSPID" 2>/dev/null
+-  for c in $CPIDS; do kill "$c" 2>/dev/null; done
++  for c in $CPIDS $VPID; do kill "$c" 2>/dev/null; done
+   if [ -n "$PID" ] && kill -0 "$PID" 2>/dev/null; then
+     kill "$PID"; for i in $(seq 1 30); do kill -0 "$PID" 2>/dev/null || break; sleep 1; done
+     kill -0 "$PID" 2>/dev/null && kill -9 "$PID"
+@@ -82,28 +83,42 @@
+ grep -o -- '-XX:MaxDirectMemorySize=[^ ]*\|-Xmx[^ ]*\|-Xms[^ ]*\|-XX:OnOutOfMemoryError=[^ ]*\|-XX:HeapDumpPath=[^ ]*\|-ea \|-XX:G1HeapRegionSize=[^ ]*' "$RUN/logs/cmdline.txt" | tr '\n' ' ' >> "$LOG"; echo >> "$LOG"
+ jcmd $PID VM.flags > "$RUN/logs/vmflags.txt" 2>&1
+ grep -o 'ParallelGCThreads=[0-9]*\|ConcGCThreads=[0-9]*\|MaxDirectMemorySize=[0-9]*\|G1HeapRegionSize=[0-9]*\|MaxHeapSize=[0-9]*' "$RUN/logs/vmflags.txt" | tr '\n' ' ' >> "$LOG"; echo >> "$LOG"
+-echo "jvm_cpus=$(taskset -cp $PID 2>/dev/null)" >> "$LOG"
+ ( while kill -0 $PID 2>/dev/null; do echo "$(date +%s) $(awk '/RssAnon/{print $2}' /proc/$PID/status 2>/dev/null)"; sleep 1; done > "$RUN/logs/rss.log" 2>/dev/null & echo $! > "$RUN/rsspid" )
+ RSSPID=$(cat "$RUN/rsspid")
+ cd "$H"
+-( taskset -c $POLL_CPU java -cp "$BASE/classes" Poll $JMX 1000 > "$RUN/logs/poll.log" 2> "$RUN/logs/poll.err" & echo $! > "$RUN/pollpid" )
+-sleep 1; POLLPID=$(cat "$RUN/pollpid")
+ export CASSANDRA_HOME=$BASE/cassandra
+ C="python3 -I $H/client.py"
+-taskset -c $POISON_CPU $C schema $NP >> "$LOG" 2>&1
+-taskset -c $POISON_CPU $C settings $NP > "$RUN/logs/settings.json" 2>> "$LOG"
++# 3-b: wait for the default superuser (created superuser_setup_delay after start), then set up as superuser
++for i in $(seq 1 30); do
++  CQL_USER=cassandra CQL_PASS=$SUPW timeout 60 $C clients $NP > /dev/null 2>> "$RUN/logs/su-wait.err" && break; sleep 2
++done
++log "superuser login ok after $i tries"
++CQL_USER=cassandra CQL_PASS=$SUPW $C setup $NP > "$RUN/logs/auth-setup.txt" 2>> "$LOG"
++cat "$RUN/logs/auth-setup.txt" >> "$LOG"
++sleep 3   # roles/permissions caches (validity 2 s)
++CQL_USER=attacker CQL_PASS=$ATT_PASS $C probe $NP > "$RUN/logs/attacker-probe.txt" 2>> "$LOG"
++cat "$RUN/logs/attacker-probe.txt" >> "$LOG"
++( java -cp "$BASE/classes" Poll $JMX 1000 > "$RUN/logs/poll.log" 2> "$RUN/logs/poll.err" & echo $! > "$RUN/pollpid" )
++sleep 1; POLLPID=$(cat "$RUN/pollpid")
++CQL_USER=cassandra CQL_PASS=$SUPW $C settings $NP > "$RUN/logs/settings.json" 2>> "$LOG"
+ cat "$RUN/logs/settings.json" >> "$LOG"
++# 3-b victim: own role, own keyspace, own source address
++VSTOP=$RUN/STOPV
++( CQL_USER=victim CQL_PASS=$VIC_PASS SRC_ADDR=127.0.0.9 $C victim $NP 20 50 10 3600 "$VSTOP" "$RUN/logs/victim.csv" "$RUN/logs/victim-resp.csv" > "$RUN/logs/victim.json" 2> "$RUN/logs/victim.err" & echo $! > "$RUN/victimpid" )
++sleep 0.5; VPID=$(cat "$RUN/victimpid")
++log "victim started pid=$VPID"
++sleep 30
+ log "quiesce"; sleep 10
+ timeout 120 jcmd $PID GC.class_histogram > "$RUN/hist/L0.txt" 2>&1; log "L0 done"
+-sleep 10
+-log "W start sw0=$(col sw) applied0=$(col applied)"
++sleep 20
++log "W start sw0=$(col sw) applied0=$(col applied) v_applied0=$(col v_applied)"
+ WSTART=$(date +%s)
+ WHY=""; STALL=""
+ STOPF=$RUN/STOPW
+ for j in 0 1 2 3; do
+-  ( taskset -c ${DATA_CPUS[$j]} $C data $NP 127.0.0.$((j + 2)) $((j + 2)) 12 32 $((WMAX + 5)) "$STOPF" "$RUN/logs/data$j.csv" "$RUN/logs/data$j-resp.csv" > "$RUN/logs/data$j.json" 2>> "$RUN/logs/data$j.err" & echo $! > "$RUN/data${j}pid" )
++  ( CQL_USER=attacker CQL_PASS=$ATT_PASS $C data $NP 127.0.0.$((j + 2)) $((j + 2)) 12 32 $((WMAX + 5)) "$STOPF" "$RUN/logs/data$j.csv" "$RUN/logs/data$j-resp.csv" > "$RUN/logs/data$j.json" 2>> "$RUN/logs/data$j.err" & echo $! > "$RUN/data${j}pid" )
+ done
+-( taskset -c $POISON_CPU $C poison $NP 127.0.0.1 $PMODE $PSIZE $PRATE 4 $((WMAX + 5)) "$STOPF" "$RUN/logs/poison.csv" "$RUN/logs/poison-resp.csv" > "$RUN/logs/poison.json" 2>> "$RUN/logs/poison.err" & echo $! > "$RUN/poisonpid" )
++( CQL_USER=attacker CQL_PASS=$ATT_PASS $C poison $NP 127.0.0.1 $PMODE $PSIZE $PRATE 4 $((WMAX + 5)) "$STOPF" "$RUN/logs/poison.csv" "$RUN/logs/poison-resp.csv" > "$RUN/logs/poison.json" 2>> "$RUN/logs/poison.err" & echo $! > "$RUN/poisonpid" )
+ sleep 0.5; CPIDS="$(cat "$RUN/data0pid") $(cat "$RUN/data1pid") $(cat "$RUN/data2pid") $(cat "$RUN/data3pid") $(cat "$RUN/poisonpid")"
+ log "clients $CPIDS"
+ issued_sum() { local s=0; for j in 0 1 2 3; do v=$(tail -1 "$RUN/logs/data$j.csv" 2>/dev/null | cut -d, -f2); [[ "$v" =~ ^[0-9]+$ ]] && s=$((s + v)); done; echo $s; }
+@@ -130,9 +145,9 @@
+ )
+     DA=$((A - A10)); DI=$((I - I10))
+     if [ $DA -lt 5 ] && [ $DI -ge 300 ] && [ "$ACT" = 32 ]; then ST=yes; else ST=no; fi
+-    STALL="stalled=$ST applied_delta10=$DA issued_delta10=$DI mutation_active=$ACT parked_in_allocate=$NPARK"
++    STALL="stalled=$ST applied_delta10=$DA issued_delta10=$DI mutation_active=$ACT parked_in_allocate=$NPARK v_applied=$(col v_applied)"
+     log "stall check W+$EL: $STALL"
+-    taskset -c $POISON_CPU timeout 20 $C clients $NP >> "$LOG" 2>&1
++    CQL_USER=cassandra CQL_PASS=$SUPW timeout 20 $C clients $NP >> "$LOG" 2>&1
+   fi
+   PM=$(stat -c %Y "$RUN/logs/poll.log" 2>/dev/null || echo 0); GM=$(stat -c %Y "$RUN/logs/gc.log" 2>/dev/null || echo 0); NOW=$(date +%s)
+   if [ $((NOW - PM)) -ge 180 ] && [ $((NOW - GM)) -ge 180 ]; then
+@@ -146,6 +161,10 @@
+ for f in data0 data1 data2 data3 poison; do [ -f "$RUN/logs/$f.json" ] && cat "$RUN/logs/$f.json" >> "$LOG"; done
+ sleep 3
+ if kill -0 "$PID" 2>/dev/null; then timeout 120 jcmd $PID GC.class_histogram > "$RUN/hist/L1.txt" 2>&1; log "L1 done"; ALIVE=1; else log "node DEAD after W"; ALIVE=0; fi
++# 3-b: the victim keeps running ~30 s after W stopped (after the node's death if it died), then stops
++VT=$(( WSTART + EL + 30 - $(date +%s) )); [ $VT -gt 0 ] && sleep $VT
++touch "$VSTOP"; for i in $(seq 1 20); do kill -0 $VPID 2>/dev/null || break; sleep 1; done; kill $VPID 2>/dev/null
++log "victim stopped: $(cat $RUN/logs/victim.json 2>/dev/null)"
+ stopnode
+ # wait for a heap dump still being written by a dying JVM (kill -9 runs after the dump)
+ for i in $(seq 1 300); do ps -eo pid,comm,args | awk '$2=="java"' | grep -qF -- "cassandra.logdir=$RUN/logs" || break; sleep 1; done
+@@ -157,13 +176,9 @@
+ for f in "$DUMP"/*.hprof; do
+   [ -f "$f" ] || continue
+   log "dump $(basename "$f") $(stat -c %s "$f") B: hprofhist"
+-  nice -n 19 taskset -c 0-3 python3 -I "$H/hprofhist.py" "$f" 30 > "$RUN/hist/dump-hist.txt" 2>&1
++  nice -n 19 python3 -I "$H/hprofhist.py" "$f" 30 > "$RUN/hist/dump-hist.txt" 2>&1
+   log "hprofhist done"
+-  if [ "$ARM" = T ] && [ "$HMB" = 2048 ] && [ ! -f "$BASE/KEPT_DUMP" ]; then
+-    mv "$f" "$RUN/" && echo "$RUN/$(basename "$f")" > "$BASE/KEPT_DUMP"; log "dump kept: $RUN/$(basename "$f")"
+-  else
+-    log "dump deleted after hprofhist: $(basename "$f")"; rm -f "$f"
+-  fi
++  log "dump deleted after hprofhist: $(basename "$f")"; rm -f "$f"
+ done
+ rm -rf "$DUMP"
+ log "done alive=$ALIVE why=$WHY stall=$STALL"

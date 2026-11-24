@@ -1,0 +1,64 @@
+attack.start=1795473896305 attack.end=1795473937484 (attack 41.2 s); victim 146 s
+  before: 49 s, sent 1960 (40.0/s), ok 1961 / timeout 0, unavailable 0, nohost 0, other 0; skipped 0; success 100.0 % of completions, ok/s 40.0; seconds with 0 ok: 0; p50 median 1 ms, p99 max 8 ms, max 8 ms; inflight max 1
+  during attack: 42 s, sent 1680 (40.0/s), ok 1433 / timeout 173, unavailable 0, nohost 0, other 0; skipped 0; success 89.2 % of completions, ok/s 34.1; seconds with 0 ok: 0; p50 median 4.5 ms, p99 max 2584 ms, max 2584 ms; inflight max 74
+      err: WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+  after: 49 s, sent 1960 (40.0/s), ok 2 / timeout 731, unavailable 0, nohost 821, other 480; skipped 0; success 0.1 % of completions, ok/s 0.0; seconds with 0 ok: 48; p50 median 1444 ms, p99 max 1444 ms, max 1444 ms; inflight max 481
+      err: OperationTimedOutException: [/127.0.0.1:9042] Timed out waiting for server response
+      err: NoHostAvailableException: All host(s) tried for query failed (no host was tried)
+first degraded victim second: +10.2 s after attack start (ok 20, errs 5/0/0/0, max 5 ms)
+per second around the attack (t rel. attack start s: sent ok to un nh oth inflight p50 p99 max):
+    -4.8: 40 39 0 0 0 0 1 1 2 2 
+    -3.8: 40 41 0 0 0 0 0 1 3 3 
+    -2.8: 40 39 0 0 0 0 1 1 2 2 
+    -1.8: 40 41 0 0 0 0 0 1 3 3 
+    -0.8: 40 40 0 0 0 0 0 1 3 3 
+    +0.2: 40 39 0 0 0 0 1 1 4 4 
+    +1.2: 40 40 0 0 0 0 1 2 3 3 
+    +2.2: 40 40 0 0 0 0 1 2 19 19 
+    +3.2: 40 40 0 0 0 0 1 3 5 5 
+    +4.2: 40 40 0 0 0 0 1 2 5 5 
+    +5.2: 40 40 0 0 0 0 1 2 11 11 
+    +6.2: 40 40 0 0 0 0 1 3 22 22 
+    +7.2: 40 38 0 0 0 0 3 29 247 247 
+    +8.2: 40 37 0 0 0 0 6 31 195 195 
+    +9.2: 40 20 0 0 0 0 26 5 7 7 
+   +10.2: 40 20 5 0 0 0 41 3 5 5 WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistenc
+   +11.2: 39 63 15 0 0 0 2 518 2096 2096 WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistenc
+   +12.2: 41 29 0 0 0 0 14 6 345 345 
+   +13.2: 40 20 0 0 0 0 34 4 6 6 
+   +14.2: 40 59 11 0 0 0 4 548 2584 2584 WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistenc
+   +15.2: 40 43 0 0 0 0 1 45 1015 1015 
+   +16.2: 40 34 0 0 0 0 7 10 87 87 
+   +17.2: 40 20 0 0 0 0 27 3 6 6 
+   +18.2: 40 20 6 0 0 0 41 3 6 6 WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistenc
+   +19.2: 40 51 16 0 0 0 14 731 1977 1977 WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistenc
+   +20.2: 40 47 0 0 0 0 7 44 942 942 
+   +21.2: 40 20 0 0 0 0 27 4 6 6 
+   +22.2: 40 20 6 0 0 0 41 3 9 9 WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistenc
+   +23.2: 40 20 20 0 0 0 41 2 4 4 WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistenc
+   +24.2: 39 19 20 0 0 0 41 2 2 2 WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistenc
+   +25.2: 41 76 1 0 0 0 5 523 2374 2374 WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistenc
+   +26.2: 40 37 0 0 0 0 8 18 378 378 
+   +27.2: 40 20 0 0 0 0 28 2 3 3 
+   +28.2: 40 20 7 0 0 0 41 2 2 2 WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistenc
+   +29.2: 40 20 21 0 0 0 40 2 3 3 WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistenc
+   +30.2: 40 72 2 0 0 0 6 574 2370 2370 WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistenc
+   +31.2: 40 44 0 0 0 0 2 145 503 503 
+   +32.2: 40 22 0 0 0 0 20 3 345 345 
+   +33.2: 40 20 0 0 0 0 40 2 348 348 
+   +34.2: 40 20 19 0 0 0 41 2 4 4 WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistenc
+   +35.2: 40 75 5 0 0 0 1 320 2037 2037 WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistenc
+   +36.2: 40 33 0 0 0 0 8 69 358 358 
+   +37.2: 40 33 0 0 0 0 15 277 755 755 
+   +38.2: 40 37 0 0 0 0 18 189 552 552 
+   +39.2: 40 20 0 0 0 0 38 81 251 251 
+   +40.2: 40 22 11 0 0 0 45 76 217 217 WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistenc
+   +41.2: 40 3 8 0 0 0 74 76 178 178 WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistenc
+   +42.2: 40 2 0 0 0 0 112 1444 1444 1444 
+   +43.2: 40 0 0 0 0 0 152 -1 -1 -1 
+   +44.2: 40 0 0 0 0 0 192 -1 -1 -1 
+   +45.2: 40 0 0 0 0 0 232 -1 -1 -1 
+   +46.2: 40 0 0 0 0 0 272 -1 -1 -1 
+   +47.2: 40 0 0 0 0 0 312 -1 -1 -1 
+   +48.2: 40 0 0 0 0 0 352 -1 -1 -1 
+   +49.2: 40 0 0 0 0 0 392 -1 -1 -1 

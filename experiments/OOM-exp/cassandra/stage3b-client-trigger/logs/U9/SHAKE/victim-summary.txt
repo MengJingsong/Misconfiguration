@@ -1,0 +1,7 @@
+events (s from attack_start): node_start -77.1, node_ready -40.9, victim_start -30.0, attack_start +0.0, attack_load_end +1.1, jvm_dead +610.8, victim_stop_requested +623.5
+before                                29.5 s  ops    590  ok    590 (100.0 %)  err {}  ok-latency ms p50 2 p99 5 max 7
+during attack                        610.8 s  ops  12215  ok  12096 ( 99.0 %)  err {'err:NoHostAvailable': 119}  ok-latency ms p50 1 p99 3 max 16
+down (JVM dead -> restart ready)      12.7 s  ops    254  ok      0 (  0.0 %)  err {'err:NoHostAvailable': 254}  ok-latency ms p50 None p99 None max None
+first second (from attack_start) with victim ok < 50 %: 605
+first fully-ok second after that: none
+seconds during/after the attack with victim ok-latency p99 > 500 ms: 0 (first None)

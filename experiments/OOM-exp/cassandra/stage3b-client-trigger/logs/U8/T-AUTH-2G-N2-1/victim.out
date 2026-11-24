@@ -1,0 +1,275 @@
+# as user=u8victim
+18:03:12.793 [main] ERROR com.datastax.driver.core.SchemaParser -- Error parsing schema for table u8.t: Cluster.getMetadata().getKeyspace("u8").getTable("t") will be missing or incomplete
+java.lang.IllegalArgumentException: Could not parse type name vector<boolean, 16000000>
+	at com.datastax.driver.core.DataTypeCqlNameParser.parse(DataTypeCqlNameParser.java:235)
+	at com.datastax.driver.core.TableMetadata.build(TableMetadata.java:313)
+	at com.datastax.driver.core.SchemaParser.buildTables(SchemaParser.java:304)
+	at com.datastax.driver.core.SchemaParser.buildKeyspaces(SchemaParser.java:205)
+	at com.datastax.driver.core.SchemaParser.refresh(SchemaParser.java:111)
+	at com.datastax.driver.core.ControlConnection.refreshSchema(ControlConnection.java:419)
+	at com.datastax.driver.core.ControlConnection.tryConnect(ControlConnection.java:326)
+	at com.datastax.driver.core.ControlConnection.reconnectInternal(ControlConnection.java:237)
+	at com.datastax.driver.core.ControlConnection.connect(ControlConnection.java:111)
+	at com.datastax.driver.core.Cluster$Manager.negotiateProtocolVersionAndConnect(Cluster.java:1815)
+	at com.datastax.driver.core.Cluster$Manager.init(Cluster.java:1728)
+	at com.datastax.driver.core.Cluster.init(Cluster.java:216)
+	at com.datastax.driver.core.Cluster.connectAsync(Cluster.java:389)
+	at com.datastax.driver.core.Cluster.connectAsync(Cluster.java:368)
+	at com.datastax.driver.core.Cluster.connect(Cluster.java:313)
+	at U8Client.main(U8Client.java:94)
+18:04:52.716 [cluster1-reconnection-0] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+com.datastax.driver.core.exceptions.OperationTimedOutException: [/127.0.0.1:9042] Operation timed out
+	at com.datastax.driver.core.Connection$Future.onTimeout(Connection.java:1559)
+	at com.datastax.driver.core.Connection$ResponseHandler$1.run(Connection.java:1638)
+	at com.datastax.shaded.netty.util.HashedWheelTimer$HashedWheelTimeout.run(HashedWheelTimer.java:715)
+	at com.datastax.shaded.netty.util.concurrent.ImmediateExecutor.execute(ImmediateExecutor.java:34)
+	at com.datastax.shaded.netty.util.HashedWheelTimer$HashedWheelTimeout.expire(HashedWheelTimer.java:703)
+	at com.datastax.shaded.netty.util.HashedWheelTimer$HashedWheelBucket.expireTimeouts(HashedWheelTimer.java:790)
+	at com.datastax.shaded.netty.util.HashedWheelTimer$Worker.run(HashedWheelTimer.java:503)
+	at com.datastax.shaded.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+18:05:03.815 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+com.datastax.driver.core.exceptions.OperationTimedOutException: [/127.0.0.1:9042] Operation timed out
+	at com.datastax.driver.core.Connection$Future.onTimeout(Connection.java:1559)
+	at com.datastax.driver.core.Connection$ResponseHandler$1.run(Connection.java:1638)
+	at com.datastax.shaded.netty.util.HashedWheelTimer$HashedWheelTimeout.run(HashedWheelTimer.java:715)
+	at com.datastax.shaded.netty.util.concurrent.ImmediateExecutor.execute(ImmediateExecutor.java:34)
+	at com.datastax.shaded.netty.util.HashedWheelTimer$HashedWheelTimeout.expire(HashedWheelTimer.java:703)
+	at com.datastax.shaded.netty.util.HashedWheelTimer$HashedWheelBucket.expireTimeouts(HashedWheelTimer.java:790)
+	at com.datastax.shaded.netty.util.HashedWheelTimer$Worker.run(HashedWheelTimer.java:503)
+	at com.datastax.shaded.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+18:05:14.911 [cluster1-reconnection-0] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+java.io.IOException: Connection reset by peer
+	at java.base/sun.nio.ch.FileDispatcherImpl.read0(Native Method)
+	at java.base/sun.nio.ch.SocketDispatcher.read(SocketDispatcher.java:39)
+	at java.base/sun.nio.ch.IOUtil.readIntoNativeBuffer(IOUtil.java:276)
+	at java.base/sun.nio.ch.IOUtil.read(IOUtil.java:233)
+	at java.base/sun.nio.ch.IOUtil.read(IOUtil.java:223)
+	at java.base/sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:356)
+	at com.datastax.shaded.netty.buffer.PooledByteBuf.setBytes(PooledByteBuf.java:256)
+	at com.datastax.shaded.netty.buffer.AbstractByteBuf.writeBytes(AbstractByteBuf.java:1132)
+	at com.datastax.shaded.netty.channel.socket.nio.NioSocketChannel.doReadBytes(NioSocketChannel.java:357)
+	at com.datastax.shaded.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:151)
+	at com.datastax.shaded.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:788)
+	at com.datastax.shaded.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)
+	at com.datastax.shaded.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)
+	at com.datastax.shaded.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
+	at com.datastax.shaded.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+	at com.datastax.shaded.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at com.datastax.shaded.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+java.io.IOException: Connection reset by peer
+	at java.base/sun.nio.ch.FileDispatcherImpl.read0(Native Method)
+	at java.base/sun.nio.ch.SocketDispatcher.read(SocketDispatcher.java:39)
+	at java.base/sun.nio.ch.IOUtil.readIntoNativeBuffer(IOUtil.java:276)
+	at java.base/sun.nio.ch.IOUtil.read(IOUtil.java:233)
+	at java.base/sun.nio.ch.IOUtil.read(IOUtil.java:223)
+	at java.base/sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:356)
+	at com.datastax.shaded.netty.buffer.PooledByteBuf.setBytes(PooledByteBuf.java:256)
+	at com.datastax.shaded.netty.buffer.AbstractByteBuf.writeBytes(AbstractByteBuf.java:1132)
+	at com.datastax.shaded.netty.channel.socket.nio.NioSocketChannel.doReadBytes(NioSocketChannel.java:357)
+	at com.datastax.shaded.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:151)
+	at com.datastax.shaded.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:788)
+	at com.datastax.shaded.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)
+	at com.datastax.shaded.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)
+	at com.datastax.shaded.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
+	at com.datastax.shaded.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+	at com.datastax.shaded.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at com.datastax.shaded.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+com.datastax.driver.core.exceptions.TransportException: [/127.0.0.1:9042] Connection has been closed
+	at com.datastax.driver.core.Connection$ConnectionCloseFuture.force(Connection.java:1460)
+	at com.datastax.driver.core.Connection$ConnectionCloseFuture.force(Connection.java:1441)
+	at com.datastax.driver.core.Connection.defunct(Connection.java:624)
+	at com.datastax.driver.core.Connection$Dispatcher.exceptionCaught(Connection.java:1363)
+	at com.datastax.shaded.netty.channel.AbstractChannelHandlerContext.invokeExceptionCaught(AbstractChannelHandlerContext.java:346)
+	at com.datastax.shaded.netty.channel.AbstractChannelHandlerContext.invokeExceptionCaught(AbstractChannelHandlerContext.java:325)
+	at com.datastax.shaded.netty.channel.AbstractChannelHandlerContext.fireExceptionCaught(AbstractChannelHandlerContext.java:317)
+	at com.datastax.shaded.netty.channel.DefaultChannelPipeline$HeadContext.exceptionCaught(DefaultChannelPipeline.java:1377)
+	at com.datastax.shaded.netty.channel.AbstractChannelHandlerContext.invokeExceptionCaught(AbstractChannelHandlerContext.java:346)
+	at com.datastax.shaded.netty.channel.AbstractChannelHandlerContext.invokeExceptionCaught(AbstractChannelHandlerContext.java:325)
+	at com.datastax.shaded.netty.channel.DefaultChannelPipeline.fireExceptionCaught(DefaultChannelPipeline.java:907)
+	at com.datastax.shaded.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.handleReadException(AbstractNioByteChannel.java:125)
+	at com.datastax.shaded.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:177)
+	at com.datastax.shaded.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:788)
+	at com.datastax.shaded.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)
+	at com.datastax.shaded.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)
+	at com.datastax.shaded.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
+	at com.datastax.shaded.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+	at com.datastax.shaded.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at com.datastax.shaded.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+18:05:19.766 [cluster1-reconnection-0] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:19.772 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.774 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.775 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.776 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.776 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.777 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.778 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.779 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.779 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.780 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.781 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.782 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.783 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.784 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.784 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.785 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.786 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.787 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.787 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.788 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.789 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.789 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.790 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.791 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.792 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.792 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.793 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.794 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.795 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.795 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.796 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.797 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.798 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.799 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.799 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.800 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.801 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.802 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.803 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.803 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.804 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.805 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.806 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.806 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.807 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.808 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.809 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.809 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.810 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.811 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.811 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.812 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.813 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.814 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.814 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.815 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.816 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.816 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.817 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.818 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.818 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.819 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.820 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.821 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.821 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.822 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.823 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.823 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.824 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.825 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.826 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.826 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.827 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.828 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.828 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.829 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.830 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.830 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.831 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.832 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.833 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.833 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.834 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.835 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.835 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.836 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.837 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.837 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.838 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.839 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.839 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.840 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.840 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.841 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.842 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.843 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.844 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.844 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:19.845 [cluster1-worker-2] WARN com.datastax.driver.core.RequestHandler -- Unexpected error while querying /127.0.0.1:9042 - [com.datastax.driver.core.exceptions.ConnectionException: [/127.0.0.1:9042] Pool is shutdown]. Find next host to query.
+18:05:20.768 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:21.770 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:22.770 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:23.771 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:24.771 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:25.772 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:26.772 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:27.773 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:28.774 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:29.774 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:30.775 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:31.775 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:32.776 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:33.777 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:34.777 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:35.778 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:36.778 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:37.778 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:38.779 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:39.779 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:40.780 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:41.780 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:42.780 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:43.781 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:44.781 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:45.782 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:46.782 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:47.784 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:48.785 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:49.785 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:50.786 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:51.786 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:52.788 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:53.788 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:54.789 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:55.789 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:56.790 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:57.792 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:58.792 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:05:59.792 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:00.793 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:01.793 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:02.794 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:03.794 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:04.794 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:05.795 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:06.795 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:07.797 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:08.797 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:09.798 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:10.798 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:11.798 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:12.800 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:13.801 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:14.801 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:15.801 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:16.802 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:17.804 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:18.804 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:19.804 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:20.805 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:21.805 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:22.807 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:23.808 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:24.808 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:25.808 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:26.809 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:27.810 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:28.810 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:29.811 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:30.811 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:31.812 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds
+18:06:32.812 [cluster1-reconnection-1] ERROR com.datastax.driver.core.ControlConnection -- [Control connection] Cannot connect to any host, scheduling retry in 1000 milliseconds

@@ -1,0 +1,17 @@
+attacker login: authenticated=True
+attacker SELECT * FROM victim_ks.t -> ERROR 0x2100 User attacker has no SELECT permission on <table victim_ks.t> or any of its parents (10 ms)
+attacker INSERT INTO victim_ks.t (k, v) VALUES (1, 'x') -> ERROR 0x2100 User attacker has no MODIFY permission on <table victim_ks.t> or any of its parents (2 ms)
+attacker CREATE KEYSPACE atk_ks WITH replication = {'class':'SimpleStrategy','replication_factor':1} -> ERROR 0x2100 User attacker has no CREATE permission on <all keyspaces> or any of its parents (2 ms)
+attacker SELECT * FROM system_auth.roles -> ERROR 0x2100 User attacker has no SELECT permission on <table system_auth.roles> or any of its parents (6 ms)
+LIST ALL PERMISSIONS OF attacker
+  -> RESULT kind 1
+attacker payload H len 1048576 -> ERROR 0x2000 line 1:0 no viable alternative at character '#' (11.323 s; per char 10.80 us)
+attacker payload H len 1048576 -> ERROR 0x2000 line 1:0 no viable alternative at character '#' (10.683 s; per char 10.19 us)
+attacker payload C len 1048576 -> ERROR 0x2000 line 0:-1 no viable alternative at input '<EOF>' (0.056 s; per char 0.05 us)
+attacker payload C len 1048576 -> ERROR 0x2000 line 0:-1 no viable alternative at input '<EOF>' (0.023 s; per char 0.02 us)
+unauthenticated conn: authenticated=False
+unauth payload C len 1048576 -> ERROR 0x000a Unexpected message QUERY, expecting SASL_RESPONSE (0.028 s)
+unauth payload H len 1048576 -> ERROR 0x000a Unexpected message QUERY, expecting SASL_RESPONSE (0.016 s)
+wrong password -> auth: op 0 (256, 'Provided username attacker and/or password are incorrect')
+victim INSERT INTO victim_ks.t (k, v) VALUES (1, 'v1') -> op8 (3.3 ms)
+victim SELECT v FROM victim_ks.t WHERE k = 1 -> op8 (2.4 ms)
