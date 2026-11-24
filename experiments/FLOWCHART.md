@@ -104,7 +104,7 @@ flowchart TD
   end
 
   S1 -->|"11,228/19,674 units"| S2
-  S2 -->|"units read: 2,685/10"| S3A
+  S2 -->|"units read: 2,678/10"| S3A
   S2 -->|"targets: 29/–"| S3G
   S3A -->|"case files: 275/6"| CF
   S3G -->|"case files: 29/–"| CF
@@ -120,7 +120,7 @@ flowchart TD
   CL -->|"candidates: 579/–, open 342/–"| O1
   RL -->|"retry rows: 23/–, open 3/–"| O1
   O1 --> CASE
-  CASE -->|"cases: 70/–"| O2
+  CASE -->|"cases: 69/–"| O2
   O2 -->|"44/–"| TP
   O2 -->|"4/–"| FP
   O2 -->|"21/–"| RT
@@ -128,9 +128,9 @@ flowchart TD
   O2 -.->|verdict| CL
   O2 -.->|new holder| CL
   TP -.->|new pattern| CPAT
-  TP -->|"checked: 30/– (14 pending)"| O3
+  TP -->|"checked: 30/– (14 + R15-B pending)"| O3
   O3 -->|"known 13/–, fixed upstream 1/–, documented 3/–, new 13/–"| JC
-  TP -->|"checked: 30/– (14 pending)"| O3B
+  TP -->|"checked: 30/– (14 + R15-B pending)"| O3B
   O3B -->|"alone 22/–, conditional 7/–, admin 1/–; confirmed 20/–"| CT
 
   class CF,JR,CPAT,CL,RL,CASE,JC,CT store
@@ -146,30 +146,132 @@ Notes on the chart:
 
 ### 5.1 Results snapshot (as of 2026-11-23)
 
-Refreshed in the same commit as each batch's results (rule in [`CLAUDE.md`](CLAUDE.md)). Counts recomputed from the data
-files named; where a README or handoff states an older count, the data file wins.
+Each step is written as **in = out + … + left**, Cassandra and Hadoop separately, and every sum closes. Counts are
+recomputed from the data files named (where a README or handoff states an older count, the data file wins); refreshed
+in the same commit as any result change (rule in [`CLAUDE.md`](CLAUDE.md)). Paths are under
+`capacity-enforcement-exp/` unless they start with `OOM-exp/` or `codeql-queries/`.
 
-**Phase 1 — `capacity-enforcement-exp`**
+#### Phase 1 — `capacity-enforcement-exp`
 
-| Step | Cassandra | Hadoop | Source |
-|---|---|---|---|
-| Stage 1 — CodeQL | 13,632 result rows → **11,228 units** (`if` corpus 4,789, extension 6,439) | 22,693 rows → **19,674 units** (9,684 / 9,990) | `codeql-queries/results/<sys>/` (gitignored), `bands.csv` |
-| Stage 2 — AI banding | A 224 · B 298 · C 401 · D 10,305 | A 200 · B 442 · C 1,104 · D 17,928 | `<sys>/stage2-ai-preprocessing/bands.csv` |
-| Stage 3 — deep read | ≈ 2,685 units read; **304 case files** (autonomous 275, guided 29): positive 137, negative 160, undetermined 7 | 10 units read; **6 case files** (autonomous): positive 3, negative 3 | `<sys>/stage3-ai-deep-read/_INDEX.md`, set CSVs, `hadoop/status.py` |
-| Stage 4 — runtime verification | **261 of 304 run**: TP 122, FP 0, TN 98, FN 6, undetermined 16, weak 19 (TP 6, TN 12, FN 1); 43 not run | **6 of 6 run**: TP 2, TN 3, undetermined 1 | `_INDEX.md` outcome column, `stage4-runtime-verification/results/` |
-| JIRA OOM report | 604 surveyed, **246 kept** | 961 read, **368 kept** | `<sys>/stage5-oom-clue-find/jira-oom-survey.csv` |
-| OOM clue patterns | **16** (CP-1–16; 14 from Cassandra's report, 3 from Hadoop's; 0 added by phase 2) | (shared) | `stage5-oom-clue-find/oom-clue-patterns.md` |
-| Stage 5 — clue find | 304 case files read by each agent; **579 candidates** (autonomous 251, guided 264, legacy 62, phase-2 2) | not started | `<sys>/stage5-oom-clue-find/coverage.csv`, `phase1-oom-candidates.md` |
-| Candidate Status | open 342 · true positive 76 · closed: covered 150 · retry 10 · skipped 1 | — | `phase1-oom-candidates.md` |
+**Stage 1, CodeQL: result rows → units** (`codeql-queries/results/<sys>/`, gitignored; unit ids from
+`codeql-queries/scripts/make-stage2-batches.py`). Narrowed rows are one unit each; helper-guarded rows collapse to one
+unit per helper; enforcement rows to one per comparison/call key, verdict rows to one per verdict method; capacity-set
+rows are one unit each.
 
-**Phase 2 — `OOM-exp`** (Cassandra; Hadoop not started)
-
-| Step | Cassandra | Source |
+| Query | Cassandra rows → units | Hadoop rows → units |
 |---|---|---|
-| Inputs | 579 candidates (342 open); retry list 23 rows (3 open: R19, B22, B8) | candidate list, `cassandra/phase2-retry-list.md` |
-| Stages 1–2 — verdicts | **70 cases** (74 index rows, 4 superseded history rows): true positive **44** (42 `deployment`, 2 `diagnostic`: C1, B8; plus R15's condition B), false positive 4 (5 rows), retry 21 rows (most later re-tried; 3 still open on the retry list) | `OOM-exp/cassandra/cases/_INDEX.md` |
-| Stage 3-a — JIRA check | **30 of 44 checked** (the 14 wave 1–3 true positives B9, B10, B12, B13, B15, C4–C8, U2–U4, R7 were missed by a counting error and are pending): **13 mentioned** (6 exact, 7 partial: 10 open, 2 fixed only after 5.0.9, 1 fixed incompletely in 5.0.9); 1 fixed upstream without an issue; 3 documented only; **13 new** | `OOM-exp/cassandra/stage3-jira-check/README.md` |
-| Stage 3-b — client trigger | **30 of 44 checked** (same 14 pending): **22 by a user alone** (pre-auth 1, login without grants 2, data role 15, DDL role 4); 7 given an outside condition; 1 admin only. Confirm runs: 23 run, **20 confirmed, 3 partly** | `OOM-exp/cassandra/stage3b-client-trigger/README.md` |
+| NarrowedIfStatements | 4,489 → 4,489 | 9,269 → 9,269 |
+| HelperGuardedIfStatements | 1,099 → 300 | 1,573 → 415 |
+| EnforcementPlaces, comparison or call | 4,212 → 3,482 | 4,481 → 3,677 |
+| EnforcementPlaces, verdict | 1,340 → 465 | 2,251 → 1,194 |
+| CapacitySetPlaces | 2,492 → 2,492 | 5,119 → 5,119 |
+| **Total** (`if` corpus + extension) | **13,632 → 11,228** (4,789 + 6,439) | **22,693 → 19,674** (9,684 + 9,990) |
+
+**Stage 2, banding** (`<sys>/stage2-ai-preprocessing/bands.csv`): units = A + B + C + D.
+
+| | A | B | C | D | Units |
+|---|---|---|---|---|---|
+| Cassandra `if` corpus / extension | 134 / 90 | 174 / 124 | 94 / 307 | 4,387 / 5,918 | 4,789 / 6,439 |
+| **Cassandra** | 224 | 298 | 401 | 10,305 | **11,228** |
+| Hadoop `if` corpus / extension | 90 / 110 | 170 / 272 | 489 / 615 | 8,935 / 8,993 | 9,684 / 9,990 |
+| **Hadoop** | 200 | 442 | 1,104 | 17,928 | **19,674** |
+
+**Stage 3, deep read — units** (Cassandra: `cassandra/stage3-ai-deep-read/` set CSVs, band-D progress CSVs,
+`band-d-noncfg-processed.md`; Hadoop: `hadoop/status.py`, the two `queue.csv`).
+
+- **Cassandra: 11,228 = read 2,678 + already a case target, not re-read 13 + queued, not read 2,619 + not queued 5,918.**
+  - read 2,678 = `if` A–C 402 (pre-existing targets 65, set A 168, set B 169) + band-D set B 2,193 + band-D set A helpers
+    30 + extension orders 1–53 53;
+  - read 2,678 = became a case target **353** (65 + 163 + 27 + 88 + 10) + judged not a case **2,325** (set A config-type skips
+    5, set B judged without write-up 169, band-D helpers 3, band-D set B refused 2,105, extension covered 43);
+  - not re-read 13 = 6 extension anchors (not in `writeup-set-ext.csv`) + 7 extension rows already a case target;
+  - queued, not read 2,619 = band-D set A 2,164 + extension A–C 455; not queued = extension band D 5,918.
+- **Hadoop: 19,674 = read 10 + queued, not read 10,671 (Yang 8,930, Jingsong 1,741) + not queued 8,993** (extension band D).
+  Read 10 = became a case 6 + not a case 4 (Yang's rechecks that stayed in band D).
+
+**Stage 3 — case files** (`<sys>/stage3-ai-deep-read/_INDEX.md` §1; §2's "58" is stale).
+
+| Cassandra source | Files | Guided | Positive / negative / undetermined |
+|---|---|---|---|
+| Before the two-set job (2026-10-22) | 58 | 29 | 42 / 16 / 0 |
+| Set A, autonomous write-ups | 125 | 0 | 22 / 103 / 0 |
+| Set A, non-config agent | 27 | 0 | 13 / 14 / 0 |
+| Band-D set A helpers, non-config job | 27 | 0 | 0 / 27 / 0 |
+| Band-D set B, advisor run | 57 | 0 | 50 / 0 / 7 |
+| Extension, band A batch 1 | 10 | 0 | 10 / 0 / 0 |
+| **Total** | **304** (autonomous 275 + guided 29) | **29** | **137 / 160 / 7** |
+
+Hadoop: **6** case files = autonomous 6 = positive 3 + negative 3 (Yang 1, Jingsong 5).
+
+**Stage 4, runtime verification** (`_INDEX.md` outcome column, `stage4-runtime-verification/results/`).
+
+- **Cassandra: 304 = run 261 + not run 43.**
+  - run 261 = TP 122 + FP 0 + TN 98 + FN 6 + undetermined 16 + weak 19 (TP 6, TN 12, FN 1);
+  - not run 43 = `none`-type cases awaiting the owner's decision 29 + cases with a constraint type but no stage-4 run
+    recorded 14.
+- **Hadoop: 6 = run 6** = TP 2 + TN 3 + undetermined 1.
+
+**JIRA OOM report** (`<sys>/stage5-oom-clue-find/jira-oom-survey.csv`).
+
+- **Cassandra: 604 = kept 246 + excluded 358**; kept 246 = Fixed 120 + open 45 + by design or invalid 45 + duplicate or
+  cannot reproduce 36.
+- **Hadoop: 961 = kept 368 + excluded 593**; kept 368 = Fixed 201 + unresolved 97 + by design or invalid 35 + duplicate or
+  cannot reproduce 35.
+
+**OOM clue patterns** (`stage5-oom-clue-find/oom-clue-patterns.md`): **16** = from Cassandra's report only 13 (CP-1–7,
+9–14) + from Hadoop's only 2 (CP-15, CP-16) + from both 1 (CP-8) + added by phase 2 0.
+
+**Stage 5, clue find** (`<sys>/stage5-oom-clue-find/coverage.csv`, `phase1-oom-candidates.md`).
+
+- **Cassandra:** case files read 304 by each agent (coverage.csv has 609 rows = 304 + 304 + 1 placeholder row); files
+  with at least one candidate: autonomous 181, guided 195.
+- **Candidates 579** (OC-1–579), agent × Status:
+
+| Agent \ Status | Open | True positive | Covered | Retry | Skipped | Total |
+|---|---|---|---|---|---|---|
+| Autonomous | 151 | 30 | 67 | 3 | 0 | 251 |
+| Guided | 159 | 21 | 80 | 4 | 0 | 264 |
+| Legacy (migrated lists) | 30 | 25 | 3 | 3 | 1 | 62 |
+| Phase-2 | 2 | 0 | 0 | 0 | 0 | 2 |
+| **Total** | **342** | **76** | **150** | **10** | **1** | **579** |
+
+  Covered 150 = by a true positive 133 + by a false positive 8 + by B14, re-tested as R13 (true positive) 6 + by a retry 3.
+- **Hadoop:** not started (header-only files).
+
+#### Phase 2 — `OOM-exp` (Cassandra; Hadoop not started)
+
+**Inputs:** candidates 579 (open 342, above). **Retry list** (`OOM-exp/cassandra/phase2-retry-list.md`): **23 rows =
+closed 20 + open 3** (R19, B22, and B8, a true positive re-opened for a deployment-level OOM). Closed 20 = re-tried →
+true positive 8 + re-tried → retry again 6 + re-tried → split (U6 → R15) 1 + covered by the default re-tests (R2–R4) 3 +
+C3 false positive 1 + disk-paused skip 1.
+
+**Stages 1–2, verdicts** (`OOM-exp/cassandra/cases/_INDEX.md`; verdicts matched with and without bold).
+
+- **Index rows 74 = history rows 5 + cases 69.** History → successor: R1 → R1-V, R6 → R6-V, C1 run 3 / reopen /
+  multiplicity → C1 run 4.
+- **Cases 69 = true positive 44 + false positive 4 + retry 21** (R15 counted as retry: its condition A is a retry, its
+  condition B a true positive).
+  - true positive 44 = `deployment` 42 + `diagnostic` 2 (C1, B8);
+  - false positive 4 = R6-V, C3, R9, B1;
+  - retry 21 = re-tried → true positive 8 (U1 → R7, B11 → R12, B14 → R13, U5 → R14, R10 → R18, R16 → R21, R15-A → R20,
+    R17 → R22) + re-tried → retry again 6 + re-tried → split 1 (U6 → R15) + covered by the default re-tests 3 (R2–R4) +
+    disk-paused skip 1 + **still open 2** (R19, B22).
+
+**Stage 3-a, JIRA check** (`OOM-exp/cassandra/stage3-jira-check/`).
+
+- **True positives 44 = checked 30 + pending 14** (B9, B10, B12, B13, B15, C4–C8, U2–U4, R7; missed by a counting error;
+  R15-B also pending).
+- **Checked 30 = known-open 10 + known-fixed (not in 5.0.9) 3 (U10, B20, R21) + known-fixed (incomplete) 1 (B8) +
+  documented only 3 + new 13.** Mentioned in JIRA (exact or partial match) = 13 (exact 6 + partial 7).
+
+**Stage 3-b, client trigger** (`OOM-exp/cassandra/stage3b-client-trigger/`).
+
+- **True positives 44 = checked 30 + pending 14** (as 3-a).
+- **Checked 30 = user alone 22 + given an outside condition 7 + admin only 1** (R18).
+  - alone 22 = pre-auth 1 + login role without grants 2 + data role 15 + DDL role 4;
+  - outside condition 7 = a node or replica event 3 (B23, B6, B8) + an operator memory budget below the resolved one 4
+    (C1, S1, U13, R1-V).
+- **Confirm runs: 30 = run 23 + not run 7; run 23 = confirmed 20 + partly 3** (R13, U7, U14).
 
 ## 6. Change log of this page
 
@@ -186,3 +288,4 @@ files named; where a README or handoff states an older count, the data file wins
 | 2026-11-23 | Result numbers added (owner): arrow labels in the chart and a results snapshot (5.1) for both phases, refreshed with each batch's results; Hadoop note corrected (its JIRA report exists, stage 5 not started) |
 | 2026-11-23 | Arrow-label format (owner): numbers written as Cassandra/Hadoop with a legend, – = not started; phase-2 counts corrected (44 true positives, not 30; stage 3 covered 30 of them) |
 | 2026-11-23 | Rule widened (owner): result-number changes in either experiment also update this page in the same commit; pointers added to the root `CLAUDE.md` batch-commit step and Hadoop `PROCEDURE.md` |
+| 2026-11-23 | §5.1 rewritten as splits that close (owner): each step as in = out + … + left, per system; corrections: phase-2 cases 69, open retries 2, Cassandra units read 2,678, pattern origins 13 + 2 + 1 |
