@@ -59,7 +59,8 @@ Maven build, daemons, naming of keys with hyphens/placeholders) rewritten for Ha
    files outside your own folders you write.
 6. Report: units processed, case files created, promotions (Yang), stage 4 status, stage-5 candidates, what is next.
    Then **commit and push to `main` automatically** (only this work's files; `git pull --rebase
-   --autostash origin main` first) and report the commit hash.
+   --autostash origin main` first) and report the commit hash. The same commit refreshes the Hadoop numbers in
+   `experiments/FLOWCHART.md` (arrow labels and §5.1) that the batch changed (rule in `experiments/CLAUDE.md`).
 
 ## "Summarize the result status" (what the AI does)
 

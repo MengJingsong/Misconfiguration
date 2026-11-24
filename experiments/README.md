@@ -56,5 +56,5 @@ the retry list; the files are in git before this change.
 
 | File | Holds |
 |---|---|
-| [`FLOWCHART.md`](FLOWCHART.md) | What both experiments do and a flowchart of the whole loop. **Rule (2026-11-17):** any change to functionality or design under `experiments/` updates it in the same commit ([`CLAUDE.md`](CLAUDE.md)) |
+| [`FLOWCHART.md`](FLOWCHART.md) | What both experiments do and a flowchart of the whole loop. **Rule (2026-11-17, widened 2026-11-23):** any change to design **or to a result number** under `experiments/` updates it in the same commit ([`CLAUDE.md`](CLAUDE.md)) |
 | [`CLAUDE.md`](CLAUDE.md) | Rules for agents working under `experiments/` |

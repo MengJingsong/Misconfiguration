@@ -35,3 +35,5 @@ If the user says "this is Yang" or "this is Jingsong" (any case) and asks about 
    the files of this work (that person's folders, their `HANDOFF-<Name>.md`, shared Hadoop docs you
    changed); leave unrelated working-tree changes uncommitted. `git pull --rebase --autostash origin main`
    before `git push origin main` (both people push to `main`). Report the commit hash.
+   In the same commit, refresh the result numbers in `experiments/FLOWCHART.md` (arrow labels and §5.1) that the
+   batch changed, per `experiments/CLAUDE.md` ("Keep `FLOWCHART.md` current"); a design change updates it too.

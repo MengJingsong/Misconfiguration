@@ -4,9 +4,9 @@
 `OOM-exp` (phase 2) do and how they hand work to each other, with one flowchart. The method of each step
 stays in the file each row points to; this page is the map. In prose: [`README.md`](README.md).
 
-> **Rule ([`CLAUDE.md`](CLAUDE.md), 2026-11-17):** whenever a change under `experiments/` adds, removes,
-> renames or reroutes a step, an agent, a playbook, a list or a hand-off between experiments, update this
-> page (tables and flowchart) in the same commit, and add a line to the change log at the end.
+> **Rule ([`CLAUDE.md`](CLAUDE.md), 2026-11-17, widened 2026-11-23):** whenever a commit under `experiments/` changes
+> the design (a step, agent, playbook, list, vocabulary or hand-off) **or a result number** of either experiment, update
+> this page in the same commit: tables and chart plus a change-log line for design; arrow labels and §5.1 for numbers.
 
 ## 1. The two experiments
 
@@ -185,3 +185,4 @@ files named; where a README or handoff states an older count, the data file wins
 | 2026-11-23 | Stage 3-b privilege levels gain `login role, no grants` (between pre-auth and data role), from the confirm runs; no step or arrow changed |
 | 2026-11-23 | Result numbers added (owner): arrow labels in the chart and a results snapshot (5.1) for both phases, refreshed with each batch's results; Hadoop note corrected (its JIRA report exists, stage 5 not started) |
 | 2026-11-23 | Arrow-label format (owner): numbers written as Cassandra/Hadoop with a legend, – = not started; phase-2 counts corrected (44 true positives, not 30; stage 3 covered 30 of them) |
+| 2026-11-23 | Rule widened (owner): result-number changes in either experiment also update this page in the same commit; pointers added to the root `CLAUDE.md` batch-commit step and Hadoop `PROCEDURE.md` |
