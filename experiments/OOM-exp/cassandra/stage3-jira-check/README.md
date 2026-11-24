@@ -23,15 +23,15 @@ each query logged in the case's file; fix commits tested in the same blobless cl
 |---|---|
 | True positives checked | **45** (44 + R15-B) |
 | **Mentioned in JIRA** (exact or partial match) | **21 / 45 (47 %)** — exact 10, partial 11 |
-| · still open | 14 (exact: C2, R14, B19, U9, B23, B13, C6, U4; partial: S1, S2, R22, U15, U14, R7) |
-| · fixed upstream, fix not in 5.0.9 | 3, partial (U10 and B20: CASSANDRA-11745, 6.0-alpha3; U2: CASSANDRA-21755, 5.0.10 / 6.0-alpha3) |
+| · still open | 13 (exact: C2, R14, B19, U9, B23, B13, C6; partial: S1, S2, R22, U15, U14, R7) |
+| · fixed upstream, fix not in 5.0.9 | 4 — exact: U4 (CASSANDRA-11745, opt-in, 6.0-alpha3; owner ruling 2026-11-24: an opt-in fix counts); partial: U10 and B20 (CASSANDRA-11745, 6.0-alpha3), U2 (CASSANDRA-21755, 5.0.10 / 6.0-alpha3) |
 | · fixed in 5.0.9 but the fix does not cover it (`known-fixed (incomplete)`) | 4 — exact: B8 (CASSANDRA-8639 bounds serialized bytes, not heap), C7 (CASSANDRA-19336's bound ships off); partial: B10 (CASSANDRA-20052 covers multi-frame messages only), B15 (CASSANDRA-8639, as B8) |
 | Not mentioned, but fixed incidentally in a newer version | 1 (R21: CASSANDRA-20780, 6.0/trunk) |
 | Not mentioned, but the shipped docs warn (`documented only`) | 5 (R1-V, R18, U12, C4, U3) |
 | **New** (no exact/partial issue, no fix, no doc warning) | **18 / 45** — B6, C1, C9, R12, R13, R20, U7, U8, B16, B17, B21, U13, C10, B9, B12, C5, C8, R15-B |
 | Docs warn at all (with or without an issue), source labelled in each file | 7 fully (R1-V, R18, U12, R14, C4, C7, U3), 2 partly (U9, B16) |
 
-Label totals: known-open 14, known-fixed (not in 5.0.9) 4 (U10, B20, R21, U2), known-fixed (incomplete) 4 (B8, B10, B15,
+Label totals: known-open 13, known-fixed (not in 5.0.9) 5 (U10, B20, R21, U2, U4), known-fixed (incomplete) 4 (B8, B10, B15,
 C7), documented only 5, new 18.
 
 ## Per case
@@ -80,7 +80,7 @@ C7), documented only 5, new 18.
 | [C8](C8.md) | new | related | none exact/partial; related CASSANDRA-20752 (Fixed 5.0.6, in 5.0.9, same holder, other root cause: borderline partial, flagged), 18673, 18598, 16052, 11383/12662/16071 (SASI), 20491 | no (cassandra.yaml:1791-1794; sai-read-write-paths.adoc:86 presents the buffer as a heap protection; side finding: monitoring.adoc:73 names a non-existent `segment_write_buffer_space_mb`) |
 | [U2](U2.md) | known-fixed (not in 5.0.9) | partial | CASSANDRA-21755 (Fixed 5.0.10 / 6.0-alpha3, fix `5f11d4bd5c` not in 5.0.9, partial: caps every pre-STARTUP message); related 21756 (Review In Progress), 4265, 8086, 12034, 21529, 20052. Stage 1's `known-open` superseded | no (cassandra.yaml:1046-1048 connections unlimited, :1059-1067 idle timeouts off; no pre-auth memory warning) |
 | [U3](U3.md) | documented only | related | none exact/partial; related CASSANDRA-17153 (Fixed 4.1, fragment-only guardrail, ships off), 12623 (Open), 6534, 19959, 11745 (6.0 only), 16896, 21374 | types.adoc:216-227 "even to access a single element of a collection, the whole collection has to be read (and reading one is not paged internally)"; collection-create.adoc:11-28; cassandra.yaml:2152-2169 (no heap or OOM figure) |
-| [U4](U4.md) | known-open | exact | CASSANDRA-11528 (Open, exact); CASSANDRA-6492 (Open, partial); 11745 (Fixed 6.0-alpha3, not in 5.0.9, exact in a 2025 comment, but its fix is opt-in byte paging, so not counted as known-fixed; **for the owner**); 9413 (Won't Fix, partial); related 4304, 16896/16850, 17189 | no (cassandra.yaml:2013-2025 read thresholds off; NEWS.txt:442-448) |
+| [U4](U4.md) | known-fixed (not in 5.0.9) | exact | CASSANDRA-11528 (Open, exact); CASSANDRA-6492 (Open, partial); 11745 (Fixed 6.0-alpha3, not in 5.0.9, exact in a 2025 comment, but its fix is opt-in byte paging, so not counted as known-fixed; **for the owner**); 9413 (Won't Fix, partial); related 4304, 16896/16850, 17189 | no (cassandra.yaml:2013-2025 read thresholds off; NEWS.txt:442-448) |
 | [R7](R7.md) | known-open | partial | CASSANDRA-21656 (In Progress, partial: same DOB holder as S1, reported as per-write over-allocation); related 16471 (Fixed 5.0, in 5.0.9), 11838, 8670, 10971, 12783 (Open), 8639 | no (cassandra.yaml:652-657, :716-724; only CHANGES.txt:601 names the scratch buffer) |
 | [R15-B](R15-B.md) | new | related | none exact/partial; related CASSANDRA-5598 (Fixed 1.2.13, the after-parse marker check), 18813 (6.0), 12618/12769, 17655 (Open), 2475, 20052 | no (marker limit not in cassandra.yaml, NEWS.txt or doc/) |
 
@@ -97,7 +97,7 @@ C7), documented only 5, new 18.
 Not ruled, as filed: **C9** (CASSANDRA-15452's review OOM attributed to retention, rated `related`); **R1-V** `documented
 only` (verified failures use heaps below hardware.adoc's 2 GB minimum). Flagged for the owner on 2026-11-24, as filed:
 **B10** (`new` if CASSANDRA-20052 is rated related), **C7** (by design, or known-open via 16909/21377), **C8**
-(CASSANDRA-20752 borderline partial), **U4** (`known-fixed (not in 5.0.9)` if an opt-in fix counts).
+(CASSANDRA-20752 borderline partial). **U4** ruled 2026-11-24: an opt-in fix counts, so `known-fixed (not in 5.0.9)`.
 
 Changes from stage 1's "JIRA prior art" in the case files: B23, U9 (exact), U15, R22 (partial) were `new` and are now
 known; U10 and B20 are fixed upstream in 6.0-alpha3; R18 is now `documented only`. 2026-11-24: U2 was `known-open`

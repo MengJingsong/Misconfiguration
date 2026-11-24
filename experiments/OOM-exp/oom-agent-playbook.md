@@ -120,6 +120,8 @@ voted on in JIRA, and nothing is reported upstream (README, owner 2026-11-17).
      (incomplete)** (owner, 2026-11-23);
    - a fix in a newer version counts as **known-fixed** even when its issue does not describe the mechanism (fixed
      incidentally); the match level still records what the issue reports (owner, 2026-11-23).
+   - an **opt-in** fix (a new setting or mode that must be enabled) counts as a fix: the same rules apply (owner,
+     2026-11-24; first applied to U4).
 5. **Documented.** Check whether the shipped docs warn about the behaviour (Cassandra: `conf/cassandra.yaml`,
    `conf/cassandra-env.sh`, `conf/jvm*-server.options`, `NEWS.txt`, `CHANGES.txt`, `doc/`, at the pinned source).
    If so, the case is also **documented**, with the **source labelled** (file and line, and the quoted sentence).
