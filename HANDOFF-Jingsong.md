@@ -630,3 +630,27 @@ of memtable-served reads pin whole 1 MiB slab regions (OC-585, OC-588); the JMX 
 
 **Next:** stage 4 for the 18 waiting cases once nodes are free (not before the OOM-exp reservation ends), then stage 5 for
 them; then band B continues after order 134.
+
+## Cassandra extension set, batch 2 of 2026-11-24 (stage 3 filed; stage 4 waiting)
+
+**Selection.** The 20 next new rows of orders 135–239 (band B to order 211, then band C). 82 rows on the way were recorded
+as covered (`stage3_record` "skipped 2026-11-24 (Jingsong): covered by …", `stage4 = skipped`): orders 135-136, 138-144,
+146-148, 150-152, 154-157, 159-166, 168, 170-171, 174-179, 182-189, 191-201, 203-204, 206, 209-211, 213-218, 220-234.
+Orders 149, 153 and 190 are existing cases (not re-read).
+
+**Stage 3 (filed).** 20 autonomous case files in `cases/`, `_INDEX.md` §1 and §4, CSV `case_file`, `estimate`,
+`stage3_record` "written up 2026-11-24": orders 137, 145, 158, 167, 169, 172, 173, 180, 181, 202, 205, 207, 208, 212,
+219, 235, 236, 237, 238, 239 (9 positive, 11 negative). Stem clash: 239 shares 236's stem
+(`scaling_parameters-getBuckets-maxOverlap`), so it is filed as `…-maxOverlap-2--autonomous.md` with the file comment in
+its title line fixed. Filer's calls, open to overrule: 207 is one verdict per place (P1 SAI term size positive, P2
+`sai_sstable_indexes_per_query` negative, P3 data-disk usage positive) and is counted `positive`; 145 (`newSize`, an
+argument of `RefCountedMemory.copy` that nothing calls) typed `runtime-queried` / `not-a-case`; 236–239
+(`scaling_parameters`, a per-table option whose default comes from `-Dunified_compaction.scaling_parameters`) typed
+`mixed ×2`; 205 and 207 `config ×3`, 208 `config ×4` (partition size, tombstones, collection size, items per collection);
+137, 180, 181 (`Sampler` queue 1000, Netty water marks, JDK queue default) typed `hard-coded constant`.
+
+**Stage 4.** Not run. CSV and index `stage4 = waiting (queued for nodes; today's node work holds them)`. Sources stay in
+`~/writeup-ext/out/o<order>/`.
+
+**Next:** stage 4 for these 20 and the 18 of batch 1 once the nodes are free, then stage 5 for them; band C continues
+after order 239 (273 rows left, orders 240–515 less the existing cases 389, 390, 415).
