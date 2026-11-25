@@ -201,6 +201,21 @@ was below its length.
   `target/test/data/...` on local disk. Every test calls `PmemVolumeManager.reset()` and
   `PmemVolumeManager.setMaxBytes(-1)` in `@Before` and `@After`, because both are static.
 
+> **Amendment A1 (2026-11-25, stage-4 audit, before any reading) — B2a on node `pc91`.** The local copy is made with
+> `hadoop/stage4-runtime-verification/jingsong/copy-source.sh $R/src` (`$R=/mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1`);
+> no `-am install` is run (all 3.4.2 modules are in the node's `~/.m2` from the base build). The test runs from
+> `$R/src/hadoop-hdfs-project/hadoop-hdfs` with `mvn -B test -Dtest=TestPmemCapO31 -Dsurefire.failIfNoSpecifiedTests=false`,
+> JDK 8 (`/usr/lib/jvm/java-8-openjdk-amd64`). Surefire counts, not the exit code, decide pass/fail.
+>
+> **Amendment A2 (2026-11-25, before any reading) — persistent-memory emulation (B2a, B3a).** The nodes have no
+> persistent memory. As in Hadoop's own `TestCacheByPmemMappableBlockLoader` (bogus pmem directories), the unit tier uses
+> ordinary directories on the local ext4 disk (`/mydata`) under the test base directory, and the cluster tier uses
+> size-limited tmpfs mounts as written in B3a. Neither the per-case copy nor the base distribution has `libhadoop`/PMDK, so
+> `MappableBlockLoaderFactory.java:46-49` picks the pure-Java `PmemMappableBlockLoader`, which writes each cache file with
+> `FileChannel.transferTo` (`PmemMappableBlockLoader.java:96-97`), not through a mapping; a full tmpfs therefore gives an
+> `IOException` (ENOSPC), not SIGBUS. The loader class is recorded from "Initializing cache loader: …". Real pmem hardware
+> behaviour stays unobserved (already named in B2d).
+
 **B2b. Knobs.**
 - **U1, direct manager.** Test-hook `setMaxBytes(M)` with M ∈ {65536, 131072} bytes per volume, two
   volumes. Request sizes B ∈ {4096 (divides M), 12288 (does not divide M)}. M and B are set in code.
@@ -255,6 +270,16 @@ was below its length.
 - **Not observable here.** Real pmem hardware behavior, and the native PMDK path unless libhadoop
   has PMDK.
 
+> **Amendment A3 (2026-11-25, before any reading) — B2d settle rule and disallow evidence.** U2 polls every 500 ms from
+> the moment the directive is added; it is **settled** when the DataNode's current cached-block count
+> (`cacheManager.getNumBlocksCached()`) and `getCacheUsed()` have been unchanged for 20 s **and** at least 35 s have passed
+> since the directive (the NameNode re-sends pending cache commands); it stops at 90 s unsettled (recorded as
+> `settled=false`). The disallow evidence is the count of captured "There is no enough persistent memory space" lines
+> (with their "max available space" value) and of `FsDatasetCache` "could not reserve" lines. `getNumBlocksFailedToCache()`
+> also counts a cache command for a block already cached or caching (`FsDatasetCache.java:276-282`), so it is read as
+> "≥ refusals", never as the refusal count; the "one per NameNode rescan" rate in B2f is not judged. The test also prints
+> the maximum `getCacheUsed()` seen over all polls and, per volume, the file bytes and `UsedBytesCount` used/max.
+
 **B2e. Procedure.**
 1. Copy the tree, build as in B2a, then add `TestPmemCapO31` with methods `u1Direct` (parameterized
    over the 4 (M,B) pairs), `u1Real`, `u2Fragmented`, `u2Control` and `u3CancelOrder`. Use the
@@ -292,6 +317,19 @@ The file bytes on disk in every case equal `getCacheUsed` per volume, except in 
 | U1-real capacity ≠ Σ usable space beyond the tolerance | The source of the cap is mis-traced |
 | U3 file remains while used = 0 | The accounting leak on the cancel path is confirmed (A3) |
 | U3 file deleted | The leak is not real (re-read the `getCachePath` behavior) |
+
+> **Amendment A4 (2026-11-25, before any reading) — B2g rows added and the tier rule.**
+>
+> | Observation | Meaning |
+> |---|---|
+> | A U1 count, `getCacheUsed` or refusal value differs from B2f while no volume's used bytes exceed its `maxBytes` | The traced arithmetic is wrong somewhere; Not confirmed |
+> | U2-control caches 16 with ≥ 1 line-407 refusal | The cap holds; the control's "NameNode filter alone" part is not shown. U2 is then read by the refusal value (2048 in U2 against 0 in the control) |
+> | U2-control caches < 16 | Something else limits caching; the control failed, U2 cannot be read as per-volume evidence; Not confirmed |
+>
+> **Tier rule.** The unit tier is **Confirmed (caps)** when B2g row 1 holds for all four U1 pairs, U1-real is within
+> tolerance, U2 caches 14 with ≥ 1 refusal "max available space is 2048", and U2-control caches 16 (with or without the
+> row above); **Refuted** if any refuting row (rows 2–3) holds; otherwise **Not confirmed**. U3 is a separate caveat
+> (the cancel-path leak) and does not enter the tier verdict; it is reported as "leak confirmed" / "leak not real".
 
 **B2h. Controls.**
 - U2-control (no fragmentation) shows that the NameNode's own filter alone gives exactly 16, so the
@@ -339,6 +377,16 @@ The file bytes on disk in every case equal `getCacheUsed` per volume, except in 
 - **Start.** `$HH/bin/hdfs namenode -format -force` once, then `$HH/bin/hdfs --daemon start namenode`
   and `$HH/bin/hdfs --daemon start datanode`. No ssh `start-dfs.sh` is needed.
 
+> **Amendment A5 (2026-11-25, before any reading) — B3a on node `pc91`.** All `/mydata/o31/…` paths become
+> `$R/cluster/…` (`$R` as in A1). No new build: `$HH` is `cp -a` of `/mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2`
+> (built 2026-11-24 from the same tag, no `libhadoop`), with `HADOOP_CONF_DIR=$R/cluster/conf`, `HADOOP_LOG_DIR`,
+> `HADOOP_PID_DIR` and `JAVA_HOME` (JDK 8) exported by the run script instead of editing `hadoop-env.sh`. The tmpfs
+> mounts are `$R/cluster/pmem0` and `$R/cluster/pmem1` (`sudo mount -t tmpfs -o size=<S>,mode=1777`). The NameNode is
+> formatted with `hdfs namenode -format -force -nonInteractive`. **DataNode-ready check** before each directive: the DataNode's
+> "Added persistent memory … size=" lines of that start, the DataNode JMX `CacheCapacity` equal to their sum, and the
+> NameNode's `dfsadmin -report` "Configured Cache Capacity" equal to it too. `head -c 402653184 /dev/urandom` writes
+> `$R/cluster/in.bin`.
+
 **B3b. Knobs.** Each knob value needs the DataNode stopped, the tmpfs re-mounted at the new size
 and the DataNode started again. The key is read only at start.
 
@@ -368,6 +416,16 @@ and the DataNode started again. The key is read only at start.
   5. Re-add the directive.
 
   The HDFS file is reused.
+
+> **Amendment A6 (2026-11-25, before any reading) — B3c/B3d settle rule and per-run counts.** "Settled" means: the
+> DataNode JMX `CacheUsed` and `NumBlocksCached` are unchanged over the last 60 s (13 consecutive 5-s samples) and at least
+> 90 s have passed since the directive; maximum 300 s (then `settled=false` is recorded). In K3 sampling continues 60 s
+> after settling and the refusals in that window are counted separately. The DataNode log is appended across restarts, so
+> every log count is per run: lines after that run's DataNode start. Counted per run: "There is no enough persistent memory
+> space" (line-407 refusals, with the "max available space" value), "could not reserve", "Failed to cache the block"
+> (load failures; K4), "No space left on device", "Added persistent memory", "Initializing cache loader". The maximum
+> `CacheUsed` and maximum `du` over all samples are recorded with the final values. "≈" for `maxBytes` in B3f means within
+> 1 MiB of (tmpfs size − filler).
 
 **B3d. Observables and instruments.** Sample every 5 s into a CSV.
 - **DataNode JMX.** `curl -s 'http://localhost:9864/jmx?qry=Hadoop:service=DataNode,name=FSDatasetState*'`,
@@ -429,6 +487,20 @@ so they follow the tmpfs size at DataNode start.
 | K2 not > K1 (the positive control did not move) | Something else limits caching (pool limit, threads, NameNode filter); the run is not valid |
 | Fewer blocks than predicted in K1/K2 with "could not reserve" lines | `maxBytes` is smaller than the tmpfs size (overhead); recompute from the log value before judging |
 
+> **Amendment A7 (2026-11-25, before any reading) — B3g rows added and the tier rule.**
+>
+> | Observation | Meaning |
+> |---|---|
+> | K3 caches < 14 | Something other than this cap limits caching; Not confirmed for K3 |
+> | K1, K2 or K5 cached count differs from B3f, `du` ≤ `maxBytes` of every volume, and the difference is not explained by the logged `maxBytes` (row "Fewer blocks …") | Not confirmed (the traced arithmetic or the cap's source is wrong) |
+> | K4 caches 9 or 10 blocks, ≥ 1 "Failed to cache the block" with ENOSPC, `CacheCapacity` unchanged, `du` ≤ tmpfs size | Same as the "K4 ≈ 10" row: stale-snapshot caveat confirmed ("about 10" = 9 or 10: concurrent partial writes may waste room) |
+> | K4 any other reading with `du` ≤ every `maxBytes` | Stale-snapshot caveat not confirmed; does not affect the cap verdict |
+>
+> **Tier rule.** The cluster tier is **Confirmed (caps)** when B3g row 1 (K1 = 8, K2 = 16, K5 = 10, `du` ≤ `maxBytes`) and
+> the row "K3 = 14 with refusal lines" both hold; **Refuted** if a refuting row holds (`du` > `maxBytes`, or K3 ≥ 15);
+> **Not confirmed** otherwise (including row 1 with "K3 = 14 but no refusal lines": the cap held but line 407 was not
+> exercised). K4 is reported as a separate caveat line and does not enter the tier verdict.
+
 **B3h. Controls.**
 - K2 against K1 is the positive control: the same workload, and the cap moves with the volume size.
 - K5 against K2 ties the cap to free space at start rather than mount size.
@@ -486,4 +558,16 @@ so they follow the tmpfs size at DataNode start.
 
 ## D. Stage-4 feedback
 
-none yet
+**D1. Audit (2026-11-25, before any reading).** Amendments A1–A7 above (node specifics, persistent-memory emulation with plain
+directories and tmpfs and the pure-Java loader, settle rules, refusal WARN lines as the disallow evidence, added B2g/B3g rows and tier
+rules). Frozen whole-file sha256 `e15f7c6778662e6d202829768302a5054d1c5d5a16b4bdd4bf7ca837bc7b8fcb`.
+
+**D2. Stage-4 result (2026-11-25, run 1 on `pc91`; results file `results/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes--autonomous.md`).**
+Unit **Confirmed — caps**, cluster **Confirmed — caps**; outcome class **true positive**. Every B2f/B3f count matched: U1 32/10/64/20
+reserves with refusal operands 0/4096/0/8192; U1-real capacity = Σ usable space + 4096 B; U2 14 blocks with 35 refusals "max available
+space is 2048" against U2-control 16 with 0; cluster K1/K2/K5 8/16/10 blocks, K3 2 + 12 = 14 with 76 refusals "max available space is
+12582912"; cache-file bytes never above a volume's logged `maxBytes`. Caveats: U3 (replay) confirms the cancel-order leak (file kept, used
+0). K4 shows `CacheCapacity` unchanged at 264 MiB with 10 blocks cached, but the failures were "checksum verification failed: premature EOF"
+(the short `transferTo` at `PmemMappableBlockLoader.java:97` is not checked), not ENOSPC, so the frozen K4 row reads **not confirmed**.
+Findings for A3/A4: `getUsableSpace()` per directory counts a shared file system once per directory (U1-real: 1.508 TB on a 753-GB disk);
+the unchecked `transferTo` return value. No section A–C claim is refuted.

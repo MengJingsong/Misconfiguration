@@ -574,4 +574,93 @@ https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurren
 
 ## D. Stage-4 feedback
 
-none yet
+**Stage-4 design audit, 2026-11-25 (Claude Opus 5.5, `claude-opus-5-5`, working as Jingsong; node `pc99`).** Applied before
+any reading of this case's runs. B1, B2f and B3f are unchanged; the amendments below fix the runbook and instruments and
+add verdict labels to B2g/B3g without changing any row.
+
+- **Amendment S4-A1 (2026-11-25, runbook and instruments, before any reading).**
+  (a) Paths: `W=/mydata/jingsong-cass-s4/o116`; `SRC=$W/src` is a `cp -a` of the built `/mydata/s4/cassandra-base`
+  (5.0.9, `ant build-test` already done there) instead of `rsync` + `ant -q jar`; `RUN=$W/run`. The probe test file is added
+  to `$SRC` only, then `ant -q build-test` (B2e line 1) compiles it.
+  (b) B2a probe, sync detection: a row whose `add` crosses L leaves `currentSize = 0` after `addRow`; when the previous
+  sample was also 0 (Ubig: every row syncs) the filed test `now < prev` never fires, so Ubig would print 0 `sync=` lines
+  although B2f predicts 5. The test is now `now < prev || (!delete && now == 0)` (identical for every other run, where
+  `prev > 0` before a sync). The B2f relations "`preSyncSample + maxIncrement > L`" apply to the 1 KiB-row runs
+  (U1–U64, Udef, U0); Ubig is judged by its own B2f/B2g rows (5 hand-offs, five ~3 MiB files), since it has no non-sync
+  increment.
+  (c) B2a probe, heap of Uinf: the filed probe takes heap samples only when `currentSize > 0.95 L` (never at 1024 MiB) or
+  for the sorted writer, so the B2f Uinf cell ("heap grows with rows") and the B2g Uinf row were not observable. The
+  quarter-point samples (rows N/4, N/2, 3N/4) are now taken in every run, printed as `quarterHeap` for unsorted runs
+  (with `currentSize`) and `sortedHeap` for sorted runs as before. Uinf "grows with rows" = the three quarter samples
+  strictly increase and the 3N/4 sample exceeds U64's sample-1 retained heap.
+  (d) Cluster step: `ulimit -n 100000` before `bin/cassandra` (the node's soft limit is 1024); the wait for `UN` has a
+  180 s cap and fails at once if the daemon dies; tools get `CASSANDRA_CONF=$RUN/conf`. Nothing else in B3e changes.
+- **Amendment S4-A2 (2026-11-25, B2g verdict labels, before any reading).** L = knob × 2^20.
+  *Core criteria (row 1)* for each of U1, U4, U16, U64: `limitBytes` = L; `sync=` count in the B2f range (U1 140–150,
+  U4 34–38, U16 8–10, U64 exactly 2); Data.db files = syncs + 1; every `preSyncSample` ≤ L and
+  `preSyncSample + maxIncrement` > L; `maxCurrentSize` ≤ L; every Data.db except the highest generation in
+  [0.90 L, 1.05 L]. Heap: r = sample-1 retained / L for U4, U16, U64; r(U4) in [1.1, 2.0]; r(U16), r(U64) within ±20 % of
+  r(U4); retained(U64) − retained(U4) ≥ 8 MiB; every sample 2–3 ≤ 2 r L + 8 MiB (r of that run). Controls: S16/S64 every
+  `sortedHeap` < 16 MiB and the two runs' means within 8 MiB; Uinf as in S4-A1(c).
+  **Confirmed — caps**: every core criterion and both controls hold. **Partly confirmed — caps**: the count/file
+  criteria hold and retained heap rises U4 < U16 < U64, but r(U4) is outside [1.1, 2.0], or a sample 2–3 exceeds
+  2 r L + 8 MiB (row "more than two buffers live"), or a control fails. **Refuted — does not cap**: B2g row 3 (the
+  `sync=` count does not change with the knob, or a `preSyncSample` > L). **Refuted (heap) — per-file disk capped, heap
+  does not follow**: B2g row 5 (retained(U64) − retained(U4) < 8 MiB). **Bypass**: B2g row 4 (`maxCurrentSize` > L in an
+  INSERT run) gives Effect `caps only on some paths (bypass)`. **Not confirmed**: no `sync=` line in U1–U64, a run fails,
+  or heap samples are missing. Sub-findings, reported separately and not changing the core label: Udef/U0 default
+  (B2g row 2), Ubig overshoot (row "Ubig five ~3 MiB files": 5 `sync=` lines, 5 files each > L), Udel bypass (one file,
+  `maxCurrentSize` ≥ 12 L, no `sync=`; if confirmed, the Effect reads "caps (bypass recorded: partition-DELETE-only
+  workloads)"; `sync=` lines in Udel = bypass refuted).
+- **Amendment S4-A3 (2026-11-25, B3g verdict labels, before any reading).** Peak = maximum post-GC heap (`peak-*.txt`).
+  *Core criteria (row 1)*: m16/m64/mdef/m256 file counts in the B3f ranges (31–35, 8–10, 5, 3); every Data.db except the
+  highest generation within the B3f size bands (15–17, 58–67, 115–135, 230–270 MiB) and no Data.db above
+  L + 1,152 B; peak strictly increasing m16 < m64 < mdef < m256, with peak(m16) < 150 MiB and peak(m256) ≥ 256 MiB; total
+  `du -sb` of the four within ±2 % of their mean; x16 exit 0 with `BULK done`; x256 non-zero exit with
+  `OutOfMemoryError`. **Confirmed — caps**: all hold. **Partly confirmed — caps**: the OOM split and per-file sizes hold
+  and peak(m256) − peak(m16) ≥ 100 MiB, but the ladder is not strictly increasing at every step, or one of the B3f
+  peak/du cells is missed. **Refuted — does not cap (heap)**: row 2 (x256 completes), row 3 (x16 OOMs) or row 4 (flat:
+  peak(m256) − peak(m16) < 32 MiB). **Bypass**: row 6 (a Data.db above L + 1,152 B). **Not confirmed**: a run fails for
+  another reason, or the ladder rises by 32–100 MiB without the OOM split. Row 7 (node load fails or counts differ)
+  concerns the load step only and does not change the label.
+- **Amendment S4-A4 (2026-11-25, second session, runbook and environment only, before any reading of this case).** The
+  attempt of S4-A1–A3 never ran (the `pc99` lock was stale). This attempt runs on **`ms0640`** (Utah m400,
+  `node1.jason92-326377`, **aarch64**, 8 cores, 62 GiB, Ubuntu 22.04, JDK 11.0.33, Ant 1.10.12; `/mydata` 39 GB, 17 GB free).
+  `/mydata/s4/cassandra-base` there is complete (`src/`, `test/`, `.build/`, `build/test/classes`, the 5.0.9-SNAPSHOT jar)
+  and its cited files (`SSTableSimpleUnsortedWriter`, `CQLSSTableWriter`, `SSTableSimpleWriter`, `BlockingQueues`,
+  `DeleteStatement`, `build.xml`, `conf/jvm11-clients.options`) are md5-identical to the repo's `systems/cassandra/source/`
+  (repo HEAD `8bd1dfb31`). Nothing in B2/B3 is architecture-specific; the changes are:
+  (a) The harness is copied by `scp` straight into `$W/harness/` (no `/tmp` staging); the lock is `/mydata/s4/NODE-LOCK` on `ms0640`.
+  (b) B2e: `ant testsome` gets `-Dtest.timeout=1800000` (build.xml's default 480 s per test class could kill a run on the
+  slower m400 core; a killed run would be a runbook failure, not a reading).
+  (c) B3e `bulk()`: a watchdog in the RSS loop kills the `java` child if it runs over 1800 s, or 60 s after
+  `OutOfMemoryError` first appears in its output while it is still alive (`DiskWriter` is a non-daemon thread, so a `main` that
+  dies of OOM could leave the JVM waiting forever); the kill is logged as `WATCHDOG-KILL` in `<name>.out`. An OOM run ended
+  this way counts as "non-zero exit with `OutOfMemoryError`" (the process could not complete); any other watchdog kill is
+  "a run fails for another reason" (S4-A3 Not confirmed).
+  (d) B3a/B3e: the client JVM also gets `-Dlogback.configurationFile=$SRC/conf/logback-tools.xml` (WARN to stderr; without
+  it logback falls back to DEBUG on stdout). Logging only; heap and files unaffected.
+  (e) Load step: `storage_compatibility_mode: NONE` in `$RUN/conf/cassandra.yaml` (environment.md §6, 2026-11-25: the writer
+  emits `oa`, which a node left at `CASSANDRA_4` may reject silently); the step stops if `sstableloader` streams no file.
+  Row 7 of B3g concerns this step only.
+  B1, B2f, B2g, B3f, B3g and the labels of S4-A2/S4-A3 are unchanged (the frozen predictions/conclusions extract,
+  `harness/freeze-pred.txt`, keeps its sha256 `8871e3e8…4f29e`).
+
+**Stage-4 feedback, 2026-11-25 (run 1 on `ms0640`, aarch64; results `~/writeup-ext/out/o116/results.md`).** Frozen before
+reading: case sha256 `06b37859…486d`, predictions/conclusions extract `8871e3e8…4f29e`.
+- **Unit tier: Partly confirmed — caps** (S4-A2). Every count/limit/file criterion and both controls hold:
+  hand-offs 146/36/9/2 at L = 1/4/16/64 MiB, each at the first crossing, `maxCurrentSize` ≤ L; default and `0` both give
+  134,217,728; heap per buffer r = 1.152/1.244/1.238 × L. One miss: U64 heap sample 2 is 174,659,712 B against
+  2 r L + 8 MiB = 174,495,200 B (two buffers plus ≈ 8 MiB writer state; not a third buffer). The sub-findings all hold:
+  Ubig overshoot (five 3 MiB files), and the **partition-DELETE bypass is confirmed** (0 hand-offs, counted size 12.4 × L).
+  Effect: caps (bypass recorded: partition-DELETE-only workloads).
+- **Cluster tier: Not confirmed (no matching row).** The OOM split (x16 completes at 256m, x256 OOMs), file counts
+  33/9/5/3, per-file bands, total output (0.043 % spread) and the strictly rising peak ladder 382 < 543 < 544 < 709 MiB all
+  hold. Two misses. (1) B3g row 6's trigger fires: every `Data.db` is ≈ 0.2 % above L (e.g. 16,811,125 B at L = 16 MiB),
+  but the same excess appears with no hand-off at all (Uinf: 154,045,440 B on disk for a counted 153,741,312 B), and the
+  unit operand never passes L, so this is the on-disk encoding, not unchecked rows. (2) peak(m16) is 382 MiB against
+  < 150 (young-pause figures include old-region garbage; the identical rerun gave 296; the same load completes in 256m).
+- **Outcome class: undetermined** (direction caps; the unit tier is Partly confirmed, so the weak rule does not apply).
+- **For stage 3:** state per-file bounds as a ratio of the counted size (≈ 1.002 L), not "knob + one row" in on-disk bytes;
+  measure the B3 heap as live heap after a forced GC, not young-pause "after" figures; add a row for "file counts out of
+  range, all else as predicted".

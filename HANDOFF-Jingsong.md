@@ -20,8 +20,8 @@
 Select by the `band` column of `bands.csv`; every unit is in exactly one person's share. The
 Cassandra material below this section is unchanged and still applies to the Cassandra work.
 
-- **Progress (2026-11-25):** orders 1–45 written up; orders 1–25 less 6, 14 and 22 closed at stage 4 (22 cases) and
-  stage 5 done for all 22; 6, 14, 22 (blocked by `pc99`'s stale node lock) and 26–45 (23) wait for stage 4 (see the Hadoop log below). Next stage-3 unit: order 46. Stage-4 environment: `pc91`, `pc82`, `pc72`, `pc75`, `pc99`
+- **Progress (2026-11-25, chunk 1 filed):** orders 1–45 written up; orders 1–31 closed at stage 4 (31 cases) and stage 5
+  done for all 31; orders 32–45 (14) are running stage 4 in the 2026-11-25 node session (see the Hadoop log below). Next stage-3 unit: order 46. Stage-4 environment: `pc91`, `pc82`, `pc72`, `pc75`, `pc99`
   ([`environment.md`](experiments/capacity-enforcement-exp/hadoop/stage4-runtime-verification/jingsong/environment.md);
   the 2026-11-06 nodes `pc41`, `pc39`, `pc29` are gone).
   Your folders (do not write to the other person's):
@@ -42,6 +42,59 @@ Cassandra material below this section is unchanged and still applies to the Cass
   counts with unclear per-object size.
 
 ### Hadoop log (newest first)
+
+- **2026-11-25 (stage 4/5 of the 48 waiting cases, chunk 1: orders 6, 14, 22, 26–31; filed 2026-11-25)** — `pc99`'s stale
+  lock is gone; the 48 cases waiting for stage 4 (Hadoop 6, 14, 22, 26–45; Cassandra 57, 64, 70, 116, 125 and batch 2's 20)
+  were started in one node session (one fresh agent per case, one case per node, node lock `/mydata/s4/NODE-LOCK`), each
+  followed by stage 5 (one autonomous and one guided agent). **The owner stopped the session at ~13:50 EST until ~16:00
+  EST.** This chunk files the 9 Hadoop and 2 Cassandra cases whose stage 4 and both stage-5 agents had finished; **orders
+  32–45 and Cassandra 57, 64, 70, 137–239 (batch 2's 20) are continuing in the same session.** Filed as for orders 6–25:
+  results in `jingsong/results/<stem>.md` (raw excerpts in `results/<stem>/run1/`), harness in `jingsong/harness/<stem>/`,
+  each case file replaced by its amended copy (dated amendments plus section D) with a new `_INDEX.md` §4 sha256 row,
+  `_INDEX.md` §1 and `queue.csv` `stage4` set to the outcome class. Sources stay in `~/writeup-hadoop/out/o<order>/`.
+
+  | Order | Case (stem) | Node | Unit | Cluster | Outcome class |
+  |---|---|---|---|---|---|
+  | 6 | `MAX_KEY_SIZE-write-limit-2` | `pc91` | Confirmed — does not cap | Confirmed — does not cap (disk only, A10) | true negative |
+  | 14 | `DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK` | `pc82` | Confirmed — caps | Confirmed — caps (under the B3f noise allowance) | true positive (**your call**, below) |
+  | 22 | `dfs.datanode.max.locked.memory-rescanCachedBlockMap-remaining` | `pc72` | Confirmed — caps | Confirmed — caps | true positive |
+  | 26 | `dfs.datanode.du.reserved-copyBlocks-getAvailable` | `pc91` | Confirmed — caps | Confirmed — caps | true positive (one-block overshoot, bounded) |
+  | 27 | `dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes` | `pc82` | Confirmed — caps | Confirmed — caps (K1c concurrency sub-test Not confirmed) | true positive |
+  | 28 | `dfs.datanode.du.reserved-append-getAvailable` | `pc72` | Confirmed — caps | Confirmed — caps | true positive |
+  | 29 | `dfs.datanode.reserve-for-archive.default.percentage-getVolumeByMount-getAvailable` | `pc91` | Confirmed — caps (soft under concurrency) | Confirmed — caps | true positive |
+  | 30 | `dfs.datanode.pmem.cache.dirs-reserve-maxBytes` | `pc82` | Confirmed — caps only on some paths (bypass) | Confirmed — caps only on some paths (bypass) | true positive (two pmem directories on one file system double the cap) |
+  | 31 | `dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes` | `pc91` | Confirmed — caps | Confirmed — caps | true positive |
+
+  **Your call:** order 14's cluster `[B` deltas sit 3.37 MB below the frozen point values (arm A −3,364,232 B, B
+  −3,372,736 B); with the frozen B3f noise allowance (and B − A = 28.99 MiB) the tier is Confirmed and the case is filed
+  **true positive**; read strictly it is Not confirmed and the class **weak true positive** (`case-notes.md`, results §5,
+  §8). Order 27's K1c sub-test (concurrent writers) overshot the reserve on disk; it is outside the verdict rows.
+  **Upstream / JIRA candidates** (check JIRA first; `case-notes.md`): `FsDatasetImpl.cleanupReplica` reads the meta length
+  after deleting the meta file, so each disk-balancer or Mover move off a volume over-counts its `dfsUsed` by one meta file
+  until a DU refresh (26); `DiskBalancer.java:1138` compares headroom with the whole `bytesToCopy`, not the block (26, cf.
+  HDFS-13892); boundary bug at exactly `replicaSize` available — line 166 (`<`) keeps the low group, the round robin (`>`)
+  rejects it, a spurious `DiskOutOfSpaceException` (27); `FsVolumeImpl.append` charges the whole new block length to
+  `dfsUsed` until the next DU refresh (28); `Mover.run` re-registers `MoverMetrics` each iteration, so the second iteration
+  throws `MetricsException … already exists` and the Mover exits 255, and `FsVolumeList.getVolumeByMount` leaks a volume
+  reference on refusal (29); pmem directories on one file system each get `maxBytes = getUsableSpace()` (30, 31);
+  `PmemMappableBlockLoader.load:97` ignores `transferTo`'s return value and the cancel path leaves an uncounted cache file
+  (31); a DataNode restarted with cache capacity 0 sends no cache reports, so the NameNode keeps a stale cached list and
+  re-sends `DNA_UNCACHE` (30); TFile stores about twice the key bytes for 64 KiB keys, and log aggregation under a space
+  quota leaves a partial `.tmp` file (6). **Lessons** (`case-notes.md` 9–13): daemon logs are UTC, the node shell MST;
+  MapReduce shuffle logs go to `syslog.shuffle`; ext4 `-m 0` still reserves clusters, use ext2 for loop volumes; harness
+  logging wrappers must not write into input files; SSH to `localhost` fails, start daemons with `--daemon`.
+  **Left on the nodes:** run folders `/mydata/jingsong-s4/<stem>-run1/` with logs and harness only (1.5–9.5 MB each) on
+  `pc91` (6, 26, 29, 31), `pc82` (14, 27, 30), `pc72` (22, 28); nothing running, loop/tmpfs mounts removed; `pc72` now has
+  the native-build packages (`environment.md`). **Stage 5 for the 9:** 25 candidates `hadoop:OC-99`–`OC-123` (autonomous 8,
+  guided 17; open) in `phase1-oom-candidates.md`, full text in `runs/p1-hadoop-2026-11-24.md` (new section "Orders 6, 14,
+  22, 26–31 … chunk 1"), 18 `coverage.csv` lines; none found by 26 and 29 (both agents) and 30's autonomous agent. 19 rows
+  carry "(likely same holder as …)": the NFS gateway rows of orders 15–18, the DataNode packet buffer (OC-33), the
+  NameNode `cachedBlocks` (OC-96), the DataNode mlock cache and checksum buffer (OC-97, OC-98), the TFile reader/writer
+  rows (OC-22, OC-23), and two rows of this chunk (OC-121, OC-123). New holders: the reduce-side shuffle's in-memory map outputs and memory-to-memory merge buffer
+  (OC-99, OC-101), the DataNode `ReplicaMap` plus the `DirectoryScanner`'s full copy every 6 h (OC-115), a pmem cache
+  directory on tmpfs that turns the "pmem" cache into DRAM outside every budget (OC-118, OC-123), one native PMDK mapping
+  per cached block (OC-120, OC-121), the DataNode cache maps and report list (OC-122). **Next:** stage 4/5 of orders 32–45
+  (running), then stage 3 at order 46.
 
 - **2026-11-25 (deferred stage 4/5 of Hadoop batch 1 of 2026-11-24, orders 6–25; filed 2026-11-25)** — The 18 orders
   that waited after the API-usage interrupt were re-run (one fresh agent per case, one node per case, node lock
@@ -775,20 +828,50 @@ FQL/audit BinLog queue weight is released before the record is written (72).
 **Next:** clear `pc99`'s lock, then stage 4 for 57, 64, 70, 116, 125 and batch 2's 20, then stage 5 for them; band C
 continues after order 239.
 
-## Next session (written 2026-11-25 ≈ 09:30 EST)
+## Cassandra extension set: stage 4/5 of the waiting cases, chunk 1 (filed 2026-11-25)
 
-State after the 2026-11-24/25 runs (all filed and pushed; last commit `d8d6dc8ac`):
+**Stage 4.** In the 2026-11-25 node session (Hadoop log of 2026-11-25, chunk 1; the owner stopped it ~13:50–16:00 EST),
+orders 116 and 125 ran on **`ms0640`** (Utah m400, aarch64; second attempts after the `pc99` lock blocked the first; one
+case at a time under `/mydata/s4/NODE-LOCK`). Filed as before: `results/<stem>.md`, `harness/<stem>/`, case file replaced by
+its amended copy with a new `_INDEX.md` §4 sha256 row, `_INDEX.md` §1 and the CSV `stage4` set to the outcome class:
+
+| Order | Case (stem) | Node | Unit | Cluster | Outcome class |
+|---|---|---|---|---|---|
+| 116 | `maxSSTableSizeInMiB-SSTableSimpleUnsortedWriter-maxSStableSizeInBytes` | `ms0640` | Partly confirmed — caps (one heap sample 0.16 MiB over its frozen two-buffer bound) | Not confirmed (no matching row) | undetermined (direction caps; **your call**, below) |
+| 125 | `flushhighwatermark-outboundconnectionsettings-flushingbytes` | `ms0640` | Confirmed — caps | Not confirmed (undetermined) | weak true positive |
+
+**Your call (116):** reading the unit tier's Partly confirmed — caps as settling the effect gives **weak true positive**;
+also reading the cluster tier as Partly confirmed (its bypass row fired on a 0.2 % encoding excess) gives **true
+positive** (results §8). The DELETE-only bypass was confirmed at runtime: 500,000 partition deletes buffered 12.4× a 1 MiB
+limit with no hand-off (`getUpdateFor` never calls `maybeSync()`; cf. 114). **Upstream candidates (125):** the `BufferPool`
+overflow path subtracts the unused portion and later the whole capacity, so `UsedSize` drifts negative while direct memory
+rises (`BufferPool.java:877-886`, `:240-246`); `OutboundConnectionSettings.withNettyBufferBounds` ignores its argument
+(`:251-258`). Left on `ms0640`: `/mydata/jingsong-cass-s4/o116/` (836 KB) and `o125/` (9.0 MB), logs and harness only;
+nothing running (`environment.md`).
+
+**Stage 5.** For the 2, one autonomous and one guided agent each: 7 candidates `OC-637`–`OC-643` (autonomous 4, guided 3;
+open) in `stage5-oom-clue-find/phase1-oom-candidates.md`, full text in `runs/p1-cassandra-2026-11-24.md`, 4 `coverage.csv`
+lines. All 7 are marked as likely the same holder as an earlier row: the unsorted `CQLSSTableWriter` buffer and its
+DELETE paths (OC-597, OC-598, OC-601; 116) and the on-heap outbound send queue behind the flush mark (OC-168; 125).
+
+**Waiting (23):** 57, 64, 70 and batch 2's 20 (137–239), continuing in the same 2026-11-25 node session.
+
+## Next session (written 2026-11-25 ≈ 09:30 EST; counts updated after chunk 1)
+
+State after the 2026-11-24/25 runs and chunk 1 of the 2026-11-25 node session (filed and pushed in the commit
+"Phase-1 stage 4/5 of 2026-11-25, chunk 1"; the rest of that session is still running):
 - **Cassandra extension set** (`writeup-set-ext.csv`): rows reviewed through order **415** (40 case files in batches 1–2;
   142 rows recorded as covered by the screen + review); 100 A–C rows left. Next batch: run
   `make-writeup-set-ext.py --screen` first (only annotates open rows), review the flags, take the next 20 new rows.
-- **Stage 4 waiting, Cassandra (25):** orders 57, 64, 70, 116, 125 (batch 1; 116/125 have audits and harnesses ready in
-  `~/writeup-ext/out/o116/`, `o125/`; 57's draft in `o57/`) and 137, 145, 158, 167, 169, 172, 173, 180, 181, 202, 205, 207,
-  208, 212, 219, 235–239 (batch 2). Your calls from batch 1: 115's cluster band miss, 133's rerun gate (see above).
+- **Stage 4 waiting, Cassandra (23):** orders 57, 64, 70 (batch 1; 57's draft in `o57/`) and 137, 145, 158, 167, 169, 172,
+  173, 180, 181, 202, 205, 207, 208, 212, 219, 235–239 (batch 2), all running in the 2026-11-25 node session (116 and 125
+  filed in chunk 1). Your calls: 115's cluster band miss, 133's rerun gate, 116's class (see above).
 - **Hadoop (queue.csv):** written up through order **45** (46 case files incl. Yang's 1); next unwritten order **46**.
-  **Stage 4 waiting (23):** 6, 14, 22, 26–45. Stage 5 for orders 1–5 done (Hadoop OC-6…23).
+  **Stage 4 waiting (14):** 32–45, running in the 2026-11-25 node session (orders 1–31 closed, stage 5 done; Hadoop
+  OC-1…123). Your calls: order 10's effect, order 14's cluster allowance.
 - **Stage 5** follows stage 4 for each of these (two agents per case; append to the candidate list and coverage.csv).
 - **Nodes:** Hadoop builds at `/mydata/jingsong-s4/hadoop-base` on pc91/82/72/75/99 (`environment.md` Node table);
   Cassandra stage 4 copies `/mydata/s4/cassandra-base` on any node. Small logs from earlier runs remain in
   `/mydata/jingsong-cass-s4/o<order>/` and `/mydata/jingsong-s4/<stem>-run1/`. Use the node-lock and cleanup rules in
-  `HANDOFF.md` "Latest state and next steps".
+  `HANDOFF.md` "Latest state and next steps". `pc99`'s stale lock is gone (2026-11-25).
 

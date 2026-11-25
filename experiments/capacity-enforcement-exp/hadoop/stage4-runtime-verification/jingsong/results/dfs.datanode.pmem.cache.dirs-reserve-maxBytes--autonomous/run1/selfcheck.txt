@@ -1,0 +1,48 @@
+OK   U1 M=32768 reserves                                        ok=8 fail=4
+OK   U1 M=32768 used/max/map/warns                              {'M': '32768', 'ok': '8', 'fail': '4', 'used': '32768', 'maxUsed': '32768', 'mapSize': '8', 'noSpaceWarns': '4'}
+OK   U1 M=32768 release+next                                    {'M': '32768', 'releaseReturn': '28672', 'usedAfterRelease': '28672', 'nextReserve': '32768', 'usedAfterNext': '32768', 'mapSize': '8'}
+OK   U1 M=32768 reflective :77                                  {'M': '32768', 'class': 'org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemVolumeManager$UsedBytesCount', 'maxBytes': '32768', 'usedBefore': '32768', 'reserve1': '-1', 'usedAfter': '32768', 'reserve0': '32768', 'noSpaceWarnsTotal': '4'}
+OK   U1 M=65536 reserves                                        ok=16 fail=4
+OK   U1 M=65536 used/max/map/warns                              {'M': '65536', 'ok': '16', 'fail': '4', 'used': '65536', 'maxUsed': '65536', 'mapSize': '16', 'noSpaceWarns': '4'}
+OK   U1 M=65536 release+next                                    {'M': '65536', 'releaseReturn': '61440', 'usedAfterRelease': '61440', 'nextReserve': '65536', 'usedAfterNext': '65536', 'mapSize': '16'}
+OK   U1 M=65536 reflective :77                                  {'M': '65536', 'class': 'org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemVolumeManager$UsedBytesCount', 'maxBytes': '65536', 'usedBefore': '65536', 'reserve1': '-1', 'usedAfter': '65536', 'reserve0': '65536', 'noSpaceWarnsTotal': '4'}
+OK   U1 M=131072 reserves                                       ok=32 fail=4
+OK   U1 M=131072 used/max/map/warns                             {'M': '131072', 'ok': '32', 'fail': '4', 'used': '131072', 'maxUsed': '131072', 'mapSize': '32', 'noSpaceWarns': '4'}
+OK   U1 M=131072 release+next                                   {'M': '131072', 'releaseReturn': '126976', 'usedAfterRelease': '126976', 'nextReserve': '131072', 'usedAfterNext': '131072', 'mapSize': '32'}
+OK   U1 M=131072 reflective :77                                 {'M': '131072', 'class': 'org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemVolumeManager$UsedBytesCount', 'maxBytes': '131072', 'usedBefore': '131072', 'reserve1': '-1', 'usedAfter': '131072', 'reserve0': '131072', 'noSpaceWarnsTotal': '4'}
+OK   U2 one dir: |cap-usable| <= 1 MiB                          {'capacity': '704039297024', 'usable': '704039297024', 'diff': '0'}
+OK   U2 two dirs: |cap-2*usable| <= 2 MiB, same store           {'capacity': '1408078589952', 'usable': '704039292928', 'diffFrom2x': '4096', 'ratio': '2.000000', 'store0': '/mydata (/dev/mapper/emulab-node1--bs)', 'store1': '/mydata (/dev/mapper/emulab-node1--bs)', 'sameStore': 'true'}
+OK   U3 M=32768 loader pure-Java, cap=M                         org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemMappableBlockLoader
+OK   U3 M=32768 f1: 8 cached, used=disk=M                       {'numBlocksCached': '8', 'cacheUsed': '32768', 'diskBytes': '32768'}
+OK   U3 M=32768 (a): unchanged, NN rejects > 0, no f2 file      rejΔ=1200
+OK   U3 M=32768 (b): 4 refusals for f2, 4 WARNs, used=disk=M    failedΔ=4
+OK   U3 M=32768 max used/disk <= M                              {'M': '32768', 'maxCacheUsed': '32768', 'maxDiskBytes': '32768', 'samples': '48', 'nnRejectTotal': '2464', 'couldNotReserveTotal': '4'}
+OK   U3 M=65536 loader pure-Java, cap=M                         org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemMappableBlockLoader
+OK   U3 M=65536 f1: 16 cached, used=disk=M                      {'numBlocksCached': '16', 'cacheUsed': '65536', 'diskBytes': '65536'}
+OK   U3 M=65536 (a): unchanged, NN rejects > 0, no f2 file      rejΔ=400
+OK   U3 M=65536 (b): 4 refusals for f2, 4 WARNs, used=disk=M    failedΔ=4
+OK   U3 M=65536 max used/disk <= M                              {'M': '65536', 'maxCacheUsed': '65536', 'maxDiskBytes': '65536', 'samples': '45', 'nnRejectTotal': '620', 'couldNotReserveTotal': '4'}
+OK   U3 control (a): 20 cached, 81920                           
+OK   U3 control (b): 0 refusals, Δ=4 duplicates                 
+OK   U3 control max <= 81920                                    
+OK   A0: one volume X=134217728 (S=134217728), N=floor(X/B)=4   
+OK   A0: final cached=N, CacheUsed=N*B, files=N*B               {'NumBlocksCached': '4', 'CacheUsed': '134217728', 'cacheFileBytes': '134217728'}
+OK   A0: max over 46 samples <= X                               maxFileBytes=134217728 maxCacheUsed=134217728 maxDfUsed=134217728
+OK   A0: BYTES_CACHED=N*B of NEEDED                             /f        671088707     134217728             1             0
+OK   A0: no ENOSPC form, no refusal; NN rejects > 0             cached=4 rejects=531
+OK   A: one volume X=268435456 (S=268435456), N=floor(X/B)=8    
+OK   A: final cached=N, CacheUsed=N*B, files=N*B                {'NumBlocksCached': '8', 'CacheUsed': '268435456', 'cacheFileBytes': '268435456'}
+OK   A: max over 46 samples <= X                                maxFileBytes=268435456 maxCacheUsed=268435456 maxDfUsed=268435456
+OK   A: BYTES_CACHED=N*B of NEEDED                              /f        671088707     268435456             1             0
+OK   A: no ENOSPC form, no refusal; NN rejects > 0              cached=8 rejects=424
+OK   B: one volume X=536870912 (S=536870912), N=floor(X/B)=16   
+OK   B: final cached=N, CacheUsed=N*B, files=N*B                {'NumBlocksCached': '16', 'CacheUsed': '536870912', 'cacheFileBytes': '536870912'}
+OK   B: max over 46 samples <= X                                maxFileBytes=536870912 maxCacheUsed=536870912 maxDfUsed=536870912
+OK   B: BYTES_CACHED=N*B of NEEDED                              /f        671088707     536870912             1             0
+OK   B: no ENOSPC form, no refusal; NN rejects > 0              cached=16 rejects=160
+OK   dose: N rises with S (A0<A<B)                              4/8/16
+OK   C: two volumes, capacity = 2X > df size                    X=[268435456, 268435456] cap=536870912 df=268435456
+OK   C: ENOSPC failures > 0                                     noSpace=240 failed=240
+OK   C: physical bound: <= floor(df/B) files, bytes <= df       max files=8
+OK   D: capacity 0, CacheUsed 0, nothing cached on the DN       
+ALL OK

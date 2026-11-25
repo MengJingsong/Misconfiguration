@@ -43,7 +43,7 @@ Free space as checked after the 2026-11-24 runs (run folders included).
 - `ulimit -n` is 1024 on all five: raise it in the shell that starts daemons if a case needs more.
 - `pc75` also has `cmake`, `zlib1g-dev`, `libssl-dev` and `pkg-config` (installed 2026-11-24 for the native build of the
   `CachePoolInfo_limit` case, which needed `libhadoop` for `mlock`); **2026-11-25:** `pc91` (order 12) and `pc82` (order 23)
-  have them too, installed for the same native build; `pc72` and `pc99` do not.
+  have them too, installed for the same native build; **2026-11-25 (later):** `pc72` has them too (order 22); `pc99` does not.
 - **2026-11-25 (deferred stage 4 of orders 6–25):** 15 cases ran on `pc91`, `pc82`, `pc72`, `pc75`; each run left only
   small logs and its harness in `/mydata/jingsong-s4/<stem>-run1/` (a few MB each; order 20's are 16 MB on `pc72`). Orders
   6, 14 and 22 did not run: **`pc99`'s node lock `/mydata/s4/NODE-LOCK` is held by `jingsong-o70-stage4` (2026-11-24
@@ -52,6 +52,10 @@ Free space as checked after the 2026-11-24 runs (run folders included).
   `pc99` also still holds order 13's interrupted run folder of 2026-11-24
   (`/mydata/jingsong-s4/dfs.client.write.byte-array-manager.count-limit-recycle-maxAllocated-run1`; order 13 finished on
   `pc75`), which can be deleted.
+- **2026-11-25 (stage 4 of the waiting cases, chunk 1: orders 6, 14, 22, 26–31):** 9 cases ran on `pc91` (6, 26, 29,
+  31), `pc82` (14, 27, 30) and `pc72` (22, 28) after `pc99`'s lock had made 6, 14 and 22 give up there; each run left only
+  small logs and its harness in `/mydata/jingsong-s4/<stem>-run1/` (1.5–9.5 MB), nothing running, loop/tmpfs mounts removed.
+  Lessons in [`case-notes.md`](case-notes.md) (daemon logs UTC vs shell MST; ext2 for loop volumes).
 - One case per node at a time. Run folders of the interrupted 2026-11-24 batch are listed in `HANDOFF-Jingsong.md`
   (Hadoop log, 2026-11-24) and in the stage-3 `_INDEX.md` rows.
 

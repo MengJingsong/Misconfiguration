@@ -1,0 +1,263 @@
+=== cluster-run.sh all start 2026-11-25 10:59:25 MST host=node2.jason92-326665.misconfiguration-pg0.cloudlab.umass.edu
+  ports 9000 9870 9864 9866 9867 free
++ rm -rf /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster  [2026-11-25 10:59:25 MST]
+  rc=0
++ mkdir -p /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/mnt /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/pids /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/logs /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed  [2026-11-25 10:59:26 MST]
+  rc=0
++ truncate -s 2G /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/vol.img  [2026-11-25 10:59:26 MST]
+  rc=0
++ mkfs.ext2 -q -F -m 0 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/vol.img  [2026-11-25 10:59:26 MST]
+  rc=0
++ sudo mount -o loop /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/vol.img /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/mnt  [2026-11-25 10:59:26 MST]
+  rc=0
++ sudo chown 20001:2574 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/mnt  [2026-11-25 10:59:26 MST]
+  rc=0
++ stat -f /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/mnt  [2026-11-25 10:59:26 MST]
+  File: "/mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/mnt"
+    ID: 4835eb6afc45848f Namelen: 255     Type: ext2/ext3
+Block size: 4096       Fundamental block size: 4096
+Blocks: Total: 515290     Free: 515284     Available: 515284
+Inodes: Total: 131072     Free: 131061
+  rc=0
+  stat -f: Free == Available (515284)
++ cp -a /mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/hadoop  [2026-11-25 10:59:26 MST]
+  rc=0
++ cp -r /mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2/etc/hadoop /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/conf  [2026-11-25 10:59:27 MST]
+  rc=0
++ hadoop version  [2026-11-25 10:59:27 MST]
++ hdfs --daemon start namenode  [2026-11-25 10:59:29 MST]
+  rc=0
++ hdfs --daemon start datanode  [2026-11-25 10:59:32 MST]
+  rc=0
++ hdfs dfsadmin -safemode wait  [2026-11-25 10:59:34 MST]
+2026-11-25 17:59:35,055 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Safe mode is OFF
+  rc=0
+Configured Capacity: 2110627840 (1.97 GB)
+Present Capacity: 2110586880 (1.97 GB)
+DFS Remaining: 2110562304 (1.97 GB)
+DFS Used: 24576 (24 KB)
+DFS Used%: 0.00%
+Replicated Blocks:
+	Under replicated blocks: 0
+	Blocks with corrupt replicas: 0
+	Missing blocks: 0
+	Missing blocks (with replication factor 1): 0
+	Low redundancy blocks with highest priority to recover: 0
+	Pending deletion blocks: 0
++ ls -l /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/c1m.bin  [2026-11-25 10:59:42 MST]
+-rw-r--r-- 1 jason92 misconfiguration 1048576 Nov 25 10:59 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/c1m.bin
+  rc=0
++ hdfs dfs -mkdir -p /t  [2026-11-25 10:59:42 MST]
+2026-11-25 17:59:43,709 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
++ hdfs dfs -D dfs.blocksize=16m -D dfs.replication=1 -put /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/fA /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/fB /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g001 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g002 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g003 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g004 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g005 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g006 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g007 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g008 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g009 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g010 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g011 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g012 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g013 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g014 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g015 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g016 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g017 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g018 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g019 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g020 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g021 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g022 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g023 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g024 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g025 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g026 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g027 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g028 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g029 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g030 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g031 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g032 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g033 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g034 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g035 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g036 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g037 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g038 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g039 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g040 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g041 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g042 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g043 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g044 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g045 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g046 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g047 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g048 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g049 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g050 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g051 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g052 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g053 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g054 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g055 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g056 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g057 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g058 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g059 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g060 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g061 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g062 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g063 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g064 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g065 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g066 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g067 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g068 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g069 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g070 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g071 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g072 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g073 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g074 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g075 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g076 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g077 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g078 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g079 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g080 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g081 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g082 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g083 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g084 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g085 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g086 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g087 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g088 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g089 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g090 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g091 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g092 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g093 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g094 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g095 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g096 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g097 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g098 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g099 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g100 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g101 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g102 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g103 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g104 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g105 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g106 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g107 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g108 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g109 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g110 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g111 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g112 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g113 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g114 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g115 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g116 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g117 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g118 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g119 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g120 /t/  [2026-11-25 10:59:47 MST]
+2026-11-25 17:59:48,084 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
+2026-11-25 18:00:44,026 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  seeded files: 122
+/t/fA 1048576 bytes, replicated: replication=1, 1 block(s):  OK
+0. BP-1982575480-198.22.255.83-1795629569567:blk_1073741825_1001 len=1048576 Live_repl=1
+/t/g120 1048576 bytes, replicated: replication=1, 1 block(s):  OK
+0. BP-1982575480-198.22.255.83-1795629569567:blk_1073741946_1122 len=1048576 Live_repl=1
+  CALIB T=2110627840 D=129966080
+  STATE seeded: VolumeInfo(free used res rfr nblk)=1980620800 129966080 0 0 122 du_dn=128972047 df(size used avail)=2110627840 130007040 1980620800
+  nonDfs (df used - du dn) = 1034993
+--- DN restart with R=1969127424  [11:00:59]
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/mnt/dn</value></property>
+  <property><name>dfs.datanode.du.reserved</name><value>1969127424</value></property>
++ hdfs --daemon start datanode  [2026-11-25 11:01:03 MST]
+  rc=0
+  DN up: VolumeInfo free/used/res/rfr/nblk = 11530240 129970176 1969127424 0 122
+  bM4M: R=1969127424 freeSpace=11530240 target=11534336 diff=-4096
+  append /t/fA rc=1:
+2026-11-25 18:01:10,397 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+2026-11-25 18:01:11,831 WARN hdfs.DataStreamer: Exception in createBlockOutputStream blk_1073741825_1001
+java.io.EOFException: Unexpected EOF while trying to read response from server
+appendToFile: All datanodes [DatanodeInfoWithStorage[127.0.0.1:9866,DS-51c83a56-f248-4d99-96f9-a5bc75bd9dec,DISK]] are bad. Aborting...
+  bM4M /t/fA rc=1 R=1969127424 free_before=11530240 used_before=129970176 -> free_after=11530240 used_after=129970176 du=128972070 insuff+=2 attempts+=1  [11:01:09-11:01:11]
+  STATE after-bM4M: VolumeInfo(free used res rfr nblk)=11530240 129970176 1969127424 0 122 du_dn=128972070 df(size used avail)=2110627840 130011136 1980616704
++ hdfs debug recoverLease -path /t/fA -retries 5  [2026-11-25 11:01:15 MST]
+2026-11-25 18:01:15,953 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+recoverLease returned false.
+Retrying in 5000 ms...
+Retry #1
+recoverLease SUCCEEDED on /t/fA
+  rc=0
+--- DN restart with R=1960734720  [11:01:27]
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/mnt/dn</value></property>
+  <property><name>dfs.datanode.du.reserved</name><value>1960734720</value></property>
++ hdfs --daemon start datanode  [2026-11-25 11:01:31 MST]
+  rc=0
+  DN up: VolumeInfo free/used/res/rfr/nblk = 19922944 129970176 1960734720 0 122
+  bP4M: R=1960734720 freeSpace=19922944 target=19922944 diff=0
+  bP4M /t/fB rc=0 R=1960734720 free_before=19922944 used_before=129970176 -> free_after=17809401 used_after=132083719 du=130028838 insuff+=0 attempts+=1  [11:01:37-11:01:40]
+  STATE after-bP4M: VolumeInfo(free used res rfr nblk)=17809401 132083719 1960734720 0 122 du_dn=130028838 df(size used avail)=2110627840 131067904 1979559936
+/t/fB 2097152 bytes, replicated: replication=1, 1 block(s):  OK
+0. BP-1982575480-198.22.255.83-1795629569567:blk_1073741826_1125 len=2097152 Live_repl=1
+--- DN restart with R=0  [11:01:49]
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/mnt/dn</value></property>
+  <property><name>dfs.datanode.du.reserved</name><value>0</value></property>
++ hdfs --daemon start datanode  [2026-11-25 11:01:52 MST]
+  rc=0
+  DN up: VolumeInfo free/used/res/rfr/nblk = 1979559936 131026944 0 0 122
+  ctrlR0 /t/fA rc=0 R=0 free_before=1979559936 used_before=131026944 -> free_after=1977487353 used_after=133140487 du=131085606 insuff+=0 attempts+=1  [11:01:59-11:02:02]
+  STATE after-ctrlR0: VolumeInfo(free used res rfr nblk)=1977487353 133140487 0 0 122 du_dn=131085606 df(size used avail)=2110627840 132124672 1978503168
+/t/fA 2097152 bytes, replicated: replication=1, 1 block(s):  OK
+0. BP-1982575480-198.22.255.83-1795629569567:blk_1073741825_1126 len=2097152 Live_repl=1
+  fill48: D_F=132083712 R_F=1928212480
+--- DN restart with R=1928212480  [11:02:11]
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/mnt/dn</value></property>
+  <property><name>dfs.datanode.du.reserved</name><value>1928212480</value></property>
++ hdfs --daemon start datanode  [2026-11-25 11:02:14 MST]
+  rc=0
+  DN up: VolumeInfo free/used/res/rfr/nblk = 50331648 132083712 1928212480 0 122
+  fill48: start freeSpace=50331648 target=50331648 diff=0
+  FILLSTART fill48 R_F=1928212480 a=50331648 freeSpace=50331648 du=131085606 [11:02:20]
+  fill48 /t/g001 rc=0 R=1928212480 free_before=50331648 used_before=132083712 -> free_after=48218105 used_after=134197255 du=132142374 insuff+=0 attempts+=1  [11:02:26-11:02:29]
+  fill48 /t/g002 rc=0 R=1928212480 free_before=49274880 used_before=133140480 -> free_after=47161337 used_after=135254023 du=133199142 insuff+=0 attempts+=1  [11:02:36-11:02:39]
+  fill48 /t/g003 rc=0 R=1928212480 free_before=48218112 used_before=134197248 -> free_after=46104569 used_after=136310791 du=134255910 insuff+=0 attempts+=1  [11:02:46-11:02:48]
+  fill48 /t/g004 rc=0 R=1928212480 free_before=47161344 used_before=135254016 -> free_after=45047801 used_after=137367559 du=135312678 insuff+=0 attempts+=1  [11:02:55-11:02:57]
+  fill48 /t/g005 rc=0 R=1928212480 free_before=46104576 used_before=136310784 -> free_after=45047808 used_after=137367552 du=136369446 insuff+=0 attempts+=1  [11:03:04-11:03:07]
+  fill48 /t/g006 rc=0 R=1928212480 free_before=45047808 used_before=137367552 -> free_after=42934265 used_after=139481095 du=137426214 insuff+=0 attempts+=1  [11:03:14-11:03:16]
+  fill48 /t/g007 rc=0 R=1928212480 free_before=43991040 used_before=138424320 -> free_after=41877497 used_after=140537863 du=138482982 insuff+=0 attempts+=1  [11:03:23-11:03:25]
+  fill48 /t/g008 rc=0 R=1928212480 free_before=42934272 used_before=139481088 -> free_after=40820729 used_after=141594631 du=139539750 insuff+=0 attempts+=1  [11:03:32-11:03:35]
+  fill48 /t/g009 rc=0 R=1928212480 free_before=41877504 used_before=140537856 -> free_after=39763961 used_after=142651399 du=140596518 insuff+=0 attempts+=1  [11:03:42-11:03:44]
+  fill48 /t/g010 rc=0 R=1928212480 free_before=40820736 used_before=141594624 -> free_after=38707193 used_after=143708167 du=141653286 insuff+=0 attempts+=1  [11:03:51-11:03:54]
+  fill48 /t/g011 rc=0 R=1928212480 free_before=39763968 used_before=142651392 -> free_after=37650425 used_after=144764935 du=142710054 insuff+=0 attempts+=1  [11:04:01-11:04:04]
+  fill48 /t/g012 rc=0 R=1928212480 free_before=38707200 used_before=143708160 -> free_after=36593657 used_after=145821703 du=143766822 insuff+=0 attempts+=1  [11:04:11-11:04:13]
+  fill48 /t/g013 rc=0 R=1928212480 free_before=37650432 used_before=144764928 -> free_after=36593664 used_after=145821696 du=144823590 insuff+=0 attempts+=1  [11:04:20-11:04:22]
+  fill48 /t/g014 rc=0 R=1928212480 free_before=36593664 used_before=145821696 -> free_after=35536896 used_after=146878464 du=145880358 insuff+=0 attempts+=1  [11:04:29-11:04:31]
+  fill48 /t/g015 rc=0 R=1928212480 free_before=35536896 used_before=146878464 -> free_after=33423353 used_after=148992007 du=146937126 insuff+=0 attempts+=1  [11:04:39-11:04:41]
+  fill48 /t/g016 rc=0 R=1928212480 free_before=34480128 used_before=147935232 -> free_after=32366585 used_after=150048775 du=147993894 insuff+=0 attempts+=1  [11:04:48-11:04:50]
+  fill48 /t/g017 rc=0 R=1928212480 free_before=33423360 used_before=148992000 -> free_after=31309817 used_after=151105543 du=149050662 insuff+=0 attempts+=1  [11:04:57-11:05:00]
+  fill48 /t/g018 rc=0 R=1928212480 free_before=32366592 used_before=150048768 -> free_after=30253049 used_after=152162311 du=150107430 insuff+=0 attempts+=1  [11:05:07-11:05:09]
+  fill48 /t/g019 rc=0 R=1928212480 free_before=31309824 used_before=151105536 -> free_after=29196281 used_after=153219079 du=151164198 insuff+=0 attempts+=1  [11:05:16-11:05:18]
+  fill48 /t/g020 rc=0 R=1928212480 free_before=30253056 used_before=152162304 -> free_after=28139513 used_after=154275847 du=152220966 insuff+=0 attempts+=1  [11:05:25-11:05:28]
+  fill48 /t/g021 rc=0 R=1928212480 free_before=29196288 used_before=153219072 -> free_after=28139520 used_after=154275840 du=153277734 insuff+=0 attempts+=1  [11:05:35-11:05:37]
+  fill48 /t/g022 rc=0 R=1928212480 free_before=28139520 used_before=154275840 -> free_after=27082752 used_after=155332608 du=154334502 insuff+=0 attempts+=1  [11:05:44-11:05:46]
+  fill48 /t/g023 rc=0 R=1928212480 free_before=27082752 used_before=155332608 -> free_after=24969209 used_after=157446151 du=155391270 insuff+=0 attempts+=1  [11:05:53-11:05:56]
+  fill48 /t/g024 rc=0 R=1928212480 free_before=26025984 used_before=156389376 -> free_after=23912441 used_after=158502919 du=156448038 insuff+=0 attempts+=1  [11:06:03-11:06:05]
+  fill48 /t/g025 rc=0 R=1928212480 free_before=24969216 used_before=157446144 -> free_after=22855673 used_after=159559687 du=157504806 insuff+=0 attempts+=1  [11:06:12-11:06:14]
+  fill48 /t/g026 rc=0 R=1928212480 free_before=23912448 used_before=158502912 -> free_after=21798905 used_after=160616455 du=158561574 insuff+=0 attempts+=1  [11:06:21-11:06:24]
+  fill48 /t/g027 rc=0 R=1928212480 free_before=22855680 used_before=159559680 -> free_after=20742137 used_after=161673223 du=159618342 insuff+=0 attempts+=1  [11:06:31-11:06:33]
+  fill48 /t/g028 rc=0 R=1928212480 free_before=21798912 used_before=160616448 -> free_after=19685369 used_after=162729991 du=160675110 insuff+=0 attempts+=1  [11:06:40-11:06:42]
+  fill48 /t/g029 rc=0 R=1928212480 free_before=20742144 used_before=161673216 -> free_after=19685376 used_after=162729984 du=161731878 insuff+=0 attempts+=1  [11:06:50-11:06:52]
+  fill48 /t/g030 rc=0 R=1928212480 free_before=19685376 used_before=162729984 -> free_after=17571833 used_after=164843527 du=162788646 insuff+=0 attempts+=1  [11:06:59-11:07:01]
+  fill48 /t/g031 rc=0 R=1928212480 free_before=18628608 used_before=163786752 -> free_after=16515065 used_after=165900295 du=163845414 insuff+=0 attempts+=1  [11:07:08-11:07:11]
+  fill48 /t/g032 rc=0 R=1928212480 free_before=17571840 used_before=164843520 -> free_after=15458297 used_after=166957063 du=164902182 insuff+=0 attempts+=1  [11:07:18-11:07:20]
+  fill48 /t/g033 rc=0 R=1928212480 free_before=16515072 used_before=165900288 -> free_after=14401529 used_after=168013831 du=165958950 insuff+=0 attempts+=1  [11:07:27-11:07:29]
+  append /t/g034 rc=1:
+2026-11-25 18:07:37,730 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+2026-11-25 18:07:39,080 WARN hdfs.DataStreamer: Exception in createBlockOutputStream blk_1073741860_1036
+java.io.EOFException: Unexpected EOF while trying to read response from server
+appendToFile: All datanodes [DatanodeInfoWithStorage[127.0.0.1:9866,DS-51c83a56-f248-4d99-96f9-a5bc75bd9dec,DISK]] are bad. Aborting...
+  fill48 /t/g034 rc=1 R=1928212480 free_before=15458304 used_before=166957056 -> free_after=15458304 used_after=166957056 du=165958950 insuff+=2 attempts+=1  [11:07:36-11:07:39]
+  FILLEND fill48: first refusal at /t/g034 after 33 successes  R_F=1928212480 [11:07:40]
+  STATE stop-fill48: VolumeInfo(free used res rfr nblk)=15458304 166957056 1928212480 0 122 du_dn=165958950 df(size used avail)=2110627840 166998016 1943629824
++ hdfs debug recoverLease -path /t/g034 -retries 5  [2026-11-25 11:07:42 MST]
+2026-11-25 18:07:43,220 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+recoverLease returned false.
+Retrying in 5000 ms...
+Retry #1
+recoverLease SUCCEEDED on /t/g034
+  rc=0
+  fill80: D_F=166957056 R_F=1859784704
+--- DN restart with R=1859784704  [11:07:55]
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/mnt/dn</value></property>
+  <property><name>dfs.datanode.du.reserved</name><value>1859784704</value></property>
++ hdfs --daemon start datanode  [2026-11-25 11:07:58 MST]
+  rc=0
+  DN up: VolumeInfo free/used/res/rfr/nblk = 83886080 166957056 1859784704 0 122
+  fill80: start freeSpace=83886080 target=83886080 diff=0
+  FILLSTART fill80 R_F=1859784704 a=83886080 freeSpace=83886080 du=165958950 [11:08:04]
+  fill80 /t/g035 rc=0 R=1859784704 free_before=83886080 used_before=166957056 -> free_after=81772537 used_after=169070599 du=167015718 insuff+=0 attempts+=1  [11:08:10-11:08:13]
+  fill80 /t/g036 rc=0 R=1859784704 free_before=82829312 used_before=168013824 -> free_after=80715769 used_after=170127367 du=168072486 insuff+=0 attempts+=1  [11:08:20-11:08:23]
+  fill80 /t/g037 rc=0 R=1859784704 free_before=81772544 used_before=169070592 -> free_after=79659001 used_after=171184135 du=169129254 insuff+=0 attempts+=1  [11:08:30-11:08:32]
+  fill80 /t/g038 rc=0 R=1859784704 free_before=80715776 used_before=170127360 -> free_after=78602233 used_after=172240903 du=170186022 insuff+=0 attempts+=1  [11:08:39-11:08:41]
+  fill80 /t/g039 rc=0 R=1859784704 free_before=79659008 used_before=171184128 -> free_after=78602240 used_after=172240896 du=171242790 insuff+=0 attempts+=1  [11:08:48-11:08:51]
+  fill80 /t/g040 rc=0 R=1859784704 free_before=78602240 used_before=172240896 -> free_after=76488697 used_after=174354439 du=172299558 insuff+=0 attempts+=1  [11:08:58-11:09:00]
+  fill80 /t/g041 rc=0 R=1859784704 free_before=77545472 used_before=173297664 -> free_after=75431929 used_after=175411207 du=173356326 insuff+=0 attempts+=1  [11:09:07-11:09:09]
+  fill80 /t/g042 rc=0 R=1859784704 free_before=76488704 used_before=174354432 -> free_after=74375161 used_after=176467975 du=174413094 insuff+=0 attempts+=1  [11:09:16-11:09:19]
+  fill80 /t/g043 rc=0 R=1859784704 free_before=75431936 used_before=175411200 -> free_after=73318393 used_after=177524743 du=175469862 insuff+=0 attempts+=1  [11:09:26-11:09:28]
+  fill80 /t/g044 rc=0 R=1859784704 free_before=74375168 used_before=176467968 -> free_after=72261625 used_after=178581511 du=176526630 insuff+=0 attempts+=1  [11:09:35-11:09:37]
+  fill80 /t/g045 rc=0 R=1859784704 free_before=73318400 used_before=177524736 -> free_after=71204857 used_after=179638279 du=177583398 insuff+=0 attempts+=1  [11:09:44-11:09:47]
+  fill80 /t/g046 rc=0 R=1859784704 free_before=72261632 used_before=178581504 -> free_after=71204864 used_after=179638272 du=178640166 insuff+=0 attempts+=1  [11:09:54-11:09:56]
+  fill80 /t/g047 rc=0 R=1859784704 free_before=71204864 used_before=179638272 -> free_after=70148096 used_after=180695040 du=179696934 insuff+=0 attempts+=1  [11:10:03-11:10:05]
+  fill80 /t/g048 rc=0 R=1859784704 free_before=70148096 used_before=180695040 -> free_after=68034553 used_after=182808583 du=180753702 insuff+=0 attempts+=1  [11:10:12-11:10:15]
+  fill80 /t/g049 rc=0 R=1859784704 free_before=69091328 used_before=181751808 -> free_after=66977785 used_after=183865351 du=181810470 insuff+=0 attempts+=1  [11:10:22-11:10:24]
+  fill80 /t/g050 rc=0 R=1859784704 free_before=68034560 used_before=182808576 -> free_after=65921017 used_after=184922119 du=182867238 insuff+=0 attempts+=1  [11:10:31-11:10:33]
+  fill80 /t/g051 rc=0 R=1859784704 free_before=66977792 used_before=183865344 -> free_after=64864249 used_after=185978887 du=183924006 insuff+=0 attempts+=1  [11:10:40-11:10:43]
+  fill80 /t/g052 rc=0 R=1859784704 free_before=65921024 used_before=184922112 -> free_after=63807481 used_after=187035655 du=184980774 insuff+=0 attempts+=1  [11:10:50-11:10:52]
+  fill80 /t/g053 rc=0 R=1859784704 free_before=64864256 used_before=185978880 -> free_after=63807488 used_after=187035648 du=186037542 insuff+=0 attempts+=1  [11:10:59-11:11:01]
+  fill80 /t/g054 rc=0 R=1859784704 free_before=63807488 used_before=187035648 -> free_after=62750720 used_after=188092416 du=187094310 insuff+=0 attempts+=1  [11:11:08-11:11:11]
+  fill80 /t/g055 rc=0 R=1859784704 free_before=62750720 used_before=188092416 -> free_after=60637177 used_after=190205959 du=188151078 insuff+=0 attempts+=1  [11:11:18-11:11:20]
+  fill80 /t/g056 rc=0 R=1859784704 free_before=61693952 used_before=189149184 -> free_after=59580409 used_after=191262727 du=189207846 insuff+=0 attempts+=1  [11:11:27-11:11:29]
+  fill80 /t/g057 rc=0 R=1859784704 free_before=60637184 used_before=190205952 -> free_after=58523641 used_after=192319495 du=190264614 insuff+=0 attempts+=1  [11:11:37-11:11:39]
+  fill80 /t/g058 rc=0 R=1859784704 free_before=59580416 used_before=191262720 -> free_after=57466873 used_after=193376263 du=191321382 insuff+=0 attempts+=1  [11:11:46-11:11:48]
+  fill80 /t/g059 rc=0 R=1859784704 free_before=58523648 used_before=192319488 -> free_after=56410105 used_after=194433031 du=192378150 insuff+=0 attempts+=1  [11:11:55-11:11:57]
+  fill80 /t/g060 rc=0 R=1859784704 free_before=57466880 used_before=193376256 -> free_after=55353337 used_after=195489799 du=193434918 insuff+=0 attempts+=1  [11:12:05-11:12:07]
+  fill80 /t/g061 rc=0 R=1859784704 free_before=56410112 used_before=194433024 -> free_after=55353344 used_after=195489792 du=194491686 insuff+=0 attempts+=1  [11:12:14-11:12:16]
+  fill80 /t/g062 rc=0 R=1859784704 free_before=55353344 used_before=195489792 -> free_after=54296576 used_after=196546560 du=195548454 insuff+=0 attempts+=1  [11:12:23-11:12:25]
+  fill80 /t/g063 rc=0 R=1859784704 free_before=54296576 used_before=196546560 -> free_after=52183033 used_after=198660103 du=196605222 insuff+=0 attempts+=1  [11:12:33-11:12:35]
+  fill80 /t/g064 rc=0 R=1859784704 free_before=53239808 used_before=197603328 -> free_after=51126265 used_after=199716871 du=197661990 insuff+=0 attempts+=1  [11:12:42-11:12:44]
+  fill80 /t/g065 rc=0 R=1859784704 free_before=52183040 used_before=198660096 -> free_after=50069497 used_after=200773639 du=198718758 insuff+=0 attempts+=1  [11:12:51-11:12:53]
+  fill80 /t/g066 rc=0 R=1859784704 free_before=51126272 used_before=199716864 -> free_after=49012729 used_after=201830407 du=199775526 insuff+=0 attempts+=1  [11:13:01-11:13:03]
+  fill80 /t/g067 rc=0 R=1859784704 free_before=50069504 used_before=200773632 -> free_after=47955961 used_after=202887175 du=200832294 insuff+=0 attempts+=1  [11:13:10-11:13:12]
+  fill80 /t/g068 rc=0 R=1859784704 free_before=49012736 used_before=201830400 -> free_after=47955968 used_after=202887168 du=201889062 insuff+=0 attempts+=1  [11:13:19-11:13:22]
+  fill80 /t/g069 rc=0 R=1859784704 free_before=47955968 used_before=202887168 -> free_after=46899200 used_after=203943936 du=202945830 insuff+=0 attempts+=1  [11:13:29-11:13:31]
+  fill80 /t/g070 rc=0 R=1859784704 free_before=46899200 used_before=203943936 -> free_after=44785657 used_after=206057479 du=204002598 insuff+=0 attempts+=1  [11:13:38-11:13:40]
+  fill80 /t/g071 rc=0 R=1859784704 free_before=45842432 used_before=205000704 -> free_after=43728889 used_after=207114247 du=205059366 insuff+=0 attempts+=1  [11:13:47-11:13:50]
+  fill80 /t/g072 rc=0 R=1859784704 free_before=44785664 used_before=206057472 -> free_after=42672121 used_after=208171015 du=206116134 insuff+=0 attempts+=1  [11:13:57-11:13:59]
+  fill80 /t/g073 rc=0 R=1859784704 free_before=43728896 used_before=207114240 -> free_after=41615353 used_after=209227783 du=207172902 insuff+=0 attempts+=1  [11:14:06-11:14:08]
+  fill80 /t/g074 rc=0 R=1859784704 free_before=42672128 used_before=208171008 -> free_after=40558585 used_after=210284551 du=208229670 insuff+=0 attempts+=1  [11:14:15-11:14:18]
+  fill80 /t/g075 rc=0 R=1859784704 free_before=41615360 used_before=209227776 -> free_after=40558592 used_after=210284544 du=209286438 insuff+=0 attempts+=1  [11:14:25-11:14:27]
+  fill80 /t/g076 rc=0 R=1859784704 free_before=40558592 used_before=210284544 -> free_after=39501824 used_after=211341312 du=210343206 insuff+=0 attempts+=1  [11:14:34-11:14:36]
+  fill80 /t/g077 rc=0 R=1859784704 free_before=39501824 used_before=211341312 -> free_after=37388281 used_after=213454855 du=211399974 insuff+=0 attempts+=1  [11:14:43-11:14:46]
+  fill80 /t/g078 rc=0 R=1859784704 free_before=38445056 used_before=212398080 -> free_after=36331513 used_after=214511623 du=212456742 insuff+=0 attempts+=1  [11:14:53-11:14:55]
+  fill80 /t/g079 rc=0 R=1859784704 free_before=37388288 used_before=213454848 -> free_after=35274745 used_after=215568391 du=213513510 insuff+=0 attempts+=1  [11:15:02-11:15:04]
+  fill80 /t/g080 rc=0 R=1859784704 free_before=36331520 used_before=214511616 -> free_after=34217977 used_after=216625159 du=214570278 insuff+=0 attempts+=1  [11:15:11-11:15:14]
+  fill80 /t/g081 rc=0 R=1859784704 free_before=35274752 used_before=215568384 -> free_after=33161209 used_after=217681927 du=215627046 insuff+=0 attempts+=1  [11:15:21-11:15:23]
+  fill80 /t/g082 rc=0 R=1859784704 free_before=34217984 used_before=216625152 -> free_after=32104441 used_after=218738695 du=216683814 insuff+=0 attempts+=1  [11:15:30-11:15:32]
+  fill80 /t/g083 rc=0 R=1859784704 free_before=33161216 used_before=217681920 -> free_after=32104448 used_after=218738688 du=217740582 insuff+=0 attempts+=1  [11:15:39-11:15:42]
+  fill80 /t/g084 rc=0 R=1859784704 free_before=32104448 used_before=218738688 -> free_after=31047680 used_after=219795456 du=218797350 insuff+=0 attempts+=1  [11:15:49-11:15:51]
+  fill80 /t/g085 rc=0 R=1859784704 free_before=31047680 used_before=219795456 -> free_after=28934137 used_after=221908999 du=219854118 insuff+=0 attempts+=1  [11:15:58-11:16:00]
+  fill80 /t/g086 rc=0 R=1859784704 free_before=29990912 used_before=220852224 -> free_after=27877369 used_after=222965767 du=220910886 insuff+=0 attempts+=1  [11:16:07-11:16:10]
+  fill80 /t/g087 rc=0 R=1859784704 free_before=28934144 used_before=221908992 -> free_after=26820601 used_after=224022535 du=221967654 insuff+=0 attempts+=1  [11:16:17-11:16:19]
+  fill80 /t/g088 rc=0 R=1859784704 free_before=27877376 used_before=222965760 -> free_after=25763833 used_after=225079303 du=223024422 insuff+=0 attempts+=1  [11:16:26-11:16:28]
+  fill80 /t/g089 rc=0 R=1859784704 free_before=26820608 used_before=224022528 -> free_after=24707065 used_after=226136071 du=224081190 insuff+=0 attempts+=1  [11:16:35-11:16:38]
+  fill80 /t/g090 rc=0 R=1859784704 free_before=25763840 used_before=225079296 -> free_after=24707072 used_after=226136064 du=225137958 insuff+=0 attempts+=1  [11:16:45-11:16:47]
+  fill80 /t/g091 rc=0 R=1859784704 free_before=24707072 used_before=226136064 -> free_after=23650304 used_after=227192832 du=226194726 insuff+=0 attempts+=1  [11:16:54-11:16:56]
+  fill80 /t/g092 rc=0 R=1859784704 free_before=23650304 used_before=227192832 -> free_after=21536761 used_after=229306375 du=227251494 insuff+=0 attempts+=1  [11:17:04-11:17:06]
+  fill80 /t/g093 rc=0 R=1859784704 free_before=22593536 used_before=228249600 -> free_after=20479993 used_after=230363143 du=228308262 insuff+=0 attempts+=1  [11:17:13-11:17:15]
+  fill80 /t/g094 rc=0 R=1859784704 free_before=21536768 used_before=229306368 -> free_after=19423225 used_after=231419911 du=229365030 insuff+=0 attempts+=1  [11:17:22-11:17:24]
+  fill80 /t/g095 rc=0 R=1859784704 free_before=20480000 used_before=230363136 -> free_after=18366457 used_after=232476679 du=230421798 insuff+=0 attempts+=1  [11:17:32-11:17:34]
+  fill80 /t/g096 rc=0 R=1859784704 free_before=19423232 used_before=231419904 -> free_after=17309689 used_after=233533447 du=231478566 insuff+=0 attempts+=1  [11:17:41-11:17:43]
+  fill80 /t/g097 rc=0 R=1859784704 free_before=18366464 used_before=232476672 -> free_after=16252921 used_after=234590215 du=232535334 insuff+=0 attempts+=1  [11:17:50-11:17:52]
+  fill80 /t/g098 rc=0 R=1859784704 free_before=17309696 used_before=233533440 -> free_after=16252928 used_after=234590208 du=233592102 insuff+=0 attempts+=1  [11:18:00-11:18:02]
+  fill80 /t/g099 rc=0 R=1859784704 free_before=16252928 used_before=234590208 -> free_after=14139385 used_after=236703751 du=234648870 insuff+=0 attempts+=1  [11:18:09-11:18:11]
+  append /t/g100 rc=1:
+2026-11-25 18:18:19,550 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+2026-11-25 18:18:20,883 WARN hdfs.DataStreamer: Exception in createBlockOutputStream blk_1073741926_1102
+java.io.EOFException: Unexpected EOF while trying to read response from server
+appendToFile: All datanodes [DatanodeInfoWithStorage[127.0.0.1:9866,DS-51c83a56-f248-4d99-96f9-a5bc75bd9dec,DISK]] are bad. Aborting...
+  fill80 /t/g100 rc=1 R=1859784704 free_before=15196160 used_before=235646976 -> free_after=15196160 used_after=235646976 du=234648870 insuff+=2 attempts+=1  [11:18:18-11:18:20]
+  FILLEND fill80: first refusal at /t/g100 after 65 successes  R_F=1859784704 [11:18:22]
+  STATE stop-fill80: VolumeInfo(free used res rfr nblk)=15196160 235646976 1859784704 0 122 du_dn=234648870 df(size used avail)=2110627840 235687936 1874939904
++ hdfs debug recoverLease -path /t/g100 -retries 5  [2026-11-25 11:18:24 MST]
+2026-11-25 18:18:25,142 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+recoverLease returned false.
+Retrying in 5000 ms...
+Retry #1
+recoverLease SUCCEEDED on /t/g100
+  rc=0
+  STATE end: VolumeInfo(free used res rfr nblk)=15196160 235646976 1859784704 0 122 du_dn=234648870 df(size used avail)=2110627840 235687936 1874939904
+  DN log totals: Insufficient=6 Appending=103 OutOfSpace=0 couldOnly=0
+=== cluster-run.sh all end 2026-11-25 11:18:31 MST
+--- EXIT trap: stopping daemons [11:18:31]
+  no NameNode/DataNode of this run

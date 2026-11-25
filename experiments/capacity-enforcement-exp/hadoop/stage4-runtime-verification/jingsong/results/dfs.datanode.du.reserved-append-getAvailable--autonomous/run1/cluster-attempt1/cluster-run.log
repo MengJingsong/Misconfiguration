@@ -1,0 +1,99 @@
+=== cluster-run.sh all start 2026-11-25 10:47:48 MST host=node2.jason92-326665.misconfiguration-pg0.cloudlab.umass.edu
+  ports 9000 9870 9864 9866 9867 free
++ rm -rf /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster  [2026-11-25 10:47:48 MST]
+  rc=0
++ mkdir -p /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/mnt /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/pids /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/logs /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed  [2026-11-25 10:47:48 MST]
+  rc=0
++ truncate -s 2G /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/vol.img  [2026-11-25 10:47:48 MST]
+  rc=0
++ mkfs.ext2 -q -F -m 0 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/vol.img  [2026-11-25 10:47:48 MST]
+  rc=0
++ sudo mount -o loop /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/vol.img /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/mnt  [2026-11-25 10:47:48 MST]
+  rc=0
++ sudo chown 20001:2574 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/mnt  [2026-11-25 10:47:48 MST]
+  rc=0
++ stat -f /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/mnt  [2026-11-25 10:47:48 MST]
+  File: "/mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/mnt"
+    ID: 1cb979fb6bb502c9 Namelen: 255     Type: ext2/ext3
+Block size: 4096       Fundamental block size: 4096
+Blocks: Total: 515290     Free: 515284     Available: 515284
+Inodes: Total: 131072     Free: 131061
+  rc=0
+  stat -f: Free == Available (515284)
++ cp -a /mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/hadoop  [2026-11-25 10:47:48 MST]
+  rc=0
++ cp -r /mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2/etc/hadoop /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/conf  [2026-11-25 10:47:49 MST]
+  rc=0
++ hadoop version  [2026-11-25 10:47:49 MST]
++ hdfs --daemon start namenode  [2026-11-25 10:47:52 MST]
+  rc=0
++ hdfs --daemon start datanode  [2026-11-25 10:47:54 MST]
+  rc=0
++ hdfs dfsadmin -safemode wait  [2026-11-25 10:47:56 MST]
+2026-11-25 17:47:57,239 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Safe mode is OFF
+  rc=0
+Configured Capacity: 2110627840 (1.97 GB)
+Present Capacity: 2110586880 (1.97 GB)
+DFS Remaining: 2110562304 (1.97 GB)
+DFS Used: 24576 (24 KB)
+DFS Used%: 0.00%
+Replicated Blocks:
+	Under replicated blocks: 0
+	Blocks with corrupt replicas: 0
+	Missing blocks: 0
+	Missing blocks (with replication factor 1): 0
+	Low redundancy blocks with highest priority to recover: 0
+	Pending deletion blocks: 0
++ ls -l /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/c1m.bin  [2026-11-25 10:48:02 MST]
+-rw-r--r-- 1 jason92 misconfiguration 1048576 Nov 25 10:48 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/c1m.bin
+  rc=0
++ hdfs dfs -mkdir -p /t  [2026-11-25 10:48:02 MST]
+2026-11-25 17:48:03,793 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
++ hdfs dfs -D dfs.blocksize=16m -D dfs.replication=1 -put /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/fA /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/fB /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g001 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g002 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g003 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g004 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g005 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g006 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g007 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g008 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g009 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g010 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g011 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g012 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g013 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g014 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g015 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g016 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g017 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g018 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g019 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g020 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g021 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g022 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g023 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g024 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g025 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g026 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g027 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g028 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g029 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g030 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g031 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g032 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g033 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g034 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g035 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g036 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g037 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g038 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g039 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g040 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g041 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g042 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g043 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g044 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g045 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g046 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g047 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g048 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g049 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g050 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g051 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g052 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g053 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g054 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g055 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g056 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g057 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g058 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g059 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g060 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g061 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g062 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g063 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g064 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g065 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g066 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g067 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g068 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g069 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g070 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g071 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g072 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g073 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g074 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g075 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g076 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g077 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g078 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g079 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g080 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g081 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g082 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g083 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g084 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g085 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g086 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g087 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g088 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g089 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g090 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g091 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g092 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g093 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g094 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g095 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g096 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g097 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g098 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g099 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g100 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g101 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g102 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g103 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g104 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g105 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g106 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g107 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g108 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g109 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g110 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g111 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g112 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g113 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g114 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g115 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g116 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g117 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g118 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g119 /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/seed/g120 /t/  [2026-11-25 10:48:05 MST]
+2026-11-25 17:48:05,877 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
+2026-11-25 17:49:02,424 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  seeded files: 122
+/t/fA 1048576 bytes, replicated: replication=1, 1 block(s):  OK
+0. BP-1730244876-198.22.255.83-1795628871746:blk_1073741825_1001 len=1048576 Live_repl=1
+/t/g120 1048576 bytes, replicated: replication=1, 1 block(s):  OK
+0. BP-1730244876-198.22.255.83-1795628871746:blk_1073741946_1122 len=1048576 Live_repl=1
+  CALIB T=2110627840 D=129966080
+  STATE seeded: VolumeInfo(free used res rfr nblk)=1980620800 129966080 0 0 122 du_dn=128972047 df(size used avail)=2110627840 130007040 1980620800
+  nonDfs (df used - du dn) = 1034993
+--- DN restart with R=1969127424  [10:49:18]
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/mnt/dn</value></property>
+  <property><name>dfs.datanode.du.reserved</name><value>1969127424</value></property>
++ hdfs --daemon start datanode  [2026-11-25 10:49:21 MST]
+  rc=0
+  DN up: VolumeInfo free/used/res/rfr/nblk = 11530240 129970176 1969127424 0 122
+  bM4M: R=1969127424 freeSpace=11530240 target=11534336 diff=-4096
+  append /t/fA rc=1:
+2026-11-25 17:53:41,732 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+2026-11-25 17:53:43,104 WARN hdfs.DataStreamer: Exception in createBlockOutputStream blk_1073741825_1001
+java.io.EOFException: Unexpected EOF while trying to read response from server
+appendToFile: All datanodes [DatanodeInfoWithStorage[127.0.0.1:9866,DS-b2c6d0ac-61e5-4c1a-b7a5-a7bbf6b17418,DISK]] are bad. Aborting...
+/mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/harness/cluster-run.sh: line 84: 0
+0: syntax error in expression (error token is "0")
+--- DN restart with R=1960734720  [10:53:50]
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/mnt/dn</value></property>
+  <property><name>dfs.datanode.du.reserved</name><value>1960734720</value></property>
++ hdfs --daemon start datanode  [2026-11-25 10:53:53 MST]
+  rc=0
+  DN up: VolumeInfo free/used/res/rfr/nblk = 19922944 129970176 1960734720 0 122
+  bP4M: R=1960734720 freeSpace=19922944 target=19922944 diff=0
+  bP4M /t/fB rc=0 R=1960734720 free_before=19922944 used_before=129970176 -> free_after=17809401 used_after=132083719 du=130028838 insuff+=0 attempts+=1  [10:58:21-10:58:23]
+  STATE after-bP4M: VolumeInfo(free used res rfr nblk)=17809401 132083719 1960734720 0 122 du_dn=130028838 df(size used avail)=2110627840 131067904 1979559936
+/t/fB 2097152 bytes, replicated: replication=1, 1 block(s):  OK
+0. BP-1730244876-198.22.255.83-1795628871746:blk_1073741826_1124 len=2097152 Live_repl=1
+--- DN restart with R=0  [10:58:33]
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1/cluster/mnt/dn</value></property>
+  <property><name>dfs.datanode.du.reserved</name><value>0</value></property>
++ hdfs --daemon start datanode  [2026-11-25 10:58:37 MST]
+  rc=0
+  no NameNode/DataNode of this run

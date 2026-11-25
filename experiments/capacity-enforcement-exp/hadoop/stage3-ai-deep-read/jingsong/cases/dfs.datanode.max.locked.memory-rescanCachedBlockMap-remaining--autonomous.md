@@ -117,7 +117,7 @@ never exceed that DataNode's reported headroom `cacheCapacity − cacheUsed`, wh
 
 ### B2. Unit tier
 
-**B2a. Environment and build.** JDK 8, Maven 3.3+. Copy the tree to local disk
+**B2a. Environment and build.** *[Amended 2026-11-25 (A1: node paths, no `install`, surefire counts; A9: node `pc72`, run folder); see D1.]* JDK 8, Maven 3.3+. Copy the tree to local disk
 (`rsync -a ~/hadoop-3.4.2/ /mydata/<run>/src/`), never build in the shared tree. Build:
 `cd /mydata/<run>/src && mvn -pl hadoop-hdfs-project/hadoop-hdfs -am install -DskipTests -Dmaven.javadoc.skip=true`.
 New test file in the copy:
@@ -149,7 +149,7 @@ Configuration (copy of `TestCacheDirectives.createCachingConf`, lines 124-136, w
 (default limit unlimited, `CachePoolInfo.java:54-55`), directive path `/f`, replication 1. Demand
 131072 > every C, so the cap is always reached.
 
-**B2d. Observables and instruments.**
+**B2d. Observables and instruments.** *[Amended 2026-11-25 (A3: line-534 DEBUG lines captured; Test A max and failures recorded; A11: DataNode reserve-refusal lines; A12: DEBUG-capture check); see D1.]*
 - NameNode pending bytes for the DataNode: under `readLock`, iterate
   `descriptor.getPendingCached()` and sum `blockManager.getStoredBlock(new Block(id)).getNumBytes()`;
   also its size. `descriptor = datanodeManager.getDatanode(dn.getDatanodeId())`.
@@ -160,7 +160,7 @@ Configuration (copy of `TestCacheDirectives.createCachingConf`, lines 124-136, w
 - Wait for rescans with `GenericTestUtils.waitFor` (poll 100 ms, timeout 10 s) or sleep 3 s (3 rescan
   intervals). Not observable: real mlocked pages (mlock is stubbed here) — that is B3's job.
 
-**B2e. Procedure.**
+**B2e. Procedure.** *[Amended 2026-11-25 (A2: one fresh cluster per K2 value; A10: settle rule for Tests A and C); see D1.]*
 1. Test A (cap, per C in K1): build cluster; create `/f`; add pool and directive; wait until
    `getNumBlocksCached()` stops changing for 3 s (≤ 30 s). Record DN `getCacheUsed()`,
    `getNumBlocksCached()`, `getNumBlocksFailedToCache()`, directive bytesCached, NameNode Σpending.
@@ -178,7 +178,7 @@ Configuration (copy of `TestCacheDirectives.createCachingConf`, lines 124-136, w
    `if (false && blockInfo.getNumBytes() > remaining)`, rebuild hadoop-hdfs, rerun Test B for U=49152.
 5. Shut down every cluster in `@After`; restore the cache manipulator.
 
-**B2f. Predictions.**
+**B2f. Predictions.** *[Amended 2026-11-25 (A3: DEBUG-line counts predicted; A11: no reserve refusals); see D1.]*
 - Test A: DN `getCacheUsed()` = C exactly (16384 / 32768 / 65536); blocks cached = C/4096 (4 / 8 / 16);
   directive bytesCached = C; NameNode Σpending = 0 at the end; never `getCacheUsed() > C`.
 - Test B: P0 = 65536 (16 blocks; line 745 fills pending to headroom). After U:
@@ -195,7 +195,7 @@ Configuration (copy of `TestCacheDirectives.createCachingConf`, lines 124-136, w
 - Ablation: P1 stays 65536 for U=49152 (no other code removes pending entries before a cache report
   marks them cached).
 
-**B2g. Readings.**
+**B2g. Readings.** *[Amended 2026-11-25 (A4: rows added; A11: the A4 failures row replaced; A12: validity row); see D1.]*
 | Observation | Meaning |
 |---|---|
 | Test B P1 equals the table (Σpending ≤ headroom) and P2 = P1 | Line 534 enforces the reported headroom; claim (1) holds |
@@ -214,7 +214,7 @@ response, not a constant. The ablation isolates line 534 from line 745.
 
 ### B3. Cluster tier
 
-**B3a. Environment and build.** One Linux host, pseudo-distributed: 1 NameNode, 1 DataNode (no YARN).
+**B3a. Environment and build.** *[Amended 2026-11-25 (A5: base distribution + native libhadoop on pc99; memlock check; A9: on `pc72`); see D1.]* One Linux host, pseudo-distributed: 1 NameNode, 1 DataNode (no YARN).
 JDK 8, Maven 3.3+, and for native code `build-essential cmake zlib1g-dev pkg-config libssl-dev`
 (`BUILDING.txt:64`). Native libhadoop is required (`DataNode.java:1892-1898`).
 - Build in a local copy: `cd /mydata/<run>/src && mvn package -Pdist -DskipTests -Dtar -Dmaven.javadoc.skip=true`
@@ -246,7 +246,7 @@ remove the directive and wait until CacheUsed is 0, or restart both daemons.
 `hdfs cacheadmin -addDirective -path /cap/f512 -pool p -replication 1`. Demand 512 MiB > 64/128/256 MiB,
 so each cap is reached; 1g is above demand. Duration ≈ 60 s per value (90 s in phase 2).
 
-**B3d. Observables and instruments.**
+**B3d. Observables and instruments.** *[Amended 2026-11-25 (A6, A7: sampling cadence, cache-report timing; A9: log time zone; A11: reserve-refusal lines; A12: DEBUG check); see D1.]*
 - Actual locked memory: `grep VmLck /proc/$(cat /mydata/<run>/pids/hadoop-$USER-datanode.pid)/status`,
   every 1 s, before the directive (baseline) and for 60 s after.
 - DataNode accounting: `curl -s 'http://localhost:9864/jmx?qry=Hadoop:service=DataNode,name=FSDatasetState-*'`
@@ -262,7 +262,7 @@ so each cap is reached; 1g is above demand. Duration ≈ 60 s per value (90 s in
 - Not observable directly: the NameNode's pending-cached list (no metric); inferred from the
   `DNA_CACHE` resend pattern (A3 step 4).
 
-**B3e. Procedure.**
+**B3e. Procedure.** *[Amended 2026-11-25 (A6, A7: pool once, plateau rule, phase-2 timing); see D1.]*
 1. Build and unpack (B3a); `hdfs namenode -format -force`; open the prlimit shell; `hdfs --daemon start namenode`;
    `hdfs --daemon start datanode`; check `hdfs dfsadmin -report` shows Configured Cache Capacity = M.
 2. Phase 1, for each M in {0, 64m, 128m, 256m, 1g}: write `/cap/f512` (once), record baseline VmLck,
@@ -274,7 +274,7 @@ so each cap is reached; 1g is above demand. Duration ≈ 60 s per value (90 s in
 4. Cleanup: `hdfs cacheadmin -removePool p`; `hdfs --daemon stop datanode`; `hdfs --daemon stop namenode`;
    `jps` shows neither; `rm -rf /mydata/<run>/{nn,dn,tmp,f512}` (keep logs for the record).
 
-**B3f. Predictions.**
+**B3f. Predictions.** *[Amended 2026-11-25 (A7: phase-2 window defined; A11: no reserve refusals); see D1.]*
 - Phase 1:
   | M | CacheUsed (final) | NumBlocksCached | BYTES_CACHED | VmLck − baseline |
   |---|---|---|---|---|
@@ -290,7 +290,7 @@ so each cap is reached; 1g is above demand. Duration ≈ 60 s per value (90 s in
   the DataNode logs only 1–3 `DNA_CACHE` lines in the first 60 s, not one per rescan (≈ 60), and no
   block id beyond the first 8; final CacheUsed = 134217728 and VmLck ≈ 131072 kB above baseline.
 
-**B3g. Readings.**
+**B3g. Readings.** *[Amended 2026-11-25 (A8: rows added; A11, A12: rows added); see D1.]*
 | Observation | Meaning |
 |---|---|
 | CacheUsed and VmLck rise to M and stop, for each capped M, and to 512 MiB for M = 1g | Locked memory follows the key; claim (2) holds |
@@ -346,4 +346,141 @@ https://hadoop.apache.org/docs/r3.4.2/hadoop-project-dist/hadoop-hdfs/Centralize
 
 ## D. Stage-4 feedback
 
-none yet
+### D1. Stage-4 audit amendments (2026-11-25, before any harness run or reading)
+
+Made by the stage-4 agent (run 1, node `pc99`) during the design audit, before the freeze. None changes B1, and none depends
+on a reading. A1, A2, A5, A6 make the runbook runnable and exact on the node; A3 and A7 make the disallow-branch evidence
+and the phase-2 observation window exact; A4 and A8 add the conclusions rows the audit found missing.
+
+- **A1 (B2a).** On `pc99`: the case copy is `/mydata/jingsong-s4/<stem>-run1/src`, made by
+  `experiments/capacity-enforcement-exp/hadoop/stage4-runtime-verification/jingsong/copy-source.sh` from the repository's
+  `systems/hadoop/source/` (never built in). No `install` step: the node's `~/.m2` holds the 3.4.2 artifacts of the base
+  build. `JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64`. Run:
+  `mvn -B -pl hadoop-hdfs-project/hadoop-hdfs test -Dtest=TestCrmPendingFit -DfailIfNoTests=false -Dmaven.javadoc.skip=true`;
+  surefire counts, not the exit code, are authoritative.
+- **A2 (B2e Test B).** One fresh `MiniDFSCluster` per K2 value (six U values; three C' values 65536, 32768, 0), the same
+  steps each time, so each instance starts from the same P0 and heartbeats are off for under 15 s (stale interval 30 s).
+  Test C runs on the U = 49152 instance. The ablation (step 4) runs the same U = 49152 method in a second copy
+  `/mydata/jingsong-s4/<stem>-run1/src-ablate`.
+- **A3 (B2d, B2f).** Direct evidence of line 534: the `CacheReplicationMonitor` logger is set to DEBUG and captured
+  (`GenericTestUtils.LogCapturer`); counted are the lines `Block <id>: removing from PENDING_CACHED for node <dn> because it
+  cannot fit in remaining cache size <r>` and their distinct block ids, in three windows of each Test B instance: before the
+  change (pre: directive added → P0), change → P1 (w1), P1 → P2 (w2). Prediction (from A3 steps 2–3 with page-aligned
+  blocks): pre = 0 lines; w1 distinct ids = 16 − P1/4096, i.e. 0 / 4 / 8 / 12 / 16 / 16 for U = 0 / 16384 / 32768 / 49152 /
+  65536 / 81920 and 0 / 8 / 16 for C' = 65536 / 32768 / 0, each id once; w2 = 0 lines. Ablation: w1 = 0 lines. Test A also
+  records the maximum DN `getCacheUsed()` polled every 100 ms during the wait (predicted ≤ C) and `getNumBlocksFailedToCache()`.
+- **A4 (B2g), rows added.**
+  | Observation | Meaning |
+  |---|---|
+  | P0 ≠ 65536, or the U = 0 / C' = 65536 rows give P1 ≠ 65536 | Setup invalid; Test B gives no verdict |
+  | P1 as in the table but no w1 "cannot fit" lines | Pending removed by another path; claim (1) not confirmed |
+  | P1 as in the table, w1 lines present but their distinct ids ≠ 16 − P1/4096 | Line 534 fires, but not as traced; claim (1) partly confirmed, re-read A3 |
+  | P2 ≠ P1, or w2 lines > 0 | Pending set not stable; claim (1) not confirmed |
+  | Test A not settled within 30 s | Claim (2) not confirmed at the unit tier |
+  | Test A `NumBlocksFailedToCache` > 0 with `getCacheUsed()` ≤ C | The DataNode's reserve (A3 step 5) caught a plan beyond its headroom; claim (2) holds, noted against (1) |
+  | Test C `getCacheUsed()` ≠ 65536 | Hand-back not shown; note, does not refute (1) |
+  A unit-tier confirmation needs Test B as in the table **and** the w1 ids **and** Test A as predicted.
+- **A5 (B3a).** No full build in the case copy: the cluster uses a copy of the node's base distribution
+  `/mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2` (built 2026-11-24 from the same source) plus
+  `libhadoop.so*` from `mvn -pl hadoop-common-project/hadoop-common package -Pnative -DskipTests` in the case copy
+  (`cmake`, `zlib1g-dev`, `libssl-dev`, `pkg-config` installed with `apt` on `pc99`, where they were absent; `lib/native`
+  created in the copy). Configuration, logs, PIDs and data under `/mydata/jingsong-s4/<stem>-run1/cluster/`; daemons with
+  `hdfs --daemon` (SSH to localhost does not work on the node). `ulimit -l` on `pc99` is 16492916 kB (> 1 GiB): the
+  `prlimit` step is replaced by the check `ulimit -l` ≥ 1048577 kB; no limit is changed.
+- **A6 (B3d, B3e step 2).** Pool `p` is added once, before the first M (a second `-addPool p` would fail); between values
+  only the directive is removed, then the run waits until JMX `CacheUsed` = 0 and `VmLck` = baseline, restarts the
+  DataNode with the next M and waits until `dfsadmin -report` shows Configured Cache Capacity = M. M = 0 runs first.
+  Sampling: `VmLck` and JMX every 1 s; `cacheadmin -listDirectives -stats` and `dfsadmin -report` every 5 s. Plateau: at
+  least 60 s and the last 10 s of (CacheUsed, NumBlocksCached, VmLck, BYTES_CACHED) unchanged; at most 120 s (else
+  `settled = false`). "Final" is the last sample, "max" the maximum over the phase. The CRM DEBUG level is set from the start
+  (also in phase 1).
+- **A7 (B3d, B3e step 3, B3f phase 2).** A DataNode sends its first cache report on its first service loop
+  (`lastCacheReport = 0`, `BPServiceActor.java:498`), then every `dfs.cachereport.intervalMsec`, and a cache report ends
+  pending-cached for the blocks it lists (`CacheManager.java:1065-1066`). The phase-2 window is therefore from the
+  directive to the first cache report after it. The directive is added 8 s after the first cache report that follows the
+  restart (DataNodeActivity `CacheReportsNumOps`, sampled every 1 s), so the window is about 50 s; the phase samples 90 s.
+  B3f's "1–3 `DNA_CACHE` lines in the first 60 s" is read as: DNA_CACHE lines before that cache report; "no block id beyond
+  the first 8" as: ≤ 8 distinct block ids in all DNA_CACHE lines of the phase. "Cannot fit" lines are counted from the
+  directive on.
+- **A8 (B3g), rows added.**
+  | Observation | Meaning |
+  |---|---|
+  | CacheUsed ≤ M but VmLck − baseline > M + 1 MiB for a capped M | Counter capped, real resource not; claim (2) refuted |
+  | CacheUsed = M but VmLck − baseline < M − 1 MiB | Instrument gap; claim (2) holds on the counter only (partly) |
+  | M = 0: anything cached or locked | Claim refuted (0 disables caching) |
+  | A capped M not settled within 120 s | That value not confirmed |
+  | Phase 2: window (directive → next cache report) < 20 s | Phase 2 not decisive; re-run it once, else claim (1) not confirmed at this tier |
+  | Phase 2: "cannot fit" lines present but more than 3 DNA_CACHE lines in the window | Mixed; claim (1) not confirmed |
+  A cluster-tier confirmation needs phase 1 (ceiling follows M, never above it) **and** phase 2's "cannot fit" lines with
+  the DNA_CACHE pattern.
+
+### D1b. Stage-4 audit amendments for the retry on `pc72` (2026-11-25, before any harness run or reading)
+
+The first stage-4 attempt (node `pc99`, 2026-11-25) wrote A1–A8 and a harness but never ran (stale node lock). A fresh
+stage-4 agent re-audited the design and that harness on 2026-11-25 for a run on `pc72` and made A9–A12 before any test,
+daemon or sampler ran (only the source copy, the `apt` install, the native `hadoop-common` build and a test-compile had
+run, none of which produces a reading). None changes B1. A9 and A10 make the runbook runnable and exact; A11 replaces
+one A4 row whose evidence was not specific (source reason below) and adds the matching prediction and cluster row; A12
+adds the instrument check the DEBUG-based rows depend on.
+
+- **A9 (B2a, B3a, A1, A2, A5).** Node `pc72` (`node2.jason92-326665`, Ubuntu 22.04.2, 125 GiB, `ulimit -l` 16492912 kB) in
+  place of `pc99`. Run folder `/mydata/jingsong-s4/dfs.datanode.max.locked.memory-rescanCachedBlockMap-remaining-run1/`
+  in place of `/mydata/jingsong-s4/<stem>-run1/` wherever A1, A2 and A5 name it (`src/`, `src-ablate/`, `cluster/`,
+  `logs/`). `cmake`, `zlib1g-dev`, `libssl-dev`, `pkg-config` were absent on `pc72` too and are installed with `apt` (A5).
+  The ablation copy runs the whole `testB_U49152` method, so it also prints a Test C line; that line has no prediction
+  and is reported only. Daemon log timestamps are in UTC (the JVM reads `/etc/timezone` = `Etc/UTC`) while the node's
+  shell clock is MST (`/etc/localtime`); the sampler converts log times to epoch seconds before comparing them with sample
+  times (used for the phase-2 window of A7).
+- **A10 (B2e steps 1 and 3).** "Wait until `getNumBlocksCached()` stops changing for 3 s (≤ 30 s)" becomes: poll every
+  100 ms; settled when at least 10 s have passed since the directive (Test A) or since heartbeats were re-enabled (Test C)
+  **and** the count has not changed for the last 3 s; at most 30 s (else `settled = false`). Reason (source, no reading):
+  the first `DNA_CACHE` needs a rescan (≤ 1 s, `refresh.interval.ms`) and then a heartbeat (≤ 1 s), and the NameNode
+  re-sends pending blocks only after the next rescan (`CacheReplicationMonitor.java:309`), so a 3-s rule can settle at 0
+  blocks, or between the first and second command of Test C, before caching has run.
+- **A11 (B2d, B2f, B2g, B3d, B3f, B3g).** `NumBlocksFailedToCache` is incremented both for a reserve refusal
+  (`FsDatasetCache.java:415-422`, WARN "Failed to cache …: could not reserve more bytes in the cache" at 419, counter at 485) and for a
+  `DNA_CACHE` of a block that is already caching or cached (`FsDatasetCache.java:276-282`), which happens whenever the
+  NameNode re-sends a still-pending block (A3 step 4). The counter alone therefore does not show a refusal.
+  Observable added: the DataNode's "could not reserve more bytes in the cache" lines (unit: `LogCapturer` on the
+  `FsDatasetCache` logger for each Test A / B / C instance; cluster: DataNode log lines from each phase's start).
+  Prediction added: **0 such lines** in every Test A row, Test B row, Test C, every phase-1 value and phase 2 (the
+  NameNode never plans beyond the reported headroom, and with page-aligned blocks it plans no block the DataNode's
+  page-rounded reserve would refuse; A3 step 5). `NumBlocksFailedToCache` is recorded and not predicted.
+  The A4 row "Test A `NumBlocksFailedToCache` > 0 with `getCacheUsed()` ≤ C" is **replaced** by:
+  | Observation | Meaning |
+  |---|---|
+  | Test A or C: "could not reserve" lines > 0 with `getCacheUsed()` ≤ C | The DataNode's reserve (A3 step 5) caught a plan beyond its headroom; claim (2) holds, noted against (1) |
+  | `NumBlocksFailedToCache` > 0 with 0 "could not reserve" lines | Duplicate cache commands (`FsDatasetCache.java:276-282`); no bearing on either claim |
+  B3g row added:
+  | Observation | Meaning |
+  |---|---|
+  | "could not reserve" lines > 0 in a phase with CacheUsed ≤ M and VmLck − baseline ≤ M + 1 MiB | The DataNode's reserve caught a NameNode plan beyond the headroom; claim (2) holds; claim (1) not confirmed at this tier |
+- **A12 (B2d, B3d), instrument validity.** The rows that read the absence of "cannot fit" lines (Test B pre and w2, the
+  ablation's w1, phase 2's "no cannot-fit" row) need the `CacheReplicationMonitor` DEBUG level in effect. Known answer:
+  every rescan logs `Scanned <n> directive(s) and <m> block(s) in <t> millisecond(s).` at DEBUG
+  (`CacheReplicationMonitor.java:205`), one per second here. Counted in every unit window (pre, w1, w2, Test A, Test C)
+  and in every cluster phase (NameNode log from the phase start). Row added to B2g and B3g:
+  | Observation | Meaning |
+  |---|---|
+  | A window or phase with 0 "Scanned" lines | DEBUG capture not in effect there; that row/phase gives no verdict (instrument invalid) |
+
+### D2. Stage-4 result (2026-11-25, run 1 on `pc72`)
+
+Results file: `results/dfs.datanode.max.locked.memory-rescanCachedBlockMap-remaining--autonomous.md` (at run time
+`~/writeup-hadoop/out/o22/results.md`). Frozen version of this file: sha256 `eb8f21a0…7612b` (sections A–C and D1/D1b
+unchanged since; only this D2 was added after run 1).
+
+- **Unit tier: Confirmed — caps.** Test B matched B2f in all 9 instances: P0 = 65536 (16 blocks); after the change
+  P1 = P2 = 65536 / 49152 / 32768 / 16384 / 0 / 0 for U = 0 / 16384 / 32768 / 49152 / 65536 / 81920 and 65536 / 32768 / 0
+  for C' = 65536 / 32768 / 0; the line-534 DEBUG message fired once per dropped block (0 / 4 / 8 / 12 / 16 / 16 and
+  0 / 8 / 16 distinct ids), never before the change or in the second window ("Scanned" DEBUG lines 3 in every window).
+  Ablation (line 534 `if (false && …)`, U = 49152): P1 = P2 = 65536, 0 drop lines. Test A: DN CacheUsed = C, blocks = C/4096
+  (4 / 8 / 16), bytesCached = C, max ≤ C, NN pending 0, 0 reserve refusals. Test C: 65536. Surefire 12/0/0 and 1/0/0.
+- **Cluster tier: Confirmed — caps.** `VmLck` 0 / 65536 / 131072 / 262144 / 524288 kB and CacheUsed = BYTES_CACHED
+  0 / 64 / 128 / 256 / 512 MiB at M = 0 / 64m / 128m / 256m / 1g (512 MiB file), never above M; 0 "could not reserve"
+  lines. Phase 2 (M = 128m, 60-s cache reports, re-run once under A8 with a ≈ 50-s window): 8 "cannot fit … remaining
+  cache size 0" lines for the 8 commanded blocks ≈ 2.8 s after the directive, 2 `DNA_CACHE` commands (same 8 ids), then
+  none for ≈ 48 s until the cache report; CacheUsed 128 MiB, `VmLck` 131072 kB.
+- **Outcome class:** true positive (estimate `positive`, effect `caps` at both tiers).
+- Recommendations for stage 3 (not applied): A3 step 4's citation of the resend reset is `CacheReplicationMonitor.java:309`
+  (not 308); predict reserve-refusal lines, not `NumBlocksFailedToCache`, which also counts duplicate commands.

@@ -1,0 +1,442 @@
+=== jars 2026-11-25 10:06:50 MST
++ [2026-11-25 10:06:50 MST] cp /mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2/share/hadoop/hdfs/hadoop-hdfs-nfs-3.4.2.jar /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/jars/nfs-stock.jar
++ [2026-11-25 10:06:50 MST] sed -i 73s/private static long DUMP_WRITE_WATER_MARK = 1024 \* 1024;/private static long DUMP_WRITE_WATER_MARK = 64L * 1024 * 1024;/ /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/src/hadoop-hdfs-project/hadoop-hdfs-nfs/src/main/java/org/apache/hadoop/hdfs/nfs/nfs3/OpenFileCtx.java
++ [2026-11-25 10:06:50 MST] sed -n 73p /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/src/hadoop-hdfs-project/hadoop-hdfs-nfs/src/main/java/org/apache/hadoop/hdfs/nfs/nfs3/OpenFileCtx.java
+  private static long DUMP_WRITE_WATER_MARK = 64L * 1024 * 1024;
++ [2026-11-25 10:06:50 MST] git diff --stat
+ .../src/main/java/org/apache/hadoop/hdfs/nfs/nfs3/OpenFileCtx.java      | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
++ [2026-11-25 10:07:00 MST] cp /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/src/hadoop-hdfs-project/hadoop-hdfs-nfs/target/hadoop-hdfs-nfs-3.4.2.jar /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/jars/nfs-64m.jar
++ [2026-11-25 10:07:00 MST] git checkout -- /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/src/hadoop-hdfs-project/hadoop-hdfs-nfs/src/main/java/org/apache/hadoop/hdfs/nfs/nfs3/OpenFileCtx.java
++ [2026-11-25 10:07:00 MST] sed -i 73s/private static long DUMP_WRITE_WATER_MARK = 1024 \* 1024;/private static long DUMP_WRITE_WATER_MARK = Long.MAX_VALUE;/ /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/src/hadoop-hdfs-project/hadoop-hdfs-nfs/src/main/java/org/apache/hadoop/hdfs/nfs/nfs3/OpenFileCtx.java
++ [2026-11-25 10:07:00 MST] sed -n 73p /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/src/hadoop-hdfs-project/hadoop-hdfs-nfs/src/main/java/org/apache/hadoop/hdfs/nfs/nfs3/OpenFileCtx.java
+  private static long DUMP_WRITE_WATER_MARK = Long.MAX_VALUE;
++ [2026-11-25 10:07:00 MST] git diff --stat
+ .../src/main/java/org/apache/hadoop/hdfs/nfs/nfs3/OpenFileCtx.java      | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
++ [2026-11-25 10:07:08 MST] cp /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/src/hadoop-hdfs-project/hadoop-hdfs-nfs/target/hadoop-hdfs-nfs-3.4.2.jar /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/jars/nfs-inf.jar
++ [2026-11-25 10:07:08 MST] git checkout -- /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/src/hadoop-hdfs-project/hadoop-hdfs-nfs/src/main/java/org/apache/hadoop/hdfs/nfs/nfs3/OpenFileCtx.java
++ [2026-11-25 10:07:08 MST] git status --short
+?? hadoop-hdfs-project/hadoop-hdfs-nfs/src/test/java/org/apache/hadoop/hdfs/nfs/nfs3/TestDumpWaterMark.java
+--- javap stock:       26: ldc2_w        #318                // long 1048576l
+--- javap 64m:       26: ldc2_w        #318                // long 67108864l
+--- javap inf:       26: ldc2_w        #319                // long 9223372036854775807l
++ [2026-11-25 10:07:19 MST] ls -l /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/jars
+total 348
+-rw-r--r-- 1 jason92 misconfiguration 115862 Nov 25 10:07 nfs-64m.jar
+-rw-r--r-- 1 jason92 misconfiguration 115867 Nov 25 10:07 nfs-inf.jar
+-rw-r--r-- 1 jason92 misconfiguration 115861 Nov 25 10:06 nfs-stock.jar
+=== setup 2026-11-25 10:07:19 MST on node1.jason92-326665.misconfiguration-pg0.cloudlab.umass.edu
++ [2026-11-25 10:07:19 MST] cp -a /mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2 /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/hadoop
++ [2026-11-25 10:07:20 MST] cp -r /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/hadoop/etc/hadoop /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/conf
++ [2026-11-25 10:07:20 MST] cat /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/conf/core-site.xml /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/conf/hdfs-site.xml
+<?xml version="1.0"?>
+<configuration>
+  <property><name>fs.defaultFS</name><value>hdfs://localhost:9000</value></property>
+  <property><name>hadoop.tmp.dir</name><value>/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/tmp</value></property>
+  <property><name>hadoop.proxyuser.jason92.hosts</name><value>*</value></property>
+  <property><name>hadoop.proxyuser.jason92.groups</name><value>*</value></property>
+</configuration>
+<?xml version="1.0"?>
+<configuration>
+  <property><name>dfs.replication</name><value>1</value></property>
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/dn</value></property>
+  <property><name>nfs.dump.dir</name><value>/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/dump</value></property>
+  <property><name>nfs.exports.allowed.hosts</name><value>* rw</value></property>
+  <property><name>nfs.stream.timeout</name><value>60000</value></property>
+  <property><name>nfs.wtmax</name><value>1048576</value></property>
+  <property><name>nfs.file.dump</name><value>true</value></property>
+</configuration>
++ [2026-11-25 10:07:20 MST] tail -4 /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/conf/hadoop-env.sh
+# export HADOOP_REGISTRYDNS_SECURE_EXTRA_OPTS="-jvm server"
+export HADOOP_LOG_DIR=/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/logs/hadoop
+export HADOOP_PID_DIR=/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/pids
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
++ [2026-11-25 10:07:20 MST] tail -1 /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/conf/log4j.properties
+log4j.logger.org.apache.hadoop.hdfs.nfs.nfs3.OpenFileCtx=DEBUG
++ [2026-11-25 10:07:24 MST] hdfs --daemon start namenode
++ [2026-11-25 10:07:26 MST] hdfs --daemon start datanode
++ [2026-11-25 10:07:28 MST] hdfs dfsadmin -safemode wait
+2026-11-25 17:07:29,155 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Safe mode is OFF
++ [2026-11-25 10:07:30 MST] hdfs dfs -mkdir -p /nfstest
+2026-11-25 17:07:31,543 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
++ [2026-11-25 10:07:33 MST] hdfs dfs -chmod 777 /nfstest
+2026-11-25 17:07:33,819 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+2026-11-25 17:07:36,094 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
++ [2026-11-25 10:07:35 MST] hdfs dfsadmin -report
+Configured Capacity: 807902732288 (752.42 GB)
+Present Capacity: 704108363776 (655.75 GB)
+DFS Remaining: 704108339200 (655.75 GB)
+DFS Used: 24576 (24 KB)
+DFS Used%: 0.00%
+Replicated Blocks:
+	Under replicated blocks: 0
+	Blocks with corrupt replicas: 0
+	Missing blocks: 0
+	Missing blocks (with replication factor 1): 0
+	Low redundancy blocks with highest priority to recover: 0
++ [2026-11-25 10:07:37 MST] jps
+1368402 NameNode
+1368508 DataNode
+1368968 Jps
+=== arm A jar=stock xmx=512m N=1500 hold=40 nfs.file.dump=true 2026-11-25 10:07:37 MST
++ [2026-11-25 10:07:40 MST] cp /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/jars/nfs-stock.jar /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/hadoop/share/hadoop/hdfs/hadoop-hdfs-nfs-3.4.2.jar.new
++ [2026-11-25 10:07:40 MST] mv -f /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/hadoop/share/hadoop/hdfs/hadoop-hdfs-nfs-3.4.2.jar.new /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/hadoop/share/hadoop/hdfs/hadoop-hdfs-nfs-3.4.2.jar
+      26: ldc2_w        #318                // long 1048576l
++ [2026-11-25 10:07:40 MST] hdfs --daemon start nfs3
++ [2026-11-25 10:07:44 MST] rpcinfo -p localhost
+   program vers proto   port  service
+    100000    4   tcp    111  portmapper
+    100000    3   tcp    111  portmapper
+    100000    2   tcp    111  portmapper
+    100000    4   udp    111  portmapper
+    100000    3   udp    111  portmapper
+    100000    2   udp    111  portmapper
+    100005    1   udp   4242  mountd
+    100005    2   udp   4242  mountd
+    100005    3   udp   4242  mountd
+    100005    1   tcp   4242  mountd
+    100005    2   tcp   4242  mountd
+    100005    3   tcp   4242  mountd
+    100003    3   tcp   2049  nfs
++ [2026-11-25 10:07:44 MST] showmount -e localhost
+Export list for localhost:
+/ *
+nfs3 pid 1369218; cmdline Xmx: -Xmx512m 
++ [2026-11-25 10:07:45 MST] sudo mount -t nfs -o vers=3,proto=tcp,nolock,noacl,soft,timeo=600,retrans=2,wsize=1048576 localhost:/ /mnt/hdfs-nfs-jason92
++ [2026-11-25 10:07:45 MST] ls -la /mnt/hdfs-nfs-jason92/nfstest
+total 1
+drwxrwxrwx 2 jason92 2584148964 64 Nov 25 10:07 .
+drwxr-xr-x 3 jason92 2584148964 96 Nov 25 10:07 ..
++ [2026-11-25 10:07:45 MST] readlink /proc/1369218/cwd
+/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1
+H0 [B live bytes: 20499952
+dump dir at start: 4096
+file /mnt/hdfs-nfs-jason92/nfstest/A-1795626469
+HOLD seen 2026-11-25 10:07:58.507098354 MST
+PROGRESS 1500 writes 8.6s
+HOLD after 1500 writes, 8.6s at 1795626478.276
+H1 [B live bytes: 17922152  delta: -2577800
+dump dir at hold: 97521664
+total 95232
+-rw-r--r-- 1 jason92 misconfiguration 97517568 Nov 25 10:07 16387
+measured at 2026-11-25 10:07:59.033000230 MST
+client exit 0
++ [2026-11-25 10:08:39 MST] cat /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/logs/cluster/arm-A/client.txt
+START 1795626469.626
+PROGRESS 500 writes 3.5s
+PROGRESS 1000 writes 6.1s
+PROGRESS 1500 writes 8.6s
+HOLD after 1500 writes, 8.6s at 1795626478.276
+DONE 49.1s at 1795626518.753
+dump dir after client: 97521664
+total 95232
+-rw-r--r-- 1 jason92 misconfiguration 97517568 Nov 25 10:07 16387
+2026-11-25 17:08:39,984 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 1 items
+-rw-r--r--   1 jason92 misconfiguration      65536 2026-11-25 17:07 /nfstest/A-1795626469
+2026-11-25 17:08:42,141 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+65536 A-1795626469
+waiting nfs.stream.timeout + 10 s
+dump dir after timeout: 4096
+total 0
+2026-11-25 17:09:54,265 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+98369536 A-1795626469
+gateway alive: 1369218
+/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/logs/cluster/arm-A/nfs3.log:0
+/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/logs/cluster/arm-A/hadoop-jason92-nfs3-node1.jason92-326665.misconfiguration-pg0.cloudlab.umass.edu.out:0
++ [2026-11-25 10:09:55 MST] sudo umount /mnt/hdfs-nfs-jason92
++ [2026-11-25 10:09:56 MST] hdfs --daemon stop nfs3
+=== arm A end 2026-11-25 10:10:01 MST
+=== arm B jar=64m xmx=512m N=1500 hold=40 nfs.file.dump=true 2026-11-25 10:10:01 MST
++ [2026-11-25 10:10:03 MST] cp /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/jars/nfs-64m.jar /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/hadoop/share/hadoop/hdfs/hadoop-hdfs-nfs-3.4.2.jar.new
++ [2026-11-25 10:10:03 MST] mv -f /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/hadoop/share/hadoop/hdfs/hadoop-hdfs-nfs-3.4.2.jar.new /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/hadoop/share/hadoop/hdfs/hadoop-hdfs-nfs-3.4.2.jar
+      26: ldc2_w        #318                // long 67108864l
++ [2026-11-25 10:10:04 MST] hdfs --daemon start nfs3
++ [2026-11-25 10:10:08 MST] rpcinfo -p localhost
+   program vers proto   port  service
+    100000    4   tcp    111  portmapper
+    100000    3   tcp    111  portmapper
+    100000    2   tcp    111  portmapper
+    100000    4   udp    111  portmapper
+    100000    3   udp    111  portmapper
+    100000    2   udp    111  portmapper
+    100005    1   udp   4242  mountd
+    100005    2   udp   4242  mountd
+    100005    3   udp   4242  mountd
+    100005    1   tcp   4242  mountd
+    100005    2   tcp   4242  mountd
+    100005    3   tcp   4242  mountd
+    100003    3   tcp   2049  nfs
++ [2026-11-25 10:10:08 MST] showmount -e localhost
+Export list for localhost:
+/ *
+nfs3 pid 1371340; cmdline Xmx: -Xmx512m 
++ [2026-11-25 10:10:09 MST] sudo mount -t nfs -o vers=3,proto=tcp,nolock,noacl,soft,timeo=600,retrans=2,wsize=1048576 localhost:/ /mnt/hdfs-nfs-jason92
++ [2026-11-25 10:10:09 MST] ls -la /mnt/hdfs-nfs-jason92/nfstest
+total 1
+drwxrwxrwx 2 jason92 2584148964 64 Nov 25 10:10 .
+drwxr-xr-x 3 jason92 2584148964 96 Nov 25 10:07 ..
++ [2026-11-25 10:10:09 MST] readlink /proc/1371340/cwd
+/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1
+H0 [B live bytes: 20528816
+dump dir at start: 4096
+file /mnt/hdfs-nfs-jason92/nfstest/B-1795626613
+HOLD seen 2026-11-25 10:10:19.279434943 MST
+PROGRESS 1500 writes 5.9s
+HOLD after 1500 writes, 5.9s at 1795626619.244
+H1 [B live bytes: 48351216  delta: 27822400
+dump dir at hold: 67112960
+total 65536
+-rw-r--r-- 1 jason92 misconfiguration 67108864 Nov 25 10:10 16388
+measured at 2026-11-25 10:10:19.795924422 MST
+client exit 0
++ [2026-11-25 10:10:59 MST] cat /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/logs/cluster/arm-B/client.txt
+START 1795626613.387
+PROGRESS 500 writes 2.3s
+PROGRESS 1000 writes 3.7s
+PROGRESS 1500 writes 5.9s
+HOLD after 1500 writes, 5.9s at 1795626619.244
+DONE 46.1s at 1795626659.491
+dump dir after client: 67112960
+total 65536
+-rw-r--r-- 1 jason92 misconfiguration 67108864 Nov 25 10:10 16388
+2026-11-25 17:11:00,680 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 1 items
+-rw-r--r--   1 jason92 misconfiguration      65536 2026-11-25 17:10 /nfstest/B-1795626613
+2026-11-25 17:11:02,894 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+65536 B-1795626613
+waiting nfs.stream.timeout + 10 s
+dump dir after timeout: 4096
+total 0
+2026-11-25 17:12:15,048 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+98369536 B-1795626613
+gateway alive: 1371340
+/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/logs/cluster/arm-B/nfs3.log:0
+/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/logs/cluster/arm-B/hadoop-jason92-nfs3-node1.jason92-326665.misconfiguration-pg0.cloudlab.umass.edu.out:0
++ [2026-11-25 10:12:16 MST] sudo umount /mnt/hdfs-nfs-jason92
++ [2026-11-25 10:12:16 MST] hdfs --daemon stop nfs3
+=== arm B end 2026-11-25 10:12:22 MST
+=== arm Aprime jar=stock xmx=384m N=8192 hold=40 nfs.file.dump=true 2026-11-25 10:12:22 MST
++ [2026-11-25 10:12:24 MST] cp /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/jars/nfs-stock.jar /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/hadoop/share/hadoop/hdfs/hadoop-hdfs-nfs-3.4.2.jar.new
++ [2026-11-25 10:12:24 MST] mv -f /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/hadoop/share/hadoop/hdfs/hadoop-hdfs-nfs-3.4.2.jar.new /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/hadoop/share/hadoop/hdfs/hadoop-hdfs-nfs-3.4.2.jar
+      26: ldc2_w        #318                // long 1048576l
++ [2026-11-25 10:12:25 MST] hdfs --daemon start nfs3
++ [2026-11-25 10:12:29 MST] rpcinfo -p localhost
+   program vers proto   port  service
+    100000    4   tcp    111  portmapper
+    100000    3   tcp    111  portmapper
+    100000    2   tcp    111  portmapper
+    100000    4   udp    111  portmapper
+    100000    3   udp    111  portmapper
+    100000    2   udp    111  portmapper
+    100005    1   udp   4242  mountd
+    100005    2   udp   4242  mountd
+    100005    3   udp   4242  mountd
+    100005    1   tcp   4242  mountd
+    100005    2   tcp   4242  mountd
+    100005    3   tcp   4242  mountd
+    100003    3   tcp   2049  nfs
++ [2026-11-25 10:12:29 MST] showmount -e localhost
+Export list for localhost:
+/ *
+nfs3 pid 1373346; cmdline Xmx: -Xmx384m 
++ [2026-11-25 10:12:29 MST] sudo mount -t nfs -o vers=3,proto=tcp,nolock,noacl,soft,timeo=600,retrans=2,wsize=1048576 localhost:/ /mnt/hdfs-nfs-jason92
++ [2026-11-25 10:12:30 MST] ls -la /mnt/hdfs-nfs-jason92/nfstest
+total 1
+drwxrwxrwx 2 jason92 2584148964 64 Nov 25 10:12 .
+drwxr-xr-x 3 jason92 2584148964 96 Nov 25 10:07 ..
++ [2026-11-25 10:12:30 MST] readlink /proc/1373346/cwd
+/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1
+H0 [B live bytes: 18077840
+dump dir at start: 4096
+file /mnt/hdfs-nfs-jason92/nfstest/Aprime-1795626754
+HOLD seen 2026-11-25 10:13:05.147578165 MST
+PROGRESS 8000 writes 29.4s
+HOLD after 8192 writes, 30.0s at 1795626784.177
+H1 [B live bytes: 17490216  delta: -587624
+dump dir at hold: 536875008
+total 524288
+-rw-r--r-- 1 jason92 misconfiguration 536870912 Nov 25 10:13 16389
+measured at 2026-11-25 10:13:05.687772945 MST
+client exit 0
++ [2026-11-25 10:13:44 MST] cat /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/logs/cluster/arm-Aprime/client.txt
+START 1795626754.164
+PROGRESS 500 writes 2.3s
+PROGRESS 1000 writes 4.2s
+PROGRESS 1500 writes 6.1s
+PROGRESS 2000 writes 7.9s
+PROGRESS 2500 writes 9.5s
+PROGRESS 3000 writes 11.1s
+PROGRESS 3500 writes 12.9s
+PROGRESS 4000 writes 14.8s
+PROGRESS 4500 writes 16.6s
+PROGRESS 5000 writes 18.4s
+PROGRESS 5500 writes 20.0s
+PROGRESS 6000 writes 21.7s
+PROGRESS 6500 writes 23.7s
+PROGRESS 7000 writes 25.6s
+PROGRESS 7500 writes 27.5s
+PROGRESS 8000 writes 29.4s
+HOLD after 8192 writes, 30.0s at 1795626784.177
+DONE 70.2s at 1795626824.402
+dump dir after client: 536875008
+total 524292
+-rw-r--r-- 1 jason92 misconfiguration 536870912 Nov 25 10:13 16389
+2026-11-25 17:13:45,662 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 1 items
+-rw-r--r--   1 jason92 misconfiguration  536870912 2026-11-25 17:12 /nfstest/Aprime-1795626754
+2026-11-25 17:13:47,922 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+536870912 Aprime-1795626754
+waiting nfs.stream.timeout + 10 s
+dump dir after timeout: 4096
+total 0
+2026-11-25 17:15:00,083 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+536936448 Aprime-1795626754
+gateway alive: 1373346
+/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/logs/cluster/arm-Aprime/nfs3.log:0
+/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/logs/cluster/arm-Aprime/hadoop-jason92-nfs3-node1.jason92-326665.misconfiguration-pg0.cloudlab.umass.edu.out:0
++ [2026-11-25 10:15:01 MST] sudo umount /mnt/hdfs-nfs-jason92
++ [2026-11-25 10:15:01 MST] hdfs --daemon stop nfs3
+=== arm Aprime end 2026-11-25 10:15:07 MST
+=== arm C jar=inf xmx=384m N=8192 hold=40 nfs.file.dump=true 2026-11-25 10:15:07 MST
++ [2026-11-25 10:15:09 MST] cp /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/jars/nfs-inf.jar /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/hadoop/share/hadoop/hdfs/hadoop-hdfs-nfs-3.4.2.jar.new
++ [2026-11-25 10:15:09 MST] mv -f /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/hadoop/share/hadoop/hdfs/hadoop-hdfs-nfs-3.4.2.jar.new /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/hadoop/share/hadoop/hdfs/hadoop-hdfs-nfs-3.4.2.jar
+      26: ldc2_w        #319                // long 9223372036854775807l
++ [2026-11-25 10:15:10 MST] hdfs --daemon start nfs3
++ [2026-11-25 10:15:14 MST] rpcinfo -p localhost
+   program vers proto   port  service
+    100000    4   tcp    111  portmapper
+    100000    3   tcp    111  portmapper
+    100000    2   tcp    111  portmapper
+    100000    4   udp    111  portmapper
+    100000    3   udp    111  portmapper
+    100000    2   udp    111  portmapper
+    100005    1   udp   4242  mountd
+    100005    2   udp   4242  mountd
+    100005    3   udp   4242  mountd
+    100005    1   tcp   4242  mountd
+    100005    2   tcp   4242  mountd
+    100005    3   tcp   4242  mountd
+    100003    3   tcp   2049  nfs
++ [2026-11-25 10:15:14 MST] showmount -e localhost
+Export list for localhost:
+/ *
+nfs3 pid 1375494; cmdline Xmx: -Xmx384m 
++ [2026-11-25 10:15:14 MST] sudo mount -t nfs -o vers=3,proto=tcp,nolock,noacl,soft,timeo=600,retrans=2,wsize=1048576 localhost:/ /mnt/hdfs-nfs-jason92
++ [2026-11-25 10:15:15 MST] ls -la /mnt/hdfs-nfs-jason92/nfstest
+total 1
+drwxrwxrwx 2 jason92 2584148964 64 Nov 25 10:15 .
+drwxr-xr-x 3 jason92 2584148964 96 Nov 25 10:07 ..
++ [2026-11-25 10:15:15 MST] readlink /proc/1375494/cwd
+/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1
+H0 [B live bytes: 18003960
+dump dir at start: 4096
+file /mnt/hdfs-nfs-jason92/nfstest/C-1795626919
+client exit 1
++ [2026-11-25 10:18:37 MST] cat /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/logs/cluster/arm-C/client.txt
+START 1795626919.217
+PROGRESS 500 writes 2.2s
+PROGRESS 1000 writes 4.1s
+PROGRESS 1500 writes 6.0s
+PROGRESS 2000 writes 7.8s
+PROGRESS 2500 writes 9.5s
+PROGRESS 3000 writes 11.2s
+PROGRESS 3500 writes 12.8s
+PROGRESS 4000 writes 14.9s
+Traceback (most recent call last):
+  File "/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/harness/ooo_write.py", line 11, in <module>
+    assert os.pwrite(fd, buf, i * C) == C
+OSError: [Errno 5] Input/output error
+no HOLD reached; state now:
+H1(end) [B live bytes: 17037680
+dump dir after client: 4096
+total 0
+2026-11-25 17:18:39,271 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 1 items
+-rw-r--r--   1 jason92 misconfiguration          0 2026-11-25 17:16 /nfstest/C-1795626919
+2026-11-25 17:18:41,432 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+0 C-1795626919
+gateway alive: 1375494
+/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/logs/cluster/arm-C/nfs3.log:4
+/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/logs/cluster/arm-C/hadoop-jason92-nfs3-node1.jason92-326665.misconfiguration-pg0.cloudlab.umass.edu.out:2
++ [2026-11-25 10:18:43 MST] sudo umount /mnt/hdfs-nfs-jason92
++ [2026-11-25 10:18:43 MST] hdfs --daemon stop nfs3
+=== arm C end 2026-11-25 10:18:48 MST
+=== arm D jar=stock xmx=512m N=64 hold=10 nfs.file.dump=false 2026-11-25 10:18:48 MST
++ [2026-11-25 10:18:51 MST] cp /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/jars/nfs-stock.jar /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/hadoop/share/hadoop/hdfs/hadoop-hdfs-nfs-3.4.2.jar.new
++ [2026-11-25 10:18:51 MST] mv -f /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/hadoop/share/hadoop/hdfs/hadoop-hdfs-nfs-3.4.2.jar.new /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/hadoop/share/hadoop/hdfs/hadoop-hdfs-nfs-3.4.2.jar
+      26: ldc2_w        #318                // long 1048576l
++ [2026-11-25 10:18:51 MST] hdfs --daemon start nfs3
++ [2026-11-25 10:18:55 MST] rpcinfo -p localhost
+   program vers proto   port  service
+    100000    4   tcp    111  portmapper
+    100000    3   tcp    111  portmapper
+    100000    2   tcp    111  portmapper
+    100000    4   udp    111  portmapper
+    100000    3   udp    111  portmapper
+    100000    2   udp    111  portmapper
+    100005    1   udp   4242  mountd
+    100005    2   udp   4242  mountd
+    100005    3   udp   4242  mountd
+    100005    1   tcp   4242  mountd
+    100005    2   tcp   4242  mountd
+    100005    3   tcp   4242  mountd
+    100003    3   tcp   2049  nfs
++ [2026-11-25 10:18:55 MST] showmount -e localhost
+Export list for localhost:
+/ *
+nfs3 pid 1377988; cmdline Xmx: -Xmx512m 
++ [2026-11-25 10:18:56 MST] sudo mount -t nfs -o vers=3,proto=tcp,nolock,noacl,soft,timeo=100,retrans=2,wsize=1048576 localhost:/ /mnt/hdfs-nfs-jason92
++ [2026-11-25 10:18:56 MST] ls -la /mnt/hdfs-nfs-jason92/nfstest
+total 1
+drwxrwxrwx 2 jason92 2584148964 64 Nov 25 10:18 .
+drwxr-xr-x 3 jason92 2584148964 96 Nov 25 10:07 ..
++ [2026-11-25 10:18:56 MST] readlink /proc/1377988/cwd
+/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1
+H0 [B live bytes: 20489752
+dump dir at start: 4096
+file /mnt/hdfs-nfs-jason92/nfstest/D-1795627140
+client exit 1
++ [2026-11-25 10:19:32 MST] cat /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/logs/cluster/arm-D/client.txt
+START 1795627140.555
+Traceback (most recent call last):
+  File "/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/harness/ooo_write.py", line 11, in <module>
+    assert os.pwrite(fd, buf, i * C) == C
+OSError: [Errno 5] Input/output error
+no HOLD reached; state now:
+H1(end) [B live bytes: 18762288
+dump dir after client: 4096
+total 0
+2026-11-25 17:19:34,140 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 1 items
+-rw-r--r--   1 jason92 misconfiguration          0 2026-11-25 17:19 /nfstest/D-1795627140
+2026-11-25 17:19:36,318 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+0 D-1795627140
+gateway alive: 1377988
+/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/logs/cluster/arm-D/nfs3.log:0
+/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1/logs/cluster/arm-D/hadoop-jason92-nfs3-node1.jason92-326665.misconfiguration-pg0.cloudlab.umass.edu.out:0
++ [2026-11-25 10:20:09 MST] hdfs --daemon stop nfs3
+=== arm D end 2026-11-25 10:20:14 MST
+EXIT trap: teardown
+=== teardown 2026-11-25 10:20:14 MST
++ [2026-11-25 10:20:48 MST] hdfs --daemon stop datanode
++ [2026-11-25 10:20:49 MST] hdfs --daemon stop namenode
++ [2026-11-25 10:20:53 MST] jps
+1379917 Jps
++ [2026-11-25 10:20:53 MST] sudo /usr/lib/jvm/java-8-openjdk-amd64/bin/jps
+1379971 Jps
+no daemon left
+mount gone
++ [2026-11-25 10:21:24 MST] systemctl is-active rpcbind
+active
++ [2026-11-25 10:21:24 MST] rpcinfo -p localhost
+   program vers proto   port  service
+    100000    4   tcp    111  portmapper
+    100000    3   tcp    111  portmapper
+    100000    2   tcp    111  portmapper
+    100000    4   udp    111  portmapper
+    100000    3   udp    111  portmapper
+    100000    2   udp    111  portmapper

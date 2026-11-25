@@ -1,0 +1,36 @@
+=== cluster-run.sh setup start 2026-11-25 11:05:03 MST host=node1.jason92-326665.misconfiguration-pg0.cloudlab.umass.edu
++ cp -a /mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2 /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-reserve-maxBytes-run1/cluster/hadoop  [2026-11-25 11:05:03 MST]
+  rc=0
++ cp -r /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-reserve-maxBytes-run1/cluster/hadoop/etc/hadoop /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-reserve-maxBytes-run1/cluster/conf  [2026-11-25 11:05:04 MST]
+  rc=0
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-reserve-maxBytes-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-reserve-maxBytes-run1/cluster/dn</value></property>
+  <property><name>dfs.datanode.pmem.cache.recovery</name><value>false</value></property>
+  <property><name>dfs.datanode.max.locked.memory</name><value>0</value></property>
++ tail -1 /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-reserve-maxBytes-run1/cluster/conf/log4j.properties  [2026-11-25 11:05:04 MST]
+log4j.logger.org.apache.hadoop.hdfs.server.blockmanagement.CacheReplicationMonitor=TRACE
+  rc=0
++ cat /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-reserve-maxBytes-run1/cluster/conf/core-site.xml  [2026-11-25 11:05:04 MST]
+<?xml version="1.0"?>
+<configuration>
+  <property><name>fs.defaultFS</name><value>hdfs://localhost:9000</value></property>
+  <property><name>hadoop.tmp.dir</name><value>/mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-reserve-maxBytes-run1/cluster/tmp</value></property>
+</configuration>
+  rc=0
++ hadoop version  [2026-11-25 11:05:04 MST]
++ ls /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-reserve-maxBytes-run1/cluster/hadoop/lib/native  [2026-11-25 11:05:04 MST]
+ls: cannot access '/mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-reserve-maxBytes-run1/cluster/hadoop/lib/native': No such file or directory
+  rc=2
++ hadoop checknative  [2026-11-25 11:05:04 MST]
+2026-11-25 18:05:05,274 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Native library checking:
+hadoop:  false 
+zlib:    false 
+zstd  :  false 
+bzip2:   false 
+openssl: false 
+ISA-L:   false 
+PMDK:    false 
+2026-11-25 18:05:05,436 INFO util.ExitUtil: Exiting with status 1: ExitException
+  rc=1
+=== cluster-run.sh setup end 2026-11-25 11:05:05 MST

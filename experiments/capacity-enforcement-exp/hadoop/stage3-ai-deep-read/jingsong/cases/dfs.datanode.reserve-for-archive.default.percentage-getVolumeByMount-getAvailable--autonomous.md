@@ -60,6 +60,8 @@
 - New test file `hadoop-hdfs-project/hadoop-hdfs/src/test/java/org/apache/hadoop/hdfs/server/datanode/fsdataset/impl/TestArchiveSameMountCap.java` (same package as `FsDatasetImpl`, so package-private `moveBlockAcrossStorage`/`getMountVolumeMap` are reachable).
 - Run: `mvn -pl hadoop-hdfs-project/hadoop-hdfs test -Dtest=TestArchiveSameMountCap -Dtest.build.data=$WORK/testdata` (the MiniDFSCluster base dir must sit on one local filesystem; `$WORK/testdata` keeps both data dirs on the same mount). Default surefire heap is enough (one NN + one DN, ≤ 128 MiB of data).
 
+> **Amendment D1-1 (2026-11-25, stage-4 audit; environment only, B2f/B2g unchanged).** Source copy by `copy-source.sh` into the run folder `/mydata/jingsong-s4/<stem>-run1/src`; the modules are in `~/.m2` from the node build, so no `install` step: `mvn -B -o -pl hadoop-hdfs-project/hadoop-hdfs test -Dtest=TestArchiveSameMountCap -DfailIfNoTests=false -Dtest.build.data=$MNT/testdata -Dhdfs.minidfs.basedir=$MNT/testdata/minidfs`. `$MNT` is a 12 GiB ext4 loop filesystem (`mkfs.ext4 -m 0`, sparse image in the run folder) so both data dirs sit on one small mount (node rule: same-mount tests on loop volumes, never on `/mydata` itself). The test logs the MiniDFSCluster base dir and each volume's `getMount()`.
+
 **B2b. Knobs.**
 - r = `dfs.datanode.reserve-for-archive.default.percentage` ∈ {0.0, 0.1, 0.25, 0.5}: 0.0 is the default (ARCHIVE gets nothing), 0.1 and 0.25 put the boundary inside the 40-block workload, 0.5 puts it beyond (all fit). Set with `conf.setDouble(...)` before building the cluster.
 - Fixed: `dfs.datanode.same-disk-tiering.enabled=true`; volume capacity C = 134,217,728 B (128 MiB) per volume via `MiniDFSCluster.Builder.storageCapacities(new long[]{C, C})` (calls `FsVolumeImpl.setCapacityForTesting`, `MiniDFSCluster.java:1895-1902`; the ratio is still applied on top, `FsVolumeImpl.java:445-452`); `dfs.blocksize=1048576`; `dfs.bytes-per-checksum=512` (default); `dfs.datanode.round-robin-volume-choosing-policy.additional-available-space=0` (otherwise the 1 GiB default makes every DISK write fail against a 128 MiB volume; it also makes the fallback threshold equal to line 148's).
@@ -75,6 +77,8 @@ Arithmetic: per replica on disk = 1,048,576 + meta (7 + 1,048,576/512×4 = 8,199
 - Path taken: DataNode metrics `ReplaceBlockOpOnSameMount` / `ReplaceBlockOpOnSameHost` via `MetricsAsserts.getLongCounter(name, MetricsAsserts.getMetrics(dn.getMetrics().name()))`.
 - Sanity: `vols[DISK].getMount().equals(vols[ARCHIVE].getMount())`, `fsDataset.getMountVolumeMap().hasMount(mount)`, and `getCapacity()` of ARCHIVE = floor(C × r).
 - Not directly observable: the private `FsVolumeList` decision itself; it is inferred from the metric `ReplaceBlockOpOnSameMount` (incremented only when line 148 passed).
+
+> **Amendment D1-2 (2026-11-25, stage-4 audit; instruments).** (a) Direct observation of line 148: before each serial move the test calls `FsVolumeList.getVolumeByMount(StorageType.ARCHIVE, <source DISK volume>.getMount(), block.getNumBytes())` on the dataset's private `volumes` field (reflection; the returned reference is closed at once) and logs `probe=pass` (non-null) or `probe=null`. The probe takes no lock and changes nothing; it is skipped in the T = 8 run. (b) After each move the test sums the sizes of all `blk_*` files (block and meta) under the ARCHIVE volume's `current/` (the real-resource reading; no `du` offset). (c) The refusal's exception class and message are logged.
 
 **B2e. Procedure.**
 1. Add the test class. Sketch (one helper, five `@Test` methods):
@@ -132,6 +136,8 @@ Arithmetic: per replica on disk = 1,048,576 + meta (7 + 1,048,576/512×4 = 8,199
 
 In every serial row, each successful move has `availBefore > 1,048,576` and each refusal has `availBefore ≤ 1,048,576`; `dfsUsed_after ≤ capacity` always.
 
+> **Amendment D1-3 (2026-11-25, stage-4 audit; source-derived, before any reading).** A volume's `dfsUsed` does not start at 0: `BlockPoolSlice` builds `FSCachingGetSpaceUsed` with `loadDfsUsed()` (`BlockPoolSlice.java:218-222, 338`), which is −1 on a fresh volume, so the first refresh runs `du` of the block-pool directory (directory blocks, `VERSION`, …: a few tens of KB), and the 600 s `du` refresh can add directory blocks later. The "dfsUsed after" columns (B2f, and the ARCHIVE `usedSpace` of B3d) are therefore read as `moved × per-replica + δ`, and "available after" as `predicted − δ`, where δ = ARCHIVE dfsUsed − moved × per-replica (logged; δ ≥ 0). The moved counts are unchanged for δ < 700,000 B (smallest margin: unit r = 0.1 at k = 11, 1,797,247 − 1,048,576 = 748,671 B; cluster margins are > 47 MB). The block+meta file sums (D1-2b; B3d `find`) carry no δ and are compared with `moved × per-replica` exactly. A δ ≥ 700,000 B is recorded as a deviation.
+
 **B2g. Readings.**
 
 | Observation | Meaning |
@@ -143,6 +149,14 @@ In every serial row, each successful move has `availBefore > 1,048,576` and each
 | Control moves all 40 with SameMount = 0 | Confirms the cap comes from the same-disk-tiering ratio, not from capacity C. |
 | Concurrent run moves > 12 and dfsUsed > capacity | Confirms the non-atomic check overshoot (A3.6); does not refute the serial claim. Concurrent moved = 12 is also consistent (race not hit). |
 | Concurrent moved > 19 | Overshoot larger than the thread bound: unexpected, re-examine locking. |
+
+> **Amendment D1-4 (2026-11-25, stage-4 audit; rows added before run 1, for reasons that do not depend on any reading).** (a) The first row (claim confirmed) also needs the direct disallow evidence of D1-2a: in every serial tiering-on row, `probe=pass` before each successful move and `probe=null` before each refusal, and the moved count equal to `ReplaceBlockOpOnSameMount`. (b) The second row (claim wrong) applies to the block+meta file sum (D1-2b) as well as to `dfsUsed`. (c) Added rows:
+
+| Observation | Meaning |
+|---|---|
+| A serial move succeeds via the same mount after `probe=null`, or is refused after `probe=pass` | Probe and move disagree: line 148 is not the deciding point as traced; unit tier Not confirmed. |
+| Control moves fewer than 40, or its `ReplaceBlockOpOnSameMount` > 0 | Control failed: the cap cannot be attributed to the ratio; unit tier Not confirmed. |
+| r = 0.5 moves fewer than 40 | Positive control failed (workload or move call); the unit tier does not test the claim (Not confirmed). |
 
 **B2h. Controls.** Tiering-off control (same workload, ratio ignored → all move). r = 0.5 is a positive control that the workload and move call work. Sanity assertions that both volumes share a mount and ARCHIVE `getCapacity()` equals floor(C×r) rule out a misconfigured mount map. Each test uses a fresh MiniDFSCluster so no state carries over.
 
@@ -167,6 +181,8 @@ In every serial row, each successful move has `availBefore > 1,048,576` and each
   - `dfs.namenode.redundancy.interval.seconds=1`
   - leave `dfs.datanode.round-robin-volume-choosing-policy.additional-available-space` at its 1 GiB default (DISK has room for it; it makes the fallback stricter than line 148, so hardlink moves admitted in the last GiB can only come from line 148).
 
+> **Amendment D1-5 (2026-11-25, stage-4 audit; environment only, B3f/B3g unchanged).** Distribution: a copy of the node's build `/mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2` in the run folder (no rebuild), `HADOOP_CONF_DIR` in the run folder. The two data dirs `dn/disk` and `dn/archive` are on a 12 GiB ext4 loop filesystem (`mkfs.ext4 -m 0`, sparse image in the run folder) mounted at `$RUN/mnt`; the NameNode dir, logs, `hadoop.tmp.dir` and the 64 MiB staging file stay outside it on `/mydata`. R = (df size of `$RUN/mnt`) − 8 GiB (B3a's formula on the loop mount; df available > 8 GiB holds for the empty filesystem). Ports off the defaults: `fs.defaultFS=hdfs://localhost:19000`, NameNode HTTP 19870, DataNode 19866 / 19867 / 19864 (the JMX URLs of B3d use 19864 and 19870). Daemons by `hdfs --daemon` (SSH to localhost does not work on these nodes); process checks by `ps`, not `jps`. The loop filesystem stays mounted across the configurations (each run wipes `dn/` and re-formats) and is unmounted and detached at the end.
+
 **B3b. Knobs.** r ∈ {0.0, 0.1, 0.25, 0.5} (same reasons as B2b); each value needs a DataNode restart, and the runs below re-format so each starts empty. Mover concurrency: `-D dfs.datanode.balance.max.concurrent.moves=1` (serial, main runs) vs default 100 (concurrency runs at r = 0.1 and 0.25). Control: `dfs.datanode.same-disk-tiering.enabled=false` with r = 0.1.
 
 **B3c. Workload.** 32 files × one 64 MiB block = 2 GiB written as HOT (DISK). Per replica = 67,108,864 + meta (7 + 67,108,864/512×4 = 524,295) = 67,633,159 B; 32 replicas = 2,164,261,088 B. DISK capacity C×(1−r) ≥ 4 GiB holds them with the 1 GiB policy margin (worst case r=0.5: 4,294,967,296 − 2,164,261,088 = 2.13 GB left > 64 MiB + 1 GiB). Then policy COLD on the directory and `hdfs mover -p /cold`, which moves each replica to the ARCHIVE volume on the same node through line 148. ARCHIVE capacity floor(C×r) = 0 / 858,993,459 / 2,147,483,648 / 4,294,967,296 B, i.e. below, below, just below and above the 2 GiB data. Duration ≈ 5–10 min per run (writes < 1 min; Mover iterations ~3 s apart, up to 10 retries after the cap is hit).
@@ -180,6 +196,8 @@ In every serial row, each successful move has `availBefore > 1,048,576` and each
 - Mover result: exit code and last stderr line; DN log lines `Moved .* from StorageType DISK to ARCHIVE` and `Out of space` in `$RUN/logs/hadoop-*-datanode-*.log`.
 - Sample: once before the Mover, every 2 s during it (`watch`-style loop appending the JMX `freeSpace`/`usedSpace` of ARCHIVE and the `find` sum to `$RUN/samples.csv`), and once 10 s after it exits.
 - Not observable directly: the individual line-148 decisions; inferred from `ReplaceBlockOpOnSameMount` and the DN log.
+
+> **Amendment D1-6 (2026-11-25, stage-4 audit; reading rule and added observable).** The B3f "Mover" column is informational (no B3g row uses it). The Mover may resubmit refused blocks in later iterations, so `Out of space` lines can be a multiple of the refused blocks; "N refused" means N distinct block ids refused. Added observable for the disallow branch: each DataNode refusal logs the fallback's WARN `The volume[…/archive/] with the available space (=X B) is less than the block size (=67108864 B).` (`RoundRobinVolumeChoosingPolicy.java:120-122`); with tiering on and an empty target storage id this fallback is reached only after line 148 returned null, and X is line 148's operand. Counted per run: DataNode `Moved … from StorageType DISK to ARCHIVE` lines (successes) and the distinct block ids in `Out of space` replies. At r = 0.0 the Mover gets no ARCHIVE target (`Mover.java:173-175`), so no move reaches the DataNode: that row's cap is enforced by the Mover, not by line 148.
 
 **B3e. Procedure.** For each configuration (serial r = 0.0, 0.1, 0.25, 0.5; concurrent r = 0.1, 0.25; control):
 1. `mkdir -p $RUN/{logs,pids,tmp}`; compute R (B3a); write `core-site.xml`/`hdfs-site.xml` into `$HADOOP_HOME/etc/hadoop` with this run's r (and tiering flag).
@@ -218,6 +236,13 @@ In all serial runs ARCHIVE bytes ≤ floor(C×r), DISK + ARCHIVE bytes = 2,164,2
 | Concurrent runs exceed the serial count | Confirms the non-atomic check (A3.6) in a real DataNode; bounded overshoot only. |
 | ARCHIVE bytes match predictions but `df` used on the mount grows by the moved amount | The move is a copy, not a hardlink: physical-usage reading of A3.6 wrong. |
 | r = 0.5 run does not reach 32 | Workload or Mover problem (positive control failed); the run does not test the claim. |
+
+> **Amendment D1-7 (2026-11-25, stage-4 audit; rows added before run 1, for reasons that do not depend on any reading).** (a) The first row (claim confirmed) also needs, in the serial r = 0.1 and 0.25 runs, `ReplaceBlockOpOnSameMount` = replicas moved and a refusal WARN (D1-6) with X ≤ 67,108,864 for each refused block (direct disallow evidence). (b) Added rows:
+
+| Observation | Meaning |
+|---|---|
+| A block refused under tiering with WARN X > 67,108,864 | The refusal did not come from line 148 (it passed line 148's bound): mechanism different from A3; cluster tier Not confirmed. |
+| Control moves fewer than 32, or its `ReplaceBlockOpOnSameMount` > 0 | Control failed: the cap cannot be attributed to the ratio; cluster tier Not confirmed. |
 
 **B3h. Controls.** Tiering-off control (same data and Mover, ratio ignored → all 32 move). r = 0.5 as positive control that the workload can fill ARCHIVE beyond the smaller caps. Fresh format per run (no carry-over of blocks or dfsUsed caches). Concurrency fixed to 1 for the main runs so a race cannot mask or create the cap. `du.reserved` derived from the same df reading the DN uses, recorded per run; NN `capacityTotal` for ARCHIVE checked against floor(C×r) before the Mover starts.
 
@@ -261,4 +286,10 @@ In all serial runs ARCHIVE bytes ≤ floor(C×r), DISK + ARCHIVE bytes = 2,164,2
 
 ## D. Stage-4 feedback
 
-none yet
+**2026-11-25, stage 4 run 1 (Jingsong, `pc91`)** — results: `hadoop/stage4-runtime-verification/jingsong/results/dfs.datanode.reserve-for-archive.default.percentage-getVolumeByMount-getAvailable--autonomous.md`.
+
+- Audit amendments D1-1 to D1-7 (above, dated 2026-11-25) were made before any reading; frozen sha256 `0912dde9899ebba56570ae05d6a60e9e7905453f8ce501e2a1ec844ee3de44bc`. B1 and every predicted number are unchanged.
+- **Unit tier: Confirmed — caps.** Serial moved/refused 0/40, 12/28, 31/9, 40/0 for r = 0.0/0.1/0.25/0.5, exactly B2f; ARCHIVE block+meta bytes 0 / 12,681,300 / 32,760,025 / 42,271,000; dfsUsed = those + δ = 24,576 (D1-3); the line-148 probe passed before every success and returned null before every refusal (0 mismatches); every success had `availBefore` > 1,048,576 (smallest 1,772,671) and every refusal ≤ 1,048,576 (largest 769,831). Control (tiering off): 40 moved, SameMount 0. Concurrent T = 8 at r = 0.1: **19 moved**, ARCHIVE block bytes 20,078,725 against a 13,421,772 capacity — the non-atomic check overshoots by exactly T − 1 = 7 blocks (A3.6 confirmed; bounded).
+- **Cluster tier: Confirmed — caps.** Serial ARCHIVE replicas 0 / 12 / 31 / 32 with bytes 0 / 811,597,908 / 2,096,627,929 / 2,164,261,088, exactly B3f; `ReplaceBlockOpOnSameMount` = replicas moved; every refusal's fallback WARN showed line 148's operand 47,370,975 (r = 0.1, 20 blocks) or 50,831,143 (r = 0.25, 1 block), both ≤ 67,108,864; `df` used on the mount moved by ≤ 24,576 B during the hardlink moves; control (tiering off) moved all 32 with SameMount 0 and a transient +56 MB copy in `df`. The concurrent Mover runs (default 100) gave the same counts as the serial ones (race not hit).
+- Outcome class: **true positive**.
+- For stage 3: (1) r = 0.0 is enforced by the Mover (`maxRemaining = 0`, no ARCHIVE target), not by line 148 — as D1-6 notes. (2) The Mover in 3.4.2 never retries: a second iteration throws `MetricsException: Metrics source Mover-<bpid> already exists!` (`Mover.java:685` builds a new `Mover` per iteration, whose constructor registers `MoverMetrics` under the same name, `Mover.java:163`, `MoverMetrics.java:47-50`), so the run exits 255 after one pass whenever a block was refused; B3f's "after 10 retries" does not happen. Upstream candidate (check JIRA). (3) The dfsUsed offset of D1-3 (24,576 B per volume here) belongs in predictions of exact dfsUsed.

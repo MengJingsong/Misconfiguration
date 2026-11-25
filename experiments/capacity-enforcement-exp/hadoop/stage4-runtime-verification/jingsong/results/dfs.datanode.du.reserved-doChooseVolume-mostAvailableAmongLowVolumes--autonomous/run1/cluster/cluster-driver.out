@@ -1,0 +1,388 @@
+=== cluster-run.sh all start 2026-11-25 10:36:21 MST host=node1.jason92-326665.misconfiguration-pg0.cloudlab.umass.edu
++ cp -a /mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2 /mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/hadoop  [2026-11-25 10:36:21 MST]
+  rc=0
++ rm -rf /mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/conf  [2026-11-25 10:36:22 MST]
+  rc=0
++ cp -r /mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2/etc/hadoop /mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/conf  [2026-11-25 10:36:22 MST]
+  rc=0
++ cat /mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/conf/core-site.xml  [2026-11-25 10:36:22 MST]
+<?xml version="1.0"?><configuration>
+  <property><name>fs.defaultFS</name><value>hdfs://127.0.0.1:19820</value></property>
+  <property><name>hadoop.tmp.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/tmp</value></property>
+</configuration>
+  rc=0
++ hadoop version  [2026-11-25 10:36:22 MST]
+Hadoop 3.4.2
+Source code repository Unknown -r d60b93c8abf83f11c7f88597306f0c56444e8ce4
+Compiled by jason92 on 2026-11-24T06:07Z
+Compiled on platform linux-x86_64
+Compiled with protoc 3.23.4
+From source with checksum fa94c67d4b4be021b9e9515c9b0f7b6
+This command was run using /mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/hadoop/share/hadoop/common/hadoop-common-3.4.2.jar
+  rc=0
++ truncate -s 12G /mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/dn.img  [2026-11-25 10:36:22 MST]
+  rc=0
++ mkfs.ext4 -q -F /mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/dn.img  [2026-11-25 10:36:22 MST]
+  rc=0
++ sudo mount -o loop /mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/dn.img /mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn  [2026-11-25 10:36:22 MST]
+  rc=0
++ sudo chown jason92 /mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn  [2026-11-25 10:36:22 MST]
+  rc=0
++ findmnt -no SOURCE,FSTYPE,SIZE,AVAIL /mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn  [2026-11-25 10:36:22 MST]
+/dev/loop0 ext4   11.7G 11.1G
+  rc=0
+/dev/loop0: []: (/mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/dn.img)
++ head -c 104857600 /dev/urandom > /mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/src/f100m
++ head -c 1048576000 /dev/urandom > /mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/src/f1000m
+total 1126400
+-rw-r--r-- 1 jason92 misconfiguration 1048576000 Nov 25 10:36 f1000m
+-rw-r--r-- 1 jason92 misconfiguration  104857600 Nov 25 10:36 f100m
++ df -B1 /mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn /mydata  [2026-11-25 10:36:28 MST]
+Filesystem                      1B-blocks        Used    Available Use% Mounted on
+/dev/loop0                    12573614080       24576  11912568832   1% /mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn
+/dev/mapper/emulab-node1--bs 807902732288 63971893248 702816804864   9% /mydata
+  rc=0
+===== fresh cluster K1: mode=perdir b0=1073741824 b1=3221225472 T=1048576  [2026-11-25 10:36:28 MST]
+  ps check: no NameNode/DataNode of this run
+  TOTAL=12573614080 ROOTRES=661020672 loopAvail=11912560640 mydataAvail=702816796672
+  <property><name>dfs.namenode.name.dir</name><value>file:///mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>file:///mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn/d0,file:///mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn/d1</value></property>
+  <property><name>dfs.datanode.fsdataset.volume.choosing.policy</name><value>org.apache.hadoop.hdfs.server.datanode.fsdataset.AvailableSpaceVolumeChoosingPolicy</value></property>
+  <property><name>dfs.datanode.available-space-volume-choosing-policy.balanced-space-threshold</name><value>1048576</value></property>
+  <property><name>dfs.datanode.available-space-volume-choosing-policy.balanced-space-preference-fraction</name><value>0.0</value></property>
+  <property><name>dfs.datanode.du.reserved./mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn/d0</name><value>10838851584</value></property>
+  <property><name>dfs.datanode.du.reserved./mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn/d1</name><value>8691367936</value></property>
++ hdfs --daemon start namenode  [2026-11-25 10:36:33 MST]
+  rc=0
++ hdfs --daemon start datanode  [2026-11-25 10:36:35 MST]
+  rc=0
++ hdfs dfsadmin -safemode wait  [2026-11-25 10:36:37 MST]
+2026-11-25 17:36:38,506 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Safe mode is OFF
+  rc=0
+  START K1: VolumeInfo free0 free1 res0 res1 rfr0 rfr1 used0 used1 nb0 nb1 = 1073717248 3221200896 10838851584 8691367936 0 0 24576 24576 0 0
+  CHECK K1: reserved0-R0=0 reserved1-R1=0 b0-free0=24576 b1-free1=24576
+--- put loop K1 (n=45)  [10:36:45]
++ hdfs dfs -mkdir -p /t /c  [2026-11-25 10:36:45 MST]
+2026-11-25 17:36:46,070 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
+1 0
+2 0
+3 0
+4 0
+5 0
+6 0
+7 0
+8 0
+9 0
+10 0
+11 0
+12 0
+13 0
+14 0
+15 0
+16 0
+17 0
+18 0
+19 0
+20 0
+21 0
+22 0
+23 0
+24 0
+25 0
+26 0
+27 0
+28 0
+29 0
+30 0
+31 0
+32 0
+33 0
+34 0
+35 0
+36 0
+37 0
+38 0
+39 0
+40 0
+41 1
+42 1
+43 1
+44 1
+45 1
+RESULT K1: accepted=40 of 45; final blk0=1056768070 blk1=3170304210 cnt=10/30 vinfo=16949178 50896686 10838851584 8691367936 0 0 1056792646 3170328786 10 30
+  LOGS K1: DN DEBUG imbalanced-high=30 imbalanced-low=10 balanced=0 'Out of space'=0 'less than the block size'=0
+  LOGS K1: NN 'does not have enough' lines=5; reasons:      10 Not enough replicas was chosen. Reason: {NO_REQUIRED_STORAGE_TYPE=1} 
+2026-11-25 17:40:37,906 DEBUG org.apache.hadoop.hdfs.server.blockmanagement.BlockPlacementPolicy: The node 127.0.0.1:19866 does not have enough DISK space (required=104857600, scheduled=0, remaining=0).
+===== fresh cluster K2: mode=perdir b0=536870912 b1=2147483648 T=1048576  [2026-11-25 10:41:02 MST]
+  ps check: no NameNode/DataNode of this run
+  TOTAL=12573614080 ROOTRES=661020672 loopAvail=11912560640 mydataAvail=698588884992
+  <property><name>dfs.namenode.name.dir</name><value>file:///mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>file:///mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn/d0,file:///mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn/d1</value></property>
+  <property><name>dfs.datanode.fsdataset.volume.choosing.policy</name><value>org.apache.hadoop.hdfs.server.datanode.fsdataset.AvailableSpaceVolumeChoosingPolicy</value></property>
+  <property><name>dfs.datanode.available-space-volume-choosing-policy.balanced-space-threshold</name><value>1048576</value></property>
+  <property><name>dfs.datanode.available-space-volume-choosing-policy.balanced-space-preference-fraction</name><value>0.0</value></property>
+  <property><name>dfs.datanode.du.reserved./mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn/d0</name><value>11375722496</value></property>
+  <property><name>dfs.datanode.du.reserved./mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn/d1</name><value>9765109760</value></property>
++ hdfs --daemon start namenode  [2026-11-25 10:41:10 MST]
+  rc=0
++ hdfs --daemon start datanode  [2026-11-25 10:41:12 MST]
+  rc=0
++ hdfs dfsadmin -safemode wait  [2026-11-25 10:41:14 MST]
+2026-11-25 17:41:15,436 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Safe mode is OFF
+  rc=0
+  START K2: VolumeInfo free0 free1 res0 res1 rfr0 rfr1 used0 used1 nb0 nb1 = 536846336 2147459072 11375722496 9765109760 0 0 24576 24576 0 0
+  CHECK K2: reserved0-R0=0 reserved1-R1=0 b0-free0=24576 b1-free1=24576
+--- put loop K2 (n=45)  [10:41:22]
++ hdfs dfs -mkdir -p /t /c  [2026-11-25 10:41:22 MST]
+2026-11-25 17:41:23,028 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
+1 0
+2 0
+3 0
+4 0
+5 0
+6 0
+7 0
+8 0
+9 0
+10 0
+11 0
+12 0
+13 0
+14 0
+15 0
+16 0
+17 0
+18 0
+19 0
+20 0
+21 0
+22 0
+23 0
+24 0
+25 0
+26 1
+27 1
+28 1
+29 1
+30 1
+31 1
+32 1
+33 1
+34 1
+35 1
+36 1
+37 1
+38 1
+39 1
+40 1
+41 1
+42 1
+43 1
+44 1
+45 1
+RESULT K2: accepted=25 of 45; final blk0=528384035 blk1=2113536140 cnt=5/20 vinfo=8462301 33922932 11375722496 9765109760 0 0 528408611 2113560716 5 20
+  LOGS K2: DN DEBUG imbalanced-high=20 imbalanced-low=5 balanced=0 'Out of space'=0 'less than the block size'=0
+  LOGS K2: NN 'does not have enough' lines=20; reasons:      40 Not enough replicas was chosen. Reason: {NO_REQUIRED_STORAGE_TYPE=1} 
+2026-11-25 17:43:49,407 DEBUG org.apache.hadoop.hdfs.server.blockmanagement.BlockPlacementPolicy: The node 127.0.0.1:19866 does not have enough DISK space (required=104857600, scheduled=0, remaining=0).
+===== fresh cluster K3: mode=global b0=1073741824 b1=0 T=10737418240  [2026-11-25 10:45:33 MST]
+  ps check: no NameNode/DataNode of this run
+  TOTAL=12573614080 ROOTRES=661020672 loopAvail=11912560640 mydataAvail=696036347904
+  <property><name>dfs.namenode.name.dir</name><value>file:///mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>file:///mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn/d0,file:///mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn/d1</value></property>
+  <property><name>dfs.datanode.fsdataset.volume.choosing.policy</name><value>org.apache.hadoop.hdfs.server.datanode.fsdataset.AvailableSpaceVolumeChoosingPolicy</value></property>
+  <property><name>dfs.datanode.available-space-volume-choosing-policy.balanced-space-threshold</name><value>10737418240</value></property>
+  <property><name>dfs.datanode.available-space-volume-choosing-policy.balanced-space-preference-fraction</name><value>0.0</value></property>
+  <property><name>dfs.datanode.du.reserved</name><value>10838851584</value></property>
++ hdfs --daemon start namenode  [2026-11-25 10:45:41 MST]
+  rc=0
++ hdfs --daemon start datanode  [2026-11-25 10:45:43 MST]
+  rc=0
++ hdfs dfsadmin -safemode wait  [2026-11-25 10:45:45 MST]
+2026-11-25 17:45:46,296 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Safe mode is OFF
+  rc=0
+  START K3: VolumeInfo free0 free1 res0 res1 rfr0 rfr1 used0 used1 nb0 nb1 = 1073717248 1073717248 10838851584 10838851584 0 0 24576 24576 0 0
+  CHECK K3: reserved0-R0=0 reserved1-R1=0 b0-free0=24576 b1-free1=24576
+--- put loop K3 (n=45)  [10:45:52]
++ hdfs dfs -mkdir -p /t /c  [2026-11-25 10:45:52 MST]
+2026-11-25 17:45:53,800 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
+1 0
+2 0
+3 0
+4 0
+5 0
+6 0
+7 0
+8 0
+9 0
+10 0
+11 0
+12 0
+13 0
+14 0
+15 0
+16 0
+17 0
+18 0
+19 0
+20 0
+21 1
+22 1
+23 1
+24 1
+25 1
+26 1
+27 1
+28 1
+29 1
+30 1
+31 1
+32 1
+33 1
+34 1
+35 1
+36 1
+37 1
+38 1
+39 1
+40 1
+41 1
+42 1
+43 1
+44 1
+45 1
+RESULT K3: accepted=20 of 45; final blk0=1056768070 blk1=1056768070 cnt=10/10 vinfo=16949178 16949178 10838851584 10838851584 0 0 1056792646 1056792646 10 10
+  LOGS K3: DN DEBUG imbalanced-high=0 imbalanced-low=0 balanced=20 'Out of space'=0 'less than the block size'=0
+  LOGS K3: NN 'does not have enough' lines=25; reasons:      50 Not enough replicas was chosen. Reason: {NO_REQUIRED_STORAGE_TYPE=1} 
+2026-11-25 17:47:51,761 DEBUG org.apache.hadoop.hdfs.server.blockmanagement.BlockPlacementPolicy: The node 127.0.0.1:19866 does not have enough DISK space (required=104857600, scheduled=0, remaining=0).
+===== fresh cluster K1c-1: mode=perdir b0=1073741824 b1=3221225472 T=1048576  [2026-11-25 10:50:02 MST]
+  ps check: no NameNode/DataNode of this run
+  TOTAL=12573614080 ROOTRES=661020672 loopAvail=11912560640 mydataAvail=694068408320
+  <property><name>dfs.namenode.name.dir</name><value>file:///mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>file:///mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn/d0,file:///mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn/d1</value></property>
+  <property><name>dfs.datanode.fsdataset.volume.choosing.policy</name><value>org.apache.hadoop.hdfs.server.datanode.fsdataset.AvailableSpaceVolumeChoosingPolicy</value></property>
+  <property><name>dfs.datanode.available-space-volume-choosing-policy.balanced-space-threshold</name><value>1048576</value></property>
+  <property><name>dfs.datanode.available-space-volume-choosing-policy.balanced-space-preference-fraction</name><value>0.0</value></property>
+  <property><name>dfs.datanode.du.reserved./mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn/d0</name><value>10838851584</value></property>
+  <property><name>dfs.datanode.du.reserved./mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn/d1</name><value>8691367936</value></property>
++ hdfs --daemon start namenode  [2026-11-25 10:50:09 MST]
+  rc=0
++ hdfs --daemon start datanode  [2026-11-25 10:50:11 MST]
+  rc=0
++ hdfs dfsadmin -safemode wait  [2026-11-25 10:50:14 MST]
+2026-11-25 17:50:14,912 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Safe mode is OFF
+  rc=0
+  START K1c-1: VolumeInfo free0 free1 res0 res1 rfr0 rfr1 used0 used1 nb0 nb1 = 1073717248 3221200896 10838851584 8691367936 0 0 24576 24576 0 0
+  CHECK K1c-1: reserved0-R0=0 reserved1-R1=0 b0-free0=24576 b1-free1=24576
++ hdfs dfs -mkdir -p /c  [2026-11-25 10:50:21 MST]
+2026-11-25 17:50:22,482 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
+  writer w1 rc=1
+  writer w2 rc=1
+  writer w3 rc=1
+  writer w4 rc=1
+  writer w5 rc=1
+  writer w6 rc=1
+  writer w7 rc=1
+  writer w8 rc=1
+RESULT K1c-1: blk0=0 blk1=0 over0=0 over1=0 S=105676807 cnt=0/0 fin=0/0 vinfo=1073717248 3221200896 10838851584 8691367936 0 0 24576 24576 0 0
++ hdfs dfs -ls /c  [2026-11-25 10:50:35 MST]
+2026-11-25 17:50:35,939 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
+  LOGS K1c-1: DN DEBUG imbalanced-high=33 imbalanced-low=12 balanced=0 'Out of space'=6 'less than the block size'=12
+  LOGS K1c-1: NN 'does not have enough' lines=5; reasons:      16 Not enough replicas was chosen. Reason: {NO_REQUIRED_STORAGE_TYPE=1} 
+2026-11-25 17:50:29,559 DEBUG org.apache.hadoop.hdfs.server.blockmanagement.BlockPlacementPolicy: The node 127.0.0.1:19866 does not have enough DISK space (required=104857600, scheduled=419430400, remaining=0).
+2026-11-25 17:50:29,317 INFO org.apache.hadoop.hdfs.server.datanode.DataNode: opWriteBlock BP-1720398184-198.22.255.93-1795629009547:blk_1073741870_1046 received exception org.apache.hadoop.util.DiskChecker$DiskOutOfSpaceException: Out of space: The volume with the most available space (=0 B) is les
+===== fresh cluster K1c-2: mode=perdir b0=1073741824 b1=3221225472 T=1048576  [2026-11-25 10:50:37 MST]
+  ps check: no NameNode/DataNode of this run
+  TOTAL=12573614080 ROOTRES=661020672 loopAvail=11912560640 mydataAvail=693975629824
+  <property><name>dfs.namenode.name.dir</name><value>file:///mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>file:///mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn/d0,file:///mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn/d1</value></property>
+  <property><name>dfs.datanode.fsdataset.volume.choosing.policy</name><value>org.apache.hadoop.hdfs.server.datanode.fsdataset.AvailableSpaceVolumeChoosingPolicy</value></property>
+  <property><name>dfs.datanode.available-space-volume-choosing-policy.balanced-space-threshold</name><value>1048576</value></property>
+  <property><name>dfs.datanode.available-space-volume-choosing-policy.balanced-space-preference-fraction</name><value>0.0</value></property>
+  <property><name>dfs.datanode.du.reserved./mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn/d0</name><value>10838851584</value></property>
+  <property><name>dfs.datanode.du.reserved./mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn/d1</name><value>8691367936</value></property>
++ hdfs --daemon start namenode  [2026-11-25 10:50:44 MST]
+  rc=0
++ hdfs --daemon start datanode  [2026-11-25 10:50:46 MST]
+  rc=0
++ hdfs dfsadmin -safemode wait  [2026-11-25 10:50:48 MST]
+2026-11-25 17:50:49,694 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Safe mode is OFF
+  rc=0
+  START K1c-2: VolumeInfo free0 free1 res0 res1 rfr0 rfr1 used0 used1 nb0 nb1 = 1073717248 3221200896 10838851584 8691367936 0 0 24576 24576 0 0
+  CHECK K1c-2: reserved0-R0=0 reserved1-R1=0 b0-free0=24576 b1-free1=24576
++ hdfs dfs -mkdir -p /c  [2026-11-25 10:50:56 MST]
+2026-11-25 17:50:57,267 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
+  writer w1 rc=1
+  writer w2 rc=1
+  writer w3 rc=1
+  writer w4 rc=1
+  writer w5 rc=1
+  writer w6 rc=1
+  writer w7 rc=1
+  writer w8 rc=1
+RESULT K1c-2: blk0=0 blk1=0 over0=0 over1=0 S=105676807 cnt=0/0 fin=0/0 vinfo=1073717248 3221200896 10838851584 8691367936 0 0 24576 24576 0 0
++ hdfs dfs -ls /c  [2026-11-25 10:51:09 MST]
+2026-11-25 17:51:10,754 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
+  LOGS K1c-2: DN DEBUG imbalanced-high=32 imbalanced-low=13 balanced=0 'Out of space'=10 'less than the block size'=18
+  LOGS K1c-2: NN 'does not have enough' lines=3; reasons:      16 Not enough replicas was chosen. Reason: {NO_REQUIRED_STORAGE_TYPE=1} 
+2026-11-25 17:51:04,368 DEBUG org.apache.hadoop.hdfs.server.blockmanagement.BlockPlacementPolicy: The node 127.0.0.1:19866 does not have enough DISK space (required=104857600, scheduled=419430400, remaining=242512195).
+2026-11-25 17:51:04,087 INFO org.apache.hadoop.hdfs.server.datanode.DataNode: opWriteBlock BP-279161872-198.22.255.93-1795629044343:blk_1073741870_1046 received exception org.apache.hadoop.util.DiskChecker$DiskOutOfSpaceException: Out of space: The volume with the most available space (=92467537 B) 
+===== fresh cluster K1c-3: mode=perdir b0=1073741824 b1=3221225472 T=1048576  [2026-11-25 10:51:12 MST]
+  ps check: no NameNode/DataNode of this run
+  TOTAL=12573614080 ROOTRES=661020672 loopAvail=11912560640 mydataAvail=693870297088
+  <property><name>dfs.namenode.name.dir</name><value>file:///mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>file:///mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn/d0,file:///mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn/d1</value></property>
+  <property><name>dfs.datanode.fsdataset.volume.choosing.policy</name><value>org.apache.hadoop.hdfs.server.datanode.fsdataset.AvailableSpaceVolumeChoosingPolicy</value></property>
+  <property><name>dfs.datanode.available-space-volume-choosing-policy.balanced-space-threshold</name><value>1048576</value></property>
+  <property><name>dfs.datanode.available-space-volume-choosing-policy.balanced-space-preference-fraction</name><value>0.0</value></property>
+  <property><name>dfs.datanode.du.reserved./mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn/d0</name><value>10838851584</value></property>
+  <property><name>dfs.datanode.du.reserved./mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn/d1</name><value>8691367936</value></property>
++ hdfs --daemon start namenode  [2026-11-25 10:51:19 MST]
+  rc=0
++ hdfs --daemon start datanode  [2026-11-25 10:51:21 MST]
+  rc=0
++ hdfs dfsadmin -safemode wait  [2026-11-25 10:51:23 MST]
+2026-11-25 17:51:24,542 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Safe mode is OFF
+  rc=0
+  START K1c-3: VolumeInfo free0 free1 res0 res1 rfr0 rfr1 used0 used1 nb0 nb1 = 1073717248 3221200896 10838851584 8691367936 0 0 24576 24576 0 0
+  CHECK K1c-3: reserved0-R0=0 reserved1-R1=0 b0-free0=24576 b1-free1=24576
++ hdfs dfs -mkdir -p /c  [2026-11-25 10:51:31 MST]
+2026-11-25 17:51:32,183 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
+  writer w1 rc=1
+  writer w2 rc=1
+  writer w3 rc=1
+  writer w4 rc=1
+  writer w5 rc=1
+  writer w6 rc=1
+  writer w7 rc=1
+  writer w8 rc=1
+RESULT K1c-3: blk0=0 blk1=0 over0=0 over1=0 S=105676807 cnt=0/0 fin=0/0 vinfo=1073717248 3221200896 10838851584 8691367936 0 0 24576 24576 0 0
++ hdfs dfs -ls /c  [2026-11-25 10:51:46 MST]
+2026-11-25 17:51:47,729 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
+  LOGS K1c-3: DN DEBUG imbalanced-high=34 imbalanced-low=13 balanced=0 'Out of space'=4 'less than the block size'=8
+  LOGS K1c-3: NN 'does not have enough' lines=6; reasons:      16 Not enough replicas was chosen. Reason: {NO_REQUIRED_STORAGE_TYPE=1} 
+2026-11-25 17:51:39,142 DEBUG org.apache.hadoop.hdfs.server.blockmanagement.BlockPlacementPolicy: The node 127.0.0.1:19866 does not have enough DISK space (required=104857600, scheduled=524288000, remaining=0).
+2026-11-25 17:51:38,918 INFO org.apache.hadoop.hdfs.server.datanode.DataNode: opWriteBlock BP-1800547122-198.22.255.93-1795629079192:blk_1073741871_1047 received exception org.apache.hadoop.util.DiskChecker$DiskOutOfSpaceException: Out of space: The volume with the most available space (=0 B) is les
+  ps check: no NameNode/DataNode of this run
++ df -B1 /mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn /mydata  [2026-11-25 10:51:54 MST]
+Filesystem                      1B-blocks        Used    Available Use% Mounted on
+/dev/loop0                    12573614080      131072  11912462336   1% /mydata/jingsong-s4/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes-run1/cluster/dn
+/dev/mapper/emulab-node1--bs 807902732288 72978677760 693810020352  10% /mydata
+  rc=0
+=== cluster-run.sh all end 2026-11-25 10:51:54 MST
+EXIT trap: stopping daemons
+  ps check: no NameNode/DataNode of this run

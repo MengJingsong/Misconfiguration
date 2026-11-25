@@ -162,6 +162,21 @@ surefire defaults; add nothing else. Output goes to
 `hadoop-common-project/hadoop-common/target/surefire-reports/org.apache.hadoop.io.TestBoundedLimitMemory-output.txt`
 (`maven.test.redirectTestOutputToFile` is true, `hadoop-project/pom.xml:39`).
 
+> **Amendment A1 (stage-4 audit, 2026-11-25, before any reading).** On Jingsong's stage-4 node (`pc99`) `$WORK` is
+> `/mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/src`, made by `jingsong/copy-source.sh` from the repository's
+> `systems/hadoop/source/` (tag `rel/release-3.4.2`). The `-am install` build is **not** run: the node's `~/.m2` already
+> holds every 3.4.2 module (`environment.md` §3), and `install` would overwrite those shared artifacts; `mvn test` in the
+> module compiles what it needs. JVM options are passed as `-Dmaven-surefire-plugin.argLine="-Xmx2048m
+> -XX:+HeapDumpOnOutOfMemoryError -Difchk.tmp=<run-dir>/tmp"` (the module default of `hadoop-project/pom.xml:187` plus
+> the scratch directory; `-DargLine` is ignored by this build, `:2469`). Surefire counts are read, not the exit code.
+> The test is `harness/TestBoundedLimitMemory.java`, run by `harness/unit-run.sh`.
+
+> **Amendment A9 (stage-4 audit, second attempt, 2026-11-25, before any reading).** The run moved from `pc99` (whose
+> node lock was held, nothing ran) to **`pc91`** (`node0.jason92-326665`, `hadoop-base` built 2026-11-24): read `pc91`
+> for `pc99` in A1 and A5; every path is otherwise the same. The argLine of A1 leaves out the module default's
+> `${extraJavaTestArgs}` (`hadoop-project/pom.xml:172-187`: `-XX:+IgnoreUnrecognizedVMOptions` and JPMS `--add-opens`
+> flags, which have no meaning on JDK 8); the heap and heap-dump options are the default's.
+
 **B2b. Knobs.**
 
 | Sub-test | Varied | Values | Why |
@@ -239,6 +254,11 @@ public class TestBoundedLimitMemory {
 (For U4 each sub-case uses a fresh writer, because a key stream that hit the limit leaves the writer
 unusable, A3 step 5.)
 
+> **Amendment A2 (stage-4 audit, 2026-11-25, before any reading).** U4 uses the same warm-up as U2/U3 (20 unmeasured
+> writers, then 5 measured; medians reported), as B2h requires ("only the medians after warm-up are compared"); the
+> sketch had none for U4. U1 is one pass per limit (its readings are counts, not allocations). The stack frame of
+> each `EOFException` is recorded as `class.method:line` of its top frame.
+
 **B2e. Procedure.**
 
 1. Build as in B2a.
@@ -260,6 +280,7 @@ unusable, A3 step 5.)
 | U3b | `ByteArrayOutputStream`, 204,800 B written | allocation ≥ 204,800 B (array doubling from 32 B makes it ≈ 2× the final 262,144-byte array) |
 | U4 | key via `prepareAppendKey(-1)` | 64 writes succeed, 65th throws `EOFException` from line 92; `ctorAlloc` of `TFile.Writer` ≥ 131,104 B (two 64 KiB arrays); `writeAlloc` < 8 KiB; `prepareAppendKey(65537)` throws `IndexOutOfBoundsException` |
 | U5 | N = 1 / 10 / 100 records of 64 KiB key | file length ≈ N × 65,5xx B + < 4 KiB metadata (≈ 66 KB / 656 KB / 6.6 MB), i.e. linear in N, unbounded by the 64 KiB limit |
+| U5 (**A3**, 2026-11-25) | same | **Corrected arithmetic:** the TFile index keeps a copy of each data block's last key (`TFile.java:653-666`, `TFileIndexEntry` `:2310-2313`, written by `TFileIndex.write` `:2272-2289`) plus the first key, and with `minBlockSize` = 64 KiB every 64 KiB record closes its block (`finishDataBlock(false)`, `:504`). So file length ≈ (2N + 1) × 65,5xx B + < 4 KiB (≈ 197 KB / 1.38 MB / 13.2 MB). The relation is unchanged: linear in N, unbounded by the 64 KiB limit. "Linear" means the per-record slopes (len(10) − len(1)) / 9 and (len(100) − len(10)) / 90 agree within 5 % and len(100) ≥ 100 × 65,536 |
 
 **B2g. Readings.**
 
@@ -272,6 +293,13 @@ unusable, A3 step 5.)
 | U1/U4 never throw (limit never reached) | Not confirmed: workload did not reach the limit; fix the loop |
 | U5 file length capped near 64 KiB regardless of N | Claim refuted for disk |
 | U5 linear in N | Disk follows data volume, not the key limit (confirms) |
+| (**A4**, 2026-11-25) U1 or U4 fails at another index, with another exception, or the top frame is not `BoundedByteArrayOutputStream.write:92` | Not confirmed: the mechanism differs from A3; feedback to stage 3 |
+| (**A4**) U2 `ctorAlloc` spread between 1 KiB and 512 KiB, or `writeAlloc` between 4 KiB and the size at EOF | Not confirmed: neither the confirm nor the refute row holds; record the readings |
+| (**A4**) a `TestBoundedLimitMemory` method errors, or the existing tests (B2e step 4) fail | Invalid run: fix the instrument and restart the tier |
+
+> **A4 (stage-4 audit, 2026-11-25, before any reading):** the three rows above were added so that every plausible
+> outcome has a row. "Claim confirmed" (row 1) needs all of: U2 and U3 within B2f's bounds, U3b ≥ 204,800, U1 and U4 at
+> the predicted indices with the frame `write:92`, and U5 linear (A3).
 
 **B2h. Controls.** U3 and U3b are positive controls for the instrument (allocation that follows a
 size). Baseline calibration of `alloc()` removes the cost of the probe. Warm-up removes JIT and class
@@ -287,6 +315,15 @@ and checks that the real resource on the TFile path (aggregated log bytes on HDF
 NodeManager through `TFile.Writer`, whose every key write passes line 91) follows the data and not the
 64 KiB limit, that the check never fires, and that a real cap (HDFS space quota) does bind the same
 workload. A secondary workload exercises the other production caller (memory-to-memory merge).
+
+> **Amendment A10 (stage-4 audit, second attempt, 2026-11-25, before any reading).** Scope of this tier, stated so the
+> gap is named: the keys that log aggregation writes through `TFile` are short strings (`VERSION`, `APPLICATION_ACL`,
+> `APPLICATION_OWNER`, container IDs; tens of bytes, `AggregatedLogFormat.java:150`, `:505-541`), so on the cluster the
+> quantity compared at line 91 never approaches 64 KiB and the disallow branch cannot fire there by design. "Past the
+> limit" in this tier means the data volume through the TFile path (up to 2,048 × 64 KiB), not the key length. The
+> cluster tier therefore tests the disk half of B1 only (disk on the TFile path follows the data and is not held near
+> 64 KiB by this check); the evidence that the check fires and allocates nothing is the unit tier's (U1, U2, U4). The
+> B3f predictions and B3g rows are unchanged.
 
 **B3a. Environment and build.**
 
@@ -315,6 +352,16 @@ workload. A secondary workload exercises the other production caller (memory-to-
 - Changes to these files need a daemon restart; the quota in B3e is applied live with
   `hdfs dfsadmin`.
 
+> **Amendment A5 (stage-4 audit, 2026-11-25, before any reading).** On `pc99`: `$S4` =
+> `/mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1`; the distribution is **copied** from the node's built
+> `/mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2` (same tag, `environment.md` §3–4), not rebuilt.
+> Daemons are started and stopped with `hdfs --daemon start|stop namenode|datanode` and `yarn --daemon start|stop
+> resourcemanager|nodemanager`: `start-dfs.sh`/`start-yarn.sh` need SSH to `localhost`, which does not work on these
+> nodes (`environment.md`). No SecondaryNameNode (B3e step 1's `jps` list therefore has four daemons).
+> `yarn.nodemanager.delete.debug-delay-sec=600` is in `yarn-site.xml` from the start (B3d). `mapred-site.xml` also sets
+> `yarn.app.mapreduce.am.env`, `mapreduce.map.env`, `mapreduce.reduce.env` = `HADOOP_MAPRED_HOME=$S4/hadoop` so the
+> MapReduce AM finds its classes. The script is `harness/cluster-run.sh`.
+
 **B3b. Knobs.**
 
 | Knob | Values | How | Why |
@@ -339,6 +386,14 @@ workload. A secondary workload exercises the other production caller (memory-to-
   `DataOutputStream.writeUTF` → line 91). Arithmetic: for N = 64 MiB the aggregated file must hold
   ≥ 2 × 67,108,864 = 134,217,728 B, 2,048× the 64 KiB key limit. Duration: < 2 min per run.
 - **A-control:** the same N = 64 MiB run with a 32 MiB space quota on `/tmp/logs`.
+
+> **Amendment A6 (stage-4 audit, 2026-11-25, before any reading).** The shell command is `head -c $N /dev/zero` (no
+> `tr`): the `'\\0'` quoting above passes through the DS client, the AM and `launch_container.sh` and is not exact. The
+> content does not matter (compression is `none`). The read-back in B3d counts the NUL bytes of `yarn logs
+> -applicationId <appId> -containerId <cid> -log_files stdout` (`| tr -cd '\000' | wc -c`), which excludes the header
+> lines `yarn logs` adds; it is done for both worker containers (`…_01_000002`, `…_01_000003`). The aggregated
+> directory in 3.4.2 is `/tmp/logs/$USER/bucket-logs-tfile/<bucket>/<appId>` (`LogAggregationUtils.java:160-165`);
+> it is found by its appId.
 - **B (secondary, shuffle path):** 20 input files of 1 MiB text,
   `hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.4.2.jar wordcount
   -D mapreduce.job.reduces=1 -D mapreduce.reduce.merge.memtomem.enabled=true
@@ -362,6 +417,14 @@ workload. A secondary workload exercises the other production caller (memory-to-
 - Not observable: the 2 × 64 KiB key buffers of a `LogWriter` inside the NodeManager heap (≪ the
   GC noise of a 1 GiB heap and short-lived); the claim about heap rests on the unit tier.
 
+> **Amendment A11 (runbook defect 1, run 1, 2026-11-25; B3f/B3g unchanged).** The memory-to-memory merge lines
+> (`MergeManagerImpl.java:411`, `:426`) are not in the reducer's `syslog`: the container log4j configuration sends the
+> `org.apache.hadoop.mapreduce.task.reduce` loggers to a separate file, `syslog.shuffle`
+> (`hadoop-yarn-server-nodemanager/src/main/resources/container-log4j.properties:16, 47-56`; `MRApps.java:662`). Read
+> the merge lines and the "Reach the limit of the buffer" count for workload B from both `syslog` and `syslog.shuffle`
+> (`yarn logs -applicationId <appId> -log_files syslog` and `... -log_files syslog.shuffle`). The cluster tier restarts
+> from B3e step 1 on a fresh format.
+
 **B3e. Procedure.**
 
 1. Format and start: `hdfs namenode -format -nonInteractive`; `start-dfs.sh`; `start-yarn.sh`;
@@ -373,6 +436,12 @@ workload. A secondary workload exercises the other production caller (memory-to-
 4. Positive control: `hdfs dfsadmin -setSpaceQuota 32m /tmp/logs`; rerun workload A with
    N = 67,108,864; record the same, plus `grep -E "DSQuotaExceeded|quota" $S4/logs/*nodemanager*.log`;
    then `hdfs dfsadmin -clrSpaceQuota /tmp/logs`.
+
+   > **Amendment A7 (stage-4 audit, 2026-11-25, before any reading).** Before setting the quota, record the A runs
+   > (step 3), then delete `/tmp/logs/$USER` (`hdfs dfs -rm -r -skipTrash`): with the ≈ 170 MB of the A runs still
+   > under `/tmp/logs`, a 32 MiB quota would be exceeded before the control app wrote anything, and the control would
+   > not show a cap binding at 32 MiB. Also record `hdfs dfs -count -q /tmp/logs` before and after, and the
+   > NodeManager's `DSQuotaExceededException` line (it names the quota and the consumed bytes).
 5. Workload B: `for i in $(seq -w 1 20); do head -c 1048576 /dev/urandom | base64 > $S4/in-$i.txt; done;
    hdfs dfs -mkdir /in && hdfs dfs -put $S4/in-*.txt /in`; run the job; record the merge lines and
    `grep -c "Reach the limit of the buffer"`; job must succeed.
@@ -399,6 +468,16 @@ workload. A secondary workload exercises the other production caller (memory-to-
 | Aggregation not SUCCEEDED in A runs / no TFile written | Not confirmed: the TFile path (and line 91) was not exercised; check `yarn.log-aggregation-enable` |
 | B: no memory-to-memory merge lines | Not confirmed for the shuffle caller: line 91 not reached; lower `memtomem.threshold` or add input files |
 | B: limit message appears / job fails with `EOFException` | The shuffle merge buffer was undersized: a bug, and evidence the check binds there (refutes for that caller) |
+
+> **Amendment A8 (stage-4 audit, 2026-11-25, before any reading).** Numbers for row 1: "linear in N" means the slopes
+> (agg(16 MiB) − agg(1 MiB)) / 15 MiB and (agg(64 MiB) − agg(16 MiB)) / 48 MiB both lie in [1.9, 2.1] (two worker
+> containers); "≫ 64 KiB" means agg ≥ 2 × N for every N; the read-back of each worker's `stdout` equals N exactly; the
+> control "caps" means aggregated bytes for the control app ≤ 33,554,432, its aggregation status is not SUCCEEDED, and
+> at least one `DSQuotaExceededException` appears in the NodeManager log during the control. Workload B is a secondary
+> check of the other caller: it neither confirms nor refutes the TFile claim on its own; its "no merge lines" row leaves
+> the tier's verdict to workload A and the control. Gap named: that line 91 runs for each aggregated key
+> (`LogKey.write` → `writeUTF` → `write(byte[],int,int)`, `AggregatedLogFormat.java:150`, `:505-541`) is inferred
+> from the code path; no probe counts it on the cluster.
 
 **B3h. Controls.** The HDFS space-quota run is the positive control (the same workload, a cap
 known to bind). Comparing the aggregated size with local `du -sb` of the raw container logs rules out
@@ -444,4 +523,29 @@ application and measuring per-app directories avoids counting earlier runs.
 
 ## D. Stage-4 feedback
 
-none yet
+**D1. Stage-4 audit amendments (2026-11-25, before any reading).** A1 (node paths, no `install`, surefire options),
+A2 (U4 warm-up, frame recorded), A3 (U5 arithmetic: the TFile index stores each block's last key), A4 (missing
+B2g rows), A5 (node cluster setup, `--daemon`), A6 (DS command without `tr`, read-back counts NUL bytes, bucket path),
+A7 (control: clear `/tmp/logs/$USER` before the quota), A8 (numbers for B3g row 1, workload B's role, the inferred
+line-91 path). None changes B1's claim. A3 corrects a prediction for a reason that does not depend on any reading.
+
+**D1a. Second attempt (2026-11-25, before any reading).** A9 (node `pc91` instead of `pc99`; the JPMS flags left out of
+the argLine), A10 (the cluster tier's scope: keys stay tens of bytes, so the check cannot fire there; the tier tests
+disk only). Neither changes B1's claim, a prediction or a conclusions row.
+
+**D1b. Runbook defect 1 (run 1, 2026-11-25).** A11: workload B's merge lines are in `syslog.shuffle`, not `syslog`;
+the cluster tier was restarted from B3e step 1. B3f/B3g unchanged.
+
+**D2. Stage-4 result (2026-11-25, run 1 + self-check, node `pc91`; results file
+`results/MAX_KEY_SIZE-write-limit-2--autonomous.md`).** Unit tier **Confirmed — does not cap** (B2g row 1 and the U5
+"linear in N" row): at capacity 1 MiB the constructor allocated 1,048,624 B for `limit` = 1 KiB, 512 KiB and 1 MiB
+alike (spread 0), the write loop allocated a flat 3,920 B (the `EOFException`) whether 1,000 or 1,048,000 bytes were
+written; U3 followed capacity (65,584 / 1,048,624 / 16,777,232 B); the check fired at `write:92` at the predicted index
+in U1 and U4; U5 TFile length 196,774 / 1,376,603 / 13,174,973 B for N = 1 / 10 / 100 (131,092 vs 131,093 B per record,
+as A3). Cluster tier **Confirmed — does not cap** (B3g row 1, disk only per A10): aggregated TFile bytes 2,124,024 /
+33,581,369 / 134,245,028 for N = 1 / 16 / 64 MiB (slopes 2.000004 and 2.000007), every worker's stdout read back
+exactly, 0 "Reach the limit of the buffer"; the 32 MiB space quota held the control app's aggregated file at
+33,554,432 B with aggregation FAILED and 12 `DSQuotaExceededException` lines. Workload B: 8 memory-to-memory merges,
+job SUCCEEDED, 0 limit messages. Outcome class: **true negative**. Runbook defect 1 (A11) fixed and the cluster tier
+restarted. Side finding: with 64 KiB keys and `minBlockSize` 64 KiB the TFile index holds a second copy of every key
+(file ≈ 2 × the key bytes), per A3.

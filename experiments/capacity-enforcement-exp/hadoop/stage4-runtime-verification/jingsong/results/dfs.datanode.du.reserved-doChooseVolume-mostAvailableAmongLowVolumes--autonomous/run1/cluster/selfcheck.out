@@ -1,0 +1,24 @@
+K1: accepted=40 (puts 1..40), failed puts=5 first failed=41 (pred 41)
+   routed d0=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10] (pred [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+   routed d1 count=30 first=11 last=40 (pred 11..40); routes=['d0 from low', 'd1 from high']
+   final blk0=1056768070 (pred 10*S=1056768070; b0=1073741824; <= b0: True; max seen 1056768070) blk1=3170304210 (pred 30*S=3170304210; b1=3221225472; <= b1: True; max seen 3170304210)
+   final free0=16949178 free1=50896686 (b0-n0*S=16973754, b1-n1*S=50921262); cnt=10/30
+   DEBUG imbalanced lines=40 balanced=0 (imbalanced expected: True); NN refusal DEBUG lines=5; DN 'Out of space'=0; put-to-volume-with-free<B=[]
+   over b+M in a sequential run: d0 False d1 False
+K2: accepted=25 (puts 1..25), failed puts=20 first failed=26 (pred 26)
+   routed d0=[1, 2, 3, 4, 5] (pred [1, 2, 3, 4, 5])
+   routed d1 count=20 first=6 last=25 (pred 6..25); routes=['d0 from low', 'd1 from high']
+   final blk0=528384035 (pred 5*S=528384035; b0=536870912; <= b0: True; max seen 528384035) blk1=2113536140 (pred 20*S=2113536140; b1=2147483648; <= b1: True; max seen 2113536140)
+   final free0=8462301 free1=33922932 (b0-n0*S=8486877, b1-n1*S=33947508); cnt=5/20
+   DEBUG imbalanced lines=25 balanced=0 (imbalanced expected: True); NN refusal DEBUG lines=20; DN 'Out of space'=0; put-to-volume-with-free<B=[]
+   over b+M in a sequential run: d0 False d1 False
+K3: accepted=20 (puts 1..20), failed puts=25 first failed=21 (pred 21)
+   balanced routes: d0=10 d1=10 sequence=01010101010101010101.........................
+   final blk0=1056768070 (pred 10*S=1056768070; b0=1073741824; <= b0: True; max seen 1056768070) blk1=1056768070 (pred 10*S=1056768070; b1=1073741824; <= b1: True; max seen 1056768070)
+   final free0=16949178 free1=16949178 (b0-n0*S=16973754, b1-n1*S=16973754); cnt=10/10
+   DEBUG imbalanced lines=0 balanced=20 (imbalanced expected: False); NN refusal DEBUG lines=25; DN 'Out of space'=0; put-to-volume-with-free<B=[]
+   over b+M in a sequential run: d0 False d1 False
+K1/K2 d0 ratio = 2.0000 (pred ~2: 10*S / 5*S); d1 ratio = 1.5000 (30/20)
+K1c-1: final blk0=0 blk1=0 overshoot0=0 (0.00 S) overshoot1=0 (0.00 S) max during: 1268121684/3487334631; finalized 0/0; samples=5
+K1c-2: final blk0=0 blk1=0 overshoot0=0 (0.00 S) overshoot1=0 (0.00 S) max during: 1373798491/3381657824; finalized 0/0; samples=5
+K1c-3: final blk0=0 blk1=0 overshoot0=0 (0.00 S) overshoot1=0 (0.00 S) max during: 1373798491/3593011438; finalized 0/0; samples=6

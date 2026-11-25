@@ -1,0 +1,318 @@
+=== cluster-run.sh all start 2026-11-25 10:32:58 MST host=node0.jason92-326665.misconfiguration-pg0.cloudlab.umass.edu
++ java -version  [2026-11-25 10:32:58]
+openjdk version "1.8.0_514"
+OpenJDK Runtime Environment (build 1.8.0_514-8u514-b01~us1-0ubuntu1~22.04.1-b01)
+OpenJDK 64-Bit Server VM (build 25.514-b01, mixed mode)
+  rc=0
+  ports 19000 19864 19866 19867 19868 19870 free
++ cp -a /mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2 /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/hadoop  [2026-11-25 10:32:58]
+  rc=0
++ cp -r /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/hadoop/etc/hadoop /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/conf  [2026-11-25 10:32:59]
+  rc=0
++ hdfs version  [2026-11-25 10:32:59]
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-src,/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-dst</value></property>
++ hdfs --daemon start namenode  [2026-11-25 10:33:01]
+  rc=0
++ hdfs --daemon start datanode  [2026-11-25 10:33:03]
+  rc=0
++ hdfs dfsadmin -safemode wait  [2026-11-25 10:33:05]
+2026-11-25 17:33:06,560 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Safe mode is OFF
+  rc=0
+  H_DN=pc91.cloudlab.umass.edu srcId=DS-7e0cd991-1f4a-4844-8cca-9e362b2be7a5 dstId=DS-0efef469-0c35-45bc-ae15-1a5bab40e79d; JMX: dst:used=24576,free=752982978560,reserved=0,rfr=0,blocks=0 src:used=24576,free=752982978560,reserved=0,rfr=0,blocks=0
++ bash -c head -c 2147483648 /dev/urandom > '/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/in.bin'  [2026-11-25 10:33:11]
+  rc=0
++ ls -l /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/in.bin  [2026-11-25 10:33:18]
+-rw-r--r-- 1 jason92 misconfiguration 2147483648 Nov 25 10:33 /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/in.bin
+  rc=0
+===================== C0: A0target=-1 B=1073741824 tol=10  [10:33:18]
+  U_dst before stop = 24576; JMX: dst:used=24576,free=750835490816,reserved=0,rfr=0,blocks=0 src:used=24576,free=750835490816,reserved=0,rfr=0,blocks=0
++ hdfs --daemon stop datanode  [2026-11-25 10:33:19]
+  rc=0
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-src</value></property>
++ hdfs --daemon start datanode  [2026-11-25 10:33:23]
+  rc=0
++ hdfs dfs -mkdir -p /data  [2026-11-25 10:33:26]
+2026-11-25 17:33:27,482 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
++ hdfs dfs -put /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/in.bin /data/f  [2026-11-25 10:33:28]
+2026-11-25 17:33:29,024 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
+  fsck total blocks = 128
++ hdfs --daemon stop datanode  [2026-11-25 10:33:37]
+  rc=0
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-src,/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-dst</value></property>
++ hdfs --daemon start datanode  [2026-11-25 10:33:40]
+  rc=0
+  KNOB C0: reserved dst=0 (R=0) src=0
+2026-11-25 17:33:47,867 INFO planner.GreedyPlanner: Starting plan for Node : pc91.cloudlab.umass.edu:19867
+2026-11-25 17:33:47,868 INFO planner.GreedyPlanner: Disk Volume set 1582d1ec-9c82-4e77-b30a-ca157d9b3509 - Type : DISK plan completed.
+2026-11-25 17:33:47,868 INFO planner.GreedyPlanner: Compute Plan for Node : pc91.cloudlab.umass.edu:19867 took 17 ms
+2026-11-25 17:33:47,868 INFO command.Command: Writing plan to:
+2026-11-25 17:33:47,868 INFO command.Command: /dbplan/pc91.cloudlab.umass.edu.plan.json
+Writing plan to:
+/dbplan/pc91.cloudlab.umass.edu.plan.json
+  rc=0
++ hdfs dfs -ls /dbplan  [2026-11-25 10:33:48]
+2026-11-25 17:33:49,588 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 2 items
+-rw-r--r--   1 jason92 supergroup        839 2026-11-25 17:33 /dbplan/pc91.cloudlab.umass.edu.before.json
+-rw-r--r--   1 jason92 supergroup       1006 2026-11-25 17:33 /dbplan/pc91.cloudlab.umass.edu.plan.json
+  rc=0
++ hdfs dfs -get /dbplan/pc91.cloudlab.umass.edu.plan.json /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/plan-template.json  [2026-11-25 10:33:50]
+2026-11-25 17:33:51,163 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
++ hdfs dfs -rm -r -skipTrash /dbplan  [2026-11-25 10:33:52]
+2026-11-25 17:33:52,904 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Deleted /dbplan
+  rc=0
+  plan: node=pc91.cloudlab.umass.edu port=19867 src=DS-7e0cd991-1f4a-4844-8cca-9e362b2be7a5 dst=DS-0efef469-0c35-45bc-ae15-1a5bab40e79d bytesToMove=1073741824 tol=10 bw=100
+  blocks src=128 dst=0
+  A0 C0: freeSpace(dst)=748670353408 usedSpace(dst)=24576 du(dst/current)=33328 statf=4096 197241878 192818454 182780848; JMX: dst:used=24576,free=748670353408,reserved=0,rfr=0,blocks=0 src:used=2164286336,free=748670353408,reserved=0,rfr=0,blocks=128
+2026-11-25 17:33:58,710 INFO command.Command: Executing "execute plan" command
+2026-11-25 17:33:58,842 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
+2026-11-25 17:34:09,592 INFO command.Command: Executing "query plan" command.
+2026-11-25 17:34:09,761 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Plan File: /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/plan-C0.json
+Plan ID: aeafe9f9b41bd0d3c926ba051236212780160031
+Result: PLAN_DONE
+[ {
+  "sourcePath" : "/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-src/",
+  "destPath" : "/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-dst/",
+  "workItem" : {
+    "startTime" : 1795628039330,
+    "secondsElapsed" : 9,
+    "bytesToCopy" : 1073741824,
+    "bytesCopied" : 989855744,
+    "blocksCopied" : 59,
+    "tolerancePercent" : 10,
+    "bandwidth" : 100
+  }
+} ]
+13:2026-11-25 17:34:09,098 INFO org.apache.hadoop.hdfs.server.datanode.DiskBalancer: Copy from file:/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-src/ to file:/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-dst/ done
+  RESULT C0: blocksCopied=59 bytesCopied=989855744 result=PLAN_DONE nPred(A0)=59 usedDst 24576 -> 997613981 (d=997589405, pred n*c=997589405) du 33328 -> 997630925 (d=997597597) freeDst1=748670304256 H1=765791084131 (B-c=1056833529, B=1073741824) intrusion=765791067187 minFreeSampled=748659814400 lines 1148=0 1110=1 1121=0 1102=0
+===================== C1: A0target=1420361872 B=1073741824 tol=10  [10:34:12]
++ hdfs dfs -rm -skipTrash /data/f  [2026-11-25 10:34:13]
+2026-11-25 17:34:14,456 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Deleted /data/f
+  rc=0
+  blocks src=0 dst=0
+  U_dst before stop = 24576; JMX: dst:used=24576,free=750834941952,reserved=0,rfr=0,blocks=0 src:used=7758237,free=750834941952,reserved=0,rfr=0,blocks=0
++ hdfs --daemon stop datanode  [2026-11-25 10:34:17]
+  rc=0
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-src</value></property>
++ hdfs --daemon start datanode  [2026-11-25 10:34:20]
+  rc=0
++ hdfs dfs -mkdir -p /data  [2026-11-25 10:34:24]
+2026-11-25 17:34:25,031 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
++ hdfs dfs -put /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/in.bin /data/f  [2026-11-25 10:34:25]
+2026-11-25 17:34:26,551 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
+  fsck total blocks = 128
++ hdfs --daemon stop datanode  [2026-11-25 10:34:34]
+  rc=0
+  statf=4096 197241878 192818355 182780749 U_dst=24576 -> R=765368311664
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-src,/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-dst</value></property>
+  <property><name>dfs.datanode.du.reserved./mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-dst</name><value>765368311664</value></property>
++ hdfs --daemon start datanode  [2026-11-25 10:34:37]
+  rc=0
+  KNOB C1: reserved dst=765368311664 (R=765368311664) src=0
+  plan: node=pc91.cloudlab.umass.edu port=19867 src=DS-7e0cd991-1f4a-4844-8cca-9e362b2be7a5 dst=DS-0efef469-0c35-45bc-ae15-1a5bab40e79d bytesToMove=1073741824 tol=10 bw=100
+  blocks src=128 dst=0
+  A0 C1: freeSpace(dst)=1420361872 usedSpace(dst)=24576 du(dst/current)=33328 statf=4096 197241878 192818334 182780728; JMX: dst:used=24576,free=1420361872,reserved=765368311664,rfr=0,blocks=0 src:used=2172019997,free=748669861888,reserved=0,rfr=0,blocks=128
+2026-11-25 17:34:42,304 INFO command.Command: Executing "execute plan" command
+2026-11-25 17:34:42,436 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
+2026-11-25 17:34:46,945 INFO command.Command: Executing "query plan" command.
+2026-11-25 17:34:47,105 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Plan File: /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/plan-C1.json
+Plan ID: ad3b6d490e31a3c52e06431dec137c368f0a87ba
+Result: PLAN_DONE
+[ {
+  "sourcePath" : "/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-src/",
+  "destPath" : "/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-dst/",
+  "workItem" : {
+    "startTime" : 1795628083092,
+    "secondsElapsed" : 3,
+    "bytesToCopy" : 1073741824,
+    "bytesCopied" : 352321536,
+    "blocksCopied" : 21,
+    "tolerancePercent" : 10,
+    "bandwidth" : 100
+  }
+} ]
+7:2026-11-25 17:34:46,535 ERROR org.apache.hadoop.hdfs.server.datanode.DiskBalancer: Destination volume: file:/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-dst/ does not have enough space to accommodate a block. Block Size: 16777216 Exiting from copyBlocks.
+  RESULT C1: blocksCopied=21 bytesCopied=352321536 result=PLAN_DONE nPred(A0)=21 usedDst 24576 -> 355098771 (d=355074195, pred n*c=355074195) du 33328 -> 355115715 (d=355082387) freeDst1=1065287677 H1=1065287677 (B-c=1056833529, B=1073741824) intrusion=1065270733 minFreeSampled=1065287677 lines 1148=1 1110=0 1121=0 1102=0
+===================== C2: A0target=1758527772 B=1073741824 tol=10  [10:34:49]
++ hdfs dfs -rm -skipTrash /data/f  [2026-11-25 10:34:51]
+2026-11-25 17:34:51,764 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Deleted /data/f
+  rc=0
+  blocks src=0 dst=0
+  U_dst before stop = 24576; JMX: dst:used=24576,free=1420361872,reserved=765368311664,rfr=0,blocks=0 src:used=10510896,free=750834458624,reserved=0,rfr=0,blocks=0
++ hdfs --daemon stop datanode  [2026-11-25 10:34:57]
+  rc=0
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-src</value></property>
++ hdfs --daemon start datanode  [2026-11-25 10:35:00]
+  rc=0
++ hdfs dfs -mkdir -p /data  [2026-11-25 10:35:03]
+2026-11-25 17:35:04,552 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
++ hdfs dfs -put /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/in.bin /data/f  [2026-11-25 10:35:05]
+2026-11-25 17:35:06,026 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
+  fsck total blocks = 128
++ hdfs --daemon stop datanode  [2026-11-25 10:35:14]
+  rc=0
+  statf=4096 197241878 192818237 182780631 U_dst=24576 -> R=765030145764
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-src,/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-dst</value></property>
+  <property><name>dfs.datanode.du.reserved./mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-dst</name><value>765030145764</value></property>
++ hdfs --daemon start datanode  [2026-11-25 10:35:17]
+  rc=0
+  KNOB C2: reserved dst=765030145764 (R=765030145764) src=0
+  plan: node=pc91.cloudlab.umass.edu port=19867 src=DS-7e0cd991-1f4a-4844-8cca-9e362b2be7a5 dst=DS-0efef469-0c35-45bc-ae15-1a5bab40e79d bytesToMove=1073741824 tol=10 bw=100
+  blocks src=128 dst=0
+  A0 C2: freeSpace(dst)=1758527772 usedSpace(dst)=24576 du(dst/current)=33328 statf=4096 197241878 192818218 182780612; JMX: dst:used=24576,free=1758527772,reserved=765030145764,rfr=0,blocks=0 src:used=2174772656,free=748669386752,reserved=0,rfr=0,blocks=128
+2026-11-25 17:35:21,898 INFO command.Command: Executing "execute plan" command
+2026-11-25 17:35:22,038 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
+2026-11-25 17:35:29,718 INFO command.Command: Executing "query plan" command.
+2026-11-25 17:35:29,886 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Plan File: /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/plan-C2.json
+Plan ID: d9d44425cc7c068a8257b079232fa884dc8f9d44
+Result: PLAN_DONE
+[ {
+  "sourcePath" : "/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-src/",
+  "destPath" : "/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-dst/",
+  "workItem" : {
+    "startTime" : 1795628122659,
+    "secondsElapsed" : 6,
+    "bytesToCopy" : 1073741824,
+    "bytesCopied" : 687865856,
+    "blocksCopied" : 41,
+    "tolerancePercent" : 10,
+    "bandwidth" : 100
+  }
+} ]
+10:2026-11-25 17:35:29,359 ERROR org.apache.hadoop.hdfs.server.datanode.DiskBalancer: Destination volume: file:/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-dst/ does not have enough space to accommodate a block. Block Size: 16777216 Exiting from copyBlocks
+  RESULT C2: blocksCopied=41 bytesCopied=687865856 result=PLAN_DONE nPred(A0)=41 usedDst 24576 -> 693264671 (d=693240095, pred n*c=693240095) du 33328 -> 693285711 (d=693252383) freeDst1=1065287677 H1=1065287677 (B-c=1056833529, B=1073741824) intrusion=1065266637 minFreeSampled=1065287677 lines 1148=1 1110=0 1121=0 1102=0
+===================== C3: A0target=1056833529 B=1073741824 tol=10  [10:35:32]
++ hdfs dfs -rm -skipTrash /data/f  [2026-11-25 10:35:33]
+2026-11-25 17:35:34,477 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Deleted /data/f
+  rc=0
+  blocks src=0 dst=0
+  U_dst before stop = 24576; JMX: dst:used=24576,free=1758527772,reserved=765030145764,rfr=0,blocks=0 src:used=15885135,free=750833963008,reserved=0,rfr=0,blocks=0
++ hdfs --daemon stop datanode  [2026-11-25 10:35:41]
+  rc=0
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-src</value></property>
++ hdfs --daemon start datanode  [2026-11-25 10:35:44]
+  rc=0
++ hdfs dfs -mkdir -p /data  [2026-11-25 10:35:48]
+2026-11-25 17:35:49,362 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
++ hdfs dfs -put /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/in.bin /data/f  [2026-11-25 10:35:50]
+2026-11-25 17:35:50,879 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
+  fsck total blocks = 128
++ hdfs --daemon stop datanode  [2026-11-25 10:35:58]
+  rc=0
+  statf=4096 197241878 192818118 182780512 U_dst=24576 -> R=765731840007
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-src,/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-dst</value></property>
+  <property><name>dfs.datanode.du.reserved./mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-dst</name><value>765731840007</value></property>
++ hdfs --daemon start datanode  [2026-11-25 10:36:02]
+  rc=0
+  KNOB C3: reserved dst=765731840007 (R=765731840007) src=0
+  plan: node=pc91.cloudlab.umass.edu port=19867 src=DS-7e0cd991-1f4a-4844-8cca-9e362b2be7a5 dst=DS-0efef469-0c35-45bc-ae15-1a5bab40e79d bytesToMove=1073741824 tol=10 bw=100
+  blocks src=128 dst=0
+  A0 C3: freeSpace(dst)=1056833529 usedSpace(dst)=24576 du(dst/current)=37424 statf=4096 197241878 192818099 182780493; JMX: dst:used=24576,free=1056833529,reserved=765731840007,rfr=0,blocks=0 src:used=2180146895,free=748668899328,reserved=0,rfr=0,blocks=128
+2026-11-25 17:36:06,771 INFO command.Command: Executing "execute plan" command
+2026-11-25 17:36:06,899 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
+2026-11-25 17:36:08,265 INFO command.Command: Executing "query plan" command.
+2026-11-25 17:36:08,425 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Plan File: /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/plan-C3.json
+Plan ID: d7bcb55fb41b9e622159ac27f114e1d5bc518612
+Result: PLAN_DONE
+[ {
+  "sourcePath" : "/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-src/",
+  "destPath" : "/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-dst/",
+  "workItem" : {
+    "startTime" : 1795628167520,
+    "bytesToCopy" : 1073741824,
+    "tolerancePercent" : 10,
+    "bandwidth" : 100
+  }
+} ]
+4:2026-11-25 17:36:07,528 ERROR org.apache.hadoop.hdfs.server.datanode.DiskBalancer: Destination volume: file:/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-dst/ does not have enough space to accommodate a block. Block Size: 16777216 Exiting from copyBlocks.
+  RESULT C3: blocksCopied=NA bytesCopied=NA result=PLAN_DONE nPred(A0)=0 usedDst 24576 -> 24576 (d=0, pred n*c=0) du 37424 -> 37424 (d=0) freeDst1=1056833529 H1=1056833529 (B-c=1056833529, B=1073741824) intrusion=1056820681 minFreeSampled=1056833529 lines 1148=1 1110=0 1121=0 1102=0
+===================== C4: A0target=13000000 B=10000000 tol=100  [10:36:10]
++ hdfs dfs -rm -skipTrash /data/f  [2026-11-25 10:36:12]
+2026-11-25 17:36:13,064 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Deleted /data/f
+  rc=0
+  blocks src=0 dst=0
+  U_dst before stop = 24576; JMX: dst:used=24576,free=1056833529,reserved=765731840007,rfr=0,blocks=0 src:used=15885135,free=750833508352,reserved=0,rfr=0,blocks=0
++ hdfs --daemon stop datanode  [2026-11-25 10:36:18]
+  rc=0
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-src</value></property>
++ hdfs --daemon start datanode  [2026-11-25 10:36:21]
+  rc=0
++ hdfs dfs -mkdir -p /data  [2026-11-25 10:36:25]
+2026-11-25 17:36:25,673 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
++ hdfs dfs -put /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/in.bin /data/f  [2026-11-25 10:36:26]
+2026-11-25 17:36:27,159 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
+  fsck total blocks = 128
++ hdfs --daemon stop datanode  [2026-11-25 10:36:35]
+  rc=0
+  statf=4096 197241878 192818007 182780401 U_dst=24576 -> R=766775673536
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-src,/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-dst</value></property>
+  <property><name>dfs.datanode.du.reserved./mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-dst</name><value>766775673536</value></property>
++ hdfs --daemon start datanode  [2026-11-25 10:36:38]
+  rc=0
+  KNOB C4: reserved dst=766775673536 (R=766775673536) src=0
+  plan: node=pc91.cloudlab.umass.edu port=19867 src=DS-7e0cd991-1f4a-4844-8cca-9e362b2be7a5 dst=DS-0efef469-0c35-45bc-ae15-1a5bab40e79d bytesToMove=10000000 tol=100 bw=100
+  blocks src=128 dst=0
+  A0 C4: freeSpace(dst)=13000000 usedSpace(dst)=24576 du(dst/current)=37424 statf=4096 197241878 192817985 182780379; JMX: dst:used=24576,free=13000000,reserved=766775673536,rfr=0,blocks=0 src:used=2180146895,free=748668432384,reserved=0,rfr=0,blocks=128
+2026-11-25 17:36:42,895 INFO command.Command: Executing "execute plan" command
+2026-11-25 17:36:43,028 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
+2026-11-25 17:36:44,443 INFO command.Command: Executing "query plan" command.
+2026-11-25 17:36:44,605 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Plan File: /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/plan-C4.json
+Plan ID: 2d6c93df13743cacdb2cd30207a06ab711a703bb
+Result: PLAN_DONE
+[ {
+  "sourcePath" : "/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-src/",
+  "destPath" : "/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-dst/",
+  "workItem" : {
+    "startTime" : 1795628203662,
+    "bytesToCopy" : 10000000,
+    "bytesCopied" : 16777216,
+    "blocksCopied" : 1,
+    "tolerancePercent" : 100,
+    "bandwidth" : 100
+  }
+} ]
+4:2026-11-25 17:36:43,830 INFO org.apache.hadoop.hdfs.server.datanode.DiskBalancer: Copy from file:/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-src/ to file:/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster/dn/vol-dst/ done.
+  RESULT C4: blocksCopied=1 bytesCopied=16777216 result=PLAN_DONE nPred(A0)=1 usedDst 24576 -> 16932871 (d=16908295, pred n*c=16908295) du 37424 -> 16958007 (d=16920583) freeDst1=0 H1=-3908295 (B-c=-6908295, B=10000000) intrusion=0 minFreeSampled=0 lines 1148=0 1110=1 1121=0 1102=0
++ ps check:
+  no NameNode/DataNode of this run
+=== cluster-run.sh all end 2026-11-25 10:36:52 MST
++ ps check:
+  no NameNode/DataNode of this run

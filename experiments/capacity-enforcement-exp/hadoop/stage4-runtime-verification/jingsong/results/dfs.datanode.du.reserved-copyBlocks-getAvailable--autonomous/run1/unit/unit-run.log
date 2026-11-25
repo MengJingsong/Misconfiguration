@@ -1,0 +1,122 @@
+=== unit-run.sh compile start 2026-11-25 10:29:24 MST host=node0.jason92-326665.misconfiguration-pg0.cloudlab.umass.edu
++ java -version  [2026-11-25 10:29:24]
+openjdk version "1.8.0_514"
+OpenJDK Runtime Environment (build 1.8.0_514-8u514-b01~us1-0ubuntu1~22.04.1-b01)
+OpenJDK 64-Bit Server VM (build 25.514-b01, mixed mode)
+  rc=0
++ cp /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/harness/TestDiskBalancerDestReserve.java /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/src/hadoop-hdfs-project/hadoop-hdfs/src/test/java/org/apache/hadoop/hdfs/server/diskbalancer/TestDiskBalancerDestReserve.java  [2026-11-25 10:29:24]
+  rc=0
++ md5sum /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/harness/TestDiskBalancerDestReserve.java /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/src/hadoop-hdfs-project/hadoop-hdfs/src/test/java/org/apache/hadoop/hdfs/server/diskbalancer/TestDiskBalancerDestReserve.java  [2026-11-25 10:29:24]
+6ead6d87b9d50d7cacccf967ec80cc26  /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/harness/TestDiskBalancerDestReserve.java
+6ead6d87b9d50d7cacccf967ec80cc26  /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/src/hadoop-hdfs-project/hadoop-hdfs/src/test/java/org/apache/hadoop/hdfs/server/diskbalancer/TestDiskBalancerDestReserve.java
+  rc=0
++ git -C /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/src status --short  [2026-11-25 10:29:24]
+?? hadoop-hdfs-project/hadoop-hdfs/src/test/java/org/apache/hadoop/hdfs/server/diskbalancer/TestDiskBalancerDestReserve.java
+  rc=0
++ sed -n 1136,1153p hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/datanode/DiskBalancer.java  [2026-11-25 10:29:24]
+            // There is a race condition here, but we will get an IOException
+            // if dest has no space, which we handle anyway.
+            if (dest.getAvailable() > item.getBytesToCopy()) {
+              long begin = System.nanoTime();
+              this.dataset.moveBlockAcrossVolumes(block, dest);
+              long now = System.nanoTime();
+              timeUsed = (now - begin) > 0 ? now - begin : 0;
+            } else {
+
+              // Technically it is possible for us to find a smaller block and
+              // make another copy, but opting for the safer choice of just
+              // exiting here.
+              LOG.error("Destination volume: {} does not have enough space to" +
+                  " accommodate a block. Block Size: {} Exiting from" +
+                  " copyBlocks.", dest.getBaseURI(), block.getNumBytes());
+              break;
+            }
+
+  rc=0
++ df -B1 --output=size,used,avail /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/test-data  [2026-11-25 10:29:24]
+   1B-blocks        Used        Avail
+807902732288 12581146624 754207551488
+  rc=0
+compile rc=0
+[INFO] BUILD SUCCESS
++ du -sh /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/test-data  [2026-11-25 10:29:54]
+4.0K	/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/test-data
+  rc=0
+=== unit-run.sh compile end 2026-11-25 10:29:54 MST
+=== unit-run.sh run start 2026-11-25 10:29:58 MST host=node0.jason92-326665.misconfiguration-pg0.cloudlab.umass.edu
++ java -version  [2026-11-25 10:29:58]
+openjdk version "1.8.0_514"
+OpenJDK Runtime Environment (build 1.8.0_514-8u514-b01~us1-0ubuntu1~22.04.1-b01)
+OpenJDK 64-Bit Server VM (build 25.514-b01, mixed mode)
+  rc=0
++ cp /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/harness/TestDiskBalancerDestReserve.java /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/src/hadoop-hdfs-project/hadoop-hdfs/src/test/java/org/apache/hadoop/hdfs/server/diskbalancer/TestDiskBalancerDestReserve.java  [2026-11-25 10:29:58]
+  rc=0
++ md5sum /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/harness/TestDiskBalancerDestReserve.java /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/src/hadoop-hdfs-project/hadoop-hdfs/src/test/java/org/apache/hadoop/hdfs/server/diskbalancer/TestDiskBalancerDestReserve.java  [2026-11-25 10:29:58]
+6ead6d87b9d50d7cacccf967ec80cc26  /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/harness/TestDiskBalancerDestReserve.java
+6ead6d87b9d50d7cacccf967ec80cc26  /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/src/hadoop-hdfs-project/hadoop-hdfs/src/test/java/org/apache/hadoop/hdfs/server/diskbalancer/TestDiskBalancerDestReserve.java
+  rc=0
++ git -C /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/src status --short  [2026-11-25 10:29:58]
+?? hadoop-hdfs-project/hadoop-hdfs/src/test/java/org/apache/hadoop/hdfs/server/diskbalancer/TestDiskBalancerDestReserve.java
+  rc=0
++ sed -n 1136,1153p hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/datanode/DiskBalancer.java  [2026-11-25 10:29:59]
+            // There is a race condition here, but we will get an IOException
+            // if dest has no space, which we handle anyway.
+            if (dest.getAvailable() > item.getBytesToCopy()) {
+              long begin = System.nanoTime();
+              this.dataset.moveBlockAcrossVolumes(block, dest);
+              long now = System.nanoTime();
+              timeUsed = (now - begin) > 0 ? now - begin : 0;
+            } else {
+
+              // Technically it is possible for us to find a smaller block and
+              // make another copy, but opting for the safer choice of just
+              // exiting here.
+              LOG.error("Destination volume: {} does not have enough space to" +
+                  " accommodate a block. Block Size: {} Exiting from" +
+                  " copyBlocks.", dest.getBaseURI(), block.getNumBytes());
+              break;
+            }
+
+  rc=0
++ df -B1 --output=size,used,avail /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/test-data  [2026-11-25 10:29:59]
+   1B-blocks        Used        Avail
+807902732288 12645240832 754143457280
+  rc=0
+mvn rc=0 (surefire counts are authoritative, not rc)
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 10.442 s - in org.apache.hadoop.hdfs.server.diskbalancer.TestDiskBalancerDestReserve
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
++ cp /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/src/hadoop-hdfs-project/hadoop-hdfs/target/surefire-reports/org.apache.hadoop.hdfs.server.diskbalancer.TestDiskBalancerDestReserve-output.txt /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/src/hadoop-hdfs-project/hadoop-hdfs/target/surefire-reports/org.apache.hadoop.hdfs.server.diskbalancer.TestDiskBalancerDestReserve.txt /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/src/hadoop-hdfs-project/hadoop-hdfs/target/surefire-reports/TEST-org.apache.hadoop.hdfs.server.diskbalancer.TestDiskBalancerDestReserve.xml /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/logs/unit/surefire/  [2026-11-25 10:30:40]
+  rc=0
+O26 lines: 100
+O26,U0,step5,total=807902732288,free=795189108736,usable=754075074560,g=41114034176,uDest=286944,a0Target=-1,R=0
+O26,U0,step7,reservedDst=0,R=0,reservedSrc=0,A0=754072940544,usedDst0=286944,freeSpaceDst0=754072940544,H0=766788411168,rfrDst0=0,dstBlocks0=0,srcBlocks0=64,srcUsed0=67658176,total=807902732288,g=41114034176
+O26,U0,result,B=41943040,tol=0,blocksCopied=37,bytesCopied=38797312,errMsg=null,errorCount=0,moves=37,A0=754072940544,nPredFromA0=37,usedDst0=286944,usedDst1=39387619,dUsed=39100675,freeSpaceDst1=754072915968,Afinal=754072915968,H1=766749310493,dstBlocks1=37,srcBlocks1=27,Bminusc=40886265,c=1056775,ms=120
+O26,U1,step5,total=807902732288,free=795188830208,usable=754074796032,g=41114034176,uDest=286944,a0Target=53039178,R=766735371990
+O26,U1,step7,reservedDst=766735371990,R=766735371990,reservedSrc=766735371990,A0=53039178,usedDst0=286944,freeSpaceDst0=53039178,H0=53039178,rfrDst0=0,dstBlocks0=0,srcBlocks0=64,srcUsed0=67658176,total=807902732288,g=41114034176
+O26,U1,result,B=41943040,tol=0,blocksCopied=11,bytesCopied=11534336,errMsg=null,errorCount=0,moves=11,A0=53039178,nPredFromA0=11,usedDst0=286944,usedDst1=11911469,dUsed=11624525,freeSpaceDst1=41414653,Afinal=41414653,H1=41414653,dstBlocks1=11,srcBlocks1=53,Bminusc=40886265,c=1056775,ms=54
+O26,U2,step5,total=807902732288,free=795188572160,usable=754074537984,g=41114034176,uDest=286944,a0Target=63606928,R=766724804240
+O26,U2,step7,reservedDst=766724804240,R=766724804240,reservedSrc=766724804240,A0=63606928,usedDst0=286944,freeSpaceDst0=63606928,H0=63606928,rfrDst0=0,dstBlocks0=0,srcBlocks0=64,srcUsed0=67658176,total=807902732288,g=41114034176
+O26,U2,result,B=41943040,tol=0,blocksCopied=21,bytesCopied=22020096,errMsg=null,errorCount=0,moves=21,A0=63606928,nPredFromA0=21,usedDst0=286944,usedDst1=22479219,dUsed=22192275,freeSpaceDst1=41414653,Afinal=41414653,H1=41414653,dstBlocks1=21,srcBlocks1=43,Bminusc=40886265,c=1056775,ms=72
+O26,U3,step5,total=807902732288,free=795188314112,usable=754074279936,g=41114034176,uDest=286944,a0Target=40886265,R=766747524903
+O26,U3,step7,reservedDst=766747524903,R=766747524903,reservedSrc=766747524903,A0=40886265,usedDst0=286944,freeSpaceDst0=40886265,H0=40886265,rfrDst0=0,dstBlocks0=0,srcBlocks0=64,srcUsed0=67658176,total=807902732288,g=41114034176
+O26,U3,result,B=41943040,tol=0,blocksCopied=0,bytesCopied=0,errMsg=null,errorCount=0,moves=0,A0=40886265,nPredFromA0=0,usedDst0=286944,usedDst1=286944,dUsed=0,freeSpaceDst1=40886265,Afinal=40886265,H1=40886265,dstBlocks1=0,srcBlocks1=64,Bminusc=40886265,c=1056775,ms=2
+O26,U4,step5,total=807902732288,free=795188064256,usable=754074030080,g=41114034176,uDest=286944,a0Target=800000,R=766787611168
+O26,U4,step7,reservedDst=766787611168,R=766787611168,reservedSrc=766787611168,A0=800000,usedDst0=286944,freeSpaceDst0=800000,H0=800000,rfrDst0=0,dstBlocks0=0,srcBlocks0=64,srcUsed0=67658176,total=807902732288,g=41114034176
+O26,U4,result,B=600000,tol=100,blocksCopied=1,bytesCopied=1048576,errMsg=null,errorCount=0,moves=1,A0=800000,nPredFromA0=1,usedDst0=286944,usedDst1=1343719,dUsed=1056775,freeSpaceDst1=0,Afinal=0,H1=-256775,dstBlocks1=1,srcBlocks1=63,Bminusc=-456775,c=1056775,ms=6
+--- DiskBalancer stop lines per run (1148 enough space / 1110 done / 1121 no source / 1102 max error):
+U0: DiskBalancer.java:copyBlocks(1110)) - Copy from file:/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/test-data/o26/U0/data/data1/ to file:/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/test-data/o26/U0/d
+U1: DiskBalancer.java:copyBlocks(1148)) - Destination volume: file:/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/test-data/o26/U1/data/data2/ does not have enough space to accommodate a block. Block Size: 1048576 Exiting from copyBl
+U2: DiskBalancer.java:copyBlocks(1148)) - Destination volume: file:/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/test-data/o26/U2/data/data2/ does not have enough space to accommodate a block. Block Size: 1048576 Exiting from copyBl
+U3: DiskBalancer.java:copyBlocks(1148)) - Destination volume: file:/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/test-data/o26/U3/data/data2/ does not have enough space to accommodate a block. Block Size: 1048576 Exiting from copyBl
+U4: DiskBalancer.java:copyBlocks(1110)) - Copy from file:/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/test-data/o26/U4/data/data1/ to file:/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/test-data/o26/U4/d
+--- counts per run:
+U0 1148=0 1110=1 1121=0 1102=0
+U1 1148=1 1110=0 1121=0 1102=0
+U2 1148=1 1110=0 1121=0 1102=0
+U3 1148=1 1110=0 1121=0 1102=0
+U4 1148=0 1110=1 1121=0 1102=0
++ du -sh /mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/test-data  [2026-11-25 10:30:41]
+8.0K	/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/test-data
+  rc=0
+=== unit-run.sh run end 2026-11-25 10:30:41 MST

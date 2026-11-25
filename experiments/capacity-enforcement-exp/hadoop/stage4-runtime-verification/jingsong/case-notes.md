@@ -23,6 +23,13 @@ setup, [`environment.md`](environment.md). Yang's [`../yang/case-notes.md`](../y
 - `fs.s3a.prefetch.max.blocks.count`: 2 of 3 N = 1 runs had 66 cache puts against 63–64 predicted (reader retry,
   A9); no conclusions row uses it; `selfcheck.py` flags it (stricter than the table).
 
+## Open calls for Jingsong (2026-11-25, orders 6, 14, 22, 26–31)
+
+- Order 14 `DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK`: the cluster `[B` deltas of arms A and B sit about
+  3.37 MB below the frozen point values (A −3,364,232 B, B −3,372,736 B); the frozen B3f noise allowance and the B − A
+  check (28.99 MiB) make the tier Confirmed (filed **true positive**). Read strictly (no allowance) the cluster tier is Not
+  confirmed and the class **weak true positive** (results §5, §8).
+
 ## Findings beyond the verdicts (upstream / doc candidates; check JIRA first)
 
 - S3A `SingleFilePerBlockCache` at `fs.s3a.prefetch.max.blocks.count=1`: two puts at the same seek can evict a
@@ -31,6 +38,25 @@ setup, [`environment.md`](environment.md). Yang's [`../yang/case-notes.md`](../y
   (`BufferData.setReady:215` → `getChecksum:161-166` → `CRC32.update` on a read-only copy).
 - S3A prefetch with random reads: buffers stuck in CACHING stalled a reader (about 22 of 100 reads in 300 s).
 - `LocalDirAllocator.java:528` only feeds the "max free space" figure in the error message (ablation changes nothing else).
+- **2026-11-25 (orders 6, 14, 22, 26–31):**
+  - `FsDatasetImpl.cleanupReplica` reads the meta length after deleting the meta file, so every disk-balancer (and Mover)
+    move off a volume over-counts that volume's `dfsUsed` by one meta file (131,079 B per 16 MiB block) until a DU refresh
+    (order 26).
+  - `DiskBalancer.java:1138` compares the destination's headroom with the whole `bytesToCopy`, not the block, and stops
+    early on a nearly full destination (order 26; cf. HDFS-13892).
+  - `AvailableSpaceVolumeChoosingPolicy`: at exactly `replicaSize` available, line 166 (`<`) keeps the low group and the
+    round robin (`>`) rejects it — a spurious `DiskOutOfSpaceException` while another volume has room (order 27).
+  - `FsVolumeImpl.append`: `dfsUsed` grows by the whole new block length after an append until the next DU refresh, so
+    later appends are refused early (order 28, conservative).
+  - `Mover.run` builds a new `Mover` per iteration and re-registers `MoverMetrics`; the second iteration throws
+    `MetricsException … already exists` and the Mover exits 255 (order 29). `FsVolumeList.getVolumeByMount` leaks a volume
+    reference on refusal (order 29, guided stage-5 side note).
+  - pmem cache: directories on one file system each get `maxBytes = getUsableSpace()`, so the advertised capacity doubles
+    (orders 30, 31); `PmemMappableBlockLoader.load:97` ignores `transferTo`'s return value (order 31); the cancel path
+    releases before close and leaves an uncounted cache file (order 31); a DataNode restarted with cache capacity 0 sends
+    no cache reports, so the NameNode keeps a stale cached list and re-sends `DNA_UNCACHE` (order 30).
+  - TFile with 64 KiB keys stores about twice the key bytes (one index key per block); log aggregation under a space quota
+    leaves a partial `.tmp` file (order 6).
 
 ## Environment lessons
 
@@ -54,6 +80,20 @@ setup, [`environment.md`](environment.md). Yang's [`../yang/case-notes.md`](../y
 8. **Shell hygiene:** `until ! pgrep -f "<script path>"` matches its own shell; a teardown that kills every process with the run
    folder in its command line also kills your own `ssh pcNN '…$R…'` poll. pc39/pc29 clocks are MST, the session clock EST:
    record both when ordering freeze time against runs.
+9. **Clocks (2026-11-25 nodes):** the shell on `pc91`/`pc82`/`pc72` runs in MST, the session in EST (MST + 2 h), and the
+   Hadoop daemon and surefire log lines are in **UTC** (MST + 7 h). Convert before matching log lines to sampler rows or the
+   freeze time.
+10. **MapReduce shuffle and merge logging** (`org.apache.hadoop.mapreduce.task.reduce`) goes to the reducer container's
+    `syslog.shuffle`, not `syslog` (`container-log4j.properties`, `MRApps.java:662`); copy both (order 6, runbook defect 1).
+11. **Loop volumes for disk-limit cases: use ext2 `-m 0`.** ext4 keeps 4096 reserved clusters (16 MiB on a small image) even
+    with `-m 0`, so Free ≠ Available and every `DF.getAvailable()` operand shifts; ext2 `-m 0` gives Free == Available
+    (order 28).
+12. **Harness logging wrappers must not write into input files:** a wrapper that tees its own lines into the file it creates
+    changes the workload (order 29: the staging file grew by 66 B, so each put made a 64 MiB and a 66 B block). Create input
+    files with plain `dd`/`head`, log elsewhere.
+13. **SSH to `localhost` fails on the nodes:** case files that say `start-dfs.sh`/`start-yarn.sh` need an amendment to start
+    each daemon with `hdfs --daemon start …` / `yarn --daemon start …` from the run's distribution copy (`environment.md`;
+    orders 6, 29, 30 amended this; stage-3 write-ups should name `--daemon` and `copy-source.sh` up front).
 
 ## Method lessons
 

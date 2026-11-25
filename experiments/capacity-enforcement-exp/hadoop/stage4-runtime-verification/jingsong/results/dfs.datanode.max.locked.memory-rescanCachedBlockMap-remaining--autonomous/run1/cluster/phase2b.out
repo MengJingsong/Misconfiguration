@@ -1,0 +1,62 @@
+=== cluster-run.sh phase2b start 2026-11-25 10:27:10 MST host=node2.jason92-326665.misconfiguration-pg0.cloudlab.umass.edu
++ ulimit -l: 16492912
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/dfs.datanode.max.locked.memory-rescanCachedBlockMap-remaining-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/dfs.datanode.max.locked.memory-rescanCachedBlockMap-remaining-run1/cluster/dn</value></property>
+  <property><name>dfs.cachereport.intervalMsec</name><value>60000</value></property>
+  <property><name>dfs.datanode.max.locked.memory</name><value>128m</value></property>
+  <property><name>dfs.cachereport.intervalMsec</name><value>60000</value></property>
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/dfs.datanode.max.locked.memory-rescanCachedBlockMap-remaining-run1/cluster/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/dfs.datanode.max.locked.memory-rescanCachedBlockMap-remaining-run1/cluster/dn</value></property>
+  <property><name>dfs.datanode.max.locked.memory</name><value>128m</value></property>
++ hdfs --daemon start namenode  [2026-11-25 10:27:10]
+  rc=0
++ hdfs --daemon start datanode  [2026-11-25 10:27:12]
+  rc=0
+Live datanodes (1):
+Configured Cache Capacity: 134217728 (128 MB)
+Cache Used: 0 (0 B)
+Cache Remaining: 134217728 (128 MB)
+Cache Used%: 0.00%
++ hdfs dfsadmin -safemode wait  [2026-11-25 10:27:17]
+Safe mode is OFF
+  rc=0
++ hadoop daemonlog -setlevel localhost:9870 org.apache.hadoop.hdfs.server.blockmanagement.CacheReplicationMonitor DEBUG  [2026-11-25 10:27:49]
+Connecting to http://localhost:9870/logLevel?log=org.apache.hadoop.hdfs.server.blockmanagement.CacheReplicationMonitor&level=DEBUG
+Submitted Class Name: org.apache.hadoop.hdfs.server.blockmanagement.CacheReplicationMonitor
+Log Class: org.slf4j.impl.Reload4jLoggerAdapter
+Submitted Level: DEBUG
+Setting Level to DEBUG ...
+Effective Level: DEBUG
+  rc=0
++ hdfs cacheadmin -addPool p  [2026-11-25 10:27:50]
+Successfully added cache pool p.
+  rc=0
+CacheReportsNumOps at poll start: 1 at 10:27:53
+next cache report seen: CacheReportsNumOps=2 at 10:28:24
+VmLck baseline (kB) = 0; jmx: 0 134217728 0
++ hdfs cacheadmin -addDirective -path /cap/f512 -pool p -replication 1  [2026-11-25 10:28:32]
+Added cache directive 7
+  rc=0
++ python3 -I /mydata/jingsong-s4/dfs.datanode.max.locked.memory-rescanCachedBlockMap-remaining-run1/harness/sampler.py P2b-M128m 134217728 1795627712.998611946 1009298 0 /mydata/jingsong-s4/dfs.datanode.max.locked.memory-rescanCachedBlockMap-remaining-run1/cluster/logs/hadoop-jason92-namenode-node2.jason92-326665.misconfiguration-pg0.cloudlab.umass.edu.log 2333659 /mydata/jingsong-s4/dfs.datanode.max.locked.memory-rescanCachedBlockMap-remaining-run1/cluster/logs/hadoop-jason92-datanode-node2.jason92-326665.misconfiguration-pg0.cloudlab.umass.edu.log 658494 /mydata/jingsong-s4/dfs.datanode.max.locked.memory-rescanCachedBlockMap-remaining-run1/logs/cluster/samples-P2b-M128m.csv fixed90  [2026-11-25 10:28:35]
+CLCHK,P2b-M128m,M=134217728,mode=fixed90,settled=True,t=90.5,samples=89,VmLck_kB=131072,VmLckDelta_kB=131072,CacheUsed=134217728,CacheCapacity=134217728,NumBlocksCached=8,NumBlocksFailedToCache=8,CacheReportsNumOps=3,BYTES_NEEDED=536870912,BYTES_CACHED=134217728,FILES_CACHED=0,nnCacheCapacity=134217728,nnCacheUsed=134217728,nnCacheRemaining=0,maxCacheUsed=134217728,maxVmLckDelta_kB=131072,maxBlocks=8,firstCacheReport_t=52.5,dropLines=8,dropIds=8,dropFirst_t=4.7,dropLast_t=4.7,dnaCacheLines=2,dnaCacheIds=8,dnaCacheLinesBeforeCR=2,dnaCacheIdsBeforeCR=8,dnCouldNotReserveLines=0,nnScanLines=92,logOffset_s=0.0,dnaCache_t=3.2;4.2
+  rc=0
++ hdfs cacheadmin -listDirectives -stats -path /cap/f512  [2026-11-25 10:30:05]
+Found 1 entry
+ ID POOL   REPL EXPIRY  PATH        BYTES_NEEDED  BYTES_CACHED  FILES_NEEDED  FILES_CACHED
+  7 p         1 never   /cap/f512      536870912     134217728             1             0
+  rc=0
+p2b NN cannot-fit lines: 8; DN lines: 2
++ hdfs cacheadmin -removeDirectives -path /cap/f512  [2026-11-25 10:30:07]
+Removed cache directive 7
+Removed every cache directive with path /cap/f512
+  rc=0
+  CacheUsed=0 blocks=0 after 6 s; VmLck=0 kB (baseline 0)
++ hdfs cacheadmin -removePool p  [2026-11-25 10:30:14]
+Successfully removed cache pool p.
+  rc=0
++ ps check:
+  no NameNode/DataNode of this run
++ jps  [2026-11-25 10:30:21]
+1013491 Jps
+  rc=0
+=== cluster-run.sh phase2b end 2026-11-25 10:30:21 MST

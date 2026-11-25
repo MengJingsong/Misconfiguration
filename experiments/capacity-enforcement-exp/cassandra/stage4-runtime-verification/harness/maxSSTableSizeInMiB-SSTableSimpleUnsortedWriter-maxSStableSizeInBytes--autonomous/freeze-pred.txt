@@ -1,0 +1,120 @@
+**B2f. Predictions.** (L = knob x 1048576 bytes; inc = `maxIncrement`, about 1030 to 1100 bytes.)
+
+| Run | limitBytes | hand-offs (`sync=` lines) | Data.db files | Data.db sizes (all but last) | retained heap (sample 1) |
+|---|---|---|---|---|---|
+| U1 | 1048576 | ~145 (140-150) | syncs + 1 | 0.90 L to 1.05 L | not judged |
+| U4 | 4194304 | ~36 (34-38) | syncs + 1 | 0.90 L to 1.05 L | r x L, r in [1.1, 2.0] |
+| U16 | 16777216 | 9 (8-10) | syncs + 1 | 0.90 L to 1.05 L | r x L, same r (+-20%) |
+| U64 | 67108864 | 2 | 3 | 0.90 L to 1.05 L | r x L, same r (+-20%) |
+| Udef | 134217728 | 1 | 2 | 0.90 L to 1.05 L | r x L |
+| U0 | 134217728 | 1 | 2 | as Udef | as Udef |
+| Uinf | 1073741824 | 0 | 1 | (one file = all data, ~146 MiB) | no 0.95 L sample; heap grows with rows to ~r x 146 MiB |
+| S16 / S64 | n/a (sorted writer) | n/a | ~ceil(146/knob) (switch on on-disk bytes) | ~knob | sortedHeap flat: < 16 MiB at 25/50/75%, same for both knobs |
+| Ubig | 1048576 | 5 | 5 | each ~3 MiB (> L) | not judged |
+| Udel | 1048576 | 0 | 1 | — | `maxCurrentSize` >= 12 x L (>= ~13 MB) |
+
+Relations stated for every unsorted run with at least one hand-off:
+
+- every `preSyncSample <= L` and `preSyncSample + maxIncrement > L` (the check fires on the first
+  row that crosses L, never later);
+- `maxCurrentSize <= L` (the samples are taken after the reset; a value above L means a row was
+  counted without a check);
+- retained heap at samples 2-3 `<= 2 x r x L + 8 MiB` (at most two buffers live);
+- retained heap / L roughly constant across U4, U16, U64 (linear in the knob).
+
+**B2g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| Hand-off counts, `preSyncSample` bounds and Data.db sizes as predicted; retained heap linear in L with r in [1.1, 2.0] | claim confirmed: the line-74 value bounds buffered data and its heap |
+| Udef/U0 show `limitBytes=134217728` | default derivation (:679) confirmed |
+| Number of hand-offs does not change with the knob, or `preSyncSample > L` | claim wrong: the check does not use this value as traced |
+| `maxCurrentSize > L` in an INSERT run | a row was counted without a check: a bypass not traced in A3 |
+| Retained heap at U64 not larger than at U4 (within noise) | buffer heap does not follow the knob: claim wrong for heap (cap would be on SSTable size only) |
+| Retained heap / L > 2 x (r at U4) at U64, or sample 2/3 > 2 x r x L + 8 MiB | more than two buffers live, or another consumer grows with the knob: claim partly wrong |
+| Uinf retained heap grows with rows past 64 MiB-equivalent while U64 stays bounded | confirms that the knob, not the workload, is what bounds U64 |
+| S16 and S64 heap flat and similar while U16/U64 differ | control: heap growth belongs to the unsorted buffer |
+| Ubig five ~3 MiB files | one-row overshoot confirmed (bounded by row size, as traced) |
+| Udel one file, `maxCurrentSize >= 12 x L` | DELETE bypass confirmed: for that workload usage does not follow the knob |
+| Udel shows hand-offs | the bypass is not real; A3 wrong on this point |
+
+**B2h. Controls.**
+**B3f. Predictions.**
+
+| Run | Data.db files | Data.db sizes (all but last) | total `du -sb` | peak post-GC heap | exit |
+|---|---|---|---|---|---|
+| m16 (2g) | ~33 (31-35) | 15-17 MiB each | ~520-560 MiB | lowest of the four; < 150 MiB | 0 |
+| m64 (2g) | ~9 (8-10) | 58-67 MiB | same as m16 (+-2%) | > m16 | 0 |
+| mdef (2g) | 5 | 115-135 MiB | same | > m64 | 0 |
+| m256 (2g) | 3 | 230-270 MiB | same | > mdef; >= 256 MiB (one buffer >= 256 MiB of payload) | 0 |
+| x16 (256m) | ~33 | as m16 | same | < 256 MiB | 0, `BULK done` |
+| x256 (256m) | — | — | — | — | non-zero, `OutOfMemoryError` (before or at the first hand-off) |
+
+Relations: peak post-GC heap strictly increases m16 < m64 < mdef < m256; total output bytes do
+not depend on the knob; per-file size tracks the knob. Node: `tablestats` live space and row
+checks consistent with the loaded data (each `count(*)` = 16).
+
+**B3g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| Per-file sizes track the knob; peak heap increases with the knob; x16 completes and x256 OOMs at the same `-Xmx` | claim confirmed on the real process: the knob decides how much heap the bulk writer needs |
+| x256 completes at 256m | buffer heap does not reach the knob's size (r < 1 or the buffer is not retained): heap side of the claim wrong |
+| x16 OOMs at 256m | something other than the buffer dominates heap (A4 consumer): claim wrong as a heap cap |
+| Peak heap flat across 16..256 | heap does not follow the knob: claim wrong for heap |
+| Total `du -sb` changes strongly with the knob | the knob affects total disk, contrary to A2 (needs explanation) |
+| Any Data.db larger than the knob plus one row (~1.1 KiB) | check bypassed for INSERTs: claim wrong |
+| Node load fails or counts differ | output files are not valid node input; the load step, not the claim, failed |
+
+**B3h. Controls.**
+## D. Stage-4 feedback
+
+**Stage-4 design audit, 2026-11-25 (Claude Opus 5.5, `claude-opus-5-5`, working as Jingsong; node `pc99`).** Applied before
+any reading of this case's runs. B1, B2f and B3f are unchanged; the amendments below fix the runbook and instruments and
+add verdict labels to B2g/B3g without changing any row.
+
+- **Amendment S4-A1 (2026-11-25, runbook and instruments, before any reading).**
+  (a) Paths: `W=/mydata/jingsong-cass-s4/o116`; `SRC=$W/src` is a `cp -a` of the built `/mydata/s4/cassandra-base`
+  (5.0.9, `ant build-test` already done there) instead of `rsync` + `ant -q jar`; `RUN=$W/run`. The probe test file is added
+  to `$SRC` only, then `ant -q build-test` (B2e line 1) compiles it.
+  (b) B2a probe, sync detection: a row whose `add` crosses L leaves `currentSize = 0` after `addRow`; when the previous
+  sample was also 0 (Ubig: every row syncs) the filed test `now < prev` never fires, so Ubig would print 0 `sync=` lines
+  although B2f predicts 5. The test is now `now < prev || (!delete && now == 0)` (identical for every other run, where
+  `prev > 0` before a sync). The B2f relations "`preSyncSample + maxIncrement > L`" apply to the 1 KiB-row runs
+  (U1–U64, Udef, U0); Ubig is judged by its own B2f/B2g rows (5 hand-offs, five ~3 MiB files), since it has no non-sync
+  increment.
+  (c) B2a probe, heap of Uinf: the filed probe takes heap samples only when `currentSize > 0.95 L` (never at 1024 MiB) or
+  for the sorted writer, so the B2f Uinf cell ("heap grows with rows") and the B2g Uinf row were not observable. The
+  quarter-point samples (rows N/4, N/2, 3N/4) are now taken in every run, printed as `quarterHeap` for unsorted runs
+  (with `currentSize`) and `sortedHeap` for sorted runs as before. Uinf "grows with rows" = the three quarter samples
+  strictly increase and the 3N/4 sample exceeds U64's sample-1 retained heap.
+  (d) Cluster step: `ulimit -n 100000` before `bin/cassandra` (the node's soft limit is 1024); the wait for `UN` has a
+  180 s cap and fails at once if the daemon dies; tools get `CASSANDRA_CONF=$RUN/conf`. Nothing else in B3e changes.
+- **Amendment S4-A2 (2026-11-25, B2g verdict labels, before any reading).** L = knob × 2^20.
+  *Core criteria (row 1)* for each of U1, U4, U16, U64: `limitBytes` = L; `sync=` count in the B2f range (U1 140–150,
+  U4 34–38, U16 8–10, U64 exactly 2); Data.db files = syncs + 1; every `preSyncSample` ≤ L and
+  `preSyncSample + maxIncrement` > L; `maxCurrentSize` ≤ L; every Data.db except the highest generation in
+  [0.90 L, 1.05 L]. Heap: r = sample-1 retained / L for U4, U16, U64; r(U4) in [1.1, 2.0]; r(U16), r(U64) within ±20 % of
+  r(U4); retained(U64) − retained(U4) ≥ 8 MiB; every sample 2–3 ≤ 2 r L + 8 MiB (r of that run). Controls: S16/S64 every
+  `sortedHeap` < 16 MiB and the two runs' means within 8 MiB; Uinf as in S4-A1(c).
+  **Confirmed — caps**: every core criterion and both controls hold. **Partly confirmed — caps**: the count/file
+  criteria hold and retained heap rises U4 < U16 < U64, but r(U4) is outside [1.1, 2.0], or a sample 2–3 exceeds
+  2 r L + 8 MiB (row "more than two buffers live"), or a control fails. **Refuted — does not cap**: B2g row 3 (the
+  `sync=` count does not change with the knob, or a `preSyncSample` > L). **Refuted (heap) — per-file disk capped, heap
+  does not follow**: B2g row 5 (retained(U64) − retained(U4) < 8 MiB). **Bypass**: B2g row 4 (`maxCurrentSize` > L in an
+  INSERT run) gives Effect `caps only on some paths (bypass)`. **Not confirmed**: no `sync=` line in U1–U64, a run fails,
+  or heap samples are missing. Sub-findings, reported separately and not changing the core label: Udef/U0 default
+  (B2g row 2), Ubig overshoot (row "Ubig five ~3 MiB files": 5 `sync=` lines, 5 files each > L), Udel bypass (one file,
+  `maxCurrentSize` ≥ 12 L, no `sync=`; if confirmed, the Effect reads "caps (bypass recorded: partition-DELETE-only
+  workloads)"; `sync=` lines in Udel = bypass refuted).
+- **Amendment S4-A3 (2026-11-25, B3g verdict labels, before any reading).** Peak = maximum post-GC heap (`peak-*.txt`).
+  *Core criteria (row 1)*: m16/m64/mdef/m256 file counts in the B3f ranges (31–35, 8–10, 5, 3); every Data.db except the
+  highest generation within the B3f size bands (15–17, 58–67, 115–135, 230–270 MiB) and no Data.db above
+  L + 1,152 B; peak strictly increasing m16 < m64 < mdef < m256, with peak(m16) < 150 MiB and peak(m256) ≥ 256 MiB; total
+  `du -sb` of the four within ±2 % of their mean; x16 exit 0 with `BULK done`; x256 non-zero exit with
+  `OutOfMemoryError`. **Confirmed — caps**: all hold. **Partly confirmed — caps**: the OOM split and per-file sizes hold
+  and peak(m256) − peak(m16) ≥ 100 MiB, but the ladder is not strictly increasing at every step, or one of the B3f
+  peak/du cells is missed. **Refuted — does not cap (heap)**: row 2 (x256 completes), row 3 (x16 OOMs) or row 4 (flat:
+  peak(m256) − peak(m16) < 32 MiB). **Bypass**: row 6 (a Data.db above L + 1,152 B). **Not confirmed**: a run fails for
+  another reason, or the ladder rises by 32–100 MiB without the OOM split. Row 7 (node load fails or counts differ)
+  concerns the load step only and does not change the label.

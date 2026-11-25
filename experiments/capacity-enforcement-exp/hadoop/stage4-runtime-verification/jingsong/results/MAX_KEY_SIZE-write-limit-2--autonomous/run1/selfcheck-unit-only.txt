@@ -1,0 +1,40 @@
+unit source: ./unit/org.apache.hadoop.io.TestBoundedLimitMemory-output.txt 16 IFCHK lines
+PASS surefire TestBoundedLimitMemory 6/0/0: ['Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.75 s - in org.apache.hadoop.io.TestBoundedLimitMemory']
+PASS existing org.apache.hadoop.io.TestBoundedByteArrayOutputStream.txt: Tests run: 2, Failures: 0, Errors: 0
+PASS existing org.apache.hadoop.io.file.tfile.TestTFileStreams.txt: Tests run: 19, Failures: 0, Errors: 0
+PASS instrument supported/enabled: {'supported': 'true', 'enabled': 'true', 'zero': '0', 'knownAnswer1MiB': '1048592', 'len': '1048576', 'maxHeap': '2024275968', 'gc': 'PS Scavenge|PS MarkSweep|', 'java': '1.8.0_514', 'vm': 'OpenJDK 64-Bit Server VM'}
+PASS instrument known answer 1 MiB in [1048576, 1048576+64]: 1048592
+PASS U1 lim=1024 writes=1 size=1000 msg frame: {'cap': '65536', 'lim': '1024', 'size': '1000', 'writes': '1', 'limitAtEOF': '1024', 'bufLen': '65536', 'msg': 'Reach the limit of the buffer', 'frame': 'BoundedByteArrayOutputStream.write:92'}
+PASS U1 lim=32768 writes=32 size=32000 msg frame: {'cap': '65536', 'lim': '32768', 'size': '32000', 'writes': '32', 'limitAtEOF': '32768', 'bufLen': '65536', 'msg': 'Reach the limit of the buffer', 'frame': 'BoundedByteArrayOutputStream.write:92'}
+PASS U1 lim=65536 writes=65 size=65000 msg frame: {'cap': '65536', 'lim': '65536', 'size': '65000', 'writes': '65', 'limitAtEOF': '65536', 'bufLen': '65536', 'msg': 'Reach the limit of the buffer', 'frame': 'BoundedByteArrayOutputStream.write:92'}
+PASS U1 rows = 3: 3
+PASS U2 rows = 3: 3
+PASS U2 lim=1024 ctorAlloc in [1048576, 1048576+1024]: 1048624
+PASS U2 lim=1024 writeAlloc < 4096: 3920
+PASS U2 lim=1024 frame write:92: BoundedByteArrayOutputStream.write:92
+PASS U2 lim=524288 ctorAlloc in [1048576, 1048576+1024]: 1048624
+PASS U2 lim=524288 writeAlloc < 4096: 3920
+PASS U2 lim=524288 frame write:92: BoundedByteArrayOutputStream.write:92
+PASS U2 lim=1048576 ctorAlloc in [1048576, 1048576+1024]: 1048624
+PASS U2 lim=1048576 writeAlloc < 4096: 3920
+PASS U2 lim=1048576 frame write:92: BoundedByteArrayOutputStream.write:92
+PASS U2 ctorAlloc spread <= 1024 (flat): 0
+PASS U2 refute test: spread >= 524288 NOT met: (0, 0)
+FAIL U2 lim=1024 writeAlloc < size at EOF (no growth with bytes written): ('3920', '1000')
+PASS U2 lim=524288 writeAlloc < size at EOF (no growth with bytes written): ('3920', '524000')
+PASS U2 lim=1048576 writeAlloc < size at EOF (no growth with bytes written): ('3920', '1048000')
+PASS U3 cap=65536 ctorAlloc in [cap, cap+1024]: 65584
+PASS U3 cap=1048576 ctorAlloc in [cap, cap+1024]: 1048624
+PASS U3 cap=16777216 ctorAlloc in [cap, cap+1024]: 16777232
+PASS U3 follows cap (16Mi/64Ki ratio > 200): 255.81288119053428
+PASS U3b alloc >= 204800: 523480
+PASS U4 64 writes ok, 65th throws at write:92: {'keyPrepare': '-1', 'writesOk': '64', 'attempt': '65', 'msg': 'Reach the limit of the buffer', 'frame': 'BoundedByteArrayOutputStream.write:92', 'ctorAllocMedian': '131576', 'writeAllocMedian': '3920', 'ctorRaw': '131576;131576;131576;131576;131576', 'writeRaw': '3920;3920;3920;3920;3920'}
+PASS U4 Writer ctorAlloc >= 131104: 131576
+PASS U4 writeAlloc < 8192: 3920
+PASS U4 prepareAppendKey(65537) -> IndexOutOfBoundsException: [{'keyPrepare': '65537', 'exception': 'java.lang.IndexOutOfBoundsException', 'msg': 'Limit exceeds buffer size'}]
+PASS U5 slopes agree within 5%: ({1: 196774, 10: 1376603, 100: 13174973}, 131092.1, 131093.0)
+PASS U5 len(100) >= 100 x 65536: 13174973
+PASS U5 N=1 near amended prediction (2N+1) x 65.5 KB: 196774
+PASS U5 N=10 near amended prediction (2N+1) x 65.5 KB: 1376603
+PASS U5 N=100 near amended prediction (2N+1) x 65.5 KB: 13174973
+TOTAL PASS 37 FAIL 1

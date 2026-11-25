@@ -1,0 +1,382 @@
+== setup Wed Nov 25 11:21:45 AM MST 2026
+ports 9000 9870 9864 9866 9867 9868 free
++ [11:21:45] cp -a /mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2 /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop
+  (rc=0)
++ [11:21:47] cp -r /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/etc/hadoop/. /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/conf/
+  (rc=0)
++ [11:21:47] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hadoop version
+Hadoop 3.4.2
+Source code repository Unknown -r da88d838b699f1243d022162d67a3dadaae0c15f
+Compiled by jason92 on 2026-11-24T06:07Z
+Compiled on platform linux-x86_64
+Compiled with protoc 3.23.4
+From source with checksum fa94c67d4b4be021b9e9515c9b0f7b6
+This command was run using /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/share/hadoop/common/hadoop-common-3.4.2.jar
+  (rc=0)
++ [11:21:47] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hadoop checknative
+2026-11-25 18:21:47,756 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Native library checking:
+hadoop:  false 
+zlib:    false 
+zstd  :  false 
+bzip2:   false 
+openssl: false 
+ISA-L:   false 
+PMDK:    false 
+2026-11-25 18:21:47,885 INFO util.ExitUtil: Exiting with status 1: ExitException
+  (rc=1)
+conf: pmem dirs = /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
++ hdfs namenode -format -force -nonInteractive (log format.log)
+  (rc=0)
++ [11:21:49] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs --daemon start namenode
+  (rc=0)
++ head -c 402653184 /dev/urandom > in.bin
+-rw-r--r-- 1 jason92 misconfiguration 402653184 Nov 25 11:21 /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/in.bin
+
+================ phase K1 (pmem0:136m, filler=none) Wed Nov 25 11:21:58 AM MST 2026
+DataNode stopped: yes
+no pmem tmpfs mounted
++ [11:21:58] sudo mount -t tmpfs -o size=136m,mode=1777 tmpfs /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+  (rc=0)
++ [11:21:58] df -B1 --output=size,used,avail,target /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+1B-blocks  Used     Avail Mounted on
+142606336     0 142606336 /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+  (rc=0)
+conf: pmem dirs = /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+DN log offset for K1: 0
++ [11:21:58] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs --daemon start datanode
+  (rc=0)
+DN-ready(K1): ok=1 logSum=142606336 jmxCapacity=142606336 nnConfiguredCacheCapacity=142606336
+  DNLOG 2026-11-25 18:22:00,763 INFO org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemMappableBlockLoader: Initializing cache loader: org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemMappableBlockLoader
+  DNLOG 2026-11-25 18:22:00,782 INFO org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemVolumeManager: Added persistent memory - /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0 with size=142606336
+  DNLOG 2026-11-25 18:22:00,782 INFO org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemMappableBlockLoader: Persistent memory is used for caching data instead of DRAM. Max locked memory is set to zero to disable DRAM cache
+2026-11-25 18:22:04,157 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
++ [11:22:05] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs dfsadmin -safemode wait
+2026-11-25 18:22:05,636 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Safe mode is OFF
+  (rc=0)
++ [11:22:06] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs dfs -D dfs.blocksize=16777216 -put /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/in.bin /o31.bin
+2026-11-25 18:22:07,025 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  (rc=0)
+2026-11-25 18:22:10,181 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Connecting to namenode via http://localhost:9870/fsck?ugi=jason92&files=1&blocks=1&path=%2Fo31.bin
+Status: HEALTHY
+ Total size:	402653184 B
+ Total blocks (validated):	24 (avg. block size 16777216 B)
+ Total size:	0 B
++ [11:22:11] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs cacheadmin -addPool o31pool
+2026-11-25 18:22:11,908 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Successfully added cache pool o31pool.
+  (rc=0)
++ [11:22:12] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs cacheadmin -addDirective -path /o31.bin -pool o31pool -replication 1
+2026-11-25 18:22:13,392 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Added cache directive 1
+  (rc=0)
+settled(K1) at t=90 s: 134217728/8
+---- final K1 Wed Nov 25 11:23:44 AM MST 2026
+11:23:39,85,142606336,134217728,8,0,134218108,0,8,0,134217728,8388608,,,0
+11:23:44,90,142606336,134217728,8,0,134218108,0,8,0,134217728,8388608,,,0
++ [11:23:44] df -B1 --output=size,used,avail,target /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+1B-blocks      Used   Avail Mounted on
+142606336 134217728 8388608 /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+  (rc=0)
++ [11:23:45] du -sb /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0/hdfs_pmem_cache
+134218108	/mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0/hdfs_pmem_cache
+  (rc=0)
+files: 8 bytes: 134217728
+  NN Configured Cache Capacity: 142606336 (136 MB)
+  NN Cache Used: 134217728 (128 MB)
+  NN Cache Remaining: 8388608 (8 MB)
+  NN Cache Used%: 94.12%
+  NN Cache Remaining%: 5.88%
++ [11:23:46] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs cacheadmin -listDirectives -stats
+2026-11-25 18:23:47,176 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 1 entry
+ ID POOL      REPL EXPIRY  PATH       BYTES_NEEDED  BYTES_CACHED  FILES_NEEDED  FILES_CACHED
+  1 o31pool      1 never   /o31.bin      402653184     134217728             1             0
+  (rc=0)
+refusal values (K1):
+CLCHK,K1,spec=pmem0:136m,filler=none,settledAt=90,logMaxBytesSum=142606336,CacheCapacity=142606336,CacheUsed=134217728,NumBlocksCached=8,NumBlocksFailedToCache=0,maxCacheUsed=134217728,maxDu0=134218108,maxDu1=0,refusalLines=0,refusalsAtSettle=0,couldNotReserve=0,failedToCacheBlock=0,noSpaceLeft=0,successfullyCached=8
+
+================ phase K2 (pmem0:264m, filler=none) Wed Nov 25 11:23:48 AM MST 2026
++ [11:23:48] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs cacheadmin -removeDirectives -path /o31.bin
+2026-11-25 18:23:48,677 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Removed cache directive 1
+Removed every cache directive with path /o31.bin
+  (rc=0)
++ [11:23:54] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs --daemon stop datanode
+  (rc=0)
+DataNode stopped: yes
++ [11:23:55] sudo umount /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+  (rc=0)
+no pmem tmpfs mounted
++ [11:23:55] sudo mount -t tmpfs -o size=264m,mode=1777 tmpfs /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+  (rc=0)
++ [11:23:55] df -B1 --output=size,used,avail,target /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+1B-blocks  Used     Avail Mounted on
+276824064     0 276824064 /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+  (rc=0)
+conf: pmem dirs = /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+DN log offset for K2: 209
++ [11:23:55] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs --daemon start datanode
+  (rc=0)
+DN-ready(K2): ok=1 logSum=276824064 jmxCapacity=276824064 nnConfiguredCacheCapacity=276824064
+  DNLOG 2026-11-25 18:23:57,995 INFO org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemMappableBlockLoader: Initializing cache loader: org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemMappableBlockLoader
+  DNLOG 2026-11-25 18:23:58,016 INFO org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemVolumeManager: Added persistent memory - /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0 with size=276824064
+  DNLOG 2026-11-25 18:23:58,016 INFO org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemMappableBlockLoader: Persistent memory is used for caching data instead of DRAM. Max locked memory is set to zero to disable DRAM cache
+2026-11-25 18:24:00,988 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
++ [11:24:01] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs cacheadmin -addDirective -path /o31.bin -pool o31pool -replication 1
+2026-11-25 18:24:02,541 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Added cache directive 2
+  (rc=0)
+settled(K2) at t=91 s: 268435456/16
+---- final K2 Wed Nov 25 11:25:34 AM MST 2026
+11:25:29,86,276824064,268435456,16,0,268435996,0,16,0,268435456,8388608,,,0
+11:25:34,91,276824064,268435456,16,0,268435996,0,16,0,268435456,8388608,,,0
++ [11:25:34] df -B1 --output=size,used,avail,target /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+1B-blocks      Used   Avail Mounted on
+276824064 268435456 8388608 /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+  (rc=0)
++ [11:25:34] du -sb /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0/hdfs_pmem_cache
+268435996	/mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0/hdfs_pmem_cache
+  (rc=0)
+files: 16 bytes: 268435456
+  NN Configured Cache Capacity: 276824064 (264 MB)
+  NN Cache Used: 268435456 (256 MB)
+  NN Cache Remaining: 8388608 (8 MB)
+  NN Cache Used%: 96.97%
+  NN Cache Remaining%: 3.03%
++ [11:25:35] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs cacheadmin -listDirectives -stats
+2026-11-25 18:25:36,260 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 1 entry
+ ID POOL      REPL EXPIRY  PATH       BYTES_NEEDED  BYTES_CACHED  FILES_NEEDED  FILES_CACHED
+  2 o31pool      1 never   /o31.bin      402653184     268435456             1             0
+  (rc=0)
+refusal values (K2):
+CLCHK,K2,spec=pmem0:264m,filler=none,settledAt=91,logMaxBytesSum=276824064,CacheCapacity=276824064,CacheUsed=268435456,NumBlocksCached=16,NumBlocksFailedToCache=0,maxCacheUsed=268435456,maxDu0=268435996,maxDu1=0,refusalLines=0,refusalsAtSettle=0,couldNotReserve=0,failedToCacheBlock=0,noSpaceLeft=0,successfullyCached=16
+
+================ phase K3 (pmem0:44m pmem1:204m, filler=none) Wed Nov 25 11:25:37 AM MST 2026
++ [11:25:37] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs cacheadmin -removeDirectives -path /o31.bin
+2026-11-25 18:25:37,750 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Removed cache directive 2
+Removed every cache directive with path /o31.bin
+  (rc=0)
++ [11:25:43] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs --daemon stop datanode
+  (rc=0)
+DataNode stopped: yes
++ [11:25:44] sudo umount /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+  (rc=0)
+no pmem tmpfs mounted
++ [11:25:44] sudo mount -t tmpfs -o size=44m,mode=1777 tmpfs /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+  (rc=0)
++ [11:25:44] df -B1 --output=size,used,avail,target /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+1B-blocks  Used    Avail Mounted on
+ 46137344     0 46137344 /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+  (rc=0)
++ [11:25:44] sudo mount -t tmpfs -o size=204m,mode=1777 tmpfs /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem1
+  (rc=0)
++ [11:25:44] df -B1 --output=size,used,avail,target /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem1
+1B-blocks  Used     Avail Mounted on
+213909504     0 213909504 /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem1
+  (rc=0)
+conf: pmem dirs = /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0,/mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem1
+DN log offset for K3: 354
++ [11:25:44] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs --daemon start datanode
+  (rc=0)
+DN-ready(K3): ok=1 logSum=260046848 jmxCapacity=260046848 nnConfiguredCacheCapacity=260046848
+  DNLOG 2026-11-25 18:25:46,968 INFO org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemMappableBlockLoader: Initializing cache loader: org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemMappableBlockLoader
+  DNLOG 2026-11-25 18:25:46,988 INFO org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemVolumeManager: Added persistent memory - /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0 with size=46137344
+  DNLOG 2026-11-25 18:25:46,988 INFO org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemVolumeManager: Added persistent memory - /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem1 with size=213909504
+  DNLOG 2026-11-25 18:25:46,989 INFO org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemMappableBlockLoader: Persistent memory is used for caching data instead of DRAM. Max locked memory is set to zero to disable DRAM cache
+2026-11-25 18:25:50,104 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
++ [11:25:50] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs cacheadmin -addDirective -path /o31.bin -pool o31pool -replication 1
+2026-11-25 18:25:51,606 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Added cache directive 3
+  (rc=0)
+settled(K3) at t=91 s: 234881024/14
+---- final K3 Wed Nov 25 11:28:23 AM MST 2026
+11:28:18,146,260046848,234881024,14,73,33554692,201327052,2,12,33554432,12582912,201326592,12582912,72
+11:28:23,151,260046848,234881024,14,73,33554692,201327052,2,12,33554432,12582912,201326592,12582912,74
++ [11:28:23] df -B1 --output=size,used,avail,target /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0 /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem1
+1B-blocks      Used    Avail Mounted on
+ 46137344  33554432 12582912 /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+213909504 201326592 12582912 /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem1
+  (rc=0)
++ [11:28:23] du -sb /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0/hdfs_pmem_cache /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem1/hdfs_pmem_cache
+33554692	/mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0/hdfs_pmem_cache
+201327052	/mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem1/hdfs_pmem_cache
+  (rc=0)
+files: 14 bytes: 234881024
+  NN Configured Cache Capacity: 260046848 (248 MB)
+  NN Cache Used: 234881024 (224 MB)
+  NN Cache Remaining: 25165824 (24 MB)
+  NN Cache Used%: 90.32%
+  NN Cache Remaining%: 9.68%
++ [11:28:25] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs cacheadmin -listDirectives -stats
+2026-11-25 18:28:26,023 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 1 entry
+ ID POOL      REPL EXPIRY  PATH       BYTES_NEEDED  BYTES_CACHED  FILES_NEEDED  FILES_CACHED
+  3 o31pool      1 never   /o31.bin      402653184     234881024             1             0
+  (rc=0)
+refusal values (K3):
+     76 max available space is 12582912, but 16777216is required
+  DNLOG 2026-11-25 18:25:54,579 WARN org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemVolumeManager: There is no enough persistent memory space for caching. The current max available space is 12582912, but 16777216is required.
+  DNLOG 2026-11-25 18:25:54,579 WARN org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.FsDatasetCache: Failed to cache 1073741839_BP-762798272-198.22.255.102-1795630909222: could not reserve more bytes in the cache: 260046848 exceeded when try to reserve 16777216bytes.
+  DNLOG 2026-11-25 18:25:58,111 WARN org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemVolumeManager: There is no enough persistent memory space for caching. The current max available space is 12582912, but 16777216is required.
+  DNLOG 2026-11-25 18:25:58,111 WARN org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.FsDatasetCache: Failed to cache 1073741839_BP-762798272-198.22.255.102-1795630909222: could not reserve more bytes in the cache: 260046848 exceeded when try to reserve 16777216bytes.
+CLCHK,K3,spec=pmem0:44m pmem1:204m,filler=none,settledAt=91,logMaxBytesSum=260046848,CacheCapacity=260046848,CacheUsed=234881024,NumBlocksCached=14,NumBlocksFailedToCache=73,maxCacheUsed=234881024,maxDu0=33554692,maxDu1=201327052,refusalLines=76,refusalsAtSettle=44,couldNotReserve=76,failedToCacheBlock=0,noSpaceLeft=0,successfullyCached=14
+
+================ phase K4 (pmem0:264m, filler=after) Wed Nov 25 11:28:26 AM MST 2026
++ [11:28:26] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs cacheadmin -removeDirectives -path /o31.bin
+2026-11-25 18:28:27,490 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Removed cache directive 3
+Removed every cache directive with path /o31.bin
+  (rc=0)
++ [11:28:33] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs --daemon stop datanode
+  (rc=0)
+DataNode stopped: yes
++ [11:28:34] sudo umount /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+  (rc=0)
++ [11:28:34] sudo umount /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem1
+  (rc=0)
+no pmem tmpfs mounted
++ [11:28:34] sudo mount -t tmpfs -o size=264m,mode=1777 tmpfs /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+  (rc=0)
++ [11:28:34] df -B1 --output=size,used,avail,target /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+1B-blocks  Used     Avail Mounted on
+276824064     0 276824064 /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+  (rc=0)
+conf: pmem dirs = /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+DN log offset for K4: 740
++ [11:28:34] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs --daemon start datanode
+  (rc=0)
+DN-ready(K4): ok=1 logSum=276824064 jmxCapacity=276824064 nnConfiguredCacheCapacity=276824064
+  DNLOG 2026-11-25 18:28:36,808 INFO org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemMappableBlockLoader: Initializing cache loader: org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemMappableBlockLoader
+  DNLOG 2026-11-25 18:28:36,827 INFO org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemVolumeManager: Added persistent memory - /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0 with size=276824064
+  DNLOG 2026-11-25 18:28:36,827 INFO org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemMappableBlockLoader: Persistent memory is used for caching data instead of DRAM. Max locked memory is set to zero to disable DRAM cache
+2026-11-25 18:28:39,879 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
++ [11:28:40] head -c 104857600 /dev/zero > pmem0/filler
+  (rc=0)
++ [11:28:40] df -B1 --output=used,avail /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+     Used     Avail
+104857600 171966464
+  (rc=0)
+JMX after filler: 276824064 0 0 0
++ [11:28:40] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs cacheadmin -addDirective -path /o31.bin -pool o31pool -replication 1
+2026-11-25 18:28:41,549 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Added cache directive 4
+  (rc=0)
+settled(K4) at t=91 s: 167772160/10
+---- final K4 Wed Nov 25 11:30:13 AM MST 2026
+11:30:08,86,276824064,167772160,10,252,167772580,0,10,0,272629760,4194304,,,0
+11:30:13,91,276824064,167772160,10,252,167772580,0,10,0,272629760,4194304,,,0
++ [11:30:13] df -B1 --output=size,used,avail,target /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+1B-blocks      Used   Avail Mounted on
+276824064 272629760 4194304 /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+  (rc=0)
++ [11:30:13] du -sb /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0/hdfs_pmem_cache
+167772580	/mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0/hdfs_pmem_cache
+  (rc=0)
+files: 11 bytes: 272629760
+  NN Configured Cache Capacity: 276824064 (264 MB)
+  NN Cache Used: 167772160 (160 MB)
+  NN Cache Remaining: 109051904 (104 MB)
+  NN Cache Used%: 60.61%
+  NN Cache Remaining%: 39.39%
++ [11:30:14] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs cacheadmin -listDirectives -stats
+2026-11-25 18:30:15,322 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 1 entry
+ ID POOL      REPL EXPIRY  PATH       BYTES_NEEDED  BYTES_CACHED  FILES_NEEDED  FILES_CACHED
+  4 o31pool      1 never   /o31.bin      402653184     167772160             1             0
+  (rc=0)
+refusal values (K4):
+  DNLOG 2026-11-25 18:28:45,272 WARN org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.FsDatasetCache: Failed to cache the block [key=1073741835_BP-762798272-198.22.255.102-1795630909222]!
+  DNLOG 2026-11-25 18:28:45,280 WARN org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.FsDatasetCache: Failed to cache the block [key=1073741836_BP-762798272-198.22.255.102-1795630909222]!
+  DNLOG 2026-11-25 18:28:45,296 WARN org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.FsDatasetCache: Failed to cache the block [key=1073741837_BP-762798272-198.22.255.102-1795630909222]!
+  DNLOG 2026-11-25 18:28:45,304 WARN org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.FsDatasetCache: Failed to cache the block [key=1073741838_BP-762798272-198.22.255.102-1795630909222]!
+CLCHK,K4,spec=pmem0:264m,filler=after,settledAt=91,logMaxBytesSum=276824064,CacheCapacity=276824064,CacheUsed=167772160,NumBlocksCached=10,NumBlocksFailedToCache=252,maxCacheUsed=167772160,maxDu0=170566072,maxDu1=0,refusalLines=0,refusalsAtSettle=0,couldNotReserve=0,failedToCacheBlock=270,noSpaceLeft=0,successfullyCached=10
+
+================ phase K5 (pmem0:264m, filler=before) Wed Nov 25 11:30:16 AM MST 2026
++ [11:30:16] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs cacheadmin -removeDirectives -path /o31.bin
+2026-11-25 18:30:16,781 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Removed cache directive 4
+Removed every cache directive with path /o31.bin
+  (rc=0)
++ [11:30:22] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs --daemon stop datanode
+  (rc=0)
+DataNode stopped: yes
++ [11:30:23] sudo umount /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+  (rc=0)
+no pmem tmpfs mounted
++ [11:30:23] sudo mount -t tmpfs -o size=264m,mode=1777 tmpfs /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+  (rc=0)
++ [11:30:23] df -B1 --output=size,used,avail,target /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+1B-blocks  Used     Avail Mounted on
+276824064     0 276824064 /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+  (rc=0)
++ [11:30:23] head -c 104857600 /dev/zero > pmem0/filler
+  (rc=0)
++ [11:30:23] df -B1 --output=used,avail /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+     Used     Avail
+104857600 171966464
+  (rc=0)
+conf: pmem dirs = /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+DN log offset for K5: 3129
++ [11:30:23] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs --daemon start datanode
+  (rc=0)
+DN-ready(K5): ok=1 logSum=171966464 jmxCapacity=171966464 nnConfiguredCacheCapacity=171966464
+  DNLOG 2026-11-25 18:30:26,093 INFO org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemMappableBlockLoader: Initializing cache loader: org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemMappableBlockLoader
+  DNLOG 2026-11-25 18:30:26,112 INFO org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemVolumeManager: Added persistent memory - /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0 with size=171966464
+  DNLOG 2026-11-25 18:30:26,112 INFO org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.PmemMappableBlockLoader: Persistent memory is used for caching data instead of DRAM. Max locked memory is set to zero to disable DRAM cache
+2026-11-25 18:30:29,248 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
++ [11:30:30] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs cacheadmin -addDirective -path /o31.bin -pool o31pool -replication 1
+2026-11-25 18:30:30,770 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Added cache directive 5
+  (rc=0)
+settled(K5) at t=91 s: 167772160/10
+---- final K5 Wed Nov 25 11:32:02 AM MST 2026
+11:31:57,86,171966464,167772160,10,0,167772580,0,10,0,272629760,4194304,,,0
+11:32:02,91,171966464,167772160,10,0,167772580,0,10,0,272629760,4194304,,,0
++ [11:32:02] df -B1 --output=size,used,avail,target /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+1B-blocks      Used   Avail Mounted on
+276824064 272629760 4194304 /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+  (rc=0)
++ [11:32:02] du -sb /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0/hdfs_pmem_cache
+167772580	/mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0/hdfs_pmem_cache
+  (rc=0)
+files: 11 bytes: 272629760
+  NN Configured Cache Capacity: 171966464 (164 MB)
+  NN Cache Used: 167772160 (160 MB)
+  NN Cache Remaining: 4194304 (4 MB)
+  NN Cache Used%: 97.56%
+  NN Cache Remaining%: 2.44%
++ [11:32:03] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs cacheadmin -listDirectives -stats
+2026-11-25 18:32:04,483 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 1 entry
+ ID POOL      REPL EXPIRY  PATH       BYTES_NEEDED  BYTES_CACHED  FILES_NEEDED  FILES_CACHED
+  5 o31pool      1 never   /o31.bin      402653184     167772160             1             0
+  (rc=0)
+refusal values (K5):
+CLCHK,K5,spec=pmem0:264m,filler=before,settledAt=91,logMaxBytesSum=171966464,CacheCapacity=171966464,CacheUsed=167772160,NumBlocksCached=10,NumBlocksFailedToCache=0,maxCacheUsed=167772160,maxDu0=167772580,maxDu1=0,refusalLines=0,refusalsAtSettle=0,couldNotReserve=0,failedToCacheBlock=0,noSpaceLeft=0,successfullyCached=10
+== teardown Wed Nov 25 11:32:05 AM MST 2026
++ [11:32:05] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs cacheadmin -removeDirectives -path /o31.bin
+2026-11-25 18:32:05,936 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Removed cache directive 5
+Removed every cache directive with path /o31.bin
+  (rc=0)
++ [11:32:09] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs --daemon stop datanode
+  (rc=0)
+DataNode stopped: yes
++ [11:32:10] /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop/bin/hdfs --daemon stop namenode
+  (rc=0)
++ [11:32:11] sudo umount /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pmem0
+  (rc=0)
+no pmem tmpfs mounted
+(no daemon if empty)
++ [11:32:11] rm -rf /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/nn /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/dn /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/tmp /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/in.bin /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/hadoop /mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster/pids
+  (rc=0)
+992K	/mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/cluster
+44K	/mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/harness
+2.0M	/mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/logs
+373M	/mydata/jingsong-s4/dfs.datanode.pmem.cache.dirs-chooseVolume-availableBytes-run1/src
+== teardown done Wed Nov 25 11:32:12 AM MST 2026

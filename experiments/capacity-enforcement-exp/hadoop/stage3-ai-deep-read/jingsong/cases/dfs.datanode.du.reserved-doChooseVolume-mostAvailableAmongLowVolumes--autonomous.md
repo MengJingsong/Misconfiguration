@@ -123,6 +123,7 @@ The NameNode's `dfs.namenode.resource.du.reserved` guards NameNode metadata dire
 - Build once: `cd $WORK/hadoop-src && mvn -pl hadoop-hdfs-project/hadoop-hdfs -am install -DskipTests -Dmaven.javadoc.skip=true`.
 - The test goes in `$WORK/hadoop-src/hadoop-hdfs-project/hadoop-hdfs/src/test/java/org/apache/hadoop/hdfs/server/datanode/fsdataset/impl/TestDuReservedAvailableSpacePlacement.java`. It must be in package `...fsdataset.impl` because `FsVolumeList`, `FsVolumeImplBuilder.setUsage(DF)` and `FsVolumeList.addVolume` are package-private.
 - The surefire default JVM options are enough. No daemon or `MiniDFSCluster` is needed: real `FsVolumeImpl`, `FsVolumeList`, `ReservedSpaceCalculator` and `AvailableSpaceVolumeChoosingPolicy` objects run in one JVM, and only `DF` is mocked so that capacity is exact.
+- *Amendment D1-1 (2026-11-25, stage-4 audit; environment only):* on the stage-4 node the copy is made with `hadoop/stage4-runtime-verification/jingsong/copy-source.sh <run>/src` from the repository's `systems/hadoop/source/` (no `~/hadoop-3.4.2` there), and the `install` is skipped: every 3.4.2 module is already in the node's `~/.m2` from its full build (`environment.md` §3). B2e step 3 runs offline with test data under the run folder: `mvn -B -o -pl hadoop-hdfs-project/hadoop-hdfs test -Dtest=TestDuReservedAvailableSpacePlacement -DfailIfNoTests=false -Dtest.build.data=<run>/test-data`.
 
 **B2b. Knobs.**
 
@@ -162,6 +163,7 @@ Repeat for up to 100 steps, stopping at the first `DiskOutOfSpaceException`. Eac
 - The policy's own DEBUG lines are captured too: "Volumes are imbalanced. Selecting <vol> from high|low available space volumes for write of block size …" (`AvailableSpaceVolumeChoosingPolicy.java:171-181`). Enable them with `GenericTestUtils.setLogLevel(LoggerFactory.getLogger(AvailableSpaceVolumeChoosingPolicy.class), org.slf4j.event.Level.DEBUG)`. With `f` = 0.0, a "from high" line means line 166 was true because of space.
 - Output: one CSV line per step on stdout (`target/surefire-reports/...TestDuReservedAvailableSpacePlacement-output.txt`).
 - Not observable: real disk bytes. That is the cluster tier's job.
+- *Amendment D1-2 (2026-11-25, stage-4 audit; instrument):* the test source below did not print `getReservedForReplicas()`, which the first bullet asks for. The harness copy adds two CSV columns, `rfr0,rfr1` (read before the step, next to `avail0,avail1`), and prints the header with the tag so each test's block is self-describing. Nothing else in the test changes.
 
 Test source to write:
 
@@ -345,6 +347,8 @@ For the four deterministic `f` = 0.0 tags (not U-EQ):
   - `dfs.datanode.available-space-volume-choosing-policy.balanced-space-preference-fraction=0.0`
   - plus the reserve keys of B3b.
 - **`$RUN/conf/log4j.properties`:** add `log4j.logger.org.apache.hadoop.hdfs.server.datanode.fsdataset.AvailableSpaceVolumeChoosingPolicy=DEBUG`.
+- *Amendment D1-3 (2026-11-25, stage-4 audit; environment, required by the node rules):* `$RUN/dn` is a **12 GiB ext4 loop file system** (`truncate -s 12G $RUN/dn.img; mkfs.ext4 -q -F $RUN/dn.img; sudo mount -o loop $RUN/dn.img $RUN/dn; sudo chown $USER $RUN/dn`), not `$RUN` on `/mydata` itself, so that no outcome (including an overshoot) can fill `/mydata`. Both data directories stay on one local file system as above, and `TOTAL`/`ROOTRES` are measured on `$RUN/dn` (the B3a algebra holds for any file system; ext4's default 5 % root reserve makes `ROOTRES` > 0, which the formula covers). The ≥ 10 GiB usable requirement applies to the loop file system (checked before each run). The distribution is the node's built `hadoop-base` copy (allowed above); daemons are started with `hdfs --daemon` (no ssh to localhost on the node); `JAVA_HOME` = JDK 8.
+- *Amendment D1-4 (2026-11-25, stage-4 audit; instrument):* also add `log4j.logger.org.apache.hadoop.hdfs.server.blockmanagement.BlockPlacementPolicy=DEBUG`, so that the NameNode's own refusal line ("does not have enough DISK space", `DatanodeDescriptor.java:833-838`) shows which gate rejected the first failed put (B3d: "use the logs"). The NameNode check counts only storages whose own remaining is ≥ `B` (`DatanodeDescriptor.java:826-831`), so in K1/K2/K3 the first failed put is expected to be refused there rather than by the DataNode's round robin; the predictions do not depend on which.
 
 **B3b. Knobs.** All are set in `hdfs-site.xml` with plain decimal bytes for the per-directory keys. Each change needs a DataNode restart; the runs below re-format.
 
@@ -426,6 +430,9 @@ The key's directory suffix must equal the volume path exactly, with no trailing 
 | K1c overshoot > 0 but ≤ 7·S | Confirms leak A3(b): the cap holds only up to in-flight acked bytes under concurrency. |
 | K1c overshoot = 0 in all repetitions | The leak did not show at this concurrency (not a refutation of A3(b); raise the writer count). |
 | K1c overshoot > 8·S | Leak larger than traced; A3 incomplete. |
+| *(D1-5)* K1c overshoot on `d0` in (7·S, 8·S], no volume over `b_i + 8·S` | Leak A3(b) shown, but `d0`'s bound in B3f (7·S) is one block too tight; the cap still holds only up to in-flight bytes. |
+
+*Amendment D1-5 (2026-11-25, stage-4 audit, before any reading):* the K1c rows define the overshoot of volume i as `max(0, final blk bytes(d_i) − b_i)`, read after the 8 writers end. B3f bounds `d0` at 7·S and every volume at 8·S, which left a `d0` reading in (7·S, 8·S] with no row; the row above closes that gap. K1/K2/K3 decide the cluster verdict; K1c is the secondary leak test and changes the Effect field only between `caps` and `caps only on some paths (bypass)`.
 
 **B3h. Controls.**
 
@@ -484,4 +491,19 @@ hadoop-hdfs-project/hadoop-hdfs/src/test/java/org/apache/hadoop/hdfs/server/data
 
 ## D. Stage-4 feedback
 
-none yet
+**Stage-4 audit amendments (2026-11-25, stage-4 agent working as Jingsong, node `pc82`; made before any reading).**
+Bottom line: *Ready after amendments*. None changes B1, a prediction number or an existing conclusions row.
+
+- **D1-1** (B2a, environment): source copy with `copy-source.sh`; no `install` (modules in `~/.m2`); offline `mvn -o` test command with test data under the run folder.
+- **D1-2** (B2d, instrument): CSV adds `rfr0,rfr1` (`getReservedForReplicas()` before each step), which B2d asks for and the given test omitted.
+- **D1-3** (B3a, environment): `$RUN/dn` on a 12 GiB ext4 loop file system; `TOTAL`/`ROOTRES` measured there; dist reuse, `--daemon` start, JDK 8.
+- **D1-4** (B3a/B3d, instrument): NameNode DEBUG for `BlockPlacementPolicy`, to see which gate refuses the first failed put.
+- **D1-5** (B3g, before any reading): K1c overshoot defined; row for a `d0` overshoot in (7·S, 8·S] added.
+
+**Stage-4 result (run 1, 2026-11-25, `pc82`; frozen version sha256 `ca1a80837d5d07d5d034b6d6e1cff6fe97c2ae625a011436dffa1a3916152d93`; results file `hadoop/stage4-runtime-verification/jingsong/results/dfs.datanode.du.reserved-doChooseVolume-mostAvailableAmongLowVolumes--autonomous.md`).**
+
+- **Unit tier: Confirmed — caps.** All eight tags match B2f to the byte (U-R0 10/30, fail 41 at 75,497,472; U-R512 5/25; U-R960 0/21; U-EQ1 0/21; f75 and `_bal` totals as U-R0/U-R512). Every step routed to the high volume had `mostLow < B` and a "from high" DEBUG line. U-EQ threw at step 1 with `d1` holding 2,252,341,248 B: the A3(e) boundary failure is real. U-R512-bal equals U-R512: line 166 routes; the cap is `getAvailable` plus the round-robin `>` test.
+- **Cluster tier: Confirmed — caps.** K1 40 puts (10·S on `d0`, 30·S on `d1`), K2 25 (5·S / 20·S), K3 20 (10·S each), every first failed put at the predicted index, final bytes equal to B3f's products, JMX `reservedSpace` = `R_i` exactly. Line 166's true branch logged "from high" on K1 puts 11–40 and K2 6–25. The first refused put of each sequential run was refused by the NameNode (`chooseStorage4Block`), not by the DataNode policy (R2).
+- **K1c (secondary): Not confirmed — observable defect.** All 8 writers failed in each repetition and `-put` deleted their files, so the post-run blk bytes were 0, while 2 s samples showed finalized bytes over budget in 3/3 repetitions (`d0` 12–13 blocks on a 10-block budget, up to 2.84·S; `d1` 32–34 on 30, up to 3.52·S): leak A3(b) observed in samples, within B3f's bounds, not settled by the frozen observable.
+- **Outcome class: true positive.**
+- **Recommendations for stage 3:** R1 (no cluster run at R = 0; disk would fill), R2 (state that the NameNode check refuses the first failed sequential put), R3 (K1c: read the overshoot as the peak finalized bytes during the run, or size the writers so that files complete).

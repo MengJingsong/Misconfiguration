@@ -177,6 +177,10 @@ first (orders 72, 132 did so). **`pc99` is blocked:** its lock is held by `jings
 session that returned no result; no process runs on `pc99` and there is no `o70` folder (checked 2026-11-25 09:10 EST), so
 orders 116 and 125 (and Hadoop 6, 14, 22) gave up after 60 min. Confirm it is stale and remove it before using `pc99`.
 
+**2026-11-25 (later): orders 116 and 125 ran on `ms0640`** (Utah m400, aarch64; second attempts after the `pc99` lock
+blocked the first), one case at a time under `/mydata/s4/NODE-LOCK`. Left on the node: `/mydata/jingsong-cass-s4/o116/`
+(836 KB) and `o125/` (9.0 MB), logs and harness only; nothing running, ports free.
+
 ## Logs
 
 Run 1's logs are in `~/stage4-logs/` on the node, outside the repo:

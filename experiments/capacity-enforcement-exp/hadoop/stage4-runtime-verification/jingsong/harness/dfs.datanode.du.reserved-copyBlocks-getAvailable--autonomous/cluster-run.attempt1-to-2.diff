@@ -1,0 +1,24 @@
+--- /users/jason92/writeup-hadoop/out/o26/run1/cluster-attempt1/cluster-run.attempt1.sh	2026-11-25 12:43:15.369573363 -0500
++++ cluster-run.sh	2026-11-25 12:37:56.662588024 -0500
+@@ -198,8 +198,10 @@
+ m=re.search(r"\{.*\}", t, re.S)
+ import json
+ try:
+-    j=json.loads(m.group(0)); w=j["currentState"][0]["workItem"]
+-    print(w["blocksCopied"], w["bytesCopied"], w.get("errorCount",0), j.get("result"))
++    # the -v output is a JSON array of work entries; a zero counter is omitted from the JSON (seen in attempt 1, C3)
++    a=re.search(r"\[\s*\{.*\}\s*\]", t, re.S); w=json.loads(a.group(0))[0]["workItem"]
++    r=re.search(r"Result: (\w+)", t)
++    print(w.get("blocksCopied",0), w.get("bytesCopied",0), w.get("errorCount",0), r.group(1) if r else "NA")
+ except Exception as e:
+     bc=re.search(r"\"blocksCopied\"\s*:\s*(\d+)",t); by=re.search(r"\"bytesCopied\"\s*:\s*(\d+)",t); r=re.search(r"PLAN_\w+",t)
+     ec=re.search(r"\"errorCount\"\s*:\s*(\d+)",t)
+@@ -209,7 +211,7 @@
+   read S Bt F A <<< "$SF1"
+   local RR=${R:-0}
+   local H1=$(( S*Bt - S*(F - A) - RR - U1 ))
+-  local INTR=$(( (S*Bt - S*(F - A) - RR) - DU1 )); [ $INTR -lt 0 ] && INTR=0
++  local INTR=$(( DU1 - (S*Bt - S*(F - A) - RR) )); [ $INTR -lt 0 ] && INTR=0   # D2-1 (corrected sign)
+   local MINF=$(awk '{for(i=2;i<=NF;i++) if($i ~ /^dst:/){split($i,a,/[=,]/); print a[4]}}' "$LOGS/jmx-$L.log" | sort -n | head -1)
+   local NP=$(python3 -I -c "import math; a=$A0; b=$BB; c=$C; print(59 if $T < 0 else min(59, max(0, math.ceil((a-b)/c))))")
+   echo "  RESULT $L: blocksCopied=$BLKC bytesCopied=$BYC result=$RES nPred(A0)=$NP usedDst $U0 -> $U1 (d=$((U1-U0)), pred n*c=$((NP*C))) du $DU0 -> $DU1 (d=$((DU1-DU0))) freeDst1=$F1 H1=$H1 (B-c=$((BB-C)), B=$BB) intrusion=$INTR minFreeSampled=$MINF lines 1148=$l1148 1110=$l1110 1121=$l1121 1102=$l1102"

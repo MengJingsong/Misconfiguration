@@ -156,6 +156,13 @@ data (the counter in the unit tier, live `byte[]` heap in the cluster tier) grow
   `-Dtest=TestDumpWaterMark#<method>`). Default surefire JVM options are fine (the test holds at most
   about 16 MB of payload).
 
+> **Amendment A1 (2026-11-25, stage-4 audit, before any reading; run on `pc82`).** Environment (`environment.md` §2–3): the local copy is made with
+> `copy-source.sh $RUN/src` (`RUN=/mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-run1`), not `rsync`;
+> no `-am install` (it would reinstall modules into the shared `~/.m2`, which already holds every 3.4.2 module);
+> the test runs offline from the copy: `mvn -B -o test -pl hadoop-hdfs-project/hadoop-hdfs-nfs -Dtest=TestDumpWaterMark
+> "-Dmaven-surefire-plugin.argLine=-Xmx1g -Ddumpwm.tmp=$RUN/tmp/unit"` (surefire ignores `-DargLine`, case-notes lesson 1).
+> No change to B2f/B2g.
+
 **B2b. Knobs.**
 - `W` = `DUMP_WRITE_WATER_MARK`, set by reflection before each case and restored after:
   `Field f = OpenFileCtx.class.getDeclaredField("DUMP_WRITE_WATER_MARK"); f.setAccessible(true); f.setLong(null, W);`
@@ -200,12 +207,27 @@ data (the counter in the unit tier, live `byte[]` heap in the cluster tier) grow
 - Not observed directly: the JVM heap itself (the tier measures the counter; the `ALLOW_DUMP`
   sum is the cross-check that the counter matches the `byte[]` actually held).
 
+> **Amendment A2 (2026-11-25, stage-4 audit, before any reading; run on `pc82`).** Instruments added (no change to B2f/B2g): after every WRITE also `HB` = summed
+> capacity of the payload `ByteBuffer`s still referenced by `WriteCtx.data` (reflection; the heap the entries actually pin),
+> and a second peak reading from an `AtomicLong` subclass swapped into `nonSequentialWriteInMemory` right after
+> construction that records the maximum of every `addAndGet` (same semantics; cross-checks the log peak). The captured
+> `OpenFileCtx` log of each case is saved to `$RUN/tmp/unit/<case>-openfilectx.log`.
+> *Correction to A2 (2026-11-25 10:06 MST, before any reading; runbook defect 1 in the results):* the `AtomicLong`-subclass
+> peak instrument does not compile (`AtomicLong.addAndGet` is `final` on JDK 8; the first unit attempt stopped at
+> `testCompile`, no test ran). It is removed; the peak comes from the DEBUG log as B2d says. The unit tier restarts.
+
 **B2e. Procedure.**
 1. Build (B2a); write `TestDumpWaterMark` with one `@Test` per case below and an `@After` that
    restores W = 1,048,576, calls `ctx.cleanup()` and `ads.shutdown()`.
 2. Cases: `wm256k`, `wm1m`, `wm4m` (dump enabled); `dumpDisabled` (null path, W = 1 MiB);
    `dumpDirMissing` (W = 1 MiB; stop at the first WRITE whose `Future.get` times out, record M, D,
    thread state, then interrupt and clean up); optional `concurrent4` (W = 1 MiB).
+
+> **Amendment A3 (2026-11-25, stage-4 audit, before any reading; run on `pc82`).** Runbook defect fixed: "interrupt" cannot free the blocked writer, because
+> `waitForDump` catches and ignores `InterruptedException` inside its `while (counter >= mark) wait()` loop
+> (`OpenFileCtx.java:294-299`), and after the dump failure nothing else lowers the counter or notifies. The harness frees it
+> by setting the counter to 0 and calling `notifyAll()` while holding the context's monitor, then calls `cleanup()`. This
+> happens after M, D, the thread state and the stack have been recorded, so B2f/B2g are unchanged.
 3. After every WRITE record (i, M, D, ALLOW_DUMP sum, DUMPED count); at the end record the peak
    from the log and the number of "Create dump file" lines; print one CSV per case.
 4. After `cleanup()` in the enabled cases check the dump file no longer exists.
@@ -272,6 +294,15 @@ In every enabled case: M + D = i × C after each WRITE, M equals the `ALLOW_DUMP
   `$HADOOP_HOME/share/hadoop/hdfs/hadoop-hdfs-nfs-3.4.2.jar` as `$RUN/jars/nfs-stock.jar`.
   Check each with `javap -c -p -classpath <jar> org.apache.hadoop.hdfs.nfs.nfs3.OpenFileCtx | grep -A4 'static {}'`
   (expect 1048576, 67108864, 9223372036854775807).
+
+> **Amendment A4 (2026-11-25, stage-4 audit, before any reading; run on `pc82`).** Environment: no full `-Pdist` build; the cluster uses a copy of the node's built
+> distribution (`cp -a /mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2 $RUN/hadoop`, `environment.md` §4).
+> The patched jars are built in the one per-case copy `$RUN/src` (edit line 73, `mvn -B -o package -pl
+> hadoop-hdfs-project/hadoop-hdfs-nfs -Dmaven.test.skip=true`, keep the jar, `git checkout` the file; nothing is installed into
+> `~/.m2`), instead of separate source copies. The jar check is `javap -c -p -constants ... | grep -B1
+> 'putstatic.*DUMP_WRITE_WATER_MARK'`: the first constant in `static {}` is the logger's class literal, so `grep -A4 'static {}'`
+> does not show the mark. Daemons start with `hdfs --daemon start …` (ssh to localhost does not work on these nodes).
+> No change to B3f/B3g.
 - Daemons: NameNode + DataNode (pseudo-distributed), Hadoop portmap (root), NFS gateway (`nfs3`,
   as the HDFS user `$U`). No YARN.
 - `core-site.xml`: `fs.defaultFS=hdfs://localhost:9000`, `hadoop.tmp.dir=$RUN/tmp`,
@@ -321,6 +352,16 @@ print("DONE", flush=True)
 - Arms A′ and C (heap governance): N = 8,192 (536,870,912 bytes = 512 MiB out of order), gateway
   `-Xmx384m`, hold 60 s. A′ stock jar; C `Long.MAX_VALUE` jar. 512 MiB of buffered `byte[]` cannot
   fit in a 384 MiB heap.
+
+> **Amendment A5 (2026-11-25, stage-4 audit, before any reading; run on `pc82`).** Runbook defect fixed: **hold 40 s in every arm** (A, B, A′, C; D is stopped by its
+> time limit). B3a sets `nfs.stream.timeout=60000`, and the stream monitor (scan every 5 s) closes a context whose last access is
+> older than the timeout (`OpenFileCtx.java:190-192` `checkStreamTimeout`, `:939-956` `streamCleanup`;
+> `OpenFileCtxCache.java:148-183` `scan`); `cleanup()` then fails every pending write with `NFS3ERR_IO` and deletes the dump
+> file (`OpenFileCtx.java:1218-1273`). A 120 s (or 60 s) idle hold would therefore destroy the state being measured and make
+> the hole-filling WRITE and the `(N+1) × C` length meaningless. 40 s < 60 s keeps the context open; the B3f values do not
+> depend on the hold length. **Stop conditions** (missing in the runbook): the client runs under `timeout -s KILL` of 900 s
+> (A, B), 1500 s (A′), 600 s (C) and 120 s (D); in C, a client that never prints `HOLD` within its limit is recorded as "WRITEs
+> fail or time out", and the `[B` histogram is taken at the end if the gateway is still alive.
 - Optional arm D: stock jar, `nfs.file.dump=false`, N = 64, soft mount with `timeo=100,retrans=2`.
 - Duration: each arm is seconds to minutes of writing (one round trip per 64 KiB) plus the hold.
 
@@ -337,6 +378,12 @@ print("DONE", flush=True)
   `nfs.stream.timeout` + 10 s.
 - HDFS result: `hdfs dfs -stat %b /nfstest/<file>` after `DONE` (expected (N+1) × C) and
   `hdfs dfs -checksum` optional.
+
+> **Amendment A6 (2026-11-25, stage-4 audit, before any reading; run on `pc82`).** Observable clarified (prediction unchanged): while the gateway still holds the
+> HDFS output stream open, the NameNode reports the length without the last block under construction
+> (`FSDirStatAndListingOp.java:449-451`, `computeFileSizeNotIncludingLastUcBlock`), so the `(N+1) × C` length is read after the
+> stream monitor has closed the stream (the "after `nfs.stream.timeout` + 10 s" moment of B3e step 6); the reading right after
+> `DONE` is also recorded.
 - Client: script output (time to finish N writes; errors).
 - OOM: `grep -c OutOfMemoryError $HADOOP_LOG_DIR/*nfs3*.{log,out}`; whether the `Nfs3` process is
   still in `jps`.
@@ -351,6 +398,11 @@ print("DONE", flush=True)
    (if present; note it to restore later); `sudo -E $HADOOP_HOME/bin/hdfs --daemon start portmap`;
    install the arm's jar; `hdfs --daemon start nfs3`. Check `rpcinfo -p localhost` lists
    mountd and nfs 3, and `showmount -e localhost` lists `/`.
+
+> **Amendment A7 (2026-11-25, stage-4 audit, before any reading; run on `pc82`).** Environment: `pc82` runs the system `rpcbind` (active before the run). The
+> gateway is first started as `$U` against it; only if `nfs 3 tcp 2049` does not appear in `rpcinfo -p localhost` within 60 s is
+> step 2 followed as written (stop `rpcbind.socket rpcbind`, Hadoop `portmap` as root), and `rpcbind` is restarted at cleanup.
+> Mount point `/mnt/hdfs-nfs-$U` (created with `sudo`, removed at cleanup). No change to B3f/B3g.
 3. `sudo mkdir -p /mnt/hdfs-nfs-$U && sudo mount -t nfs -o vers=3,proto=tcp,nolock,noacl,soft,timeo=600,retrans=2,wsize=1048576 localhost:/ /mnt/hdfs-nfs-$U`.
 4. Baseline: `H0`, `du -sb $RUN/dump` (expect 0), start `jstat`.
 5. Run `python3 $RUN/bin/ooo_write.py /mnt/hdfs-nfs-$U/nfstest/<arm>-$(date +%s) 65536 <N> <hold>`
@@ -456,4 +508,20 @@ https://hadoop.apache.org/docs/r3.4.2/hadoop-project-dist/hadoop-hdfs/HdfsNfsGat
 
 ## D. Stage-4 feedback
 
-none yet
+**2026-11-25 — run 1 on `pc82` (results: `results/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK--autonomous.md`,
+drafted at `~/writeup-hadoop/out/o14/results.md`; not committed).** Unit tier **Confirmed** (B2g row 1; both controls as
+predicted), cluster tier **Confirmed** (B3g rows 1 and 2; arm D's 16th WRITE hangs) — effect **caps**; outcome class **true
+positive**. Frozen version sha256 `cf7d8ac5…ba25aa` (amendments A1–A7 + A2 correction, all before any reading; B2f/B2g/B3f/B3g
+unchanged).
+
+- Unit: counters, dump lengths and `ALLOW_DUMP`/`DUMPED` accounting equal B2f on all 750 rows of the three W values (0
+  mismatches); peaks 262,144 / 1,048,576 / 4,194,304; `dumpDisabled` grows to 16,384,000; `dumpDirMissing` write 16 is held in
+  `waitForDump` (`OpenFileCtx.java:296`) after "Got failure when creating dump stream"; `concurrent4` peak exactly W + 3·C.
+- Cluster: A counter at hold 786,432, 93 rounds, dump 97,517,568 B; B 31,195,136, 1 round, 67,108,864 B; live `[B` B − A =
+  30,400,200 B (predicted 30,408,704); A′ (384 MiB heap) 512 rounds, 536,870,912 B spilled, flat old gen, no OOM; C
+  (`Long.MAX_VALUE`) `OutOfMemoryError` after 4,341 WRITEs (284,491,776 B counted), client `EIO`; D (`nfs.file.dump=false`)
+  "Create dump file: null/16391" fails and the 16th WRITE never returns.
+- Runbook defects (fixed by A3, A5): the `dumpDirMissing` writer cannot be interrupted; the 120 s / 60 s holds exceed
+  `nfs.stream.timeout=60000`, which would close the context and fail the pending writes. The single-point `[B` deltas of B3f
+  were 3.2–3.4 MiB low in A and B (a gateway-start baseline offset); the B − A difference is the robust reading — stage 3 may
+  prefer stating B3g row 1 in terms of B − A and a tolerance.

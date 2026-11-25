@@ -120,6 +120,11 @@ The claim is refuted if the copied amount is unchanged by R, or if the headroom 
 - **New test file:** `hadoop-hdfs-project/hadoop-hdfs/src/test/java/org/apache/hadoop/hdfs/server/diskbalancer/TestDiskBalancerDestReserve.java`, in the same package as `TestDiskBalancer`, reusing its imports.
 - **Run:** `mvn -pl hadoop-hdfs-project/hadoop-hdfs test -Dtest=TestDiskBalancerDestReserve -DfailIfNoTests=false`. The surefire defaults are fine (MiniDFSCluster heap is under 1 GB).
 - **Filesystem:** the MiniDFSCluster base dir, `target/test/data/...` under the copy, must be on a **local** filesystem with more than 1 GB usable. Both volumes then share that filesystem, which the arithmetic below assumes.
+- *Amendment D1-1 (2026-11-25, stage-4 audit; environment only):* the source copy is made with the stage-4 environment's
+  `copy-source.sh` into `/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/src`; nothing is
+  installed (the node's `~/.m2` already holds every 3.4.2 module from the node build); the run is
+  `mvn -o -B -pl hadoop-hdfs-project/hadoop-hdfs test -Dtest=TestDiskBalancerDestReserve -DfailIfNoTests=false` with
+  `JAVA_HOME` = JDK 8. Readings come from the surefire report and the test's own log lines, not the Maven exit code.
 
 **B2b. Knobs.** `dfs.datanode.du.reserved`, global key, set in the `Configuration` given to the **second** MiniDFSCluster (restart semantics). R is not chosen as a round number. It is computed so that the destination's starting headroom `A0` hits a target:
 `R = S·(blocks_total - blocks_free + blocks_avail) - U_dest - A0_target`,
@@ -169,6 +174,10 @@ Other settings, kept fixed:
 4. Shut down without deleting data: `cluster1.shutdown(false)`. (`MiniDFSCluster.shutdown(boolean deleteDfsDir)` is at `MiniDFSCluster.java:2173`.)
 5. Compute R from `File(D)`: `total = getTotalSpace()`, `free = getFreeSpace()`, `usable = getUsableSpace()`, `g = free - usable`, `R = total - g - U_dest - A0_target`. For U0, R = 0. Set `conf.setLong("dfs.datanode.du.reserved", R)`.
 6. Build cluster 2 on the same data: `cluster2 = new MiniDFSCluster.Builder(conf).format(false).numDataNodes(1).storagesPerDatanode(2).storageTypes(...).build(); waitActive()`. Resolve `src` and `dst` by storage ID.
+   *Amendment D1-2 (2026-11-25, stage-4 audit; procedure detail):* each run sets `hdfs.minidfs.basedir`
+   (`MiniDFSCluster.HDFS_MINIDFS_BASEDIR`, `MiniDFSCluster.java:169, 234-241`) to its own fresh directory under
+   `target/test/data/o26/<run>` in the one `conf` object used for both clusters, so cluster 1 formats a fresh base dir and
+   cluster 2 reopens exactly that dir. Each run (U0–U4) is its own test method with its own two clusters.
 7. Assert the reserve took effect: `reservedSpace(dst) == R`. Record `A0 = dst.getAvailable()` and `U0 = usedSpace(dst)`, and log both.
 8. Run the mover:
    - `mover = new DiskBalancer.DiskBalancerMover(dsSpy, conf); mover.setRunnable();`
@@ -203,6 +212,13 @@ Other settings, kept fixed:
 | U4 copies 1 block and H < 0 | Bounded overshoot confirmed (A3 step 9a). This does not refute the main claim, but it qualifies it |
 | U4 copies 0 blocks | The `isLessThanNeeded` and tolerance trace is wrong. Re-read `:855-861` |
 | U0 copies fewer than 37 blocks | The positive control failed (source short of blocks, or errors). Results are not interpretable |
+| *D1-5 (2026-11-25):* U1, U2 or U3 match the counts, but the test log of that run lacks the line-1148 message, or shows a line-1110 ("Copy from ... done"), line-1121 ("No source blocks") or line-1102 ("Exceeded the max error count") stop | Not confirmed: the stop is not shown to come from the check |
+| *D1-5 (2026-11-25):* any other reading (e.g. a binding run's `blocksCopied` ≠ n but ≠ 37, with H ≥ B − c) | Not confirmed (no matching row) |
+
+*Amendment D1-5 (2026-11-25, stage-4 audit, before any reading; group B "direct disallow evidence"):* the first row
+("Claim confirmed") additionally requires, in each of U1, U2 and U3, the line-1148 message ("does not have enough space to
+accommodate a block") in that run's log and no line-1110, 1121 or 1102 stop, as B2f's "log" column already predicts. The two
+rows above are added so that every outcome has a row. Predictions and the other rows are unchanged.
 
 **B2h. Controls.**
 - **U0** (R = 0) shows that the same workload moves 37 blocks when the cap does not bind. This is the positive control for "usage moves".
@@ -224,6 +240,9 @@ Other settings, kept fixed:
   - `HADOOP_PID_DIR=$RUN/pids`
   - `HADOOP_HEAPSIZE_MAX=1g`
   - `JAVA_HOME` pointing to JDK 8 or 11
+  - *Amendment D1-3 (2026-11-25, stage-4 audit; environment only):* `RUN=/mydata/jingsong-s4/dfs.datanode.du.reserved-copyBlocks-getAvailable-run1/cluster`;
+    `HADOOP_HOME` = a copy (`cp -a`) of the node's built distribution `/mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2`
+    in `$RUN/hadoop`; `JAVA_HOME` = JDK 8 (`/usr/lib/jvm/java-8-openjdk-amd64`).
 
 `core-site.xml`:
 - `fs.defaultFS=hdfs://localhost:19000`
@@ -276,6 +295,10 @@ Both data dirs sit on the same local filesystem. The headroom formula from B2b h
 - **Disk:** `du -sb $RUN/dn/vol-dst/current` before and after, for the actual bytes. Also `stat -f -c '%S %b %f %a' $RUN/dn/vol-dst` before and after, giving total, g and usable.
 - **Headroom including any negative part:** `H = S·b − S·(f − a) − R − usedSpace_dst` (`= total − g − R − dfsUsed`).
 - **Physical intrusion into the reserve:** `max(0, (S·b − S·(f−a) − R) − du_dst)`. This uses `du` and counts directories, so it is approximate by a few KiB.
+  *Amendment D2-1 (2026-11-25, runbook defect found in cluster attempt 1; sign error, independent of the readings):* the
+  formula is reversed. As written it is the headroom left between the HDFS allowance and `du`, positive whenever the reserve
+  is **not** entered, and it cannot give B3f's own C4 value ("`du` intrusion about 3.9 MB" with H ≈ −3.9 MB). The intended
+  observable is **`max(0, du_dst − (S·b − S·(f−a) − R))`**. B3f and B3g are unchanged; the cluster tier restarts from step 1.
 - **Balancer:** `hdfs diskbalancer -query localhost:19867 -v` gives the result (`PLAN_DONE`), `bytesToCopy`, `bytesCopied`, `blocksCopied` and `errorCount`.
 - **DataNode log:** `$RUN/logs/hadoop-*-datanode-*.log`, checked for "does not have enough space to accommodate a block", "Copy from ... done" and "No source blocks".
 - **Not observable directly:** the value at the exact moment of each check. The 1 s JMX sampling misses intermediate values; use the unit tier for per-pass values.
@@ -301,6 +324,15 @@ Both data dirs sit on the same local filesystem. The headroom formula from B2b h
    - `hdfs diskbalancer -plan H_DN -thresholdPercentage 0.01 -out /dbplan`, then `hdfs dfs -get /dbplan/H_DN.plan.json $RUN/plan-template.json`.
    - For each run, edit with python3: set the destination step's `bytesToMove`, `tolerancePercent` and `bandwidth` as in B3b, keep only the step whose `destinationVolume.uuid` is the vol-dst storage ID, and set `timeStamp` to `int(time.time()*1000)`.
    - Upload: `hdfs dfs -put -f $RUN/plan-<run>.json /dbplan/plan-<run>.json`.
+   - *Amendment D1-4 (2026-11-25, stage-4 audit; a control, no prediction changed):* **no plan file stays in HDFS.** A
+     small HDFS file whose block sits on vol-src is a valid source block (`getBlockToCopy` takes the first finalized block
+     that fits, `DiskBalancer.java:952-981`) and, having a lower block ID than the next run's `/data/f`, would be iterated
+     and moved first, changing `blocksCopied`. So: in C0, after `hdfs dfs -get` of the template, `hdfs dfs -rm -r -skipTrash /dbplan`
+     and wait until JMX `numBlocks` is 128 on vol-src and 0 on vol-dst before step 6. The edited plan of each run is
+     **not uploaded**; it is executed from local disk with `hdfs diskbalancer -D fs.defaultFS=file:/// -execute $RUN/plan-<run>.json`
+     (`ExecuteCommand` reads the file through the default filesystem, `Command.java:447-453`, and sends the plan text to the
+     DataNode over RPC, `ExecuteCommand.java:96-105`). Step 6 reads A0 after the plan is written locally. Step 2's load check
+     adds: JMX `numBlocks` = 128 on vol-src and 0 on vol-dst at A0 time, i.e. no block other than `/data/f`'s exists.
 6. **Read A0.** Take JMX `freeSpace` for vol-dst after the plan upload, and record `usedSpace`, `du -sb` and `stat -f`.
 7. **Execute.**
    - Start the JMX sampler.
@@ -340,6 +372,13 @@ Both data dirs sit on the same local filesystem. The headroom formula from B2b h
 | JMX `reservedSpace(dst) ≠ R` | Not confirmed: the knob was not applied. Fix the key path and re-run |
 | C0 copies fewer than 59 blocks, or errors | The positive control failed. Results are not interpretable |
 | Execute is rejected (hash, time or node UUID) | Procedure fault in step 5 (timestamp or nodeUUID). Not a reading |
+| *D1-6 (2026-11-25):* C1, C2 or C3 match the counts, but the DataNode log for that run lacks the line-1148 message, or shows a line-1110, 1121 or 1102 stop | Not confirmed: the stop is not shown to come from the check |
+| *D1-6 (2026-11-25):* any other reading (e.g. a binding run's `blocksCopied` ≠ n but ≠ 59, with H ≥ B − c and no `du` intrusion) | Not confirmed (no matching row) |
+
+*Amendment D1-6 (2026-11-25, stage-4 audit, before any reading; group B "direct disallow evidence"):* the first row
+("Claim confirmed") additionally requires, in each of C1, C2 and C3, the line-1148 message in the DataNode log for that run
+and no line-1110, 1121 or 1102 stop, as B3f's "log" column already predicts. The two rows above are added so that every
+outcome has a row. Predictions and the other rows are unchanged.
 
 **B3h. Controls.**
 - **C0**, with the same data, plan and bandwidth and R = 0, shows usage moves to about 1 GiB when the cap does not bind.
@@ -393,4 +432,39 @@ Both data dirs sit on the same local filesystem. The headroom formula from B2b h
 
 ## D. Stage-4 feedback
 
-none yet
+**Stage-4 audit, 2026-11-25 (fresh stage-4 agent working as Jingsong, node `pc91`), before any reading.** Bottom line:
+**Ready after amendments.** Filed sha256 `a72ff16c…0706c1` (matches `_INDEX.md` §4). Amendments, each next to the text it
+changes:
+
+- **D1-1** (B2a, environment): per-case copy with `copy-source.sh`, offline `mvn -o … test`, no install into `~/.m2`.
+- **D1-2** (B2e step 6, procedure detail): an explicit `hdfs.minidfs.basedir` per run, shared by cluster 1 and cluster 2.
+- **D1-3** (B3a, environment): run folder and distribution copy on `pc91`'s `/mydata`, JDK 8.
+- **D1-4** (B3e step 5, control): no plan file in HDFS during a run (its block on vol-src would be moved first); plans
+  executed from local disk with `-D fs.defaultFS=file:///`; `numBlocks` 128/0 checked at A0 time.
+- **D1-5 / D1-6** (B2g / B3g): Confirmed also requires the line-1148 message in each binding run (U1–U3, C1–C3) and no
+  other stop; rows added for "counts match, stop not from the check" and "any other reading" (both Not confirmed).
+
+- **D2-1** (B3d, runbook defect found in cluster attempt 1, 2026-11-25 10:37 MST): the "physical intrusion" formula had its
+  sign reversed (it measured headroom, and as written would have matched B3g's "`du` intrusion > 0" Refuted row in every
+  non-intruding run). Corrected to `max(0, du_dst − (S·b − S·(f−a) − R))`; the cluster tier restarted from step 1
+  (attempt 2). The audit (group B/C) should have caught it: B3f's C4 value already implied the corrected sign.
+
+B1, B2f, B3f and every predicted number are unchanged. Recommendations left for stage 3 (not applied): the default
+(R = 0) arm stands in for the knob's default in both tiers (U0/C0); the "filling the filesystem" variant (R = 0 with a
+small loop filesystem) is not needed because `getAvailable()` is algebraically independent of other files on the
+filesystem while `R ≥ actualNonDfsUsed` (A3 step 3).
+
+**Stage-4 run 1, 2026-11-25 (pc91, 10:29–10:42 MST): unit Confirmed, cluster Confirmed — effect `caps`; outcome class
+true positive.** Results: `hadoop/stage4-runtime-verification/jingsong/results/dfs.datanode.du.reserved-copyBlocks-getAvailable--autonomous.md`.
+- Unit (B2g row 1): U1/U2/U3 copied 11/21/0 blocks = n from the measured A0 (53,039,178 / 63,606,928 / 40,886,265, each
+  exactly the target); final headroom 41,414,653 in (B − c, B] for U1 and U2; the pre-move operand fell by exactly c = 1,056,775
+  per move and was > B at every move; one line-1148 stop in each of U1–U3, no other stop. U0 (R = 0) copied 37 (close-enough).
+  U4: 1 block landed with H = −256,775 (bounded overshoot row).
+- Cluster (B3g row 1), attempt 2 after D2-1: C1/C2/C3 copied 21/41/0 blocks = n (A0 1,420,361,872 / 1,758,527,772 /
+  1,056,833,529); final H 1,065,287,677 in (B − c, B] for C1 and C2; C2 − C1 = 20 blocks for 20c of A0; Δ`du` − Δ`usedSpace`
+  = 8–12 KiB (directories); `du` intrusion 0; one line-1148 stop each. C0 59 blocks (positive control). C4: 1 block,
+  H = −3,908,295, `du` intrusion 3,933,428 B (bounded overshoot row). Attempt 1 (formula error only) had the same counts and
+  bytes to the byte.
+- For stage 3: (1) predict the observable formulas as carefully as the numbers (D2-1); (2) side finding: the disk balancer's
+  **source** volume keeps each moved block's meta length in `dfsUsed` (`FsDatasetImpl.cleanupReplica`, `:1187-1196`, deletes
+  the meta file before `getMetadataLength()` reads its length) — 59, 80 and 121 × 131,079 B observed, exact.

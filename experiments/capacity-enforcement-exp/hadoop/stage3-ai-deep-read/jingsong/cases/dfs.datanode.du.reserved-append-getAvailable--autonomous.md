@@ -84,6 +84,7 @@ Shared numbers:
 
 **B2a. Environment and build.**
 - **Toolchain:** JDK 8, Maven 3.3+, a private copy of the tree (`rsync -a ~/hadoop-3.4.2/ $RUN/src/`, never the shared copy). Build with `cd $RUN/src && mvn -pl hadoop-hdfs-project/hadoop-hdfs -am install -DskipTests -Dmaven.javadoc.skip=true`.
+  > **Amendment D1-2 (stage-4 audit, 2026-11-25; environment only).** The private copy is made with the stage-4 `copy-source.sh $RUN/src` (from the repository's `systems/hadoop/source`, tag `rel/release-3.4.2`). Nothing is `install`ed into the node's shared `~/.m2` (it already holds every 3.4.2 module from the node build); the test class is compiled and run in the copy with `mvn -B -o -pl hadoop-hdfs-project/hadoop-hdfs test …`. `$RUN = /mydata/jingsong-s4/dfs.datanode.du.reserved-append-getAvailable-run1`; unit image at `$RUN/unit/vol.img` (mount `$RUN/unit/mnt`), cluster image at `$RUN/cluster/vol.img` (mount `$RUN/cluster/mnt`). The cluster tier uses a copy of the node's built distribution (`/mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2`), as B3a allows.
 - **Test source:** new class `hadoop-hdfs-project/hadoop-hdfs/src/test/java/org/apache/hadoop/hdfs/server/datanode/fsdataset/impl/TestAppendDuReservedBoundary.java`. It sits in that package so it can call the package-private `getReserved()` and `getDfAvailable()`.
 - **Data filesystem** (needs sudo; `$RUN` is the stage-4 run directory on local disk, e.g. `/mydata/<person>-s4/<case>`):
   ```
@@ -93,6 +94,7 @@ Shared numbers:
   stat -f $RUN/mnt   # check "Free blocks" == "Available blocks"
   ```
   Use `-m 0` so that usable == free (A3e). If sudo is unavailable, use any XFS or other filesystem on local disk where `stat -f` shows Free == Available and no other process writes during the run. Record that choice.
+  > **Amendment D1-1 (stage-4 audit, 2026-11-25; environment only, both tiers).** On the stage-4 node (`pc72`, kernel 5.15) an ext4 image made as above shows `Free: 514516  Available: 510420` blocks: ext4 keeps min(2 %, 4096) reserved clusters on an extent filesystem, so `usable = free − 16 MiB` even with `-m 0`, which would lower the DF term of `getAvailable()` by 16 MiB (A3e). `mkfs.xfs` is not installed. Use **ext2** instead: `mkfs.ext2 -q -F -m 0 $RUN/vol.img` (checked on the node: `Free: 515284  Available: 515284`). Everything else in B2a/B3a is unchanged; the `stat -f` check stays. Per-append on-disk growth is the same as on ext4 (data +1 MiB, meta 12 KiB → 20 KiB allocated; the single indirect block of a 1–4 MiB ext2 file exists before and after), so `s ≈ 1 MiB + 8 KiB` (B3c) stands.
 - **JVM:** Surefire defaults; `-Xmx1g` is enough.
 
 **B2b. Knobs.**
@@ -112,6 +114,7 @@ Shared numbers:
   `ExtendedBlock eb = DFSTestUtil.getFirstBlock(fs, p); ExtendedBlock req = new ExtendedBlock(eb); req.setNumBytes(B); ds.append(req, eb.getGenerationStamp()+1, L);`
   This mirrors what the client sends (A3 step 1), so `bytesReserved = B - L = 15728640`. The arithmetic: `getAvailable() = T - R - D' - 0 = 15 MiB + δ + (D - D')`, where `D'` is the dfsUsed after restart, expected to equal D within a few KiB.
 - **Client-path variant** (same restore, δ = −4 MiB and +4 MiB): `fs.append(p)`, write `c`, `hflush()`, `close()`.
+  > **Amendment D2-1 (stage-4 run 1, unit attempt 1, 2026-11-25 10:43 MST; runbook defect, B2f/B2g unchanged).** In attempt 1 the δ = −4 MiB start threw `BlockMissingException … No live nodes contain current block` from `DFSTestUtil.getFirstBlock` (which reads the file), before any append: `waitActive()` returns once the DataNode is registered, not once its block report has reached the NameNode. After each restart, call `DFSTestUtil.waitReplication(fs, p, (short) 1)` before `getFirstBlock`. The unit tier restarts from its beginning (attempt 2).
 
 **B2d. Observables and instruments.** Logged per run through `LOG.info` in the test and copied to the readings file:
 - `vol.getCapacity()`, `vol.getDfsUsed()`, `vol.getReservedForReplicas()`, `vol.getReserved()` and `vol.getDfAvailable()`.
@@ -140,6 +143,13 @@ Not directly observable: the exact `nonDfsUsed` (derive it as `T - getDfAvailabl
 | +4 MiB | ≈ 19922944 | handler returned | 15728640 | `rbw/` |
 
 In every row, the outcome depends only on whether `A < 15728640`. Each successful append lowers `getAvailable()` by exactly 15728640 immediately afterwards.
+
+> **Amendment D1-3 (stage-4 audit, 2026-11-25; clarifies B2c–B2e and B2f without changing any number).**
+> - *Replica dir:* found by walking the DataNode's data dir for the file `blk_<id>` (no `.meta`) and reporting whether its path contains `/finalized/` or `/rbw/`, plus its length.
+> - *"Lowers `getAvailable()` by exactly 15728640":* observed as `vol.getAvailable()` read again right after the call (`A_after`); predicted `A − A_after = 15728640` on success and `0` on failure (a `du` refresh between the two reads could move it by a few KiB; the difference is reported, not tuned).
+> - *Client-path variant (δ = −4 MiB and +4 MiB):* the client sees an `IOException` (not the `DiskOutOfSpaceException` itself), so its outcome is read as: −4 MiB → the `append`/`write`/`hflush`/`close` sequence throws, the test output carries the DataNode's `Insufficient space for appending to` for that block, and the file length stays `L` (1048576) with the replica still in `finalized/`; +4 MiB → no exception, file length `L + c` = 2097152, no `Insufficient space` line in that test's window. B2g's rows apply to it with "exception" read this way.
+> - *One fresh `Configuration` and `MiniDFSCluster` per start*, all with base dir `$RUN/unit/mnt/mdfs`; the snapshot restore is `rsync -a --delete $RUN/unit/snap/mdfs/ $RUN/unit/mnt/mdfs/` run from the test.
+> - Row added to B2g (missing outcome): **"R = 0 control append fails → setup invalid (something other than the reserve blocks appends); stop and record."**
 
 **B2g. Readings.**
 
@@ -195,6 +205,7 @@ In every row, the outcome depends only on whether `A < 15728640`. Each successfu
   hdfs dfs -D dfs.blocksize=16m -D dfs.replication=1 -put $RUN/c1m.bin /t/fA
   ```
   Repeat the `-put` for `/t/fB` and `/t/g001 … /t/g080`. That is 82 files of L = 1 MiB in one partial 16 MiB block each, about 83 MiB of HDFS data on the 2 GiB image.
+  > **Amendment D1-4 (stage-4 audit, 2026-11-25; workload too small to reach the second limit).** The two fills need about 33 + 1 and 65 + 1 files (each file takes one append; the refused file is not reused), i.e. ≈ 100 > 80. Seed **`/t/g001 … /t/g120`** (122 files, ≈ 123 MiB on the 2 GiB image). Fill a = 80 MiB starts at the first `g` file after the one refused in fill a = 48 MiB.
 - **Boundary test:** `hdfs dfs -appendToFile $RUN/c1m.bin /t/fA` at δ = −4 MiB (operand ≈ 11 MiB < 15 MiB), then `/t/fB` at δ = +4 MiB (≈ 19 MiB ≥ 15 MiB).
 - **Fill test:** at each `R_F(a)`, append 1 MiB to `g001, g002, …` in order, one append per file (each target block stays partial, so every append goes through the target check with `B - L = 15 MiB`). Sleep 6 s after each append (> `fs.du.interval`), so `du` corrects the double count (A3b). Stop at the first failure.
 - **Fill arithmetic:** per successful append, HDFS bytes grow by `s ≈ 1 MiB + 8 KiB` (data plus checksum: 4 bytes per 512 bytes). Appends succeed while the operand `A_k = a - k·s ≥ 15 MiB`, so `N ≈ floor((a - 15 MiB)/s) + 1`. That gives N ≈ 33 for a = 48 MiB and N ≈ 65 for a = 80 MiB. 80 seeded files are enough for both.
@@ -223,6 +234,10 @@ In every row, the outcome depends only on whether `A < 15728640`. Each successfu
 5. **Control R = 0:** restart and append to `/t/fA`; record.
 6. **Fill a = 48 MiB:** restart with `R_F(48 MiB)` (recompute `D_F` from the current `usedSpace`). Run the append loop of B3c, recording all observables at each step, until the first non-zero exit. Recover the lease on the failed file.
 7. **Fill a = 80 MiB:** restart with `R_F(80 MiB)` (again from the current `usedSpace`, so the starting operand is 80 MiB). Continue the loop with the next unused `g` files.
+
+> **Amendment D1-5 (stage-4 audit, 2026-11-25; exact calibration for steps 6–7, no number changed).** `D_F` is VolumeInfo `usedSpace` read with the DataNode running, at least 6 s after the last append (so `du` has refreshed); `R_F(a) = T − D_F − a`; restart; read `freeSpace`. If `|freeSpace − a| > 1 MiB`, recompute `R_F` from the new `usedSpace` and restart once more (the same rule as step 3). Before each append the operand is VolumeInfo `freeSpace` read after the 6 s sleep. A failed append's file has its lease recovered and is not appended to again.
+>
+> **Amendment D1-6 (stage-4 audit, 2026-11-25; DataNode log count).** A refused append is logged by the DataNode more than once: `opWriteBlock … received exception …DiskOutOfSpaceException: Insufficient space for appending to …` (DataXceiver.java:952-953) and again in the `DataXceiver error processing WRITE_BLOCK` ERROR line with its stack trace (DataXceiver.java:303-304 and below); the client may also retry the pipeline setup. "One 'Insufficient space for appending to'" in B3f is therefore read as **at least one such line in the failed append's time window and none in a successful append's window**; the number of `Appending to` attempts (FsDatasetImpl.java:1395) and lines is recorded.
 8. Clean up (B4).
 
 **B3f. Predictions.**
@@ -234,6 +249,7 @@ In every row, the outcome depends only on whether `A < 15728640`. Each successfu
   - The first failure in each fill is the "Insufficient space for appending to" message.
   - At the stop, `freeSpace` is in `[15 MiB - s, 15 MiB)`. `du -sb dn` ≤ `T - R_F - 14 MiB` and ≥ `T - R_F - 16 MiB`.
   - The ceiling on HDFS bytes at the stop is `T - R - ~15 MiB` in both runs, so the HDFS bytes at the stop differ by ≈ 32 MiB (the R difference), ±2 MiB.
+    > **Amendment D1-7 (stage-4 audit, 2026-11-25; arithmetic error, fixed before any reading).** With step 7 as written (`R_F(80)` computed from the `usedSpace` at the end of fill 48, which already holds fill 48's ≈ 33·s of appends), the R difference is not 32 MiB but `R_F(48) − R_F(80) ≈ 32 MiB + 33·s ≈ 65 MiB`. The prediction keeps its own rule, "differ by the R difference": **`du -sb dn` at the stop of fill 80 minus that at the stop of fill 48 = `R_F(48) − R_F(80)` (from the recorded R values) ± 2 MiB.** The "32 MiB" in the B3g row below means this R difference.
   - `df avail` on the mount at the stop ≥ R − nonDfs.
 
 **B3g. Readings.**
@@ -243,6 +259,7 @@ In every row, the outcome depends only on whether `A < 15728640`. Each successfu
 | Boundary and fill predictions hold | Confirmed: du.reserved, through `getAvailable()`, caps HDFS bytes reached by appends |
 | Append succeeds with `freeSpace < 15728640` just before it | Wrong: the check does not gate appends |
 | Fill: HDFS bytes at the stop do not move with R (the 32 MiB difference is absent) | Wrong: the reserve does not set the stop point |
+| *(D1-8, 2026-11-25)* A fill's loop runs out of seeded files with no refusal | Limit not reached: **Not confirmed** for that fill (workload), not a refutation |
 | Fill stops through "Out of space" or NameNode "could only be written to" instead | A different check fired (new block); redesign the chunking; not a reading on this check |
 | N about half of predicted, with `usedSpace` > `du -sb dn` before refresh | The double count (A3b) was not corrected by du in time; the check is more conservative than the formula; note it, not a refutation |
 | `du -sb dn` at the stop > `T - R_F` | Overshoot past the reserve; report the size (A3a/c) |
@@ -292,4 +309,20 @@ In every row, the outcome depends only on whether `A < 15728640`. Each successfu
 
 ## D. Stage-4 feedback
 
-none yet
+**Stage-4 audit (2026-11-25, queue order 28, node `pc72`): Ready after amendments.** Amendments, all made before any reading:
+- D1-1 (B2a/B3a) ext2 `-m 0` image instead of ext4 (ext4 keeps 4096 reserved clusters = 16 MiB, so Free ≠ Available on this kernel); environment only.
+- D1-2 (B2a) source via `copy-source.sh`, no `install` into the shared `~/.m2`, run paths; environment only.
+- D1-3 (B2c–B2f) how the replica dir, `A_after` and the client-path outcome are read; B2g row for a failing R = 0 control.
+- D1-4 (B3c) seed 120 `g` files, not 80 (the two fills need ≈ 100).
+- D1-5 (B3e) exact fill calibration and operand reading.
+- D1-6 (B3f) a refusal produces ≥ 1 `Insufficient space for appending to` line (INFO and ERROR lines, client retries).
+- D1-7 (B3f) arithmetic error: the stop-point difference is the R difference, ≈ 65 MiB with step 7 as written, not 32 MiB.
+- D1-8 (B3g) row for a fill that runs out of files without a refusal.
+- D2-1 (B2c, run 1 unit attempt 1) wait for the block report (`DFSTestUtil.waitReplication`) after each restart before `getFirstBlock`; unit tier restarted.
+
+- D3-1 (harness only, cluster attempt 1, 2026-11-25 10:58 MST): the run script's DataNode-log counter printed `0` twice on no match and aborted step 3 after the δ = −4 MiB append (no lease recovery on `/t/fA`); fixed in the script (and the restart wait now uses the DataNode's `BPServiceActorInfo` instead of reading `/t/fA`). No case text changed; the cluster tier restarted from its beginning (attempt 2).
+
+**Stage-4 result (2026-11-25, run 1 on `pc72`, results file `results/dfs.datanode.du.reserved-append-getAvailable--autonomous.md`): unit Confirmed, cluster Confirmed — effect `caps`; outcome class true positive.**
+- Unit: 7/7 rows `refused == (A < B − L)`; refusals at A = 11,526,144 and 15,458,304, successes at 15,982,592 and 19,914,752 (boundary 15,728,640); reservation 15,728,640 after each success, 0 after each refusal; replica stays `finalized` on refusal.
+- Cluster: 103/103 appends follow `freeSpace < 15,728,640`; fills 33 and 65 successes (predicted 33 ± 2, 65 ± 2); stop `du -sb dn` 165,958,950 and 234,648,870, inside the predicted windows; the stop points differ by 68,689,920 B against an R difference of 68,427,776 B.
+- A3b (double count after append) observed: `usedSpace` +2,113,543 per 1 MiB append until the next `du` refresh (conservative). A3a/A3c/A3f were not exercised.

@@ -1,0 +1,315 @@
+DRIVER START 2026-11-25 10:04:53 pid 1194303 host node0.jason92-326665.misconfiguration-pg0.cloudlab.umass.edu
++ [2026-11-25 10:04:53] git -C /proj/misconfiguration-PG0/git-repos/Misconfiguration status --short systems/hadoop/source
+  rc=0 [2026-11-25 10:04:55]
++ [2026-11-25 10:04:55] /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/capacity-enforcement-exp/hadoop/stage4-runtime-verification/jingsong/copy-source.sh /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/src
+copied /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/capacity-enforcement-exp/hadoop/stage4-runtime-verification/jingsong/../../../../../systems/hadoop/source -> /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/src (rel/release-3.4.2)
+  rc=0 [2026-11-25 10:05:07]
++ [2026-11-25 10:05:07] bash /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/harness/unit-run.sh /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1 --compile-only
+=== unit-run.sh 2026-11-25 10:05:07 on node0.jason92-326665.misconfiguration-pg0.cloudlab.umass.edu mode=--compile-only
++ [2026-11-25 10:05:07] java -version
+openjdk version "1.8.0_514"
+OpenJDK Runtime Environment (build 1.8.0_514-8u514-b01~us1-0ubuntu1~22.04.1-b01)
+OpenJDK 64-Bit Server VM (build 25.514-b01, mixed mode)
++ [2026-11-25 10:05:07] mvn -version
+[1mApache Maven 3.6.3[m
+Maven home: /usr/share/maven
+Java version: 1.8.0_514, vendor: Ubuntu, runtime: /usr/lib/jvm/java-8-openjdk-amd64/jre
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "5.15.0-203-generic", arch: "amd64", family: "unix"
++ [2026-11-25 10:05:07] cp /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/harness/TestBoundedLimitMemory.java /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/src/hadoop-common-project/hadoop-common/src/test/java/org/apache/hadoop/io/
++ [2026-11-25 10:05:07] md5sum /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/harness/TestBoundedLimitMemory.java /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/harness/unit-run.sh
+bbd0f97b7c9ae849c216ee8b2ae821e1  /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/harness/TestBoundedLimitMemory.java
+ca0965a52fad38fd83f9e9947ff66c4e  /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/harness/unit-run.sh
+[INFO] BUILD SUCCESS
+-rw-r--r-- 1 jason92 misconfiguration 10995 Nov 25 10:05 target/test-classes/org/apache/hadoop/io/TestBoundedLimitMemory.class
+EXIT rc=0 at 2026-11-25 10:05:29
+leftover surefire JVMs of this run:
+  rc=0 [2026-11-25 10:05:29]
++ [2026-11-25 10:05:29] bash /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/harness/unit-run.sh /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1
+=== unit-run.sh 2026-11-25 10:05:29 on node0.jason92-326665.misconfiguration-pg0.cloudlab.umass.edu mode=run
++ [2026-11-25 10:05:29] java -version
+openjdk version "1.8.0_514"
+OpenJDK Runtime Environment (build 1.8.0_514-8u514-b01~us1-0ubuntu1~22.04.1-b01)
+OpenJDK 64-Bit Server VM (build 25.514-b01, mixed mode)
++ [2026-11-25 10:05:30] mvn -version
+[1mApache Maven 3.6.3[m
+Maven home: /usr/share/maven
+Java version: 1.8.0_514, vendor: Ubuntu, runtime: /usr/lib/jvm/java-8-openjdk-amd64/jre
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "5.15.0-203-generic", arch: "amd64", family: "unix"
++ [2026-11-25 10:05:30] cp /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/harness/TestBoundedLimitMemory.java /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/src/hadoop-common-project/hadoop-common/src/test/java/org/apache/hadoop/io/
++ [2026-11-25 10:05:30] md5sum /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/harness/TestBoundedLimitMemory.java /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/harness/unit-run.sh
+bbd0f97b7c9ae849c216ee8b2ae821e1  /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/harness/TestBoundedLimitMemory.java
+ca0965a52fad38fd83f9e9947ff66c4e  /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/harness/unit-run.sh
+EXPECTED (B2f, frozen 2026-11-25):
+ U1 lim 1024/32768/65536: writes 1/32/65, size 1000/32000/65000, msg "Reach the limit of the buffer", frame BoundedByteArrayOutputStream.write:92
+ U2 cap 1 MiB: ctorAlloc ~1048576+~50 at all three lim, equal within +-1 KiB; writeAlloc < 4096
+ U3 cap 64Ki/1Mi/16Mi: ctorAlloc follows cap within +-1 KiB; U3b alloc >= 204800 (~2x 262144)
+ U4 prepareAppendKey(-1): 64 writes ok, 65th EOFException at write:92; Writer ctorAlloc >= 131104; writeAlloc < 8192; prepareAppendKey(65537) -> IndexOutOfBoundsException
+ U5 (amended A3): fileLength ~ (2N+1) x 65,5xx + < 4 KiB (~197 KB / ~1.38 MB / ~13.2 MB); linear in N
+mvn rc=0
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.75 s - in org.apache.hadoop.io.TestBoundedLimitMemory
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+IFCHK source: /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/logs/unit/org.apache.hadoop.io.TestBoundedLimitMemory-output.txt
+IFCHK,instr,supported=true,enabled=true,zero=0,knownAnswer1MiB=1048592,len=1048576,maxHeap=2024275968,gc=PS Scavenge|PS MarkSweep|,java=1.8.0_514,vm=OpenJDK 64-Bit Server VM
+IFCHK,U2,cap=1048576,lim=1024,ctorAllocMedian=1048624,writeAllocMedian=3920,size=1000,writes=1,ctorRaw=1048624;1048624;1048624;1048624;1048624,writeRaw=3920;3920;3920;3920;3920,msg=Reach the limit of the buffer,frame=BoundedByteArrayOutputStream.write:92
+IFCHK,U2,cap=1048576,lim=524288,ctorAllocMedian=1048624,writeAllocMedian=3920,size=524000,writes=524,ctorRaw=1048624;1048624;1048624;1048624;1048624,writeRaw=3920;3920;3920;3920;3920,msg=Reach the limit of the buffer,frame=BoundedByteArrayOutputStream.write:92
+IFCHK,U2,cap=1048576,lim=1048576,ctorAllocMedian=1048624,writeAllocMedian=3920,size=1048000,writes=1048,ctorRaw=1048624;1048624;1048624;1048624;1048624,writeRaw=3920;3920;3920;3920;3920,msg=Reach the limit of the buffer,frame=BoundedByteArrayOutputStream.write:92
+IFCHK,U4,keyPrepare=-1,writesOk=64,attempt=65,msg=Reach the limit of the buffer,frame=BoundedByteArrayOutputStream.write:92,ctorAllocMedian=131576,writeAllocMedian=3920,ctorRaw=131576;131576;131576;131576;131576,writeRaw=3920;3920;3920;3920;3920
+IFCHK,U4,keyPrepare=65537,exception=java.lang.IndexOutOfBoundsException,msg=Limit exceeds buffer size
+IFCHK,U5,N=1,fileLength=196774,keyBytes=65536
+IFCHK,U5,N=10,fileLength=1376603,keyBytes=655360
+IFCHK,U5,N=100,fileLength=13174973,keyBytes=6553600
+IFCHK,U3,cap=65536,lim=65536,ctorAllocMedian=65584,writeAllocMedian=3920,ctorRaw=65584;65584;65584;65584;65584,writeRaw=3920;3920;3920;3920;3920
+IFCHK,U3,cap=1048576,lim=1048576,ctorAllocMedian=1048624,writeAllocMedian=3920,ctorRaw=1048624;1048624;1048624;1048624;1048624,writeRaw=3920;3920;3920;3920;3920
+IFCHK,U3,cap=16777216,lim=16777216,ctorAllocMedian=16777232,writeAllocMedian=3920,ctorRaw=16777232;16777232;16777232;16777232;16777232,writeRaw=3920;3920;3920;3920;3920
+IFCHK,U3b,written=204800,allocMedian=523480,raw=523480;523480;523480;523480;523480
+IFCHK,U1,cap=65536,lim=1024,size=1000,writes=1,limitAtEOF=1024,bufLen=65536,msg=Reach the limit of the buffer,frame=BoundedByteArrayOutputStream.write:92
+IFCHK,U1,cap=65536,lim=32768,size=32000,writes=32,limitAtEOF=32768,bufLen=65536,msg=Reach the limit of the buffer,frame=BoundedByteArrayOutputStream.write:92
+IFCHK,U1,cap=65536,lim=65536,size=65000,writes=65,limitAtEOF=65536,bufLen=65536,msg=Reach the limit of the buffer,frame=BoundedByteArrayOutputStream.write:92
+mvn rc=0
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.7 s - in org.apache.hadoop.io.file.tfile.TestTFileStreams
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.047 s - in org.apache.hadoop.io.TestBoundedByteArrayOutputStream
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
++ [2026-11-25 10:06:19] ls -la /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp
+total 14748
+drwxr-xr-x 2 jason92 misconfiguration     4096 Nov 25 10:05 .
+drwxr-xr-x 6 jason92 misconfiguration     4096 Nov 25 10:05 ..
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-0.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-0.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-10.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-10.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-11.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-11.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-12.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-12.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-13.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-13.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-14.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-14.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-15.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-15.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-16.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-16.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-17.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-17.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-18.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-18.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-19.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-19.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-1.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-1.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-20.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-20.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-21.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-21.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-22.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-22.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-23.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-23.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-24.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-24.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-2.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-2.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-3.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-3.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-4.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-4.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-5.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-5.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-6.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-6.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-7.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-7.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-8.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-8.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration       80 Nov 25 10:05 u4-9.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-9.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration      136 Nov 25 10:05 u4-big.tfile
+-rw-r--r-- 1 jason92 misconfiguration       12 Nov 25 10:05 .u4-big.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration 13174973 Nov 25 10:05 u5-100.tfile
+-rw-r--r-- 1 jason92 misconfiguration   102940 Nov 25 10:05 .u5-100.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration  1376603 Nov 25 10:05 u5-10.tfile
+-rw-r--r-- 1 jason92 misconfiguration    10764 Nov 25 10:05 .u5-10.tfile.crc
+-rw-r--r-- 1 jason92 misconfiguration   196774 Nov 25 10:05 u5-1.tfile
+-rw-r--r-- 1 jason92 misconfiguration     1548 Nov 25 10:05 .u5-1.tfile.crc
++ [2026-11-25 10:06:19] rm -f /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-0.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-10.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-11.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-12.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-13.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-14.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-15.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-16.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-17.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-18.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-19.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-1.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-20.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-21.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-22.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-23.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-24.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-2.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-3.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-4.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-5.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-6.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-7.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-8.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-9.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u4-big.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u5-100.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u5-10.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/u5-1.tfile /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-0.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-10.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-11.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-12.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-13.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-14.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-15.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-16.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-17.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-18.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-19.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-1.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-20.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-21.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-22.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-23.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-24.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-2.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-3.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-4.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-5.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-6.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-7.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-8.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-9.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u4-big.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u5-100.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u5-10.tfile.crc /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp/.u5-1.tfile.crc
+=== done 2026-11-25 10:06:19
+EXIT rc=0 at 2026-11-25 10:06:19
+leftover surefire JVMs of this run:
+  rc=0 [2026-11-25 10:06:19]
++ [2026-11-25 10:06:19] bash /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/harness/cluster-run.sh /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1
+=== cluster-run.sh 2026-11-25 10:06:19 on node0.jason92-326665.misconfiguration-pg0.cloudlab.umass.edu
++ [2026-11-25 10:06:19] java -version
+openjdk version "1.8.0_514"
+OpenJDK Runtime Environment (build 1.8.0_514-8u514-b01~us1-0ubuntu1~22.04.1-b01)
+OpenJDK 64-Bit Server VM (build 25.514-b01, mixed mode)
++ [2026-11-25 10:06:19] cp -a /mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2 /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/hadoop
++ [2026-11-25 10:06:20] cp -r /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/hadoop/etc/hadoop /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/conf
+--- core-site.xml
+<?xml version="1.0"?>
+<configuration>
+  <property><name>fs.defaultFS</name><value>hdfs://localhost:9000</value></property>
+  <property><name>hadoop.tmp.dir</name><value>/mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/tmp</value></property>
+</configuration>
+--- hdfs-site.xml
+<?xml version="1.0"?>
+<configuration>
+  <property><name>dfs.replication</name><value>1</value></property>
+  <property><name>dfs.namenode.name.dir</name><value>/mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/nn</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>/mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/dn</value></property>
+  <property><name>dfs.blocksize</name><value>1048576</value></property>
+</configuration>
+--- yarn-site.xml
+<?xml version="1.0"?>
+<configuration>
+  <property><name>yarn.nodemanager.aux-services</name><value>mapreduce_shuffle</value></property>
+  <property><name>yarn.nodemanager.env-whitelist</name><value>JAVA_HOME,HADOOP_COMMON_HOME,HADOOP_HDFS_HOME,HADOOP_CONF_DIR,CLASSPATH_PREPEND_DISTCACHE,HADOOP_YARN_HOME,HADOOP_HOME,PATH,LANG,TZ,HADOOP_MAPRED_HOME</value></property>
+  <property><name>yarn.log-aggregation-enable</name><value>true</value></property>
+  <property><name>yarn.nodemanager.remote-app-log-dir</name><value>/tmp/logs</value></property>
+  <property><name>yarn.nodemanager.local-dirs</name><value>/mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/nm-local</value></property>
+  <property><name>yarn.nodemanager.log-dirs</name><value>/mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/nm-logs</value></property>
+  <property><name>yarn.nodemanager.resource.memory-mb</name><value>4096</value></property>
+  <property><name>yarn.scheduler.minimum-allocation-mb</name><value>256</value></property>
+  <property><name>yarn.nodemanager.vmem-check-enabled</name><value>false</value></property>
+  <property><name>yarn.nodemanager.delete.debug-delay-sec</name><value>600</value></property>
+</configuration>
+--- mapred-site.xml
+<?xml version="1.0"?>
+<configuration>
+  <property><name>mapreduce.framework.name</name><value>yarn</value></property>
+  <property><name>mapreduce.application.classpath</name><value>$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/*:$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/lib/*</value></property>
+  <property><name>yarn.app.mapreduce.am.env</name><value>HADOOP_MAPRED_HOME=/mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/hadoop</value></property>
+  <property><name>mapreduce.map.env</name><value>HADOOP_MAPRED_HOME=/mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/hadoop</value></property>
+  <property><name>mapreduce.reduce.env</name><value>HADOOP_MAPRED_HOME=/mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/hadoop</value></property>
+</configuration>
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+export HADOOP_HEAPSIZE_MAX=1g
+export HADOOP_LOG_DIR=/mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/logs/daemons
+export HADOOP_PID_DIR=/mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/pids
+2026-11-25 17:06:22,144 INFO common.Storage: Storage directory /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/nn has been successfully formatted.
++ [2026-11-25 10:06:22] hdfs --daemon start namenode
++ [2026-11-25 10:06:24] hdfs --daemon start datanode
++ [2026-11-25 10:06:26] yarn --daemon start resourcemanager
++ [2026-11-25 10:06:28] yarn --daemon start nodemanager
++ [2026-11-25 10:06:33] jps
+1195712 DataNode
+1195961 NodeManager
+1195609 NameNode
+1195855 ResourceManager
+1196477 Jps
++ [2026-11-25 10:06:33] yarn node -list
+2026-11-25 17:06:34,448 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+2026-11-25 17:06:34,501 INFO client.DefaultNoHARMFailoverProxyProvider: Connecting to ResourceManager at /0.0.0.0:8032
+Total Nodes:1
+         Node-Id	     Node-State	Node-Http-Address	Number-of-Running-Containers
+pc91.cloudlab.umass.edu:45915	        RUNNING	pc91.cloudlab.umass.edu:8042	                           0
+2026-11-25 17:06:35,551 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
++ [2026-11-25 10:06:34] hdfs dfsadmin -report
+Configured Capacity: 807902732288 (752.42 GB)
+Present Capacity: 753005883392 (701.29 GB)
+DFS Remaining: 753005858816 (701.29 GB)
+DFS Used: 24576 (24 KB)
+DFS Used%: 0.00%
+Replicated Blocks:
+	Under replicated blocks: 0
+	Blocks with corrupt replicas: 0
+	Missing blocks: 0
+	Missing blocks (with replication factor 1): 0
+	Low redundancy blocks with highest priority to recover: 0
+	Pending deletion blocks: 0
+Erasure Coded Block Groups: 
+	Low redundancy block groups: 0
+	Block groups with corrupt internal blocks: 0
+	Missing block groups: 0
+	Low redundancy blocks with highest priority to recover: 0
+	Pending deletion blocks: 0
+
++ [2026-11-25 10:06:36] hdfs dfs -mkdir -p /tmp/logs /user/jason92
+2026-11-25 17:06:37,147 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
++ [2026-11-25 10:06:38] hdfs dfs -chmod 1777 /tmp/logs
+2026-11-25 17:06:39,116 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+NM pid 1195961 log /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/logs/daemons/hadoop-jason92-nodemanager-node0.jason92-326665.misconfiguration-pg0.cloudlab.umass.edu.log
+=== DS run A1M N=1048576 2026-11-25 10:06:40
+client rc=0
+2026-11-25 17:06:52,207 INFO distributedshell.Client: Application completed successfully
+2026-11-25 17:07:04,537 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+IFCHK,cluster,A1M,N=1048576,app=application_1795626390356_0001,final=SUCCEEDED,aggStatus=SUCCEEDED,aggDir=/tmp/logs/jason92/bucket-logs-tfile/0001/application_1795626390356_0001,aggBytes=2123969,localBytes=2139532,readBack2=1048576,readBack3=1048576,limitMsgNM=0,limitMsgYarnLogs=0
+=== DS run A16M N=16777216 2026-11-25 10:07:12
+client rc=0
+2026-11-25 17:07:20,676 INFO distributedshell.Client: Application completed successfully
+2026-11-25 17:07:32,912 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+IFCHK,cluster,A16M,N=16777216,app=application_1795626390356_0002,final=SUCCEEDED,aggStatus=SUCCEEDED,aggDir=/tmp/logs/jason92/bucket-logs-tfile/0002/application_1795626390356_0002,aggBytes=33581424,localBytes=33596814,readBack2=16777216,readBack3=16777216,limitMsgNM=0,limitMsgYarnLogs=0
+=== DS run A64M N=67108864 2026-11-25 10:07:40
+client rc=0
+2026-11-25 17:07:49,243 INFO distributedshell.Client: Application completed successfully
+2026-11-25 17:08:01,648 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+IFCHK,cluster,A64M,N=67108864,app=application_1795626390356_0003,final=SUCCEEDED,aggStatus=SUCCEEDED,aggDir=/tmp/logs/jason92/bucket-logs-tfile/0003/application_1795626390356_0003,aggBytes=134245084,localBytes=134260110,readBack2=67108864,readBack3=67108864,limitMsgNM=0,limitMsgYarnLogs=0
++ [2026-11-25 10:08:13] hdfs dfs -count -q /tmp/logs
+2026-11-25 17:08:14,116 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+        none             inf            none             inf            9            3          169950477 /tmp/logs
++ [2026-11-25 10:08:14] hdfs dfs -rm -r -skipTrash /tmp/logs/jason92
+2026-11-25 17:08:15,605 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Deleted /tmp/logs/jason92
++ [2026-11-25 10:08:16] hdfs dfs -count -q /tmp/logs
+2026-11-25 17:08:17,074 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+        none             inf            none             inf            1            0                  0 /tmp/logs
++ [2026-11-25 10:08:18] hdfs dfsadmin -setSpaceQuota 32m /tmp/logs
+2026-11-25 17:08:18,717 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
++ [2026-11-25 10:08:19] hdfs dfs -count -q /tmp/logs
+2026-11-25 17:08:20,175 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+        none             inf        33554432        33554432            1            0                  0 /tmp/logs
+=== DS run CTRL64M N=67108864 2026-11-25 10:08:21
+client rc=0
+2026-11-25 17:08:29,648 INFO distributedshell.Client: Application completed successfully
+2026-11-25 17:08:41,987 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+IFCHK,cluster,CTRL64M,N=67108864,app=application_1795626390356_0004,final=SUCCEEDED,aggStatus=FAILED,aggDir=/tmp/logs/jason92/bucket-logs-tfile/0004/application_1795626390356_0004,aggBytes=33554432,localBytes=134260110,readBack2=0,readBack3=0,limitMsgNM=0,limitMsgYarnLogs=0
++ [2026-11-25 10:08:48] hdfs dfs -count -q /tmp/logs
+2026-11-25 17:08:49,443 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+        none             inf        33554432               0            5            1           33554432 /tmp/logs
+IFCHK,ctrlquota,quotaLinesNM=12
+2026-11-25 17:08:31,361 ERROR org.apache.hadoop.yarn.logaggregation.AggregatedLogFormat: Error aggregating log file. Log file : /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/nm-logs/application_1795626390356_0004/container_1795626390356_0004_01_000002/stdout. The DiskSpace quota of /tmp/logs is exceeded: quota = 33554432 B = 32 MB but diskspace consumed = 34603008 B = 33 MB
+org.apache.hadoop.hdfs.protocol.DSQuotaExceededException: The DiskSpace quota of /tmp/logs is exceeded: quota = 33554432 B = 32 MB but diskspace consumed = 34603008 B = 33 MB
+Caused by: org.apache.hadoop.ipc.RemoteException(org.apache.hadoop.hdfs.protocol.DSQuotaExceededException): The DiskSpace quota of /tmp/logs is exceeded: quota = 33554432 B = 32 MB but diskspace consumed = 34603008 B = 33 MB
+Caused by: org.apache.hadoop.hdfs.protocol.DSQuotaExceededException: The DiskSpace quota of /tmp/logs is exceeded: quota = 33554432 B = 32 MB but diskspace consumed = 34603008 B = 33 MB
+Caused by: org.apache.hadoop.ipc.RemoteException(org.apache.hadoop.hdfs.protocol.DSQuotaExceededException): The DiskSpace quota of /tmp/logs is exceeded: quota = 33554432 B = 32 MB but diskspace consumed = 34603008 B = 33 MB
+2026-11-25 17:08:31,367 ERROR org.apache.hadoop.yarn.logaggregation.AggregatedLogFormat: Error aggregating log file. Log file : /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/nm-logs/application_1795626390356_0004/container_1795626390356_0004_01_000003/stdout. The DiskSpace quota of /tmp/logs is exceeded: quota = 33554432 B = 32 MB but diskspace consumed = 34603008 B = 33 MB
+org.apache.hadoop.hdfs.protocol.DSQuotaExceededException: The DiskSpace quota of /tmp/logs is exceeded: quota = 33554432 B = 32 MB but diskspace consumed = 34603008 B = 33 MB
+Caused by: org.apache.hadoop.ipc.RemoteException(org.apache.hadoop.hdfs.protocol.DSQuotaExceededException): The DiskSpace quota of /tmp/logs is exceeded: quota = 33554432 B = 32 MB but diskspace consumed = 34603008 B = 33 MB
+org.apache.hadoop.hdfs.protocol.DSQuotaExceededException: The DiskSpace quota of /tmp/logs is exceeded: quota = 33554432 B = 32 MB but diskspace consumed = 34603008 B = 33 MB
+Caused by: org.apache.hadoop.ipc.RemoteException(org.apache.hadoop.hdfs.protocol.DSQuotaExceededException): The DiskSpace quota of /tmp/logs is exceeded: quota = 33554432 B = 32 MB but diskspace consumed = 34603008 B = 33 MB
+org.apache.hadoop.hdfs.protocol.DSQuotaExceededException: The DiskSpace quota of /tmp/logs is exceeded: quota = 33554432 B = 32 MB but diskspace consumed = 34603008 B = 33 MB
+Caused by: org.apache.hadoop.ipc.RemoteException(org.apache.hadoop.hdfs.protocol.DSQuotaExceededException): The DiskSpace quota of /tmp/logs is exceeded: quota = 33554432 B = 32 MB but diskspace consumed = 34603008 B = 33 MB
+org.apache.hadoop.hdfs.protocol.DSQuotaExceededException: The DiskSpace quota of /tmp/logs is exceeded: quota = 33554432 B = 32 MB but diskspace consumed = 34603008 B = 33 MB
+Caused by: org.apache.hadoop.ipc.RemoteException(org.apache.hadoop.hdfs.protocol.DSQuotaExceededException): The DiskSpace quota of /tmp/logs is exceeded: quota = 33554432 B = 32 MB but diskspace consumed = 34603008 B = 33 MB
++ [2026-11-25 10:08:50] hdfs dfsadmin -clrSpaceQuota /tmp/logs
+2026-11-25 17:08:51,011 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
++ [2026-11-25 10:08:51] hdfs dfs -count -q /tmp/logs
+2026-11-25 17:08:52,482 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+        none             inf            none             inf            5            1           33554432 /tmp/logs
++ [2026-11-25 10:08:53] du -sb /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/in
+28334116	/mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/in
++ [2026-11-25 10:08:53] hdfs dfs -mkdir /in
+2026-11-25 17:08:54,124 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
++ [2026-11-25 10:08:55] hdfs dfs -put /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/in/in-01.txt /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/in/in-02.txt /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/in/in-03.txt /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/in/in-04.txt /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/in/in-05.txt /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/in/in-06.txt /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/in/in-07.txt /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/in/in-08.txt /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/in/in-09.txt /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/in/in-10.txt /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/in/in-11.txt /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/in/in-12.txt /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/in/in-13.txt /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/in/in-14.txt /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/in/in-15.txt /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/in/in-16.txt /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/in/in-17.txt /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/in/in-18.txt /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/in/in-19.txt /mydata/jingsong-s4/MAX_KEY_SIZE-write-limit-2-run1/in/in-20.txt /in
+2026-11-25 17:08:55,641 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+job rc=0
+2026-11-25 17:09:11,314 INFO mapreduce.Job: Job job_1795626390356_0005 running in uber mode : false
+2026-11-25 17:10:50,094 INFO mapreduce.Job: Job job_1795626390356_0005 completed successfully
+2026-11-25 17:11:01,719 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+IFCHK,clusterB,app=application_1795626390356_0005,final=SUCCEEDED,aggStatus=SUCCEEDED,success=yes,initMerges=0,doneMerges=0,limitMsgSyslog=0,limitMsgNM=0
++ [2026-11-25 10:11:02] hdfs dfs -du -s /in /out-b /tmp/logs
+2026-11-25 17:11:03,267 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+28330020  28330020  /in
+29065900  29065900  /out-b
+35995360  35995360  /tmp/logs
+=== workloads done 2026-11-25 10:11:04
+EXIT rc=0 at 2026-11-25 10:11:04
+=== stop_all 2026-11-25 10:11:04
+after stop, processes of this run:
+(end)
+  rc=0 [2026-11-25 10:11:14]
+DRIVER ALL STEPS DONE 2026-11-25 10:11:14
+DRIVER EXIT rc=0 2026-11-25 10:11:14
