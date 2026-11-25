@@ -20,8 +20,8 @@
 Select by the `band` column of `bands.csv`; every unit is in exactly one person's share. The
 Cassandra material below this section is unchanged and still applies to the Cassandra work.
 
-- **Progress (2026-11-24):** orders 1–25 written up; 1–5, 19 and 21 closed at stage 4, the other 18 wait for stage 4
-  (see the Hadoop log below). Next stage-3 unit: order 26. Stage-4 environment: `pc91`, `pc82`, `pc72`, `pc75`, `pc99`
+- **Progress (2026-11-24):** orders 1–45 written up; 1–5, 19 and 21 closed at stage 4 (and stage 5 done for all
+  seven), the other 38 wait for stage 4 (see the Hadoop log below). Next stage-3 unit: order 46. Stage-4 environment: `pc91`, `pc82`, `pc72`, `pc75`, `pc99`
   ([`environment.md`](experiments/capacity-enforcement-exp/hadoop/stage4-runtime-verification/jingsong/environment.md);
   the 2026-11-06 nodes `pc41`, `pc39`, `pc29` are gone).
   Your folders (do not write to the other person's):
@@ -42,6 +42,28 @@ Cassandra material below this section is unchanged and still applies to the Cass
   counts with unclear per-object size.
 
 ### Hadoop log (newest first)
+
+- **2026-11-24 (Hadoop batch 2 of 2026-11-24: stage 3 for orders 26–45, band A; stage 5 for orders 1–5)** —
+  **Stage 3 (filed):** 20 autonomous case files in `jingsong/cases/`, `_INDEX.md` §1 and §4 (sha256 at filing),
+  `queue.csv` `case_file`/`estimate`: 18 positive, 2 negative (39 `SNAPSHOT_QUOTA_DEFAULT` — caps a snapshot count, not
+  the heap/disk snapshots hold; 45 `mapreduce.task.index.cache.limit.bytes` — `mergeParts` reloads every spill index
+  into the heap without the limit). Stems already taken got `-2` with the title line fixed: order 33
+  `AclTransformation_MAX_ENTRIES-checkMaxEntries-MAX_ENTRIES-2` (32 has the plain stem, lines 323/327 of one method) and 43
+  `mapreduce.reduce.markreset.buffer.percent-reserve-availableSize-2` (42; lines 601/611 of one method). Orders 26–28
+  are three checks of `dfs.datanode.du.reserved`, 30/31 two of `dfs.datanode.pmem.cache.dirs` and 41–43 three of
+  `mapreduce.reduce.markreset.buffer.percent`; each is its own case. **Stage 4:** not run; all 20 are
+  `waiting (queued for nodes; today's node work holds them)` in the CSV and index. **Stage 5 for orders 1–5** (stage 4
+  finished 2026-11-06): one autonomous and one guided agent per case, 18 candidates `hadoop:OC-6`–`OC-23` (autonomous 8,
+  guided 10; status open) in `phase1-oom-candidates.md`, full text in `runs/p1-hadoop-2026-11-24.md`, ten `coverage.csv`
+  lines (order 1 guided found none). Notable: the S3A prefetch pool caps one stream, never the JVM (72 MiB per open
+  stream at defaults; orders 3 and 4, OC-9, OC-13, OC-16, OC-18), and on JDK 8 each prefetched block is copied again by
+  its CRC32 outside the pool (stage 4 measured it; OC-10, OC-12); the PROVIDED-volume `RawPathHandle` is built by a
+  constructor that skips `MAX_SIZE` and one replica per alias-map region is kept with no count cap (OC-7, OC-8); the
+  opt-in RM generic history store holds one TFile writer (~384 KiB) per running application (OC-20, OC-21); OBS disk
+  upload blocks leave one `deleteOnExit` path per block in the JDK hook set (OC-6). Agents of one holder are filed as
+  written; phase 2 may mark duplicates. **Next:** stage 4 for the 38 waiting cases (orders 6–18, 20, 22–45) once the
+  nodes are free (clean up the three partial run folders of batch 1 first), then stage 5 for them; stage 3 continues
+  at order 46.
 
 - **2026-11-24 (Hadoop batch 1 of 2026-11-24, orders 6–25, band A; interrupted ~02:30 EST by an API usage limit)** —
   Stage-4 nodes `pc91`, `pc82`, `pc72`, `pc75`, `pc99` (experiment `jason92-326665`) set up with `setup-node.sh`, full
