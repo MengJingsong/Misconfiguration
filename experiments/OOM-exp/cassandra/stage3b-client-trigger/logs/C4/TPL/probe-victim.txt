@@ -1,0 +1,9 @@
+CONNECTED as victim
+-- victim: SELECT + MODIFY on vks.kv only (a data role on an admin table)
+02:45:36 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+OK  SELECT k FROM vks.kv LIMIT 1
+    Row[4317]
+ERR ALTER TABLE vks.kv WITH min_index_interval = 1
+    -> UnauthorizedException: User victim has no ALTER permission on <table vks.kv> or any of its parents
+ERR CREATE KEYSPACE vx WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+    -> UnauthorizedException: User victim has no CREATE permission on <all keyspaces> or any of its parents

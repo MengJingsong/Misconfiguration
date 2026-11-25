@@ -1,0 +1,13 @@
+2026-11-24T19:56:00-0700 ATTACK lifetime A-1 heap=1536M direct=768M cap=1200s
+2026-11-24T19:56:00-0700 precheck ok; /mydata free 26G; load 2.11 6.04 4.23
+2026-11-24T19:56:20-0700 daemon pid 879247 up
+2026-11-24T19:57:27-0700 baseline done; attack start at_ms 1795575447501
+2026-11-24T19:57:27-0700 stress pid 880387
+2026-11-24T19:58:27-0700 CREATE INDEX (as attacker) issued at_ms 1795575507514
+harness/attack-life.sh: line 41: 879247 Killed                  ( ulimit -n 100000; cd $T; exec env -u HEAP_NEWSIZE CASSANDRA_CONF=$CONF MAX_HEAP_SIZE=$HEAP MAX_DIRECT_MEMORY_SIZE=$DIRECT CASSANDRA_HEAPDUMP_DIR=$R setsid nohup systemd-run --user --scope -p MemorySwapMax=0 --unit=3b-c8-$U -- bin/cassandra -f > $R/stdout.txt 2>&1 < /dev/null )
+2026-11-24T20:04:12-0700 daemon gone while attack running at_ms 1795575852806
+2026-11-24T20:04:12-0700 endpoint daemon-exit
+2026-11-24T20:04:15-0700 victim after-phase (30 s, node down)
+2026-11-24T20:04:45-0700 node stopped (daemon: '')
+2026-11-24T20:04:48-0700 END daemon-exit oom:java.lang.OutOfMemoryError: Java heap space
+2026-11-24T20:04:49-0700 done; leftovers: daemon='' stress='' victim='' sampler=''

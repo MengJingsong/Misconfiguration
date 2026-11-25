@@ -1,0 +1,11 @@
+connection 1: STARTUP, then QUERY / PREPARE / OPTIONS without authenticating
+  STARTUP                                    -> AUTHENTICATE org.apache.cassandra.auth.PasswordAuthenticator
+  QUERY (attack query) before AUTH_RESPONSE  -> ERROR code=0x000A msg="Unexpected message QUERY, expecting SASL_RESPONSE"
+  PREPARE (attack query)                     -> ERROR code=0x000A msg="Unexpected message PREPARE, expecting SASL_RESPONSE"
+  OPTIONS                                    -> ERROR code=0x000A msg="Unexpected message OPTIONS, expecting SASL_RESPONSE"
+connection 2: QUERY before STARTUP
+  QUERY (attack query) before STARTUP        -> ERROR code=0x000A msg="Unexpected message QUERY, expecting STARTUP or OPTIONS"
+connection 3: STARTUP, AUTH_RESPONSE with a wrong password, then QUERY
+  STARTUP                                    -> AUTHENTICATE org.apache.cassandra.auth.PasswordAuthenticator
+  AUTH_RESPONSE attacker/wrong-password      -> ERROR code=0x0100 msg="Provided username attacker and/or password are incorrect"
+  QUERY (attack query)                       -> ERROR code=0x000A msg="Unexpected message QUERY, expecting SASL_RESPONSE"

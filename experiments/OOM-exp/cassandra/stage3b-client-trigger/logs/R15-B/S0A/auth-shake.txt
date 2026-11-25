@@ -1,0 +1,21 @@
+attacker login: authenticated=True
+attacker QUERY SELECT * FROM victim_ks.t -> ERROR 0x2100 User attacker has no SELECT permission on <table victim_ks.t> or any of its parents (4 ms)
+attacker QUERY INSERT INTO victim_ks.t (k, v) VALUES (1, 'x') -> ERROR 0x2100 User attacker has no MODIFY permission on <table victim_ks.t> or any of its parents (1 ms)
+attacker QUERY CREATE KEYSPACE atk_ks WITH replication = {'class':'SimpleStrategy','replication_factor':1} -> ERROR 0x2100 User attacker has no CREATE permission on <all keyspaces> or any of its parents (1 ms)
+attacker QUERY SELECT * FROM system_auth.roles -> ERROR 0x2100 User attacker has no SELECT permission on <table system_auth.roles> or any of its parents (2 ms)
+LIST ALL PERMISSIONS OF attacker
+  -> RESULT kind 1
+attacker PREPARE SELECT v FROM victim_ks.t WHERE k = ? -> RESULT kind 4 (Prepared) id 0799754e00fcbc35f7bad9d0494f30b6 (6 ms)
+attacker EXECUTE 0799754e00fcbc35f7bad9d0494f30b6 (k=1) -> ERROR 0x2100 User attacker has no SELECT permission on <table victim_ks.t> or any of its parents (1 ms)
+attacker PREPARE M len 1048576 markers 524272 (SELECT v FROM r15.t WHERE k IN () -> ERROR 0x2200 keyspace r15 does not exist (0.299 s)
+attacker PREPARE M len 1048576 markers 524272 (SELECT v FROM r15.t WHERE k IN () -> ERROR 0x2200 keyspace r15 does not exist (0.223 s)
+attacker PREPARE M len 1048576 markers 524269 (SELECT v FROM victim_ks.t WHERE k IN () -> ERROR 0x2200 Too many markers(?). 524269 markers exceed the allowed maximum of 65535 (1.143 s)
+attacker PREPARE CM len 1048576 markers 0 (-) -> ERROR 0x2000 line 0:-1 no viable alternative at input '<EOF>' (0.033 s)
+attacker PREPARE CM len 1048576 markers 0 (-) -> ERROR 0x2000 line 0:-1 no viable alternative at input '<EOF>' (0.027 s)
+unauthenticated conn: authenticated=False
+unauth PREPARE CM len 1048576 -> ERROR 0x000a Unexpected message PREPARE, expecting SASL_RESPONSE (0.015 s)
+unauth PREPARE M len 1048576 -> ERROR 0x000a Unexpected message PREPARE, expecting SASL_RESPONSE (0.006 s)
+unauth PREPARE M len 1048576 -> ERROR 0x000a Unexpected message PREPARE, expecting SASL_RESPONSE (0.006 s)
+wrong password -> auth: op 0 (256, 'Provided username attacker and/or password are incorrect')
+victim INSERT INTO victim_ks.t (k, v) VALUES (1, 'v1') -> op8 (1.0 ms)
+victim SELECT v FROM victim_ks.t WHERE k = 1 -> op8 (0.8 ms)

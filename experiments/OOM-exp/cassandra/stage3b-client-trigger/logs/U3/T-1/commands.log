@@ -1,0 +1,23 @@
+[2026-11-24 13:12:55 1795551175497] RUN T-1 mode=T heap=2G guard=16G table=s1m mode=set c=16 window=180 role=attacker start_epoch=1795551175
+[2026-11-24 13:12:55 1795551175855] + systemd-run --user --scope -p MemoryMax=16G -p MemorySwapMax=0 --unit=3bu3-T-1 env MAX_HEAP_SIZE=2G bin/cassandra -f
+[2026-11-24 13:13:21 1795551201437] NODE up daemon_pid=843913 cgroup=/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/3bu3-T-1.scope memory.max=17179869184 swap.max=0
+[2026-11-24 13:13:21 1795551201448] JVMARGS -XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M 
+[2026-11-24 13:13:21 1795551201463] RESOLVED authenticator=PasswordAuthenticator{}; authenticator=null; authorizer=AllowAllCIDRAuthorizernull; authorizer=CassandraAuthorizer{}; collection_size_fail_threshold=null; collection_size_warn_threshold=null; concurrent_reads=32; items_per_collection_fail_threshold=-1; items_per_collection_warn_threshold=-1; native_transport_max_concurrent_connections=-1; native_transport_max_threads=128; native_transport_rate_limiting_enabled=false; network_authorizer=AllowAllNetworkAuthorizer{}; permissions_validity=2000ms; read_request_timeout=5000ms; read_thresholds_enabled=false; role_manager=CassandraRoleManager{}; roles_validity=2000ms; 
+[2026-11-24 13:13:56 1795551236349] CLIENTS start epoch=1795551236.342285324 table=s1m mode=set c=16 role=attacker
+[2026-11-24 13:13:56 1795551236363] attack start role=attacker table=s1m c=16 at_ms 1795551236353
+[2026-11-24 13:14:34 1795551274567] OOME seen (node-events) at t=38s: 1795551273714 java.lang.OutOfMemoryError: Java heap space
+[2026-11-24 13:16:56 1795551416999] attack clients ended; daemon alive (hold end) at_ms 1795551416990
+[2026-11-24 13:16:58 1795551418056] CLIENTS stopped epoch=1795551418.049708945
+[2026-11-24 13:16:58 1795551418068] dump in progress at window end: wait <= 600 s
+[2026-11-24 13:17:18 1795551438200] OOME thrown, daemon alive at window end: wait <= 150 s for the shipped kill -9
+[2026-11-24 13:17:19 1795551439215] DAEMON DIED (after window) at epoch=1795551439.209249048
+[2026-11-24 13:17:19 1795551439221] victim after-phase 30 s
+[2026-11-24 13:17:51 1795551471238] OOMKILL 1795551438967 end 
+[2026-11-24 13:17:51 1795551471253] STDOUT-OOM 4 | java.lang.OutOfMemoryError: Java heap space Dumping heap to /mydata/s4/3b-U3/runs/T-1/logs/cassandra-1795551176-pid843913.hprof ... java.lang.OutOfMemoryError: Java heap space java.lang.OutOfMemoryError: Java heap space 
+[2026-11-24 13:17:51 1795551471273] SYSLOG ERROR=4 WARN=8 first_error=459:ERROR [ReadStage-20] 2026-11-24T20:16:15,806 JVMStabilityInspector.java:70 - Exception in thread Thread[ReadStage-20,10,SharedPool]
+[2026-11-24 13:17:51 1795551471284] AUTHZ-LOG 0
+[2026-11-24 13:17:51 1795551471297] AUTHZ-DEBUG 3 3 
+[2026-11-24 13:17:51 1795551471308] OUTCOME-RAW survived
+[2026-11-24 13:17:51 1795551471383] no Cassandra daemon left
+[2026-11-24 13:17:51 1795551471402] HPROF /mydata/s4/3b-U3/runs/T-1/logs/cassandra-1795551176-pid843913.hprof 2954833767 birth=1795551273 mtime=1795551437
+[2026-11-24 13:17:51 1795551471489] END end_epoch=1795551471 daemons_left=0 clients_left=0

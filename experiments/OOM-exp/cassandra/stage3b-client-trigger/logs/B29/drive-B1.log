@@ -1,0 +1,51 @@
+[2026-11-24 23:46:32 EST] ARM B1 mode=armB Q=8 k=100..115 warm=0 same=no
+UN  127.0.0.2  7.87 GiB  16      100.0%            f79ac22b-6aa8-493c-ba36-67b0e2edee1e  rack1
+DN  127.0.0.1  7.86 GiB  16      100.0%            6c73fcd3-d7a4-4f35-b42c-4cd692a41102  rack1
+n2 listpendinghints: Host ID                              Address        Rack  DC          Status Total files Newest                  Oldest                  6c73fcd3-d7a4-4f35-b42c-4cd692a41102 127.0.0.1:7000 rack1 datacenter1 DOWN   3           2026-11-25 04:44:52,946 2026-11-25 04:43:07,925 
+n2 hints dir: 4 files, 328123872 B
+21:46:35.525 (1795581995525) STARTUP -> AUTHENTICATE
+21:46:35.644 (1795581995644) AUTH_RESPONSE as attacker -> AUTH_SUCCESS
+21:46:35.644 (1795581995644) REGISTER [STATUS_CHANGE, TOPOLOGY_CHANGE] -> READY
+[2026-11-24 23:46:38 EST] started B1 n1 pid 1169095 heap 2G
+[2026-11-24 23:46:53 EST] attacker saw UP: 21:46:53.302 (1795582013302) waitup 127.0.0.1 UP
+[2026-11-24 23:46:53 EST] ready B1 n1
+n2 listpendinghints: Host ID                              Address        Rack  DC          Status Total files Newest                  Oldest                  6c73fcd3-d7a4-4f35-b42c-4cd692a41102 127.0.0.1:7000 rack1 datacenter1 UP     3           2026-11-25 04:44:52,946 2026-11-25 04:43:07,925 
+n2 hints dir: 4 files, 328123872 B
+[2026-11-24 23:46:57 EST] attack client pid 1169713
+/mydata/s4/3b-B29/harness/ctl.sh: line 54: 1169095 Killed                  CASSANDRA_CONF=$ROOT/conf-n$i CASSANDRA_LOG_DIR=$R/n$i/logs MAX_HEAP_SIZE=$HEAP CASSANDRA_HEAPDUMP_DIR=$R/n$i JVM_EXTRA_OPTS="-XX:NativeMemoryTracking=summary" setsid nohup systemd-run --user --scope --unit="3bb29-$L-n$i-$(date +%s)" -p MemorySwapMax=0 "$BUILD/bin/cassandra" -f < /dev/null > "$R/n$i/stdout.log" 2>&1
+[2026-11-24 23:47:00 EST] NODE 1 DEAD at +3s
+SUMMARY secs=5 ok=0 err=16 rows1=0 rowsOther=0 overloaded=0 timeouts=0 handedOut=16 inflight_left=0
+n2 listpendinghints: Host ID                              Address        Rack  DC          Status Total files Newest                  Oldest                  6c73fcd3-d7a4-4f35-b42c-4cd692a41102 127.0.0.1:7000 rack1 datacenter1 UP     4           2026-11-25 04:44:53,602 2026-11-25 04:43:07,925 
+n2 hints dir: 4 files, 328123880 B
+OOM type="java.lang.OutOfMemoryError: Java heap space" at+3s (driver poll)
+node-1 OOM (GC log, HeapDumper) at 2026-11-24T21:46:57.253-0700
+attack start=1795582013401 node1-end/attack-end=1795582017253 (3.9 s after attack start) outcome: OOM type="java.lang.OutOfMemoryError: Java heap space" at+3s (driver poll)
+
+V1 (node 1 = attacked coordinator, CL ONE)
+  before  no samples
+  during     1 s issued/s= 11.0 ok=6 err=0 success= 54.5% p50(med)=160.7ms p99(med)=355.0ms p99(max)=355.0ms max=355.0ms errors 
+  after     67 s issued/s= 10.0 ok=0 err=675 success=  0.0% p50(med)=-1.0ms p99(med)=-1.0ms p99(max)=-1.0ms max=-1.0ms errors nohost=641 other=34 | e.g. NoHostAvailableException: All host(s) tried for query failed (no host was tried)
+  timeline (5 s bins, rel. to attack start): t,issued,ok,err,max p99 ms
+       +0s   20    6    0    355.0
+       +5s   51    0   65     -1.0
+      +10s   50    0   49     -1.0
+      +15s   50    0   51     -1.0
+      +20s   50    0   50     -1.0
+      +25s   50    0   49     -1.0
+      +30s   50    0   51     -1.0
+      +35s   50    0   50     -1.0
+      +40s   50    0   50     -1.0
+      +45s   50    0   50     -1.0
+      +50s   50    0   50     -1.0
+      +55s   50    0   50     -1.0
+      +60s   50    0   50     -1.0
+      +65s   50    0   50     -1.0
+      +70s   10    0   10     -1.0
+
+V2 (node 2, CL ONE)
+  before  no samples
+  during     1 s issued/s= 11.0 ok=11 err=0 success=100.0% p50(med)=2.9ms p99(med)=4.4ms p99(max)=4.4ms max=4.4ms errors 
+  after     67 s issued/s= 10.0 ok=670 err=0 success=100.0% p50(med)=1.6ms p99(med)=2.5ms p99(max)=222.5ms max=222.5ms errors 
+  timeline (5 s bins, rel. to attack start): t,issued,ok,err,max p99 ms
+       +0s   21   20    0      4.7
+[2026-11-24 23:48:12 EST] END B1 OOM type="java.lang.OutOfMemoryError: Java heap space" at+3s (driver poll)

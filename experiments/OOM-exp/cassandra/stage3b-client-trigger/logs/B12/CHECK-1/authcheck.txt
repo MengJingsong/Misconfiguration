@@ -1,0 +1,27 @@
+== pre-auth (no credentials)
+PREAUTH STARTUP -> op 0x03 org.apache.cassandra.auth.PasswordAuthenticator
+PREAUTH QUERY(SERIAL, no login) -> op 0x00 0x000a:Unexpected message QUERY, expecting SASL_RESPONSE
+== wrong password
+CHECK C2-wrongpw -> ERROR auth: op 0 0x0100:Provided username attacker and/or password are incorrect
+== attacker (SELECT on b12.t only)
+CHECK C3-serial-61440 (user=attacker cl=SERIAL keytype=blob K=61440) -> RESULT kind 2
+CHECK C3-one-61440 (user=attacker cl=ONE keytype=blob K=61440) -> RESULT kind 2
+CHECK C4-serial-65535 (user=attacker cl=SERIAL keytype=blob K=65535) -> RESULT kind 2
+CHECK C4-serial-65536 (user=attacker cl=SERIAL keytype=blob K=65536) -> 0x2200:Key length of 65536 is longer than maximum of 65535
+CHECK C5-insert -> ERROR 0x2100:User attacker has no MODIFY permission on <table b12.t> or any of its parents
+CHECK C5-lwt-update -> ERROR 0x2100:User attacker has no MODIFY permission on <table b12.t> or any of its parents
+CHECK C5-vic-select -> ERROR 0x2100:User attacker has no SELECT permission on <table vic.kv> or any of its parents
+CHECK C5-create-table -> ERROR 0x2100:User attacker has no CREATE permission on <all tables in b12> or any of its parents
+== nogrant (login, no grants)
+CHECK C6-select-b12 -> ERROR 0x2100:User nogrant has no SELECT permission on <table b12.t> or any of its parents
+CHECK C6-serial-b12 (user=nogrant cl=SERIAL keytype=blob K=61440) -> 0x2100:User nogrant has no SELECT permission on <table b12.t> or any of its parents
+CHECK C7-local-one-61440 (user=nogrant cl=ONE keytype=text K=61440) -> RESULT kind 2
+CHECK C7-local-serial-61440 (user=nogrant cl=SERIAL keytype=text K=61440) -> RESULT kind 2
+CHECK C7-local-serial-65535 (user=nogrant cl=SERIAL keytype=text K=65535) -> RESULT kind 2
+CHECK C7-local-serial-65536 (user=nogrant cl=SERIAL keytype=text K=65536) -> 0x2200:Key length of 65536 is longer than maximum of 65535
+CHECK C7-schema-serial-61440 (user=nogrant cl=SERIAL keytype=text K=61440) -> RESULT kind 2
+CHECK C7-sizeest-serial-61440 (user=nogrant cl=SERIAL keytype=text K=61440) -> RESULT kind 2
+CHECK C7-vtable-serial (user=nogrant cl=SERIAL keytype=text K=100) -> 0x2100:User nogrant has no SELECT permission on <table system_views.settings> or any of its parents
+CHECK C7-paxos-select -> ERROR 0x2100:User nogrant has no SELECT permission on <table system.paxos> or any of its parents
+== tenant
+CHECK C8-tenant-b12 -> ERROR 0x2100:User tenant has no SELECT permission on <table b12.t> or any of its parents

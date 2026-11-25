@@ -1,0 +1,122 @@
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+ADMIN login as cassandra after 10655 ms
+ADMIN ok: CREATE ROLE IF NOT EXISTS attacker WITH PASSWORD = '…' AND LOGIN = true AND SUPERUSER = false
+ADMIN ok: CREATE ROLE IF NOT EXISTS nogrant WITH PASSWORD = '…' AND LOGIN = true AND SUPERUSER = false
+ADMIN ok: CREATE ROLE IF NOT EXISTS tenant WITH PASSWORD = '…' AND LOGIN = true AND SUPERUSER = false
+ADMIN ok: CREATE KEYSPACE IF NOT EXISTS b12 WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+ADMIN ok: CREATE TABLE IF NOT EXISTS b12.t (k blob PRIMARY KEY, v int)
+ADMIN ok: CREATE KEYSPACE IF NOT EXISTS vic WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+ADMIN ok: CREATE TABLE IF NOT EXISTS vic.kv (k int PRIMARY KEY, v text)
+ADMIN ok: GRANT SELECT ON TABLE b12.t TO attacker
+ADMIN ok: GRANT SELECT ON TABLE vic.kv TO tenant
+ADMIN ok: GRANT MODIFY ON TABLE vic.kv TO tenant
+ADMIN LIST ALL PERMISSIONS:
+    Row[attacker, attacker, <table b12.t>, SELECT]
+    Row[cassandra, cassandra, <keyspace b12>, CREATE]
+    Row[cassandra, cassandra, <keyspace b12>, ALTER]
+    Row[cassandra, cassandra, <keyspace b12>, DROP]
+    Row[cassandra, cassandra, <keyspace b12>, SELECT]
+    Row[cassandra, cassandra, <keyspace b12>, MODIFY]
+    Row[cassandra, cassandra, <keyspace b12>, AUTHORIZE]
+    Row[cassandra, cassandra, <keyspace b12>, UNMASK]
+    Row[cassandra, cassandra, <keyspace b12>, SELECT_MASKED]
+    Row[cassandra, cassandra, <table b12.t>, ALTER]
+    Row[cassandra, cassandra, <table b12.t>, DROP]
+    Row[cassandra, cassandra, <table b12.t>, SELECT]
+    Row[cassandra, cassandra, <table b12.t>, MODIFY]
+    Row[cassandra, cassandra, <table b12.t>, AUTHORIZE]
+    Row[cassandra, cassandra, <table b12.t>, UNMASK]
+    Row[cassandra, cassandra, <table b12.t>, SELECT_MASKED]
+    Row[cassandra, cassandra, <keyspace vic>, CREATE]
+    Row[cassandra, cassandra, <keyspace vic>, ALTER]
+    Row[cassandra, cassandra, <keyspace vic>, DROP]
+    Row[cassandra, cassandra, <keyspace vic>, SELECT]
+    Row[cassandra, cassandra, <keyspace vic>, MODIFY]
+    Row[cassandra, cassandra, <keyspace vic>, AUTHORIZE]
+    Row[cassandra, cassandra, <keyspace vic>, UNMASK]
+    Row[cassandra, cassandra, <keyspace vic>, SELECT_MASKED]
+    Row[cassandra, cassandra, <table vic.kv>, ALTER]
+    Row[cassandra, cassandra, <table vic.kv>, DROP]
+    Row[cassandra, cassandra, <table vic.kv>, SELECT]
+    Row[cassandra, cassandra, <table vic.kv>, MODIFY]
+    Row[cassandra, cassandra, <table vic.kv>, AUTHORIZE]
+    Row[cassandra, cassandra, <table vic.kv>, UNMASK]
+    Row[cassandra, cassandra, <table vic.kv>, SELECT_MASKED]
+    Row[cassandra, cassandra, <all functions in b12>, CREATE]
+    Row[cassandra, cassandra, <all functions in b12>, ALTER]
+    Row[cassandra, cassandra, <all functions in b12>, DROP]
+    Row[cassandra, cassandra, <all functions in b12>, AUTHORIZE]
+    Row[cassandra, cassandra, <all functions in b12>, EXECUTE]
+    Row[cassandra, cassandra, <all functions in vic>, CREATE]
+    Row[cassandra, cassandra, <all functions in vic>, ALTER]
+    Row[cassandra, cassandra, <all functions in vic>, DROP]
+    Row[cassandra, cassandra, <all functions in vic>, AUTHORIZE]
+    Row[cassandra, cassandra, <all functions in vic>, EXECUTE]
+    Row[cassandra, cassandra, <role attacker>, ALTER]
+    Row[cassandra, cassandra, <role attacker>, DROP]
+    Row[cassandra, cassandra, <role attacker>, AUTHORIZE]
+    Row[cassandra, cassandra, <role attacker>, DESCRIBE]
+    Row[cassandra, cassandra, <role nogrant>, ALTER]
+    Row[cassandra, cassandra, <role nogrant>, DROP]
+    Row[cassandra, cassandra, <role nogrant>, AUTHORIZE]
+    Row[cassandra, cassandra, <role nogrant>, DESCRIBE]
+    Row[cassandra, cassandra, <role tenant>, ALTER]
+    Row[cassandra, cassandra, <role tenant>, DROP]
+    Row[cassandra, cassandra, <role tenant>, AUTHORIZE]
+    Row[cassandra, cassandra, <role tenant>, DESCRIBE]
+    Row[tenant, tenant, <table vic.kv>, SELECT]
+    Row[tenant, tenant, <table vic.kv>, MODIFY]
+ADMIN SELECT role, is_superuser, can_login, member_of FROM system_auth.roles:
+    Row[nogrant, false, true, NULL]
+    Row[attacker, false, true, NULL]
+    Row[cassandra, true, true, NULL]
+    Row[tenant, false, true, NULL]
+ADMIN settings:
+    authenticator = PasswordAuthenticator
+    authenticator.class_name = PasswordAuthenticator
+    authenticator.parameters = {}
+    authorizer = CassandraAuthorizer
+    authorizer.class_name = CassandraAuthorizer
+    authorizer.parameters = {}
+    cas_contention_timeout = 1000ms
+    denylist_range_reads_enabled = true
+    denylist_reads_enabled = true
+    denylist_writes_enabled = true
+    key_cache_size = 100MiB
+    memtable_allocation_type = heap_buffers
+    memtable_heap_space = 512MiB
+    native_transport_max_concurrent_connections = -1
+    native_transport_max_concurrent_connections_per_ip = -1
+    native_transport_max_frame_size = 16MiB
+    native_transport_max_request_data_in_flight = 214748364B
+    native_transport_max_request_data_in_flight_per_ip = 53687091B
+    native_transport_rate_limiting_enabled = false
+    native_transport_timeout = 12s
+    network_authorizer = AllowAllNetworkAuthorizer
+    network_authorizer.class_name = AllowAllNetworkAuthorizer
+    network_authorizer.parameters = {}
+    partition_keys_in_select_fail_threshold = -1
+    partition_keys_in_select_warn_threshold = -1
+    paxos_cache_size = null
+    paxos_contention_max_wait = null
+    paxos_contention_min_delta = null
+    paxos_contention_min_wait = null
+    paxos_contention_wait_randomizer = null
+    paxos_on_linearizability_violations = ignore
+    paxos_purge_grace_period = 60s
+    paxos_repair_enabled = true
+    paxos_repair_parallelism = 4
+    paxos_repair_race_wait = true
+    paxos_state_purging = legacy
+    paxos_topology_repair_no_dc_checks = false
+    paxos_topology_repair_strict_each_quorum = false
+    paxos_variant = v1
+    read_consistency_levels_disallowed = []
+    read_consistency_levels_warned = []
+    read_request_timeout = 5000ms
+    role_manager = CassandraRoleManager
+    role_manager.class_name = CassandraRoleManager
+    role_manager.parameters = {}
+    write_request_timeout = 2000ms

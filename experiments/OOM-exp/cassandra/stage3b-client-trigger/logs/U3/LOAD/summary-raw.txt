@@ -1,0 +1,10 @@
+RUN LOAD mode=LOAD heap=2G guard=16G table=s1m mode=set c=16 window=180 role= start_epoch=1795550922
+NODE up daemon_pid=839390 cgroup=/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/3bu3-LOAD.scope memory.max=17179869184 swap.max=0
+JVMARGS -XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M 
+RESOLVED authenticator=PasswordAuthenticator{}; authenticator=null; authorizer=AllowAllCIDRAuthorizernull; authorizer=CassandraAuthorizer{}; collection_size_fail_threshold=null; collection_size_warn_threshold=null; concurrent_reads=32; items_per_collection_fail_threshold=-1; items_per_collection_warn_threshold=-1; native_transport_max_concurrent_connections=-1; native_transport_max_threads=128; native_transport_rate_limiting_enabled=false; network_authorizer=AllowAllNetworkAuthorizer{}; permissions_validity=2000ms; read_request_timeout=5000ms; read_thresholds_enabled=false; role_manager=CassandraRoleManager{}; roles_validity=2000ms; 
+RESULT loadset table=s1m M=1000000 chunk=100000 P=8 accepted=80 rejected=0 seconds=70.0 first=None
+LOAD attacker loadset s1m took 71 s
+CHECK single reader (attacker)       6 ok 1000000;
+SIZES Table: n1m;SSTable count: 0;Old SSTable count: 0;Space used (live): 0;Table: s1m;SSTable count: 1;Old SSTable count: 0;Space used (live): 32192496;
+GOLDEN data du=32604719 commitlog_files=1
+END end_epoch=1795551163 daemons_left=0 clients_left=0

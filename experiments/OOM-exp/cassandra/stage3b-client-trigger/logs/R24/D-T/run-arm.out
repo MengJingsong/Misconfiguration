@@ -1,0 +1,38 @@
+[2026-11-24 23:04:17 EST] ARM D-T table=w2k CL=QUORUM heap=2G direct=auto steps=1:20,7:160 fetch=128 attacker=attacker
+131M	/mydata/s4/3b-R24/n1 131M	/mydata/s4/3b-R24/n2 
+[2026-11-24 23:04:18 EST] started D-T n1 pid 741835 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/3br24-D-T-n1-1795579457.scope
+[2026-11-24 23:04:58 EST] ready D-T n1
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M -javaagent:/mydata/s4/3b-R24/tree/bin/../lib/jamm-0.4.0.jar -XX:HeapDumpPath=/mydata/s4/3b-R24/runs/D-T/n1/cassandra-1795579457-pid741835.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-24 23:05:00 EST] started D-T n2 pid 742333 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/3br24-D-T-n2-1795579499.scope
+[2026-11-24 23:05:18 EST] ready D-T n2
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms16G -Xmx16G -XX:MaxDirectMemorySize=15872M -javaagent:/mydata/s4/3b-R24/tree/bin/../lib/jamm-0.4.0.jar -XX:HeapDumpPath=/mydata/s4/3b-R24/runs/D-T/n2/cassandra-1795579499-pid742333.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-24 23:05:19 EST] ring: 2 UN in node 1's view
+[2026-11-24 23:05:26 EST] GC.run D-T n1
+1795579529,base,nmtOtherKB=81752,nmtTotalKB=2614482,rssAnonKB=2688600,scopeCurB=2781061120,scopeOomKill=0,1795579529002,115815080,82260648,82260648,0,0,0,0,0,66924152,0,94,86,0,0,0,0,0,0,0,0
+[2026-11-24 23:05:29 EST] no victim (NOVICTIM)
+[2026-11-24 23:06:02 EST] attack client pid 743072 (role attacker)
+1795579572,t+10,nmtOtherKB=343983,nmtTotalKB=2891845,rssAnonKB=2769716,scopeCurB=2867642368,scopeOomKill=0,1795579572010,301070312,284293096,284293096,1,0,24,0,0,100573774,3,216,306,4768,6,4768,6,0,0,206,206
+1795579572038,1,1,6,0,1,8.0,1700.9,1700.9,128,0,0,0,
+grep: /mydata/s4/3b-R24/runs/D-T/victim.csv: No such file or directory
+1795579583,t+20,nmtOtherKB=344076,nmtTotalKB=2917588,rssAnonKB=2772476,scopeCurB=2879217664,scopeOomKill=0,1795579583013,1962853728,1929299296,1920439792,7,0,30,3,0,100669506,3,516,913,4768,12,4768,12,0,0,540,540
+1795579583060,7,7,12,0,0,0.0,-1.0,-1.0,128,0,0,0,
+grep: /mydata/s4/3b-R24/runs/D-T/victim.csv: No such file or directory
+1795579593,t+31,nmtOtherKB=360476,nmtTotalKB=2914733,rssAnonKB=2770612,scopeCurB=2891116544,scopeOomKill=0,1795579592641,2067883544,2067883544,2067883544,7,0,38,1,0,100685964,3,1285,7925,4768,19,4768,19,0,0,738,738
+1795579593073,7,7,12,7,0,0.0,-1.0,-1.0,128,0,7,0,
+grep: /mydata/s4/3b-R24/runs/D-T/victim.csv: No such file or directory
+1795579611,t+41,nmtOtherKB=360492,nmtTotalKB=2923844,rssAnonKB=2771716,scopeCurB=5116805120,scopeOomKill=0,1795579598642,2083668824,2083668824,2083668824,7,0,45,1,0,100702422,3,1765,11906,4768,26,4768,26,0,0,915,915
+1795579611092,7,7,12,14,0,0.0,-1.0,-1.0,128,0,14,0,
+grep: /mydata/s4/3b-R24/runs/D-T/victim.csv: No such file or directory
+/mydata/s4/3b-R24/harness/ctl.sh: line 61: 741835 Killed                  CASSANDRA_CONF=$R/n$i/conf CASSANDRA_LOG_DIR=$R/n$i/logs MAX_HEAP_SIZE=$HEAP MAX_DIRECT_MEMORY_SIZE=$DENV CASSANDRA_HEAPDUMP_DIR=$R/n$i JVM_EXTRA_OPTS="$EXTRA" setsid nohup systemd-run --user --scope --unit="3br24-$L-n$i-$(date +%s)" -p MemorySwapMax=0 "$BUILD/bin/cassandra" -f < /dev/null > "$R/n$i/stdout.log" 2>&1
+[2026-11-24 23:07:01 EST] NODE 1 DEAD at +59s
+[2026-11-24 23:07:01 EST] victim keeps running 60 s after node 1's death
+04:07:07 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 16000 milliseconds
+04:07:23 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 32000 milliseconds
+04:07:55 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 64000 milliseconds
+[2026-11-24 23:08:35 EST] stopped D-T n1
+[2026-11-24 23:08:46 EST] stopped D-T n2
+OOM type="java.lang.OutOfMemoryError: Java heap space" at+59s peer=ALIVE
+grep: /mydata/s4/3b-R24/runs/D-T/victim.csv: No such file or directory
+[2026-11-24 23:08:46 EST] scanning /mydata/s4/3b-R24/runs/D-T/n1/cassandra-1795579457-pid741835.hprof
+[2026-11-24 23:09:03 EST] deleted /mydata/s4/3b-R24/runs/D-T/n1/cassandra-1795579457-pid741835.hprof
+[2026-11-24 23:09:03 EST] END D-T OOM type="java.lang.OutOfMemoryError: Java heap space" at+59s peer=ALIVE

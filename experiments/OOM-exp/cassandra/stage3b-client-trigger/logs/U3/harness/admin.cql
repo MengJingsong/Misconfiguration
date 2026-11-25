@@ -1,0 +1,16 @@
+CREATE ROLE attacker WITH PASSWORD = 'attacker-pw-3b' AND LOGIN = true AND SUPERUSER = false;
+CREATE ROLE victim WITH PASSWORD = 'victim-pw-3b' AND LOGIN = true AND SUPERUSER = false;
+CREATE ROLE nogrant WITH PASSWORD = 'nogrant-pw-3b' AND LOGIN = true AND SUPERUSER = false;
+CREATE ROLE selonly WITH PASSWORD = 'selonly-pw-3b' AND LOGIN = true AND SUPERUSER = false;
+CREATE KEYSPACE u3 WITH replication = {'class':'SimpleStrategy','replication_factor':1};
+CREATE TABLE u3.s1m (k int PRIMARY KEY, v set<int>);
+CREATE TABLE u3.n1m (k int PRIMARY KEY, v set<int>);
+GRANT SELECT ON TABLE u3.s1m TO attacker;
+GRANT MODIFY ON TABLE u3.s1m TO attacker;
+GRANT SELECT ON TABLE u3.n1m TO attacker;
+GRANT MODIFY ON TABLE u3.n1m TO attacker;
+GRANT SELECT ON TABLE u3.s1m TO selonly;
+CREATE KEYSPACE victim WITH replication = {'class':'SimpleStrategy','replication_factor':1};
+CREATE TABLE victim.kv (k int PRIMARY KEY, v text);
+GRANT SELECT ON TABLE victim.kv TO victim;
+GRANT MODIFY ON TABLE victim.kv TO victim;

@@ -1,0 +1,33 @@
+[11:03:36] privilege checks
+== attacker (expected: SELECT b13.t ok; everything else Unauthorized)
+  0 |  0
+  0 |  1
+
+(2 rows)
+<stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User attacker has no MODIFY permission on <table b13.t> or any of its parents"
+<stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User attacker has no SELECT permission on <table vic.kv> or any of its parents"
+<stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User attacker has no CREATE permission on <all keyspaces> or any of its parents"
+<stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User attacker has no ALTER permission on <table b13.t> or any of its parents"
+<stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User attacker has no SELECT permission on <table system_auth.roles> or any of its parents"
+== nogrant (expected: b13.t and vic.kv Unauthorized; system_schema / system.local readable)
+<stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User nogrant has no SELECT permission on <table b13.t> or any of its parents"
+<stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User nogrant has no SELECT permission on <table vic.kv> or any of its parents"
+<stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User nogrant has no CREATE permission on <all keyspaces> or any of its parents"
+
+Warnings :
+Aggregation query used without partition key
+
+
+Warnings :
+Aggregation query used without partition key
+
+-----------------
+  5.0.9-SNAPSHOT
+
+(1 rows)
+== tenant (expected: b13.t Unauthorized; vic.kv ok)
+<stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User tenant has no SELECT permission on <table b13.t> or any of its parents"
+---
+ 0
+
+(1 rows)

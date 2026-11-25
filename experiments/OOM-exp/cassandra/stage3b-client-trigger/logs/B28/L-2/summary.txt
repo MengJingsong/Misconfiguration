@@ -1,0 +1,39 @@
+endpoint: daemon-exit oom:java.lang.OutOfMemoryError: Java heap space
+run: run L-2 mode=L N=4 hold=300 ips=1 heap=2G
+stdout: INFO  [main] 2026-11-25T04:04:33,334 CassandraDaemon.java:619 - JVM Arguments: [-ea, -da:net.openhft..., -XX:+UseThreadPriorities, -XX:+HeapDumpOnOutOfMemoryError, -Xss256k, -XX:+AlwaysPreTouch, -XX:+
+stdout: java.lang.OutOfMemoryError: Java heap space
+stdout: Dumping heap to /mydata/s4/3b-B28/runs/L-2/cassandra-1795579466-pid899735.hprof ...
+stdout: Heap dump file created [2057431113 bytes in 6.114 secs]
+stdout: # java.lang.OutOfMemoryError: Java heap space
+stdout: # -XX:OnOutOfMemoryError="kill -9 %p"
+stdout: #   Executing /bin/sh -c "kill -9 899735"...
+driver: 2026-11-24T21:06:17.618-0700 load start N=4 hold 300s
+driver: 2026-11-24T21:06:34.120-0700 OOM line seen in stdout
+driver: 2026-11-24T21:06:41.182-0700 daemon gone while attack running at_ms 1795579601179
+resolved: /mydata/s4/3b-B28/runs/L-2/vm-cmdline.txt:MaxDirectMemorySize=15872M ; /mydata/s4/3b-B28/runs/L-2/vm-flags.txt:MaxDirectMemorySize=16642998272 ; /mydata/s4/3b-B28/runs/L-2/vm-flags.txt:MaxHeapSize=2147483648 ; org.apache.cassandra.db:type=StorageService|NativeTransportMaxConcurrentRequestsInBytes|214748364 ; org.apache.cassandra.db:type=StorageService|NativeTransportMaxConcurrentRequestsInBytesPerIp|53687091 ;  write_request_timeout=2000ms; ; authenticator=PasswordAuthenticator{}; ; authenticator=null; ; authorizer=AllowAllCIDRAuthorizernull; ; authorizer=CassandraAuthorizer{}; ; commitlog_segment_size=32MiB; ; max_mutation_size=null; ; memtable_heap_space=null; ; native_transport_max_concurrent_connections=-1; ; native_transport_max_concurrent_connections_per_ip=-1; ; native_transport_max_frame_size=16MiB; ; native_transport_max_request_data_in_flight=null; ; native_transport_max_reques
+load: t0 21:06:18; full N at +0 s; end OOM at +15.8 s (15.8 s after full N)
+responses ok 70, errors 4; requests/s overall 4.42; latency median 795 ms p90 1064 ms max 1467 ms
+  error: 3 8996 io_error [Errno_104]_Connection_reset_by_peer
+  error: 2 8425 io_error [Errno_104]_Connection_reset_by_peer
+  error: 1 8623 io_error [Errno_104]_Connection_reset_by_peer
+  error: 0 8571 io_error [Errno_104]_Connection_reset_by_peer
+jmx samples 171 (500 ms)
+K_q TracingStage PendingTasks max 152 (at +15 s), last 152
+TracingStage CompletedTasks during load 2 -> 134 (9.1 tasks/s)
+dropped _TRACE max 0
+MutationStage pending max 1
+K RequestsSize max 64000028 B (61.0 MiB)
+heap used (JMX) max 1972 MiB
+PendingTasks max per 10 s: +0:107 +10:152
+memtable system_traces on-heap max: sessions 92 MiB, events 122 MiB
+GCs 170; heap after GC max 1998 MiB median 1635 MiB; last 8 after-GC: 1933 1970 1970 1933 1973 1973 1933 1933
+Full GCs 8; after MiB 1016 1773 1658 1853 1933 1933 1933 1933
+STW share over last 60 s of GC log: 4%
+U_h humongous regions after GC (16 MiB each): max 120 (1920 MiB), median during load 100, last 8: 117 118 118 117 118 118 117 117; before load max 0
+to-space exhausted 7
+RssAnon max 2775 MiB
+scope memory.current max 5262 MiB
+threads samples 5: max NTR 9, runnable 4, lexer 4, TraceKeyspace 0, formatter 0; TracingStage top: none none none wait-response wait-response
+df last: 1795579597 24482 1054 1 6 4.08 5.40 3.60
+du at end: 1054	/mydata/s4/3b-B28/cassandra/data/commitlog ; 1	/mydata/s4/3b-B28/cassandra/data/hints ; 6	/mydata/s4/3b-B28/cassandra/data/data/system_traces ; 
+dumps: cassandra-1795579466-pid899735.hprof (1962 MiB)

@@ -1,0 +1,23 @@
+CompileCommand: dontinline org/apache/cassandra/io/util/BufferedDataOutputStreamPlus.writeSlow(JI)V
+CompileCommand: dontinline org/apache/cassandra/io/util/RebufferingInputStream.readPrimitiveSlowly(I)J
+CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.address()J
+CompileCommand: inline org/apache/cassandra/db/NativeDecoratedKey.length()I
+CompileCommand: inline org/apache/cassandra/db/rows/UnfilteredSerializer.serializeRowBody(Lorg/apache/cassandra/db/rows/Row;ILorg/apache/cassandra/db/rows/SerializationHelper;Lorg/apache/cassandra/io/util/DataOutputPlus;)V
+--
+INFO  [main] 2026-11-24T15:57:21,836 CassandraDaemon.java:615 - CodeHeap 'non-profiled nmethods' Non-heap memory: init = 2555904(2496K) used = 1692416(1652K) committed = 2555904(2496K) max = 122912768(120032K)
+INFO  [main] 2026-11-24T15:57:21,837 CassandraDaemon.java:617 - Classpath: /mydata/s4/3b-B12/node/conf:/mydata/s4/3b-B12/tree/bin/../build/apache-cassandra-5.0.9-SNAPSHOT.jar:/mydata/s4/3b-B12/tree/bin/../lib/HdrHistogram-2.1.12.jar:/mydata/s4/3b-B12/tree/bin/../lib/ST4-4.0.8.jar:/mydata/s4/3b-B12/t
+INFO  [main] 2026-11-24T15:57:21,840 CassandraDaemon.java:619 - JVM Arguments: [-ea, -da:net.openhft..., -XX:+UseThreadPriorities, -XX:+HeapDumpOnOutOfMemoryError, -Xss256k, -XX:+AlwaysPreTouch, -XX:+UseTLAB, -XX:+ResizeTLAB, -XX:+UseNUMA, -XX:+PerfDisableSharedMem, -Djava.net.preferIPv4Stack=true, 
+INFO  [main] 2026-11-24T15:57:22,774 NativeLibrary.java:186 - JNA mlockall successful
+INFO  [main] 2026-11-24T15:57:22,820 MonotonicClock.java:209 - Scheduling approximate time conversion task with an interval of 10000 milliseconds
+INFO  [main] 2026-11-24T15:57:22,824 MonotonicClock.java:345 - Scheduling approximate time-check task with a precision of 2 milliseconds
+--
+INFO  [Native-Transport-Requests-26] 2026-11-24T16:02:10,039 NoSpamLogger.java:104 - ReadTimeoutException "Operation timed out - received only 0 responses." while executing SELECT v FROM b12.t WHERE k = 0x0000000000005f6ade767d796adadc442c1e50a84c1d758779e099aadb888b59e5748124ff39b361f2bfc7027ba222f
+INFO  [Service Thread] 2026-11-24T16:02:10,038 StatusLogger.java:71 - MemtableReclaimMemory                0         0             51         0                 0
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /dev/shm/3b-B12/cassandra-1795535835-pid497718.hprof ...
+Heap dump file created [2166823512 bytes in 3.370 secs]
+#
+# java.lang.OutOfMemoryError: Java heap space
+# -XX:OnOutOfMemoryError="kill -9 %p"
+#   Executing /bin/sh -c "kill -9 497718"...

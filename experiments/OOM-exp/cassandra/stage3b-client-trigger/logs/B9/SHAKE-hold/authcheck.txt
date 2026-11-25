@@ -1,0 +1,12 @@
+victim login: AUTH_SUCCESS
+victim> INSERT INTO vks.kv (k, v) VALUES (0, 'seed')
+   OK Void []
+victim> SELECT v FROM vks.kv WHERE k = 0
+   OK ['v'] [['seed']]
+victim> SELECT * FROM system_auth.roles
+   ERR:0x2100:User victim has no SELECT permission on <table system_auth.roles> or any of its parents
+victim> CREATE KEYSPACE x WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+   ERR:0x2100:User victim has no CREATE permission on <all keyspaces> or any of its parents
+no-credential client STARTUP -> AUTHENTICATE
+no-credential client QUERY -> ERR:0x000a:Unexpected message QUERY, expecting SASL_RESPONSE
+no-credential client wrong password -> ERR:0x0100:Provided username cassandra and/or password are incorrect

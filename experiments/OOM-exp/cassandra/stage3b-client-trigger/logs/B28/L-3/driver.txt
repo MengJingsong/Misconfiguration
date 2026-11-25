@@ -1,0 +1,15 @@
+2026-11-24T21:08:28.579-0700 run L-3 mode=L N=4 hold=300 ips=1 heap=2G
+2026-11-24T21:08:28.649-0700 free 26G
+2026-11-24T21:09:21.385-0700 daemon pid 900977 up
+2026-11-24T21:09:50.675-0700 auth setup done
+2026-11-24T21:10:20.684-0700 baseline done; attack start N=4 ips=1 at_ms 1795579820682
+2026-11-24T21:10:20.687-0700 load start N=4 hold 300s
+2026-11-24T21:10:37.973-0700 OOM line seen in stdout
+harness/run3b.sh: line 116: 900977 Killed                  ( ulimit -n 100000; cd $T; exec env CASSANDRA_CONF=$CONF MAX_HEAP_SIZE=$HEAP CASSANDRA_HEAPDUMP_DIR=$R setsid nohup systemd-run --user --scope -p MemorySwapMax=0 --unit=3b-b28-$RID -- bin/cassandra -f > $R/stdout.txt 2>&1 < /dev/null )
+2026-11-24T21:10:45.035-0700 daemon gone while attack running at_ms 1795579845032
+2026-11-24T21:10:48.040-0700 victim after-phase (30 s, node down)
+2026-11-24T21:11:18.054-0700 daemon stopped
+2026-11-24T21:11:21.079-0700 END daemon-exit oom:java.lang.OutOfMemoryError: Java heap space
+2026-11-24T21:11:45.906-0700 dump /mydata/s4/3b-B28/runs/L-3/cassandra-1795579709-pid900977.hprof 2081544422 B sha256 13a6d7afdd935e5c
+2026-11-24T21:12:15.415-0700 dump analysed and deleted
+2026-11-24T21:12:15.417-0700 done

@@ -1,0 +1,22 @@
+[roles] as cassandra: LIST ROLES
+  rc=0 0.66s: role      | super | login | options | datacenters | -----------+-------+-------+---------+------------- | attacker | False |  True |        {} |         ALL | cassandra |  True |  True |        {} |         ALL | nogrant | False |  True |        {} |         ALL | victim | False |  True |        {} |         ALL | (4 rows) | Warning: Using a password on the command line interface can be insecure. | Recommendation: use the credentials file to securely provide the password.
+[perm-attacker] as cassandra: LIST ALL PERMISSIONS OF attacker
+  rc=0 0.71s: role     | username | resource     | permission | ----------+----------+--------------+------------ | attacker | attacker | <table ks.t> |     SELECT | (1 rows) | Warning: Using a password on the command line interface can be insecure. | Recommendation: use the credentials file to securely provide the password.
+[perm-nogrant] as cassandra: LIST ALL PERMISSIONS OF nogrant
+  rc=0 0.65s: role | resource | permissions | ------+----------+------------- | (0 rows) | Warning: Using a password on the command line interface can be insecure. | Recommendation: use the credentials file to securely provide the password.
+[perm-victim] as cassandra: LIST ALL PERMISSIONS OF victim
+  rc=0 0.65s: role   | username | resource          | permission | --------+----------+-------------------+------------ | victim |   victim | <table victim.kv> |     SELECT | victim |   victim | <table victim.kv> |     MODIFY | (2 rows) | Warning: Using a password on the command line interface can be insecure. | Recommendation: use the credentials file to securely provide the password.
+[cqlsh-startup] as cassandra: SELECT now() FROM system.local
+  rc=0 0.64s: system.now() | -------------------------------------- | eb402c80-e882-11f1-b174-db2be4f2ce3e | (1 rows) | Warning: Using a password on the command line interface can be insecure. | Recommendation: use the credentials file to securely provide the password.
+[attacker-filter-read] as attacker: SELECT pk FROM ks.t WHERE pk = 0 AND v = 0x00 ALLOW FILTERING
+  rc=0 0.95s: pk | ---- | (0 rows) | Warning: Using a password on the command line interface can be insecure. | Recommendation: use the credentials file to securely provide the password.
+[attacker-filter-read-2] as attacker: SELECT pk FROM ks.t WHERE pk = 0 AND v = 0x00 ALLOW FILTERING
+  rc=0 0.82s: pk | ---- | (0 rows) | Warning: Using a password on the command line interface can be insecure. | Recommendation: use the credentials file to securely provide the password.
+[attacker-no-modify] as attacker: INSERT INTO ks.t (pk, ck, v) VALUES (1, 1, 0x00)
+  rc=2 0.67s: Warning: Using a password on the command line interface can be insecure. | Recommendation: use the credentials file to securely provide the password. | <stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User attacker has no MODIFY permission on <table ks.t> or any of its parents"
+[attacker-no-victim] as attacker: SELECT * FROM victim.kv LIMIT 1
+  rc=2 0.73s: Warning: Using a password on the command line interface can be insecure. | Recommendation: use the credentials file to securely provide the password. | <stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User attacker has no SELECT permission on <table victim.kv> or any of its parents"
+[attacker-no-ddl] as attacker: CREATE KEYSPACE atk WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+  rc=2 0.66s: Warning: Using a password on the command line interface can be insecure. | Recommendation: use the credentials file to securely provide the password. | <stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User attacker has no CREATE permission on <all keyspaces> or any of its parents"
+[nogrant-no-select] as nogrant: SELECT pk FROM ks.t WHERE pk = 0 AND v = 0x00 ALLOW FILTERING
+  rc=2 0.66s: Warning: Using a password on the command line interface can be insecure. | Recommendation: use the credentials file to securely provide the password. | <stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User nogrant has no SELECT permission on <table ks.t> or any of its parents"

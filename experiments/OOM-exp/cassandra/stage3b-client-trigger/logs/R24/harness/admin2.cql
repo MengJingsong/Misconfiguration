@@ -1,0 +1,20 @@
+-- 3-b R24 admin step 2 (superuser cassandra): roles, the admin-made schema, the only grants
+CREATE ROLE attacker WITH PASSWORD = 'atk-r24-pw' AND LOGIN = true AND SUPERUSER = false;
+CREATE ROLE selonly WITH PASSWORD = 'sel-r24-pw' AND LOGIN = true AND SUPERUSER = false;
+CREATE ROLE nogrant WITH PASSWORD = 'ng-r24-pw' AND LOGIN = true AND SUPERUSER = false;
+CREATE ROLE victim WITH PASSWORD = 'vic-r24-pw' AND LOGIN = true AND SUPERUSER = false;
+CREATE KEYSPACE r24 WITH replication = {'class':'SimpleStrategy','replication_factor':2};
+CREATE TABLE r24.w2k (k int, c int, v text, pad blob, PRIMARY KEY (k, c));
+GRANT SELECT ON TABLE r24.w2k TO attacker;
+GRANT MODIFY ON TABLE r24.w2k TO attacker;
+GRANT SELECT ON TABLE r24.w2k TO selonly;
+CREATE KEYSPACE vks WITH replication = {'class':'SimpleStrategy','replication_factor':2};
+CREATE TABLE vks.kv (k int PRIMARY KEY, v blob);
+GRANT SELECT ON TABLE vks.kv TO victim;
+GRANT MODIFY ON TABLE vks.kv TO victim;
+LIST ROLES;
+LIST ALL PERMISSIONS OF attacker;
+LIST ALL PERMISSIONS OF selonly;
+LIST ALL PERMISSIONS OF nogrant;
+LIST ALL PERMISSIONS OF victim;
+SELECT keyspace_name, replication FROM system_schema.keyspaces;

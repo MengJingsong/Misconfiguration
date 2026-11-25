@@ -1,0 +1,9 @@
+CONNECTED as attacker
+-- attacker (diagnostic lifetime): two own tables at interval 1, one also with max_index_interval = 1
+02:57:46 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+OK  CREATE KEYSPACE atk WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+OK  CREATE TABLE atk.t1 (pk text PRIMARY KEY, v int) WITH min_index_interval = 1
+OK  CREATE TABLE atk.tmax (pk text PRIMARY KEY, v int) WITH min_index_interval = 1 AND max_index_interval = 1
+OK  SELECT keyspace_name, table_name, min_index_interval, max_index_interval FROM system_schema.tables WHERE keyspace_name = 'atk'
+    Row[atk, t1, 1, 2048]
+    Row[atk, tmax, 1, 1]

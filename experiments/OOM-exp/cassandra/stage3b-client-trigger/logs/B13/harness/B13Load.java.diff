@@ -1,0 +1,18 @@
+--- orig/B13Load.java	2026-11-24 10:58:53.445778811 -0500
++++ B13Load.java	2026-11-24 10:59:34.081654658 -0500
+@@ -1,6 +1,7 @@
+ // B13 data-template loader. Java driver 3.12.1 (shaded), protocol V4 (lesson: large v5 requests leak frame buffers).
+ // Creates b13.t (pk int, ck int, v blob, PRIMARY KEY (pk, ck)) and inserts 64 partitions x 56 rows x 65,536 random bytes
+ // (3,670,016 value bytes per partition), 32 requests in flight.   java B13Load <host>
++// 3-b confirm (2026-11-24): -Db13.user / -Db13.pass -> withCredentials (PasswordAuthenticator); run as the admin (superuser).
+ import com.datastax.driver.core.*;
+ import com.datastax.driver.core.policies.*;
+ import com.google.common.util.concurrent.*;
+@@ -11,6 +12,7 @@
+ public class B13Load {
+     public static void main(String[] a) throws Exception {
+         try (Cluster c = Cluster.builder().addContactPoint(a[0]).withProtocolVersion(ProtocolVersion.V4)
++                 .withCredentials(System.getProperty("b13.user"), System.getProperty("b13.pass"))
+                  .withSocketOptions(new SocketOptions().setReadTimeoutMillis(60000)).withoutJMXReporting().withoutMetrics().build();
+              Session s = c.connect()) {
+             s.execute("CREATE KEYSPACE IF NOT EXISTS b13 WITH replication = {'class':'SimpleStrategy','replication_factor':1}");

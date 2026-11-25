@@ -1,0 +1,147 @@
+== superuser (cassandra) admin.cql
+CREATE ROLE attacker WITH PASSWORD = 'attacker-pw-3b' AND LOGIN = true AND SUPERUSER = false;
+CREATE ROLE victim WITH PASSWORD = 'victim-pw-3b' AND LOGIN = true AND SUPERUSER = false;
+CREATE ROLE nogrant WITH PASSWORD = 'nogrant-pw-3b' AND LOGIN = true AND SUPERUSER = false;
+CREATE ROLE selonly WITH PASSWORD = 'selonly-pw-3b' AND LOGIN = true AND SUPERUSER = false;
+CREATE KEYSPACE u3 WITH replication = {'class':'SimpleStrategy','replication_factor':1};
+CREATE TABLE u3.s1m (k int PRIMARY KEY, v set<int>);
+CREATE TABLE u3.n1m (k int PRIMARY KEY, v set<int>);
+GRANT SELECT ON TABLE u3.s1m TO attacker;
+GRANT MODIFY ON TABLE u3.s1m TO attacker;
+GRANT SELECT ON TABLE u3.n1m TO attacker;
+GRANT MODIFY ON TABLE u3.n1m TO attacker;
+GRANT SELECT ON TABLE u3.s1m TO selonly;
+CREATE KEYSPACE victim WITH replication = {'class':'SimpleStrategy','replication_factor':1};
+CREATE TABLE victim.kv (k int PRIMARY KEY, v text);
+GRANT SELECT ON TABLE victim.kv TO victim;
+GRANT MODIFY ON TABLE victim.kv TO victim;
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+== setup OK
+== perms
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+
+ role      | super | login | options | datacenters
+-----------+-------+-------+---------+-------------
+  attacker | False |  True |        {} |         ALL
+ cassandra |  True |  True |        {} |         ALL
+   nogrant | False |  True |        {} |         ALL
+   selonly | False |  True |        {} |         ALL
+    victim | False |  True |        {} |         ALL
+
+(5 rows)
+
+ role     | username | resource       | permission
+----------+----------+----------------+------------
+ attacker | attacker | <table u3.n1m> |     SELECT
+ attacker | attacker | <table u3.n1m> |     MODIFY
+ attacker | attacker | <table u3.s1m> |     SELECT
+ attacker | attacker | <table u3.s1m> |     MODIFY
+
+(4 rows)
+
+ role   | username | resource          | permission
+--------+----------+-------------------+------------
+ victim |   victim | <table victim.kv> |     SELECT
+ victim |   victim | <table victim.kv> |     MODIFY
+
+(2 rows)
+
+ role    | username | resource       | permission
+---------+----------+----------------+------------
+ selonly |  selonly | <table u3.s1m> |     SELECT
+
+(1 rows)
+
+ role | resource | permissions
+------+----------+-------------
+
+
+(0 rows)
+
+CREATE KEYSPACE u3 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'}  AND durable_writes = true;
+
+CREATE TABLE u3.n1m (
+    k int PRIMARY KEY,
+    v set<int>
+) WITH additional_write_policy = '99p'
+    AND allow_auto_snapshot = true
+    AND bloom_filter_fp_chance = 0.01
+    AND caching = {'keys': 'ALL', 'rows_per_partition': 'NONE'}
+    AND cdc = false
+    AND comment = ''
+    AND compaction = {'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32', 'min_threshold': '4'}
+    AND compression = {'chunk_length_in_kb': '16', 'class': 'org.apache.cassandra.io.compress.LZ4Compressor'}
+    AND memtable = 'default'
+    AND crc_check_chance = 1.0
+    AND default_time_to_live = 0
+    AND extensions = {}
+    AND gc_grace_seconds = 864000
+    AND incremental_backups = true
+    AND max_index_interval = 2048
+    AND memtable_flush_period_in_ms = 0
+    AND min_index_interval = 128
+    AND read_repair = 'BLOCKING'
+    AND speculative_retry = '99p';
+
+CREATE TABLE u3.s1m (
+    k int PRIMARY KEY,
+    v set<int>
+) WITH additional_write_policy = '99p'
+    AND allow_auto_snapshot = true
+    AND bloom_filter_fp_chance = 0.01
+    AND caching = {'keys': 'ALL', 'rows_per_partition': 'NONE'}
+    AND cdc = false
+    AND comment = ''
+    AND compaction = {'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32', 'min_threshold': '4'}
+    AND compression = {'chunk_length_in_kb': '16', 'class': 'org.apache.cassandra.io.compress.LZ4Compressor'}
+    AND memtable = 'default'
+    AND crc_check_chance = 1.0
+    AND default_time_to_live = 0
+    AND extensions = {}
+    AND gc_grace_seconds = 864000
+    AND incremental_backups = true
+    AND max_index_interval = 2048
+    AND memtable_flush_period_in_ms = 0
+    AND min_index_interval = 128
+    AND read_repair = 'BLOCKING'
+    AND speculative_retry = '99p';
+== guardrail/threshold settings (system_views.settings, superuser view)
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+                                                              authenticator |                                           PasswordAuthenticator
+                                                   authenticator.class_name |                                           PasswordAuthenticator
+                                                   authenticator.parameters |                                                              {}
+                                                                 authorizer |                                             CassandraAuthorizer
+                                                      authorizer.class_name |                                             CassandraAuthorizer
+                                                      authorizer.parameters |                                                              {}
+                               cidr_authorizer.class_name |                                 AllowAllCIDRAuthorizer
+                               cidr_authorizer.parameters |                                                   null
+                           collection_size_fail_threshold |                                                   null
+                           collection_size_warn_threshold |                                                   null
+                                         concurrent_reads |                                                     32
+                     coordinator_read_size_fail_threshold |                                                   null
+                     coordinator_read_size_warn_threshold |                                                   null
+                                                internode_authenticator |                                  null
+                                     internode_authenticator.class_name |                                  null
+                                     internode_authenticator.parameters |                                  null
+                                    items_per_collection_fail_threshold |                                    -1
+                                    items_per_collection_warn_threshold |                                    -1
+                                         local_read_size_fail_threshold |                                  null
+                                         local_read_size_warn_threshold |                                  null
+                                        max_mutation_size |                                                          16384KiB
+                                  max_mutation_size_in_kb |                                                             16384
+                               min_tracked_partition_size |                                                              1MiB
+                                       network_authorizer |                                         AllowAllNetworkAuthorizer
+                            network_authorizer.class_name |                                         AllowAllNetworkAuthorizer
+                            network_authorizer.parameters |                                                                {}
+                            partition_size_fail_threshold |                                                              null
+                            partition_size_warn_threshold |                                                              null
+                                  read_thresholds_enabled |                                                             false

@@ -1,0 +1,23 @@
+reference BURST_START = 1795575332537 (attack_start -0.19 s)
+X0 176 MiB (n=13)
+dU_peak 1088 MiB at +0.3 s (NMT samples after attack start: 1)
+K_requests_size peak 0.0 MiB (before attack: 0.0)
+paused_conns peak 0.0  (before attack: 0.0)
+connected_clients peak 1.0  (before attack: 1.0)
+direct_used peak 41.679734230041504 MiB (before attack: 41.632859230041504)
+heap_used peak 896.0 MiB (before attack: 880.0)
+ntr_active peak 0.0  (before attack: 1.0)
+ntr_pending peak 0.0  (before attack: 0.0)
+protocol_exc delta during attack 0 (before-window end 0)
+auth_success delta during attack 0 (before-window end 3)
+auth_failure delta during attack 0 (before-window end 5)
+req_dispatched delta during attack 14 (before-window end 613)
+conn_paused_count delta during attack 0 (before-window end 0)
+last JMX sample +1.44 s: K 0 MiB, paused 0, clients 1, direct 42 MiB, heap 96 MiB
+first OOM line: io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 1342177280, max: 1342177280)
+first OOM record thread epollEventLoopGroup-5-9 at 2026-11-25T02:55:33,145 UTC = +0.61 s after BURST_START
+Netty counter at failure used 1342177280 (1280 MiB) max 1342177280 (1280 MiB)
+stack top: io.netty.util.internal.PlatformDependent.incrementMemoryCounter <- io.netty.util.internal.PlatformDependent.allocateDirectNoCleaner <- io.netty.buffer.PoolArena$DirectArena.allocateDirect <- io.netty.buffer.PoolArena$DirectArena.newChunk <- io.netty.buffer.PoolArena.allocateNormal <- io.netty.buffer.PoolArena.tcacheAllocateNormal <- io.netty.buffer.PoolArena.allocate <- io.netty.buffer.PoolArena.reallocate
+system.log counts: OutOfDirectMemoryError 52, "Force heap space OutOfMemoryError" 1, ERROR lines 51, WARN lines 54
+node_exit +2.85 s after BURST_START
+forced heap OOM logged +1.49 s after BURST_START: ERROR [epollEventLoopGroup-5-9] 2026-11-25T02:55:34,024 JVMStabilityInspector.java:197 - Force heap space OutOfMemoryError in the presence of

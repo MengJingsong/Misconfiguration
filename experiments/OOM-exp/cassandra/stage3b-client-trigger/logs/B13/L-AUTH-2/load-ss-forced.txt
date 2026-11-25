@@ -1,0 +1,67 @@
+READY 16 sockets; SO_RCVBUF 131072; mode stall; auth nogrant; handshakes 2.4 s; query 'SELECT * FROM system_schema.columns'
+REQ_BYTES 64 (one request incl. segment framing)
+LOAD_START 1795536916185
+WAVE 1795536916186 320
+235
+WAVE 1795537149186 74880
+WAVE 1795537150186 75200
+
+State Recv-Q Send-Q  Local Address:Port Peer Address:Port Process                                                                                           
+ESTAB 0      2552132   127.0.0.131:9042    127.0.0.1:48788 users:(("java",pid=675843,fd=210))
+	 skmem:(r0,rb131072,t0,tb2626560,f6332,w2651972,o0,bl0,d0)   
+ESTAB 0      2552132   127.0.0.131:9042    127.0.0.1:48772 users:(("java",pid=675843,fd=208))
+	 skmem:(r0,rb131072,t0,tb2626560,f6332,w2651972,o0,bl0,d0)   
+ESTAB 0      2552132   127.0.0.131:9042    127.0.0.1:48856 users:(("java",pid=675843,fd=258))
+	 skmem:(r0,rb131072,t0,tb2626560,f10428,w2651972,o0,bl0,d0)  
+ESTAB 0      2552132   127.0.0.131:9042    127.0.0.1:48872 users:(("java",pid=675843,fd=259))
+	 skmem:(r0,rb131072,t0,tb2626560,f6332,w2651972,o0,bl0,d0)   
+ESTAB 0      2552132   127.0.0.131:9042    127.0.0.1:48878 users:(("java",pid=675843,fd=260))
+	 skmem:(r0,rb131072,t0,tb2626560,f6332,w2651972,o0,bl0,d0)   
+ESTAB 0      2552132   127.0.0.131:9042    127.0.0.1:48784 users:(("java",pid=675843,fd=209))
+	 skmem:(r0,rb131072,t0,tb2626560,f6332,w2651972,o0,bl0,d0)   
+ESTAB 0      2551420   127.0.0.131:9042    127.0.0.1:48804 users:(("java",pid=675843,fd=249))
+	 skmem:(r0,rb131072,t0,tb2626560,f2948,w2651260,o0,bl0,d0)   
+ESTAB 0      0         127.0.0.131:9042    127.0.0.1:49060 users:(("java",pid=675843,fd=263))
+	 skmem:(r0,rb131072,t0,tb2626560,f0,w0,o0,bl0,d0)            
+ESTAB 0      2552132   127.0.0.131:9042    127.0.0.1:48790 users:(("java",pid=675843,fd=212))
+	 skmem:(r0,rb131072,t0,tb2626560,f6332,w2651972,o0,bl0,d0)   
+ESTAB 0      2552132   127.0.0.131:9042    127.0.0.1:48824 users:(("java",pid=675843,fd=256))
+	 skmem:(r0,rb131072,t0,tb2626560,f2236,w2651972,o0,bl0,d0)   
+ESTAB 1280   2552132   127.0.0.131:9042    127.0.0.1:48758 users:(("java",pid=675843,fd=153))
+	 skmem:(r2560,rb131072,t0,tb2626560,f3772,w2651972,o0,bl0,d0)
+ESTAB 0      2552132   127.0.0.131:9042    127.0.0.1:48808 users:(("java",pid=675843,fd=254))
+	 skmem:(r0,rb131072,t0,tb2626560,f6332,w2651972,o0,bl0,d0)   
+6392-INFO  [Service Thread] 2026-11-24T16:19:09,209 StatusLogger.java:121 - system_auth.role_permissions                 0,0
+6393:ERROR [ReadStage-48] 2026-11-24T16:19:09,209 JVMStabilityInspector.java:197 - Force heap space OutOfMemoryError in the presence of
+6394-java.lang.OutOfMemoryError: Direct buffer memory
+6395-	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+6396-	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+6397-	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+6398-	at org.apache.cassandra.io.compress.BufferType$2.allocate(BufferType.java:35)
+6399-	at org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer.getBlock(ThreadLocalReadAheadBuffer.java:84)
+6400-	at org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer.allocateBuffer(ThreadLocalReadAheadBuffer.java:76)
+6401-	at org.apache.cassandra.io.util.CompressedChunkReader$ScanCompressedReader.allocateResources(CompressedChunkReader.java:204)
+6402-	at org.apache.cassandra.io.util.CompressedChunkReader$Standard.forScan(CompressedChunkReader.java:244)
+6403-	at org.apache.cassandra.io.util.CompressedChunkReader.instantiateRebufferer(CompressedChunkReader.java:95)
+6404-	at org.apache.cassandra.io.util.FileHandle.instantiateRebufferer(FileHandle.java:204)
+6405-	at org.apache.cassandra.io.util.FileHandle.createReader(FileHandle.java:156)
+6406-	at org.apache.cassandra.io.util.FileHandle.createReaderForScan(FileHandle.java:139)
+6407-	at org.apache.cassandra.io.sstable.format.SSTableReader.openDataReaderForScan(SSTableReader.java:1385)
+6408-	at org.apache.cassandra.io.sstable.format.SSTableScanner.<init>(SSTableScanner.java:78)
+6409-	at org.apache.cassandra.io.sstable.format.big.BigTableScanner.<init>(BigTableScanner.java:62)
+6410-	at org.apache.cassandra.io.sstable.format.big.BigTableScanner.getScanner(BigTableScanner.java:53)
+6411-	at org.apache.cassandra.io.sstable.format.big.BigTableReader.partitionIterator(BigTableReader.java:149)
+6412-	at org.apache.cassandra.io.sstable.format.big.BigTableReader.partitionIterator(BigTableReader.java:85)
+6413-	at org.apache.cassandra.db.PartitionRangeReadCommand.queryStorage(PartitionRangeReadCommand.java:340)
+6414-	at org.apache.cassandra.db.ReadCommand.executeLocally(ReadCommand.java:452)
+6415-	at org.apache.cassandra.service.StorageProxy$LocalReadRunnable.runMayThrow(StorageProxy.java:2209)
+6416-	at org.apache.cassandra.service.StorageProxy$DroppableRunnable.run(StorageProxy.java:2608)
+6417-	at org.apache.cassandra.concurrent.ExecutionFailure$2.run(ExecutionFailure.java:163)
+6418-	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+6419-	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+6420-	at java.base/java.lang.Thread.run(Thread.java:829)
+6421-INFO  [Service Thread] 2026-11-24T16:19:09,209 StatusLogger.java:121 - vic.kv                            2291,124500
+6422-INFO  [Service Thread] 2026-11-24T16:19:09,209 StatusLogger.java:121 - system_distributed.parent_repair_history                 0,0
+6423-INFO  [Service Thread] 2026-11-24T16:19:09,224 StatusLogger.java:121 - system_distributed.repair_history                 0,0
+3
+      3 [ReadStage-48]

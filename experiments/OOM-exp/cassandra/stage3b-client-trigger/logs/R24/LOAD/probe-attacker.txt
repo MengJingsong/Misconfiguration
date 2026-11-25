@@ -1,0 +1,15 @@
+cql as role=attacker host=127.0.0.1
+OK   LIST ALL PERMISSIONS OF attacker;  -> rows=2 warnings=[]
+    Row[attacker, attacker, <table r24.w2k>, SELECT]
+    Row[attacker, attacker, <table r24.w2k>, MODIFY]
+ERR  CREATE KEYSPACE atk WITH replication = {'class':'SimpleStrategy','replication_factor':1};  -> UnauthorizedException: User attacker has no CREATE permission on <all keyspaces> or any of its parents
+ERR  CREATE TABLE r24.atk (k int PRIMARY KEY, v blob);  -> UnauthorizedException: User attacker has no CREATE permission on <all tables in r24> or any of its parents
+ERR  ALTER TABLE r24.w2k WITH gc_grace_seconds = 0;  -> UnauthorizedException: User attacker has no ALTER permission on <table r24.w2k> or any of its parents
+ERR  CREATE INDEX ON r24.w2k (v);  -> UnauthorizedException: User attacker has no ALTER permission on <table r24.w2k> or any of its parents
+ERR  SELECT k FROM vks.kv LIMIT 1;  -> UnauthorizedException: User attacker has no SELECT permission on <table vks.kv> or any of its parents
+ERR  INSERT INTO vks.kv (k, v) VALUES (1, 0x00);  -> UnauthorizedException: User attacker has no MODIFY permission on <table vks.kv> or any of its parents
+ERR  GRANT SELECT ON TABLE vks.kv TO attacker;  -> UnauthorizedException: User attacker has no AUTHORIZE permission on <table vks.kv> or any of its parents
+OK   SELECT keyspace_name, replication FROM system_schema.keyspaces WHERE keyspace_name = 'r24';  -> rows=1 warnings=[]
+    Row[r24, {class=org.apache.cassandra.locator.SimpleStrategy, replication_factor=2}]
+OK   SELECT k, c, v FROM r24.w2k LIMIT 1;  -> rows=0 warnings=[]
+schema agreement=true

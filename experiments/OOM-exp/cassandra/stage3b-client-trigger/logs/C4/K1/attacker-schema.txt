@@ -1,0 +1,40 @@
+CONNECTED as attacker
+-- attacker: CREATE ON ALL KEYSPACES only
+02:53:33 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+OK  LIST ALL PERMISSIONS OF attacker
+    Row[attacker, attacker, <all keyspaces>, CREATE]
+ERR SELECT k FROM vks.kv LIMIT 1
+    -> UnauthorizedException: User attacker has no SELECT permission on <table vks.kv> or any of its parents
+ERR INSERT INTO vks.kv (k, v) VALUES (1, 0x00)
+    -> UnauthorizedException: User attacker has no MODIFY permission on <table vks.kv> or any of its parents
+ERR ALTER TABLE vks.kv WITH min_index_interval = 1
+    -> UnauthorizedException: User attacker has no ALTER permission on <table vks.kv> or any of its parents
+OK  CREATE KEYSPACE atk WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+ERR CREATE TABLE atk.t0 (pk text PRIMARY KEY, v int) WITH min_index_interval = 0
+    -> InvalidConfigurationInQueryException: min_index_interval must be greater than or equal to 1 (got 0)
+OK  CREATE TABLE atk.t (pk text PRIMARY KEY, v int) WITH min_index_interval = 128 AND max_index_interval = 2048
+OK  ALTER TABLE atk.t WITH min_index_interval = 128
+OK  SELECT keyspace_name, table_name, min_index_interval, max_index_interval, compaction FROM system_schema.tables WHERE keyspace_name = 'atk'
+    Row[atk, t, 128, 2048, {class=org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy, max_threshold=32, min_threshold=4}]
+OK  LIST ALL PERMISSIONS OF attacker
+    Row[attacker, attacker, <all keyspaces>, CREATE]
+    Row[attacker, attacker, <keyspace atk>, CREATE]
+    Row[attacker, attacker, <keyspace atk>, ALTER]
+    Row[attacker, attacker, <keyspace atk>, DROP]
+    Row[attacker, attacker, <keyspace atk>, SELECT]
+    Row[attacker, attacker, <keyspace atk>, MODIFY]
+    Row[attacker, attacker, <keyspace atk>, AUTHORIZE]
+    Row[attacker, attacker, <keyspace atk>, UNMASK]
+    Row[attacker, attacker, <keyspace atk>, SELECT_MASKED]
+    Row[attacker, attacker, <table atk.t>, ALTER]
+    Row[attacker, attacker, <table atk.t>, DROP]
+    Row[attacker, attacker, <table atk.t>, SELECT]
+    Row[attacker, attacker, <table atk.t>, MODIFY]
+    Row[attacker, attacker, <table atk.t>, AUTHORIZE]
+    Row[attacker, attacker, <table atk.t>, UNMASK]
+    Row[attacker, attacker, <table atk.t>, SELECT_MASKED]
+    Row[attacker, attacker, <all functions in atk>, CREATE]
+    Row[attacker, attacker, <all functions in atk>, ALTER]
+    Row[attacker, attacker, <all functions in atk>, DROP]
+    Row[attacker, attacker, <all functions in atk>, AUTHORIZE]
+    Row[attacker, attacker, <all functions in atk>, EXECUTE]

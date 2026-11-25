@@ -1,0 +1,26 @@
+# superuser (default 'cassandra'): raise system_auth RF to the ring size, as the shipped yaml advises (repair follows)
+OK  ALTER KEYSPACE system_auth WITH replication = {'class':'SimpleStrategy','replication_factor':2}  -> rows=0 warnings=[When increasing replication factor you need to run a full (-full) repair to distribute the data.]
+# superuser: roles, the admin-made schema (keyspace b29 RF 2, a table with a static column), the only GRANTs, the victim's schema
+OK  CREATE ROLE attacker WITH PASSWORD = 'att-pw' AND LOGIN = true AND SUPERUSER = false  -> rows=0
+OK  CREATE ROLE victim WITH PASSWORD = 'vic-pw' AND LOGIN = true AND SUPERUSER = false  -> rows=0
+OK  CREATE ROLE nogrant WITH PASSWORD = 'nog-pw' AND LOGIN = true AND SUPERUSER = false  -> rows=0
+OK  CREATE KEYSPACE b29 WITH replication = {'class':'SimpleStrategy','replication_factor':2}  -> rows=0
+OK  CREATE TABLE b29.t (k int, c int, s text STATIC, pad blob, PRIMARY KEY (k, c))  -> rows=0
+OK  GRANT SELECT ON TABLE b29.t TO attacker  -> rows=0
+OK  GRANT MODIFY ON TABLE b29.t TO attacker  -> rows=0
+OK  CREATE KEYSPACE vks WITH replication = {'class':'SimpleStrategy','replication_factor':2}  -> rows=0
+OK  CREATE TABLE vks.kv (k int PRIMARY KEY, v blob)  -> rows=0
+OK  GRANT SELECT ON TABLE vks.kv TO victim  -> rows=0
+OK  GRANT MODIFY ON TABLE vks.kv TO victim  -> rows=0
+OK  LIST ROLES  -> rows=4
+   ROW Row[attacker, false, true, {}, ALL]
+   ROW Row[cassandra, true, true, {}, ALL]
+   ROW Row[nogrant, false, true, {}, ALL]
+   ROW Row[victim, false, true, {}, ALL]
+OK  LIST ALL PERMISSIONS OF attacker  -> rows=2
+   ROW Row[attacker, attacker, <table b29.t>, SELECT]
+   ROW Row[attacker, attacker, <table b29.t>, MODIFY]
+OK  LIST ALL PERMISSIONS OF victim  -> rows=2
+   ROW Row[victim, victim, <table vks.kv>, SELECT]
+   ROW Row[victim, victim, <table vks.kv>, MODIFY]
+OK  LIST ALL PERMISSIONS OF nogrant  -> rows=0

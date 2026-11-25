@@ -1,0 +1,9 @@
+p1 pre-STARTUP OPTIONS body 15728675 B -> SUPPORTED 78 ms
+p1 same connection, small OPTIONS -> SUPPORTED (connection still open)
+p1 same connection, STARTUP -> AUTHENTICATE
+p2 STARTUP -> AUTHENTICATE ok
+p2 pre-auth EXECUTE body 15728675 B -> ERR:0x000a:Unexpected message EXECUTE, expecting SASL_RESPONSE 42 ms
+p2 same connection, OPTIONS -> ERR:0x000a:Unexpected message OPTIONS, expecting SASL_RESPONSE
+p2 same connection, second 15 MiB EXECUTE -> ERR:0x000a:Unexpected message EXECUTE, expecting SASL_RESPONSE
+p3 pre-auth QUERY SELECT * FROM vks.kv -> ERR:0x000a:Unexpected message QUERY, expecting SASL_RESPONSE
+p4 pre-auth 16 MiB+100 B frame (1 MiB sent) -> no reply within 5 s / io TimeoutError

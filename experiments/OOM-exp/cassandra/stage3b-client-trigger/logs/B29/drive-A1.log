@@ -1,0 +1,69 @@
+[2026-11-24 23:31:40 EST] ARM A1 mode=arm Q=8 k=0..15 warm=20 same=no
+UN  127.0.0.2  7.87 GiB  16      100.0%            f79ac22b-6aa8-493c-ba36-67b0e2edee1e  rack1
+UN  127.0.0.1  7.86 GiB  16      100.0%            6c73fcd3-d7a4-4f35-b42c-4cd692a41102  rack1
+n2 listpendinghints: This node does not have any pending hints 
+n2 hints dir: 0 files, 4096 B
+[2026-11-24 23:31:42 EST] ready A1 n1
+[2026-11-24 23:31:44 EST] ring: 2 UN in node 1's view
+UN  127.0.0.2  7.87 GiB  16      100.0%            f79ac22b-6aa8-493c-ba36-67b0e2edee1e  rack1
+UN  127.0.0.1  7.86 GiB  16      100.0%            6c73fcd3-d7a4-4f35-b42c-4cd692a41102  rack1
+n1 b29.t memtable after restart:
+		SSTable count: 4
+		Old SSTable count: 0
+		Space used (live): 8442578100
+		Memtable cell count: 0
+n2 listpendinghints: This node does not have any pending hints 
+n2 hints dir: 0 files, 4096 B
+stat k=15 CL=ONE via 127.0.0.1 rows=1 s=x ms=43 warnings=[]
+  trace /127.0.0.1 +5769us [ReadStage-1] Executing single-partition query on role_permissions
+  trace /127.0.0.1 +5972us [ReadStage-1] Acquiring sstable references
+  trace /127.0.0.1 +6457us [ReadStage-1] Skipped 0/1 non-slice-intersecting sstables, included 0 due to tombstones
+  trace /127.0.0.1 +6722us [ReadStage-1] Key cache hit for sstable 1, size = 0
+  trace /127.0.0.1 +7605us [ReadStage-1] Merged data from memtables and 1 sstables
+  trace /127.0.0.1 +7889us [ReadStage-1] Read 1 live rows and 0 tombstone cells
+  trace /127.0.0.2 +4001us [ReadStage-1] Executing single-partition query on role_permissions
+  trace /127.0.0.2 +4202us [ReadStage-1] Acquiring sstable references
+  trace /127.0.0.2 +4710us [ReadStage-1] Skipped 0/1 non-slice-intersecting sstables, included 0 due to tombstones
+  trace /127.0.0.2 +4973us [ReadStage-1] Key cache hit for sstable 1, size = 0
+  trace /127.0.0.2 +5929us [ReadStage-1] Merged data from memtables and 1 sstables
+[2026-11-24 23:33:15 EST] attack client pid 1163306
+1795581200082,warm,1,1,594,0,112,8.3,13.5,0,594,0,0,
+1795581205092,warm,1,1,1055,0,90,11.9,17.8,0,1055,0,0,
+1795581210101,warm,1,1,1542,0,79,12.8,15.8,0,1542,0,0,
+1795581215121,test,8,8,1916,0,2,7.0,7.0,0,1916,0,0,
+[2026-11-24 23:33:38 EST] NODE 1 DEAD at +23s
+SUMMARY secs=24 ok=1916 err=16 rows1=0 rowsOther=1916 overloaded=0 timeouts=0 handedOut=16 inflight_left=0
+n2 listpendinghints: Host ID                              Address        Rack  DC          Status Total files Newest                  Oldest                  6c73fcd3-d7a4-4f35-b42c-4cd692a41102 127.0.0.1:7000 rack1 datacenter1 UP     1           2026-11-25 04:33:37,815 2026-11-25 04:33:37,815 
+n2 hints dir: 1 files, 6442 B
+OOM type="java.lang.OutOfMemoryError: Java heap space" at+23s (driver poll)
+node-1 OOM (GC log, HeapDumper) at 2026-11-24T21:33:34.731-0700
+attack start=1795581192210 node1-end/attack-end=1795581214731 (22.5 s after attack start) outcome: OOM type="java.lang.OutOfMemoryError: Java heap space" at+23s (driver poll)
+
+V1 (node 1 = attacked coordinator, CL ONE)
+  before    57 s issued/s= 10.0 ok=570 err=0 success= 99.8% p50(med)=3.5ms p99(med)=7.4ms p99(max)=17.0ms max=17.0ms errors 
+  during    22 s issued/s= 10.0 ok=220 err=0 success=100.0% p50(med)=2.6ms p99(med)=5.0ms p99(max)=7.8ms max=7.8ms errors 
+  after     69 s issued/s= 10.0 ok=8 err=683 success=  1.2% p50(med)=2.6ms p99(med)=5.7ms p99(max)=5.7ms max=5.7ms errors nohost=651 other=32 | e.g. NoHostAvailableException: All host(s) tried for query failed (no host was tried)
+  timeline (5 s bins, rel. to attack start): t,issued,ok,err,max p99 ms
+      -60s   21   20    0     16.4
+      -55s   50   50    0     17.0
+      -50s   50   50    0     10.0
+      -45s   50   50    0      9.6
+      -40s   50   50    0      8.1
+      -35s   50   50    0      9.8
+      -30s   50   50    0      8.5
+      -25s   50   50    0      9.7
+      -20s   50   50    0      7.8
+      -15s   50   50    0      9.0
+      -10s   50   50    0      8.8
+       -5s   50   50    0      9.1
+       +0s   50   50    0      6.4
+       +5s   50   50    0      5.5
+      +10s   50   50    0      5.3
+      +15s   50   50    0      7.8
+      +20s   50   28    0      5.7
+      +25s   50    0   73     -1.0
+      +30s   50    0   50     -1.0
+      +35s   50    0   50     -1.0
+      +40s   50    0   50     -1.0
+      +45s   50    0   50     -1.0
+[2026-11-24 23:34:51 EST] END A1 OOM type="java.lang.OutOfMemoryError: Java heap space" at+23s (driver poll)

@@ -1,0 +1,23 @@
+reference SEND_START = 1795575526524 (attack_start -0.09 s)
+X0 192 MiB (n=13)
+dU_peak 13104 MiB at +5.0 s (NMT samples after attack start: 3)
+K_requests_size peak 3.910064697265625e-05 MiB (before attack: 3.910064697265625e-05)
+paused_conns peak 0.0  (before attack: 0.0)
+connected_clients peak 979.0  (before attack: 1.0)
+direct_used peak 41.654388427734375 MiB (before attack: 41.627915382385254)
+heap_used peak 272.57935333251953 MiB (before attack: 880.0)
+ntr_active peak 0.0  (before attack: 1.0)
+ntr_pending peak 0.0  (before attack: 0.0)
+protocol_exc delta during attack 0 (before-window end 0)
+auth_success delta during attack 0 (before-window end 3)
+auth_failure delta during attack 0 (before-window end 5)
+req_dispatched delta during attack 120 (before-window end 610)
+conn_paused_count delta during attack 0 (before-window end 0)
+last JMX sample +6.55 s: K 0 MiB, paused 0, clients 979, direct 42 MiB, heap 273 MiB
+first OOM line: io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 16642998272, max: 16642998272)
+first OOM record thread epollEventLoopGroup-5-10 at 2026-11-25T02:58:52,765 UTC = +6.24 s after SEND_START
+Netty counter at failure used 16642998272 (15872 MiB) max 16642998272 (15872 MiB)
+stack top: io.netty.util.internal.PlatformDependent.incrementMemoryCounter <- io.netty.util.internal.PlatformDependent.allocateDirectNoCleaner <- io.netty.buffer.PoolArena$DirectArena.allocateDirect <- io.netty.buffer.PoolArena$DirectArena.newChunk <- io.netty.buffer.PoolArena.allocateNormal <- io.netty.buffer.PoolArena.tcacheAllocateNormal <- io.netty.buffer.PoolArena.allocate <- io.netty.buffer.PoolArena.reallocate
+system.log counts: OutOfDirectMemoryError 117, "Force heap space OutOfMemoryError" 1, ERROR lines 116, WARN lines 119
+node_exit +8.98 s after SEND_START
+forced heap OOM logged +6.84 s after SEND_START: ERROR [epollEventLoopGroup-5-9] 2026-11-25T02:58:53,360 JVMStabilityInspector.java:197 - Force heap space OutOfMemoryError in the presence of

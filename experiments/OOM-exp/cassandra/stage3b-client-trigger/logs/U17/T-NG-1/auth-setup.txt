@@ -1,0 +1,27 @@
+# superuser cassandra logged in at 1795577949539
+CREATE ROLE attacker WITH PASSWORD = 'atk-3bU17' AND LOGIN = true -> RESULT kind 1
+CREATE ROLE victim WITH PASSWORD = 'vic-3bU17' AND LOGIN = true -> RESULT kind 1
+CREATE KEYSPACE victim_ks WITH replication = {'class':'SimpleStrategy','replication_factor':1} -> RESULT kind 5
+CREATE TABLE victim_ks.t (k int PRIMARY KEY, v text) -> RESULT kind 5
+GRANT SELECT ON TABLE victim_ks.t TO victim -> RESULT kind 1
+GRANT MODIFY ON TABLE victim_ks.t TO victim -> RESULT kind 1
+LIST ROLES
+  -> role | super | login | options | datacenters (3 rows)
+     attacker | False | True | 00000000 | ALL
+     cassandra | True | True | 00000000 | ALL
+     victim | False | True | 00000000 | ALL
+LIST ALL PERMISSIONS OF attacker
+  -> RESULT kind 1
+LIST ALL PERMISSIONS OF victim
+  -> role | username | resource | permission (2 rows)
+     victim | victim | <table victim_ks.t> | SELECT
+     victim | victim | <table victim_ks.t> | MODIFY
+SELECT keyspace_name FROM system_schema.keyspaces
+  -> keyspace_name (6 rows)
+     system_auth
+     system_schema
+     victim_ks
+     system_distributed
+     system
+     system_traces
+setup ok

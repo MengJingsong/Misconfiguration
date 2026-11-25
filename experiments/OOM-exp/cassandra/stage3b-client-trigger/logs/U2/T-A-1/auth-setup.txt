@@ -1,0 +1,57 @@
+== superuser statements (cqlsh as cassandra)
+CREATE ROLE victim WITH PASSWORD = '<pw>' AND LOGIN = true AND SUPERUSER = false;
+CREATE KEYSPACE victim WITH replication = {'class':'SimpleStrategy','replication_factor':1};
+CREATE TABLE victim.kv (k int PRIMARY KEY, v text);
+GRANT SELECT ON TABLE victim.kv TO victim;
+GRANT MODIFY ON TABLE victim.kv TO victim;
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+== setup OK
+== LIST ROLES
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+
+ role      | super | login | options | datacenters
+-----------+-------+-------+---------+-------------
+ cassandra |  True |  True |        {} |         ALL
+    victim | False |  True |        {} |         ALL
+
+(2 rows)
+== LIST ALL PERMISSIONS OF victim
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+
+ role   | username | resource          | permission
+--------+----------+-------------------+------------
+ victim |   victim | <table victim.kv> |     SELECT
+ victim |   victim | <table victim.kv> |     MODIFY
+
+(2 rows)
+== unauthenticated cqlsh (expect AuthenticationFailed)
+Connection error: ('Unable to connect to any servers', {'127.0.0.1:9042': AuthenticationFailed('Remote end requires authentication')})
+== preauth_probe.py (raw v4 frames, no credentials unless stated)
+P1 OPTIONS-before-STARTUP SUPPORTED
+P2 QUERY-before-STARTUP ERROR code=0x000a msg=Unexpected message QUERY, expecting STARTUP or OPTIONS
+P3 STARTUP AUTHENTICATE org.apache.cassandra.auth.PasswordAuthenticator
+P4 STARTUP+QUERY-no-auth AUTHENTICATE org.apache.cassandra.auth.PasswordAuthenticator -> ERROR code=0x000a msg=Unexpected message QUERY, expecting SASL_RESPONSE
+P5 STARTUP+wrong-password AUTHENTICATE org.apache.cassandra.auth.PasswordAuthenticator -> ERROR code=0x0100 msg=Provided username victim and/or password are incorrect
+P6 STARTUP+victim-login AUTHENTICATE org.apache.cassandra.auth.PasswordAuthenticator -> AUTH_SUCCESS
+P7 partial-16MiB-frame no response in 3 s; connection open (frame waits for its rest)
+== system_views.clients after the probes (superuser view)
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+
+ address   | port  | username  | connection_stage | protocol_version
+-----------+-------+-----------+------------------+------------------
+ 127.0.0.1 | 53672 | cassandra |            ready |                5
+ 127.0.0.1 | 53684 | cassandra |            ready |                5
+
+(2 rows)

@@ -1,0 +1,15 @@
+RUN SO-1 mode=SO heap=2G guard=16G table=s1m mode=set c=16 window=180 role=selonly start_epoch=1795551494
+NODE up daemon_pid=850009 cgroup=/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/3bu3-SO-1.scope memory.max=17179869184 swap.max=0
+JVMARGS -XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M 
+RESOLVED authenticator=PasswordAuthenticator{}; authenticator=null; authorizer=AllowAllCIDRAuthorizernull; authorizer=CassandraAuthorizer{}; collection_size_fail_threshold=null; collection_size_warn_threshold=null; concurrent_reads=32; items_per_collection_fail_threshold=-1; items_per_collection_warn_threshold=-1; native_transport_max_concurrent_connections=-1; native_transport_max_threads=128; native_transport_rate_limiting_enabled=false; network_authorizer=AllowAllNetworkAuthorizer{}; permissions_validity=2000ms; read_request_timeout=5000ms; read_thresholds_enabled=false; role_manager=CassandraRoleManager{}; roles_validity=2000ms; 
+CLIENTS start epoch=1795551555.913368781 table=s1m mode=set c=16 role=selonly
+OOME seen (node-events) at t=30s: 1795551586027 java.lang.OutOfMemoryError: Java heap space
+CLIENTS stopped epoch=1795551737.565982355
+OOMKILL 1795551945268 5892235264 0 2572940
+STDOUT-OOM 1 | java.lang.OutOfMemoryError: Java heap space Dumping heap to /mydata/s4/3b-U3/runs/SO-1/logs/cassandra-1795551495-pid850009.hprof ... Heap dump file created [3115984829 bytes in 174.888 secs] 
+SYSLOG ERROR=0 WARN=6 first_error=
+AUTHZ-LOG 0
+AUTHZ-DEBUG 3 3 
+OUTCOME-RAW survived
+HPROF /mydata/s4/3b-U3/runs/SO-1/logs/cassandra-1795551495-pid850009.hprof 3115984829 birth=1795551585 mtime=1795551760
+END end_epoch=1795551975 daemons_left=0 clients_left=0

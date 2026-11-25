@@ -1,0 +1,44 @@
+[2026-11-24 23:29:49 EST] started A1 n1 pid 1160962 heap 2G
+[2026-11-24 23:30:29 EST] ready A1 n1
+[2026-11-24 23:30:30 EST] started A1 n2 pid 1161434 heap 4G
+[2026-11-24 23:30:48 EST] ready A1 n2
+[2026-11-24 23:30:50 EST] ring: 2 UN in node 1's view
+UN  127.0.0.2  7.87 GiB  16      100.0%            f79ac22b-6aa8-493c-ba36-67b0e2edee1e  rack1
+UN  127.0.0.1  7.86 GiB  16      100.0%            6c73fcd3-d7a4-4f35-b42c-4cd692a41102  rack1
+Exception in thread "main" javax.management.InstanceNotFoundException: org.apache.cassandra.auth:type=AuthProperties
+	at java.management/com.sun.jmx.interceptor.DefaultMBeanServerInterceptor.getMBean(DefaultMBeanServerInterceptor.java:1083)
+	at java.management/com.sun.jmx.interceptor.DefaultMBeanServerInterceptor.getAttribute(DefaultMBeanServerInterceptor.java:637)
+	at java.management/com.sun.jmx.mbeanserver.JmxMBeanServer.getAttribute(JmxMBeanServer.java:678)
+	at java.management.rmi/javax.management.remote.rmi.RMIConnectionImpl.doOperation(RMIConnectionImpl.java:1443)
+	at java.management.rmi/javax.management.remote.rmi.RMIConnectionImpl$PrivilegedOperation.run(RMIConnectionImpl.java:1307)
+	at java.management.rmi/javax.management.remote.rmi.RMIConnectionImpl.doPrivilegedOperation(RMIConnectionImpl.java:1399)
+	at java.management.rmi/javax.management.remote.rmi.RMIConnectionImpl.getAttribute(RMIConnectionImpl.java:637)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at java.rmi/sun.rmi.server.UnicastServerRef.dispatch(UnicastServerRef.java:359)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Transport.java:200)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Transport.java:197)
+	at java.base/java.security.AccessController.doPrivileged(Native Method)
+	at java.rmi/sun.rmi.transport.Transport.serviceCall(Transport.java:196)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport.handleMessages(TCPTransport.java:562)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run0(TCPTransport.java:796)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.lambda$run$0(TCPTransport.java:677)
+	at java.base/java.security.AccessController.doPrivileged(Native Method)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run(TCPTransport.java:676)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+	at java.rmi/sun.rmi.transport.StreamRemoteCall.exceptionReceivedFromServer(StreamRemoteCall.java:303)
+	at java.rmi/sun.rmi.transport.StreamRemoteCall.executeCall(StreamRemoteCall.java:279)
+	at java.rmi/sun.rmi.server.UnicastRef.invoke(UnicastRef.java:164)
+	at jdk.remoteref/jdk.jmx.remote.internal.rmi.PRef.invoke(Unknown Source)
+	at java.management.rmi/javax.management.remote.rmi.RMIConnectionImpl_Stub.getAttribute(Unknown Source)
+	at java.management.rmi/javax.management.remote.rmi.RMIConnector$RemoteMBeanServerConnection.getAttribute(RMIConnector.java:904)
+	at AuthJmx.main(AuthJmx.java:9)
+21:30:51.090 (1795581051090) STARTUP -> AUTHENTICATE
+21:30:51.338 (1795581051338) AUTH_RESPONSE as attacker -> AUTH_SUCCESS
+21:30:51.339 (1795581051339) REGISTER [STATUS_CHANGE, TOPOLOGY_CHANGE] -> READY
+[2026-11-24 23:30:54 EST] BOOT-END
+/mydata/s4/3b-B29/harness/ctl.sh: line 54: 1160962 Killed                  CASSANDRA_CONF=$ROOT/conf-n$i CASSANDRA_LOG_DIR=$R/n$i/logs MAX_HEAP_SIZE=$HEAP CASSANDRA_HEAPDUMP_DIR=$R/n$i JVM_EXTRA_OPTS="-XX:NativeMemoryTracking=summary" setsid nohup systemd-run --user --scope --unit="3bb29-$L-n$i-$(date +%s)" -p MemorySwapMax=0 "$BUILD/bin/cassandra" -f < /dev/null > "$R/n$i/stdout.log" 2>&1

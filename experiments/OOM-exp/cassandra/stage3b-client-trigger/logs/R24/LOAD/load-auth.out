@@ -1,0 +1,161 @@
+24K	/mydata/s4/3b-R24/n1 24K	/mydata/s4/3b-R24/n2 
+[2026-11-24 22:29:49 EST] started LOAD n1 pid 717660 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/3br24-LOAD-n1-1795577388.scope
+[2026-11-24 22:30:30 EST] ready LOAD n1
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms8G -Xmx8G -XX:MaxDirectMemorySize=15872M -javaagent:/mydata/s4/3b-R24/tree/bin/../lib/jamm-0.4.0.jar -XX:HeapDumpPath=/mydata/s4/3b-R24/runs/LOAD/n1/cassandra-1795577388-pid717660.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-24 22:30:31 EST] started LOAD n2 pid 718090 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/3br24-LOAD-n2-1795577430.scope
+[2026-11-24 22:31:07 EST] ready LOAD n2
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms16G -Xmx16G -XX:MaxDirectMemorySize=15872M -javaagent:/mydata/s4/3b-R24/tree/bin/../lib/jamm-0.4.0.jar -XX:HeapDumpPath=/mydata/s4/3b-R24/runs/LOAD/n2/cassandra-1795577430-pid718090.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-24 22:31:08 EST] ring: 2 UN in node 1's view
+[2026-11-24 22:31:21 EST] superuser login: 1 ok after 2 tries
+cql as role=cassandra host=127.0.0.1
+03:31:22 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+OK   ALTER KEYSPACE system_auth WITH replication = {'class':'SimpleStrategy','replication_factor':2};  -> rows=0 warnings=[When increasing replication factor you need to run a full (-full) repair to distribute the data.]
+schema agreement=true
+[2026-11-24 22:31:26 EST] repair -full system_auth n1
+[2026-11-25 03:31:28,887] Repair command #1 finished in 1 second
+[2026-11-25 03:31:28,896] condition satisfied queried for parent session status and discovered repair completed.
+[2026-11-25 03:31:28,896] Repair completed successfully
+[2026-11-24 22:31:29 EST] repair -full system_auth n2
+[2026-11-25 03:31:31,387] Repair command #1 finished in 0 seconds
+[2026-11-25 03:31:31,396] condition satisfied queried for parent session status and discovered repair completed.
+[2026-11-25 03:31:31,396] Repair completed successfully
+cql as role=cassandra host=127.0.0.1
+03:31:33 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+OK   CREATE ROLE attacker WITH PASSWORD = 'atk-r24-pw' AND LOGIN = true AND SUPERUSER = false;  -> rows=0 warnings=[]
+OK   CREATE ROLE selonly WITH PASSWORD = 'sel-r24-pw' AND LOGIN = true AND SUPERUSER = false;  -> rows=0 warnings=[]
+OK   CREATE ROLE nogrant WITH PASSWORD = 'ng-r24-pw' AND LOGIN = true AND SUPERUSER = false;  -> rows=0 warnings=[]
+OK   CREATE ROLE victim WITH PASSWORD = 'vic-r24-pw' AND LOGIN = true AND SUPERUSER = false;  -> rows=0 warnings=[]
+OK   CREATE KEYSPACE r24 WITH replication = {'class':'SimpleStrategy','replication_factor':2};  -> rows=0 warnings=[]
+OK   CREATE TABLE r24.w2k (k int, c int, v text, pad blob, PRIMARY KEY (k, c));  -> rows=0 warnings=[]
+OK   GRANT SELECT ON TABLE r24.w2k TO attacker;  -> rows=0 warnings=[]
+OK   GRANT MODIFY ON TABLE r24.w2k TO attacker;  -> rows=0 warnings=[]
+OK   GRANT SELECT ON TABLE r24.w2k TO selonly;  -> rows=0 warnings=[]
+OK   CREATE KEYSPACE vks WITH replication = {'class':'SimpleStrategy','replication_factor':2};  -> rows=0 warnings=[]
+OK   CREATE TABLE vks.kv (k int PRIMARY KEY, v blob);  -> rows=0 warnings=[]
+OK   GRANT SELECT ON TABLE vks.kv TO victim;  -> rows=0 warnings=[]
+OK   GRANT MODIFY ON TABLE vks.kv TO victim;  -> rows=0 warnings=[]
+OK   LIST ROLES;  -> rows=5 warnings=[]
+    Row[attacker, false, true, {}, ALL]
+    Row[cassandra, true, true, {}, ALL]
+    Row[nogrant, false, true, {}, ALL]
+    Row[selonly, false, true, {}, ALL]
+    Row[victim, false, true, {}, ALL]
+OK   LIST ALL PERMISSIONS OF attacker;  -> rows=2 warnings=[]
+    Row[attacker, attacker, <table r24.w2k>, SELECT]
+    Row[attacker, attacker, <table r24.w2k>, MODIFY]
+OK   LIST ALL PERMISSIONS OF selonly;  -> rows=1 warnings=[]
+    Row[selonly, selonly, <table r24.w2k>, SELECT]
+OK   LIST ALL PERMISSIONS OF nogrant;  -> rows=0 warnings=[]
+OK   LIST ALL PERMISSIONS OF victim;  -> rows=2 warnings=[]
+    Row[victim, victim, <table vks.kv>, SELECT]
+    Row[victim, victim, <table vks.kv>, MODIFY]
+OK   SELECT keyspace_name, replication FROM system_schema.keyspaces;  -> rows=7 warnings=[]
+    Row[system_auth, {class=org.apache.cassandra.locator.SimpleStrategy, replication_factor=2}]
+    Row[system_schema, {class=org.apache.cassandra.locator.LocalStrategy}]
+    Row[system_distributed, {class=org.apache.cassandra.locator.SimpleStrategy, replication_factor=3}]
+    Row[system, {class=org.apache.cassandra.locator.LocalStrategy}]
+    Row[vks, {class=org.apache.cassandra.locator.SimpleStrategy, replication_factor=2}]
+    Row[system_traces, {class=org.apache.cassandra.locator.SimpleStrategy, replication_factor=2}]
+    Row[r24, {class=org.apache.cassandra.locator.SimpleStrategy, replication_factor=2}]
+schema agreement=true
+[2026-11-24 22:31:43 EST] pre-auth frames
+connection 1: STARTUP, then QUERY / PREPARE / OPTIONS without authenticating
+  STARTUP                                    -> AUTHENTICATE org.apache.cassandra.auth.PasswordAuthenticator
+  QUERY (attack query) before AUTH_RESPONSE  -> ERROR code=0x000A msg="Unexpected message QUERY, expecting SASL_RESPONSE"
+  PREPARE (attack query)                     -> ERROR code=0x000A msg="Unexpected message PREPARE, expecting SASL_RESPONSE"
+  OPTIONS                                    -> ERROR code=0x000A msg="Unexpected message OPTIONS, expecting SASL_RESPONSE"
+connection 2: QUERY before STARTUP
+  QUERY (attack query) before STARTUP        -> ERROR code=0x000A msg="Unexpected message QUERY, expecting STARTUP or OPTIONS"
+connection 3: STARTUP, AUTH_RESPONSE with a wrong password, then QUERY
+  STARTUP                                    -> AUTHENTICATE org.apache.cassandra.auth.PasswordAuthenticator
+  AUTH_RESPONSE attacker/wrong-password      -> ERROR code=0x0100 msg="Provided username attacker and/or password are incorrect"
+  QUERY (attack query)                       -> ERROR code=0x000A msg="Unexpected message QUERY, expecting SASL_RESPONSE"
+[2026-11-24 22:31:43 EST] driver without credentials
+one CONNECT ERROR as role=(none): AuthenticationException: Authentication error on host /127.0.0.1:9042: Host /127.0.0.1:9042 requires authentication; but no authenticator found in Cluster configuration
+[2026-11-24 22:31:47 EST] driver with a wrong password
+one CONNECT ERROR as role=attacker: AuthenticationException: Authentication error on host /127.0.0.1:9042: Provided username attacker and/or password are incorrect
+cql as role=attacker host=127.0.0.1
+03:31:53 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+OK   LIST ALL PERMISSIONS OF attacker;  -> rows=2 warnings=[]
+    Row[attacker, attacker, <table r24.w2k>, SELECT]
+    Row[attacker, attacker, <table r24.w2k>, MODIFY]
+ERR  CREATE KEYSPACE atk WITH replication = {'class':'SimpleStrategy','replication_factor':1};  -> UnauthorizedException: User attacker has no CREATE permission on <all keyspaces> or any of its parents
+ERR  CREATE TABLE r24.atk (k int PRIMARY KEY, v blob);  -> UnauthorizedException: User attacker has no CREATE permission on <all tables in r24> or any of its parents
+ERR  ALTER TABLE r24.w2k WITH gc_grace_seconds = 0;  -> UnauthorizedException: User attacker has no ALTER permission on <table r24.w2k> or any of its parents
+ERR  CREATE INDEX ON r24.w2k (v);  -> UnauthorizedException: User attacker has no ALTER permission on <table r24.w2k> or any of its parents
+ERR  SELECT k FROM vks.kv LIMIT 1;  -> UnauthorizedException: User attacker has no SELECT permission on <table vks.kv> or any of its parents
+ERR  INSERT INTO vks.kv (k, v) VALUES (1, 0x00);  -> UnauthorizedException: User attacker has no MODIFY permission on <table vks.kv> or any of its parents
+ERR  GRANT SELECT ON TABLE vks.kv TO attacker;  -> UnauthorizedException: User attacker has no AUTHORIZE permission on <table vks.kv> or any of its parents
+OK   SELECT keyspace_name, replication FROM system_schema.keyspaces WHERE keyspace_name = 'r24';  -> rows=1 warnings=[]
+    Row[r24, {class=org.apache.cassandra.locator.SimpleStrategy, replication_factor=2}]
+OK   SELECT k, c, v FROM r24.w2k LIMIT 1;  -> rows=0 warnings=[]
+schema agreement=true
+cql as role=nogrant host=127.0.0.1
+03:31:58 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+OK   LIST ALL PERMISSIONS OF nogrant;  -> rows=0 warnings=[]
+ERR  SELECT k, c, v FROM r24.w2k WHERE v = 'x' LIMIT 1 ALLOW FILTERING;  -> UnauthorizedException: User nogrant has no SELECT permission on <table r24.w2k> or any of its parents
+ERR  INSERT INTO r24.w2k (k, c, v, pad) VALUES (5, 0, 'x', 0x00);  -> UnauthorizedException: User nogrant has no MODIFY permission on <table r24.w2k> or any of its parents
+ERR  CREATE KEYSPACE ng WITH replication = {'class':'SimpleStrategy','replication_factor':1};  -> UnauthorizedException: User nogrant has no CREATE permission on <all keyspaces> or any of its parents
+OK   SELECT keyspace_name, replication FROM system_schema.keyspaces WHERE keyspace_name = 'system_traces';  -> rows=1 warnings=[]
+    Row[system_traces, {class=org.apache.cassandra.locator.SimpleStrategy, replication_factor=2}]
+OK   SELECT session_id FROM system_traces.sessions LIMIT 1;  -> rows=0 warnings=[]
+OK   SELECT session_id FROM system_traces.events LIMIT 1;  -> rows=0 warnings=[]
+ERR  INSERT INTO system_traces.events (session_id, event_id, activity) VALUES (uuid(), now(), 'probe');  -> UnauthorizedException: User nogrant has no MODIFY permission on <table system_traces.events> or any of its parents
+ERR  INSERT INTO system_traces.sessions (session_id, request) VALUES (uuid(), 'probe');  -> UnauthorizedException: User nogrant has no MODIFY permission on <table system_traces.sessions> or any of its parents
+OK   SELECT session_id, activity FROM system_traces.events WHERE activity = 'x' ALLOW FILTERING;  -> rows=0 warnings=[]
+schema agreement=true
+cql as role=selonly host=127.0.0.1
+03:32:03 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+OK   LIST ALL PERMISSIONS OF selonly;  -> rows=1 warnings=[]
+    Row[selonly, selonly, <table r24.w2k>, SELECT]
+ERR  INSERT INTO r24.w2k (k, c, v, pad) VALUES (5, 0, 'x', 0x00);  -> UnauthorizedException: User selonly has no MODIFY permission on <table r24.w2k> or any of its parents
+OK   SELECT k, c, v FROM r24.w2k LIMIT 1;  -> rows=0 warnings=[]
+schema agreement=true
+[2026-11-24 22:32:06 EST] victim preload
+victim preload rows=10000 errors=0
+[2026-11-24 22:32:12 EST] attacker load w2k
+load ok table=w2k rows=2048 size=65536 errors=0
+[2026-11-24 22:32:18 EST] load took 6 s
+== n1 (before any stop; no flush/compact command)
+		SSTable count: 0
+		Old SSTable count: 0
+		Space used (live): 0
+		Number of partitions (estimate): 0
+		Memtable cell count: 2048
+		Memtable data size: 134352904
+		Compacted partition maximum bytes: 0
+== n2 (before any stop; no flush/compact command)
+		SSTable count: 0
+		Old SSTable count: 0
+		Space used (live): 0
+		Number of partitions (estimate): 0
+		Memtable cell count: 2048
+		Memtable data size: 134352904
+		Compacted partition maximum bytes: 0
+[2026-11-24 22:32:22 EST] attacker single queries at 8 GiB
+one as role=attacker
+one table=w2k CL=QUORUM fetch=128 limit=0 OK rows=128 padBytes=8388608 check=ok ms=1242 morePages=true warnings=[Replica filtering protection has cached over 2000 rows during query SELECT pad, v FROM r24.w2k WHERE v = 'x' LIMIT 128 ALLOW FILTERING. (See 'cached_replica_rows_warn_threshold' in cassandra.yaml.)]
+one table=w2k CL=QUORUM fetch=128 limit=0 OK rows=128 padBytes=8388608 check=ok ms=913 morePages=true warnings=[Replica filtering protection has cached over 2000 rows during query SELECT pad, v FROM r24.w2k WHERE v = 'x' LIMIT 128 ALLOW FILTERING. (See 'cached_replica_rows_warn_threshold' in cassandra.yaml.)]
+one table=w2k CL=QUORUM fetch=128 limit=0 OK rows=128 padBytes=8388608 check=ok ms=971 morePages=true warnings=[Replica filtering protection has cached over 2000 rows during query SELECT pad, v FROM r24.w2k WHERE v = 'x' LIMIT 128 ALLOW FILTERING. (See 'cached_replica_rows_warn_threshold' in cassandra.yaml.)]
+after-attacker w2k srp=96 rfpReq=0 count=3 max=4768 len=166 recent=43:3
+after-attacker thresholds fail=32000 warn=2000
+[2026-11-24 22:32:30 EST] selonly single queries
+one as role=selonly
+one table=w2k CL=QUORUM fetch=128 limit=0 OK rows=128 padBytes=8388608 check=ok ms=1165 morePages=true warnings=[Replica filtering protection has cached over 2000 rows during query SELECT pad, v FROM r24.w2k WHERE v = 'x' LIMIT 128 ALLOW FILTERING. (See 'cached_replica_rows_warn_threshold' in cassandra.yaml.)]
+one table=w2k CL=QUORUM fetch=128 limit=0 OK rows=128 padBytes=8388608 check=ok ms=1159 morePages=true warnings=[Replica filtering protection has cached over 2000 rows during query SELECT pad, v FROM r24.w2k WHERE v = 'x' LIMIT 128 ALLOW FILTERING. (See 'cached_replica_rows_warn_threshold' in cassandra.yaml.)]
+after-selonly w2k srp=160 rfpReq=0 count=5 max=4768 len=166 recent=43:2
+after-selonly thresholds fail=32000 warn=2000
+[2026-11-24 22:32:38 EST] attacker F=4096
+one as role=attacker
+one table=w2k CL=QUORUM fetch=4096 limit=0 ERROR ReadFailureException: Cassandra failure during read query at consistency QUORUM (2 responses were required but only 0 replica responded; 1 failed)
+n1 hints: 0
+n2 hints: 0
+[2026-11-24 22:32:54 EST] stopped LOAD n1
+[2026-11-24 22:33:05 EST] stopped LOAD n2
+n1 r24 Data.db after stop: 1 (134869199 B)
+n2 r24 Data.db after stop: 1 (134869199 B)
+/mydata/s4/3b-R24/runs/LOAD/n1/logs/system.log:1
+/mydata/s4/3b-R24/runs/LOAD/n2/logs/system.log:1
+131M	/mydata/s4/3b-R24/template-n1
+131M	/mydata/s4/3b-R24/template-n2
+[2026-11-24 22:33:06 EST] LOAD done

@@ -1,0 +1,1 @@
+-rw------- 1 jason92 misconfiguration 2166823512 Nov 24 09:02 /dev/shm/3b-B12/cassandra-1795535835-pid497718.hprof

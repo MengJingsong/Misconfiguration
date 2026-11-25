@@ -1,0 +1,91 @@
+run PA-1 arm=preauth heap=2G direct=2G N=3500 jvms=7 connect_threads=64 W=7 value=125000 M=125074 R=200000 throw=False seconds=240 spec=none::3500 calib=False
+harness md5: 2f18ec53c4d427ffdbc72d30b6a11dbd  /mydata/s4/3b-B27/harness/Jmx.java; e831616fe0ab3ac2949d5fa8f2d0820f  /mydata/s4/3b-B27/harness/NativeFlood3b.java; 89163aa08ace90acc87fffd135f94efd  /mydata/s4/3b-B27/harness/b27-3b-run.py; 4f91920358c0ca96f3851dab31e5fe14  /mydata/s4/3b-B27/harness/flood-logback.xml; 4e99f029b0d7c8372ea9154e3fae6d30  /mydata/s4/3b-B27/harness/hprof-histo.py; 08dfce2387fe4e2594ee2d46e6dbc8d6  /mydata/s4/3b-B27/harness/make-node-yaml-3b.sh; b00ea2fac577fd30997b7dd3510f5137  /mydata/s4/3b-B27/harness/run-list-2.txt; 5df90b1423ed65190856c051f07b9dee  /mydata/s4/3b-B27/harness/run-list.txt; ac4bc8e694f24b90634bd6aa606ec633  /mydata/s4/3b-B27/harness/run-series.sh; da27f330fad6d425ec14ddc8d46bf89f  /mydata/s4/3b-B27/harness/victim.py; ee3367f9ec97e67a0ca95e7caca1dbe8  /mydata/s4/3b-B27/harness/victim_summary.py; 
+TIME-WAIT check: 0 + N 3500 = 3500 (limit 26000) ok
+yaml check: yaml ok: harness adds no §2.3 key; shipped read_request_timeout=5000ms, concurrent_reads=32, slow_query_log_timeout=500ms (defaults)
+node pid 2096528 scope /sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/oom-b27-3b-PA-1.scope memory.max 10737418240 (want 10737418240) memory.swap.max 0
+jvm readback: -XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -Xms2G -Xmx2G -XX:MaxDirectMemorySize=2G -javaagent:/mydata/s4/3b-B27/cassandra/bin/../lib/jamm-0.4.0.jar -XX:HeapDumpPath=/mydata/s4/3b-B27/logs/PA-1/cassandra-1795579194-pid2096528.hprof -XX:OnOutOfMemoryError=kill -9 %p
+resolved native_transport_max_message_size: null
+resolved native_transport_max_request_data_in_flight: null
+resolved native_transport_max_request_data_in_flight_per_ip: null
+resolved native_transport_receive_queue_capacity: 1MiB
+resolved native_transport_timeout: 12s
+resolved read_request_timeout: 5000ms
+resolved native_transport_throw_on_overload: false
+resolved native_transport_max_threads: 128
+resolved native_transport_queue_max_item_age_threshold: 1.7976931348623157E308
+resolved native_transport_max_concurrent_connections: -1
+resolved native_transport_max_concurrent_connections_per_ip: -1
+resolved native_transport_idle_timeout: 0ms
+resolved native_transport_rate_limiting_enabled: false
+resolved native_transport_max_auth_threads: 4
+resolved authenticator: PasswordAuthenticator{}
+resolved authorizer: CassandraAuthorizer{}
+resolved role_manager: CassandraRoleManager{}
+resolved roles_validity: 2000ms
+resolved permissions_validity: 2000ms
+resolved credentials_validity: 2000ms
+resolved concurrent_reads: 32
+resolved allow_filtering_enabled: true
+privilege checks written to auth-setup.txt
+connect/login phase: 7/7 JVMs ready in 4.2 s; {'connected': 3500, 'refused': 0, 'authfail': 0}; last ready ms 1795579278175; server conns 3501
+t0 = 1795579278973
+after stop, CassandraDaemon processes on node4: none
+NativeFlood left: none
+victim.py left: none
+VICTIM attack start 1795579278952; phase boundary 1795579520541 (attack ended (node alive), +241.6 s after attack start) || connect/login phase 4.2 s before attack start || before: 29.9 s, ticks 301, OK 301 (100.0%), OK latency ms p50 2 p99 7 max 11; failures: none || login : 4.0 s, ticks 41, OK 41 (100.0%), OK latency ms p50 2 p99 8 max 8; failures: none || during: 241.5 s, ticks 2416, OK 1753 (72.6%), OK latency ms p50 123 p99 341 max 1257; failures: missed x663 || after : 30.0 s, ticks 301, OK 301 (100.0%), OK latency ms p50 1 p99 4 max 5; failures: none || first victim failure after attack start: +0.8 s (missed) || last victim OK after attack start: +271.6 s || OK requests slower than 1 s during/after: 3 (max 1257 ms) || 
+run_id: PA-1
+arm: preauth
+heap_gib: 2
+N: 3500
+W: 7
+M: 125074
+R: 200000
+throw: False
+t0: 1795579278973
+endpoint: none
+oom_line: None
+endpoint_t_s: None
+dump: None
+syslog_oom: None
+first_error: None
+histos: [{'t': 20.129, 'qm': 16, 'bb': 29334864, 'top': [('[B', 29334864), ('[Ljava.lang.Object;', 20493400), ('[I', 15419840), ('[J', 10084800)], 'dur_ms': 1193}, {'t': 40.514, 'qm': 3, 'bb': 29603008, 'top': [('[B', 29603008), ('[Ljava.lang.Object;', 20538952), ('[I', 15417968), ('[J', 10084440)], 'dur_ms': 1562}, {'t': 61.016, 'qm': 8, 'bb': 30214376, 'top': [('[B', 30214376), ('[Ljava.lang.Object;', 20590832), ('[I', 15419400), ('[J', 10088744)], 'dur_ms': 1406}, {'t': 80.482, 'qm': 1, 'bb': 29340880, 'top': [('[B', 29340880), ('[Ljava.lang.Object;', 20615760), ('[I', 15419696), ('[J', 10090672)], 'dur_ms': 1464}, {'t': 101.067, 'qm': 146, 'bb': 46875528, 'top': [('[B', 46875528), ('[Ljava.lang.Object;', 20648512), ('[I', 15419696), ('[J', 10091608)], 'dur_ms': 1398}, {'t': 120.572, 'qm': 29, 'bb': 32599136, 'top': [('[B', 32599136), ('[Ljava.lang.Object;', 20679496), ('[I', 15420408), ('[J', 10094728)], 'dur_ms': 1561}, {'t': 140.163, 'qm': 5, 'bb': 29347864, 'top': [('[B', 29347864), ('[Ljava.lang.Object;', 20674160), ('[I', 15419264), ('[J', 10093472)], 'dur_ms': 1553}, {'t': 160.92, 'qm': 16, 'bb': 30117216, 'top': [('[B', 30117216), ('[Ljava.lang.Object;', 20707984), ('[I', 15419120), ('[J', 10094096)], 'dur_ms': 1328}, {'t': 180.412, 'qm': 16, 'bb': 30102096, 'top': [('[B', 30102096), ('[Ljava.lang.Object;', 20741856), ('[I', 15419792), ('[J', 10096448)], 'dur_ms': 1200}, {'t': 200.828, 'qm': 1080, 'bb': 164329696, 'top': [('[B', 164329696), ('[Ljava.lang.Object;', 20786776), ('[I', 15419552), ('[J', 10097368)], 'dur_ms': 1440}, {'t': 220.218, 'qm': 7, 'bb': 30121776, 'top': [('[B', 30121776), ('[Ljava.lang.Object;', 20758976), ('[I', 15418688), ('[J', 10096248)], 'dur_ms': 1230}]
+qm_idle: 0
+bb_idle: 27722056
+U_D1: 135079920
+K_N: 3723703091
+U_over_KN: 0.03627569564460745
+K_max_global_in_use: 117.0
+ntr_pending_max: 2021.0
+read_pending_max: 0.0
+heap_used_max: 1464665720.0
+direct_used_max: 511998524.0
+discarded_max: 0.0
+timedout_before_max: 0.0
+paused_max: 0.0
+client: {'sent': 8883349, 'g0_sent': 1266123, 'ok': 0, 'g0_ok': 0, 'warned': 0, 'g0_warned': 0, 'ovl_bytes': 0, 'g0_ovl_bytes': 0, 'ovl_other': 0, 'g0_ovl_other': 0, 'err': 8883349, 'g0_err': 1266123, 'outstanding': 0, 'g0_outstanding': 0, 'refused': 0, 'g0_refused': 0, 'connected': 3500, 'g0_connected': 500, 'authfail': 0, 'g0_authfail': 0, 'g1_sent': 1268333, 'g1_ok': 0, 'g1_warned': 0, 'g1_ovl_bytes': 0, 'g1_ovl_other': 0, 'g1_err': 1268333, 'g1_outstanding': 0, 'g1_refused': 0, 'g1_connected': 500, 'g1_authfail': 0, 'g2_sent': 1269305, 'g2_ok': 0, 'g2_warned': 0, 'g2_ovl_bytes': 0, 'g2_ovl_other': 0, 'g2_err': 1269305, 'g2_outstanding': 0, 'g2_refused': 0, 'g2_connected': 500, 'g2_authfail': 0, 'g3_sent': 1267151, 'g3_ok': 0, 'g3_warned': 0, 'g3_ovl_bytes': 0, 'g3_ovl_other': 0, 'g3_err': 1267151, 'g3_outstanding': 0, 'g3_refused': 0, 'g3_connected': 500, 'g3_authfail': 0, 'g4_sent': 1267905, 'g4_ok': 0, 'g4_warned': 0, 'g4_ovl_bytes': 0, 'g4_ovl_other': 0, 'g4_err': 1267905, 'g4_outstanding': 0, 'g4_refused': 0, 'g4_connected': 500, 'g4_authfail': 0, 'g5_sent': 1274331, 'g5_ok': 0, 'g5_warned': 0, 'g5_ovl_bytes': 0, 'g5_ovl_other': 0, 'g5_err': 1274331, 'g5_outstanding': 0, 'g5_refused': 0, 'g5_connected': 500, 'g5_authfail': 0, 'g6_sent': 1270201, 'g6_ok': 0, 'g6_warned': 0, 'g6_ovl_bytes': 0, 'g6_ovl_other': 0, 'g6_err': 1270201, 'g6_outstanding': 0, 'g6_refused': 0, 'g6_connected': 500, 'g6_authfail': 0}
+ok_per_s: 0.0
+load_s: 240.0
+gc_pause_frac_last60: 0.019931999999999995
+gc_pauses_n: 976
+gc_last5: ['3.710s][2096528][2096647][info ] GC(968) Pause Young (Normal) (G1 Evacuation Pause) 1319M->119M(2048M) 5.817ms', '3.964s][2096528][2096647][info ] GC(969) Pause Young (Normal) (G1 Evacuation Pause) 1319M->119M(2048M) 5.800ms', '4.224s][2096528][2096647][info ] GC(970) Pause Young (Normal) (G1 Evacuation Pause) 1319M->118M(2048M) 4.361ms', '4.437s][2096528][2096647][info ] GC(971) Pause Young (Normal) (G1 Evacuation Pause) 1318M->118M(2048M) 3.998ms', '4.595s][2096528][2096647][info ] GC(972) Pause Young (Normal) (G1 Evacuation Pause) 1318M->118M(2048M) 3.407ms']
+scope_mem_max: 7175421952
+scope_events: {'low': '0', 'high': '0', 'max': '0', 'oom': '0', 'oom_kill': '0'}
+spec: none::3500
+auth_success_max: 26.0
+auth_failure_max: 0.0
+connected_clients_max: 3501.0
+auth_pending_max: 0.0
+connect_phase: {'connected': 3500, 'refused': 0, 'authfail': 0}
+connect_phase_s: 3.395
+qm_max: 1080
+qm_per_server_conn: [0.005, 0.001, 0.002, 0.0, 0.042, 0.008, 0.001, 0.005, 0.005, 0.308, 0.002]
+qm_per_conn_max: 0.308
+breached_lines: 0
+server_conns_max: 3501
+G: 214748364
+E: 53687091
+post_gc_last5_MB: [116, 116, 117, 116, 117]
+jvms: 7
+EXPECTED K: max RequestsSize 117.0 (stage 2: <= 264 B); breached lines 0 (stage 2: 0); warned 0; ovl_bytes 0; discarded 0.0
+QM max 1080 (histograms); QM / server conn [0.005, 0.001, 0.002, 0.0, 0.042, 0.008, 0.001, 0.005, 0.005, 0.308, 0.002]; NTR pending max 2021.0; endpoint none at None; scope events {'low': '0', 'high': '0', 'max': '0', 'oom': '0', 'oom_kill': '0'}
+DONE

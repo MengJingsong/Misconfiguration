@@ -1,0 +1,68 @@
+21:23:28.191 (1795580608191) STARTUP -> AUTHENTICATE
+21:23:28.567 (1795580608567) AUTH_RESPONSE as attacker -> AUTH_SUCCESS
+21:23:28.634 (1795580608634) REGISTER [STATUS_CHANGE, TOPOLOGY_CHANGE] -> READY
+[2026-11-24 23:23:31 EST] operator: node 1 down (drain, stop)
+[2026-11-24 23:23:40 EST] stopped LOAD n1
+UN  127.0.0.2  7.87 GiB  16      100.0%            f79ac22b-6aa8-493c-ba36-67b0e2edee1e  rack1
+DN  127.0.0.1  7.86 GiB  16      100.0%            6c73fcd3-d7a4-4f35-b42c-4cd692a41102  rack1
+[2026-11-24 23:23:42 EST] attacker: f1 via node 2 at CL ONE, k 0..15
+Exception in thread "main" com.datastax.driver.core.exceptions.AuthenticationException: Authentication error on host /127.0.0.2:9042: Unable to perform authentication: Cannot achieve consistency level LOCAL_QUORUM
+	at com.datastax.driver.core.Connection$9.apply(Connection.java:555)
+	at com.datastax.driver.core.Connection$9.apply(Connection.java:517)
+	at com.google.common.util.concurrent.AbstractTransformFuture$AsyncTransformFuture.doTransform(AbstractTransformFuture.java:223)
+	at com.google.common.util.concurrent.AbstractTransformFuture$AsyncTransformFuture.doTransform(AbstractTransformFuture.java:210)
+	at com.google.common.util.concurrent.AbstractTransformFuture.run(AbstractTransformFuture.java:123)
+	at com.google.common.util.concurrent.DirectExecutor.execute(DirectExecutor.java:31)
+	at com.google.common.util.concurrent.AbstractFuture.executeListener(AbstractFuture.java:1286)
+	at com.google.common.util.concurrent.AbstractFuture.complete(AbstractFuture.java:1055)
+	at com.google.common.util.concurrent.AbstractFuture.set(AbstractFuture.java:782)
+	at com.datastax.driver.core.Connection$Future.onSet(Connection.java:1542)
+	at com.datastax.driver.core.Connection$Dispatcher.channelRead0(Connection.java:1292)
+	at com.datastax.driver.core.Connection$Dispatcher.channelRead0(Connection.java:1210)
+	at com.datastax.shaded.netty.channel.SimpleChannelInboundHandler.channelRead(SimpleChannelInboundHandler.java:99)
+	at com.datastax.shaded.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444)
+	at com.datastax.shaded.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+	at com.datastax.shaded.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412)
+	at com.datastax.shaded.netty.handler.timeout.IdleStateHandler.channelRead(IdleStateHandler.java:286)
+	at com.datastax.shaded.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:442)
+	at com.datastax.shaded.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+	at com.datastax.shaded.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412)
+	at com.datastax.shaded.netty.handler.codec.MessageToMessageDecoder.channelRead(MessageToMessageDecoder.java:103)
+	at com.datastax.shaded.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444)
+	at com.datastax.shaded.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+	at com.datastax.shaded.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412)
+	at com.datastax.shaded.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:346)
+	at com.datastax.shaded.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:318)
+	at com.datastax.shaded.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444)
+	at com.datastax.shaded.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+	at com.datastax.shaded.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412)
+	at com.datastax.shaded.netty.channel.ChannelInboundHandlerAdapter.channelRead(ChannelInboundHandlerAdapter.java:93)
+	at com.datastax.driver.core.InboundTrafficMeter.channelRead(InboundTrafficMeter.java:40)
+	at com.datastax.shaded.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444)
+	at com.datastax.shaded.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+	at com.datastax.shaded.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412)
+	at com.datastax.shaded.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1410)
+	at com.datastax.shaded.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:440)
+	at com.datastax.shaded.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+	at com.datastax.shaded.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:919)
+	at com.datastax.shaded.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)
+	at com.datastax.shaded.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:788)
+	at com.datastax.shaded.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)
+	at com.datastax.shaded.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)
+	at com.datastax.shaded.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
+	at com.datastax.shaded.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+	at com.datastax.shaded.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at com.datastax.shaded.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+n2 listpendinghints: This node does not have any pending hints 
+n2 hints dir: 0 files, 4096 B
+n2 listpendinghints: This node does not have any pending hints 
+n2 hints dir: 0 files, 4096 B
+[2026-11-24 23:24:20 EST] operator: truncatehints on node 2 (stands for > 3 h outage)
+n2 listpendinghints: This node does not have any pending hints 
+n2 hints dir: 0 files, 4096 B
+21:23:28.191 (1795580608191) STARTUP -> AUTHENTICATE
+21:23:28.567 (1795580608567) AUTH_RESPONSE as attacker -> AUTH_SUCCESS
+21:23:28.634 (1795580608634) REGISTER [STATUS_CHANGE, TOPOLOGY_CHANGE] -> READY
+21:23:32.808 (1795580612808) EVENT STATUS_CHANGE DOWN 127.0.0.1
+[2026-11-24 23:24:39 EST] DIVA-END

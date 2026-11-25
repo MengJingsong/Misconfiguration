@@ -1,0 +1,19 @@
+superuser login AUTH_SUCCESS after 8.3 s
+> CREATE ROLE IF NOT EXISTS victim WITH PASSWORD = '***' AND LOGIN = true AND SUPERUSER = false
+   OK Void []
+> CREATE KEYSPACE IF NOT EXISTS vks WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+   OK SchemaChange []
+> CREATE TABLE IF NOT EXISTS vks.kv (k int PRIMARY KEY, v text)
+   OK SchemaChange []
+> GRANT SELECT ON TABLE vks.kv TO victim
+   OK Void []
+> GRANT MODIFY ON TABLE vks.kv TO victim
+   OK Void []
+> LIST ROLES
+   OK ['role', 'super', 'login', 'options', 'datacenters'] [['cassandra', 'True', 'True', '00000000', 'ALL'], ['victim', 'False', 'True', '00000000', 'ALL']]
+> LIST ALL PERMISSIONS
+   OK ['role', 'username', 'resource', 'permission'] [['cassandra', 'cassandra', '<keyspace vks>', 'CREATE'], ['cassandra', 'cassandra', '<keyspace vks>', 'ALTER'], ['cassandra', 'cassandra', '<keyspace vks>', 'DROP'], ['cassandra', 'cassandra', '<keyspace vks>', 'SELECT'], ['cassandra', 'cassandra', '<keyspace vks>', 'MODIFY'], ['cassandra', 'cassandra', '<keyspace vks>', 'AUTHORIZE'], ['cassandra', 'cassandra', '<keyspace vks>', 'UNMASK'], ['cassandra', 'cassandra', '<keyspace vks>', 'SELECT_MASKED'], ['cassandra', 'cassandra', '<table vks.kv>', 'ALTER'], ['cassandra', 'cassandra', '<table vks.kv>', 'DROP'], ['cassandra', 'cassandra', '<table vks.kv>', 'SELECT'], ['cassandra', 'cassandra', '<table vks.kv>', 'MODIFY'], ['cassandra', 'cassandra', '<table vks.kv>', 'AUTHORIZE'], ['cassandra', 'cassandra', '<table vks.kv>', 'UNMASK'], ['cassandra', 'cassandra', '<table vks.kv>', 'SELECT_MASKED'], ['cassandra', 'cassandra', '<all functions in vks>', 'CREATE'], ['cassandra', 'cassandra', '<all functions in vks>', 'ALTER'], ['cassandra', 'cassandra', '<all functions in vks>', 'DROP'], ['cassandra', 'cassandra', '<all functions in vks>', 'AUTHORIZE'], ['cassandra', 'cassandra', '<all functions in vks>', 'EXECUTE'], ['cassandra', 'cassandra', '<role victim>', 'ALTER'], ['cassandra', 'cassandra', '<role victim>', 'DROP'], ['cassandra', 'cassandra', '<role victim>', 'AUTHORIZE'], ['cassandra', 'cassandra', '<role victim>', 'DESCRIBE'], ['victim', 'victim', '<table vks.kv>', 'SELECT'], ['victim', 'victim', '<table vks.kv>', 'MODIFY']]
+> SELECT role, is_superuser, can_login FROM system_auth.roles
+   OK ['role', 'is_superuser', 'can_login'] [['victim', 'False', 'True'], ['cassandra', 'True', 'True']]
+> SELECT keyspace_name FROM system_schema.keyspaces
+   OK ['keyspace_name'] [['system_auth'], ['system_schema'], ['system_distributed'], ['system'], ['vks'], ['system_traces']]

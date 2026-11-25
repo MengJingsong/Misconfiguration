@@ -1,0 +1,22 @@
+CONNECTED as cassandra
+-- admin (default superuser cassandra; this setup only). Single node: system_auth keeps its shipped RF 1.
+02:45:26 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+OK  CREATE ROLE attacker WITH PASSWORD = 'att-pw' AND LOGIN = true AND SUPERUSER = false
+OK  CREATE ROLE victim WITH PASSWORD = 'vic-pw' AND LOGIN = true AND SUPERUSER = false
+OK  CREATE ROLE nogrant WITH PASSWORD = 'ng-pw' AND LOGIN = true AND SUPERUSER = false
+OK  GRANT CREATE ON ALL KEYSPACES TO attacker
+OK  CREATE KEYSPACE vks WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+OK  CREATE TABLE vks.kv (k int PRIMARY KEY, v blob)
+OK  GRANT SELECT ON TABLE vks.kv TO victim
+OK  GRANT MODIFY ON TABLE vks.kv TO victim
+OK  LIST ROLES
+    Row[attacker, false, true, {}, ALL]
+    Row[cassandra, true, true, {}, ALL]
+    Row[nogrant, false, true, {}, ALL]
+    Row[victim, false, true, {}, ALL]
+OK  LIST ALL PERMISSIONS OF attacker
+    Row[attacker, attacker, <all keyspaces>, CREATE]
+OK  LIST ALL PERMISSIONS OF victim
+    Row[victim, victim, <table vks.kv>, SELECT]
+    Row[victim, victim, <table vks.kv>, MODIFY]
+OK  LIST ALL PERMISSIONS OF nogrant

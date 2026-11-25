@@ -1,0 +1,65 @@
+node-1 OOM (GC log, HeapDumper) at 2026-11-24T21:46:57.253-0700
+attack start=1795582013401 node1-end/attack-end=1795582017253 (3.9 s after attack start) outcome: OOM type="java.lang.OutOfMemoryError: Java heap space" at+3s (driver poll)
+
+V1 (node 1 = attacked coordinator, CL ONE)
+  before  no samples
+  during     1 s issued/s= 11.0 ok=6 err=0 success= 54.5% p50(med)=160.7ms p99(med)=355.0ms p99(max)=355.0ms max=355.0ms errors 
+  after     67 s issued/s= 10.0 ok=0 err=675 success=  0.0% p50(med)=-1.0ms p99(med)=-1.0ms p99(max)=-1.0ms max=-1.0ms errors nohost=641 other=34 | e.g. NoHostAvailableException: All host(s) tried for query failed (no host was tried)
+  timeline (5 s bins, rel. to attack start): t,issued,ok,err,max p99 ms
+       +0s   20    6    0    355.0
+       +5s   51    0   65     -1.0
+      +10s   50    0   49     -1.0
+      +15s   50    0   51     -1.0
+      +20s   50    0   50     -1.0
+      +25s   50    0   49     -1.0
+      +30s   50    0   51     -1.0
+      +35s   50    0   50     -1.0
+      +40s   50    0   50     -1.0
+      +45s   50    0   50     -1.0
+      +50s   50    0   50     -1.0
+      +55s   50    0   50     -1.0
+      +60s   50    0   50     -1.0
+      +65s   50    0   50     -1.0
+      +70s   10    0   10     -1.0
+
+V2 (node 2, CL ONE)
+  before  no samples
+  during     1 s issued/s= 11.0 ok=11 err=0 success=100.0% p50(med)=2.9ms p99(med)=4.4ms p99(max)=4.4ms max=4.4ms errors 
+  after     67 s issued/s= 10.0 ok=670 err=0 success=100.0% p50(med)=1.6ms p99(med)=2.5ms p99(max)=222.5ms max=222.5ms errors 
+  timeline (5 s bins, rel. to attack start): t,issued,ok,err,max p99 ms
+       +0s   21   20    0      4.7
+       +5s   50   51    0     20.8
+      +10s   50   49    0    222.5
+      +15s   50   50    0      3.1
+      +20s   50   51    0      3.0
+      +25s   50   49    0      3.1
+      +30s   50   50    0      3.1
+      +35s   50   51    0      3.2
+      +40s   50   49    0      2.7
+      +45s   50   50    0      3.6
+      +50s   50   51    0      2.9
+      +55s   50   50    0      3.1
+      +60s   50   49    0      2.8
+      +65s   50   50    0      3.0
+      +70s   10   11    0      2.1
+
+V3 (node 2, CL QUORUM)
+  before  no samples
+  during     1 s issued/s= 11.0 ok=6 err=0 success= 54.5% p50(med)=55.4ms p99(med)=139.4ms p99(max)=139.4ms max=139.4ms errors 
+  after     67 s issued/s= 10.0 ok=0 err=675 success=  0.0% p50(med)=-1.0ms p99(med)=-1.0ms p99(max)=-1.0ms max=-1.0ms errors rto=109 wto=110 unav=456 | e.g. UnavailableException: Not enough replicas available for query at consistency QUORUM (2 required but only 1 alive)
+  timeline (5 s bins, rel. to attack start): t,issued,ok,err,max p99 ms
+       +0s   21    6    0    139.4
+       +5s   50    0   30     -1.0
+      +10s   50    0   49     -1.0
+      +15s   50    0   51     -1.0
+      +20s   50    0   50     -1.0
+      +25s   50    0   82     -1.0
+      +30s   50    0   53     -1.0
+      +35s   50    0   50     -1.0
+      +40s   50    0   49     -1.0
+      +45s   50    0   51     -1.0
+      +50s   50    0   50     -1.0
+      +55s   50    0   50     -1.0
+      +60s   50    0   49     -1.0
+      +65s   50    0   50     -1.0
+      +70s   10    0   11     -1.0

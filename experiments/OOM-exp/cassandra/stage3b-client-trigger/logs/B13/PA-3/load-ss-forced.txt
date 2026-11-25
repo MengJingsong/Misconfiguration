@@ -1,0 +1,44 @@
+READY 16 sockets; SO_RCVBUF 131072; mode stall; auth PREAUTH (AUTHENTICATE unanswered); handshakes 0.1 s; query 'SELECT v FROM b13.t WHERE pk = {pk}'
+REQ_BYTES 61 (one request incl. segment framing)
+LOAD_START 1795538469191
+WAVE 1795538813206 33120000
+WAVE 1795538814218 33216000
+
+State      Recv-Q Send-Q Local Address:Port Peer Address:Port Process                                                                                      
+CLOSE-WAIT 32     0        127.0.0.131:9042    127.0.0.1:54954
+	 skmem:(r1311,rb131072,t0,tb2626560,f2785,w0,o0,bl0,d0)                                    
+CLOSE-WAIT 32     0        127.0.0.131:9042    127.0.0.1:54942
+	 skmem:(r1311,rb131072,t0,tb2626560,f2785,w0,o0,bl0,d0)                                    
+CLOSE-WAIT 1      0        127.0.0.131:9042    127.0.0.1:42086 users:(("java",pid=710259,fd=152))
+	 skmem:(r1280,rb2358342,t0,tb2626560,f2816,w0,o0,bl0,d0)
+CLOSE-WAIT 32     0        127.0.0.131:9042    127.0.0.1:54946
+	 skmem:(r1311,rb131072,t0,tb2626560,f2785,w0,o0,bl0,d0)                                    
+ESTAB      31     0        127.0.0.131:9042    127.0.0.1:56000
+	 skmem:(r1311,rb131072,t0,tb2626560,f2785,w0,o0,bl0,d0)                                    
+11070-WARN  [epollEventLoopGroup-5-7] 2026-11-24T16:46:58,175 ExceptionHandlers.java:181 - Unknown exception in client networking with peer /127.0.0.1:45846 null
+11071:ERROR [epollEventLoopGroup-5-12] 2026-11-24T16:46:58,172 JVMStabilityInspector.java:197 - Force heap space OutOfMemoryError in the presence of
+11072-java.lang.OutOfMemoryError: Direct buffer memory
+11073-	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+11074-	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+11075-	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+11076-	at org.apache.cassandra.utils.memory.BufferPool.allocate(BufferPool.java:238)
+11077-	at org.apache.cassandra.utils.memory.BufferPool$LocalPool.get(BufferPool.java:923)
+11078-	at org.apache.cassandra.utils.memory.BufferPool$LocalPool.getAtLeast(BufferPool.java:901)
+11079-	at org.apache.cassandra.utils.memory.BufferPool.getAtLeast(BufferPool.java:219)
+11080-	at org.apache.cassandra.net.BufferPoolAllocator.getAtLeast(BufferPoolAllocator.java:75)
+11081-	at org.apache.cassandra.net.BufferPoolAllocator.newDirectBuffer(BufferPoolAllocator.java:63)
+11082-	at io.netty.buffer.AbstractByteBufAllocator.directBuffer(AbstractByteBufAllocator.java:188)
+11083-	at io.netty.buffer.AbstractByteBufAllocator.directBuffer(AbstractByteBufAllocator.java:179)
+11084-	at io.netty.channel.unix.PreferredDirectByteBufAllocator.ioBuffer(PreferredDirectByteBufAllocator.java:53)
+11085-	at io.netty.channel.DefaultMaxMessagesRecvByteBufAllocator$MaxMessageHandle.allocate(DefaultMaxMessagesRecvByteBufAllocator.java:120)
+11086-	at io.netty.channel.epoll.EpollRecvByteAllocatorHandle.allocate(EpollRecvByteAllocatorHandle.java:75)
+11087-	at io.netty.channel.epoll.AbstractEpollStreamChannel$EpollStreamUnsafe.epollInReady(AbstractEpollStreamChannel.java:790)
+11088-	at io.netty.channel.epoll.EpollEventLoop.processReady(EpollEventLoop.java:501)
+11089-	at io.netty.channel.epoll.EpollEventLoop.run(EpollEventLoop.java:399)
+11090-	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:998)
+11091-	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+11092-	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+11093-	at java.base/java.lang.Thread.run(Thread.java:829)
+11094-WARN  [epollEventLoopGroup-5-7] 2026-11-24T16:46:58,175 ExceptionHandlers.java:181 - Unknown exception in client networking with peer /127.0.0.1:45846 null
+11095-WARN  [epollEventLoopGroup-5-2] 2026-11-24T16:46:58,170 ExceptionHandlers.java:181 - Unknown exception in client networking with peer /127.0.0.1:45930 null
+11096-WARN  [epollEventLoopGroup-5-6] 2026-11-24T16:46:58,172 ExceptionHandlers.java:181 - Unknown exception in client networking with peer /127.0.0.1:45836 null

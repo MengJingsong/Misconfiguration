@@ -1,0 +1,19 @@
+RUN NF-1 mode=NF heap=2G guard=16G table=n1m mode=set c=16 window=180 role=attacker start_epoch=1795552004
+NODE up daemon_pid=858362 cgroup=/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/3bu3-NF-1.scope memory.max=17179869184 swap.max=0
+JVMARGS -XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M 
+RESOLVED authenticator=PasswordAuthenticator{}; authenticator=null; authorizer=AllowAllCIDRAuthorizernull; authorizer=CassandraAuthorizer{}; collection_size_fail_threshold=null; collection_size_warn_threshold=null; concurrent_reads=32; items_per_collection_fail_threshold=-1; items_per_collection_warn_threshold=-1; native_transport_max_concurrent_connections=-1; native_transport_max_threads=128; native_transport_rate_limiting_enabled=false; network_authorizer=AllowAllNetworkAuthorizer{}; permissions_validity=2000ms; read_request_timeout=5000ms; read_thresholds_enabled=false; role_manager=CassandraRoleManager{}; roles_validity=2000ms; 
+RESULT loadset table=n1m M=1000000 chunk=100000 P=8 accepted=80 rejected=0 seconds=72.0 first=None
+LOAD attacker loadset n1m took 74 s
+N1M SSTable count: 4;Old SSTable count: 0;Space used (live): 30996784;Memtable cell count: 3;Memtable data size: 7200041;
+CLIENTS start epoch=1795552148.793316463 table=n1m mode=set c=16 role=attacker
+OOME seen (node-events) at t=27s: 1795552176246 java.lang.OutOfMemoryError: Java heap space
+CLIENTS stopped epoch=1795552331.047478138
+DAEMON DIED (after window) at epoch=1795552517.903120831
+OOMKILL 1795552518135 end 
+STDOUT-OOM 1 | java.lang.OutOfMemoryError: Java heap space Dumping heap to /mydata/s4/3b-U3/runs/NF-1/logs/cassandra-1795552005-pid858362.hprof ... Heap dump file created [3125178703 bytes in 280.476 secs] # java.lang.OutOfMemoryError: Java heap space 
+SYSLOG ERROR=0 WARN=6 first_error=
+AUTHZ-LOG 0
+AUTHZ-DEBUG 3 3 
+OUTCOME-RAW survived
+HPROF /mydata/s4/3b-U3/runs/NF-1/logs/cassandra-1795552005-pid858362.hprof 3125178703 birth=1795552176 mtime=1795552456
+END end_epoch=1795552550 daemons_left=0 clients_left=0

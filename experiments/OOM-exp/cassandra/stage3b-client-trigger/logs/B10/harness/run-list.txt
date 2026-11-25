@@ -1,0 +1,10 @@
+# B10 3-b confirm, ms0640, 2026-11-24 (MST). Base /mydata/s4/3b-B10 (cassandra = cp -a /mydata/s4/cassandra-base).
+# Compile: javac -d classes harness/Jmx.java; javac -nowarn -d classes -cp "cassandra/build/classes/main:cassandra/build/lib/jars/*" harness/NativeFlood3b.java
+# victim.py, victim_summary.py: copied unchanged from logs/R13/harness/. Jmx.java, flood-logback.xml, hprof-histo.py: unchanged from the case harness.
+08:10  python3 harness/b10-3b-run.py dataset 200000
+08:14  python3 harness/b10-3b-run.py run SH   SH          2 login:attacker:2 200000 --seconds 30 --window 64        # shakedown, not counted
+08:17  python3 harness/b10-3b-run.py run A-1  T2-auth     2 login:attacker:10,login:attacker:10 200000              # the attack run (T2 under auth)
+08:24  python3 harness/b10-3b-run.py run MX-1 mixed       2 login:attacker:2,none::9,none::9 200000                 # claim: queued bytes can be pre-auth filler
+08:30  python3 harness/b10-3b-run.py run PA-1 preauth     2 none::10,none::10 200000                                # claim: pre-auth alone forms no backlog
+08:37  python3 harness/b10-3b-run.py run NG-1 nogrant     2 login:nogrant:10,login:nogrant:10 200000                # claim: login role without grants forms no backlog
+08:45  python3 harness/b10-3b-run.py run MX-2 mixed-light 2 login:attacker:1:256,none::10,none::9 200000            # exploratory: light slow load + pre-auth filler

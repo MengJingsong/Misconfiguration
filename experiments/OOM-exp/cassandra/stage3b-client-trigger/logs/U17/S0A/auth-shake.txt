@@ -1,0 +1,23 @@
+attacker login: authenticated=True
+attacker QUERY SELECT * FROM victim_ks.t -> ERROR 0x2100 User attacker has no SELECT permission on <table victim_ks.t> or any of its parents (5 ms)
+attacker QUERY INSERT INTO victim_ks.t (k, v) VALUES (1, 'x') -> ERROR 0x2100 User attacker has no MODIFY permission on <table victim_ks.t> or any of its parents (1 ms)
+attacker QUERY CREATE KEYSPACE atk_ks WITH replication = {'class':'SimpleStrategy','replication_factor':1} -> ERROR 0x2100 User attacker has no CREATE permission on <all keyspaces> or any of its parents (1 ms)
+attacker QUERY SELECT * FROM system_auth.roles -> ERROR 0x2100 User attacker has no SELECT permission on <table system_auth.roles> or any of its parents (3 ms)
+attacker QUERY SELECT v FROM u17.t WHERE pk = 0 -> ERROR 0x2100 User attacker has no SELECT permission on <table u17.t> or any of its parents (6 ms)
+LIST ALL PERMISSIONS OF attacker
+  -> RESULT kind 1
+attacker VEC D=500000 -> nosuch.t body 1000049 B -> ERROR 0x2200 keyspace nosuch does not exist (0.309 s)
+attacker VEC D=500000 -> nosuch.t body 1000049 B -> ERROR 0x2200 keyspace nosuch does not exist (0.203 s)
+attacker HEX D=500000 -> nosuch.t body 1000050 B -> ERROR 0x2200 keyspace nosuch does not exist (0.029 s)
+attacker HEX D=500000 -> nosuch.t body 1000050 B -> ERROR 0x2200 keyspace nosuch does not exist (0.010 s)
+attacker VEC D=500000 -> u17.t body 1000046 B -> ERROR 0x2200 Invalid vector literal for v of type vector<tinyint, 6500000>; expected 6500000 elements, but given 500000 (0.252 s)
+attacker VEC D=500000 -> u17.t body 1000046 B -> ERROR 0x2200 Invalid vector literal for v of type vector<tinyint, 6500000>; expected 6500000 elements, but given 500000 (0.199 s)
+attacker HEX D=500000 -> u17.h body 1000047 B -> ERROR 0x2100 User attacker has no MODIFY permission on <table u17.h> or any of its parents (0.053 s)
+attacker VEC D=500000 -> victim_ks.t body 1000052 B -> ERROR 0x2200 Undefined column name pk in table victim_ks.t (0.200 s)
+unauthenticated conn (STARTUP answered AUTHENTICATE, no AUTH_RESPONSE): authenticated=False
+unauth HEX D=500000 -> nosuch.t -> ERROR 0x000a Unexpected message QUERY, expecting SASL_RESPONSE (0.010 s)
+unauth VEC D=500000 -> nosuch.t -> ERROR 0x000a Unexpected message QUERY, expecting SASL_RESPONSE (0.006 s)
+unauth VEC D=500000 -> nosuch.t -> ERROR 0x000a Unexpected message QUERY, expecting SASL_RESPONSE (0.007 s)
+wrong password -> auth: op 0 (256, 'Provided username attacker and/or password are incorrect')
+victim INSERT INTO victim_ks.t (k, v) VALUES (1, 'v1') -> RESULT kind 1 (4.1 ms)
+victim SELECT v FROM victim_ks.t WHERE k = 1 -> RESULT kind 2 (4.3 ms)

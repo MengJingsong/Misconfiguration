@@ -1,0 +1,13 @@
+cql as role=nogrant host=127.0.0.1
+OK   LIST ALL PERMISSIONS OF nogrant;  -> rows=0 warnings=[]
+ERR  SELECT k, c, v FROM r24.w2k WHERE v = 'x' LIMIT 1 ALLOW FILTERING;  -> UnauthorizedException: User nogrant has no SELECT permission on <table r24.w2k> or any of its parents
+ERR  INSERT INTO r24.w2k (k, c, v, pad) VALUES (5, 0, 'x', 0x00);  -> UnauthorizedException: User nogrant has no MODIFY permission on <table r24.w2k> or any of its parents
+ERR  CREATE KEYSPACE ng WITH replication = {'class':'SimpleStrategy','replication_factor':1};  -> UnauthorizedException: User nogrant has no CREATE permission on <all keyspaces> or any of its parents
+OK   SELECT keyspace_name, replication FROM system_schema.keyspaces WHERE keyspace_name = 'system_traces';  -> rows=1 warnings=[]
+    Row[system_traces, {class=org.apache.cassandra.locator.SimpleStrategy, replication_factor=2}]
+OK   SELECT session_id FROM system_traces.sessions LIMIT 1;  -> rows=0 warnings=[]
+OK   SELECT session_id FROM system_traces.events LIMIT 1;  -> rows=0 warnings=[]
+ERR  INSERT INTO system_traces.events (session_id, event_id, activity) VALUES (uuid(), now(), 'probe');  -> UnauthorizedException: User nogrant has no MODIFY permission on <table system_traces.events> or any of its parents
+ERR  INSERT INTO system_traces.sessions (session_id, request) VALUES (uuid(), 'probe');  -> UnauthorizedException: User nogrant has no MODIFY permission on <table system_traces.sessions> or any of its parents
+OK   SELECT session_id, activity FROM system_traces.events WHERE activity = 'x' ALLOW FILTERING;  -> rows=0 warnings=[]
+schema agreement=true

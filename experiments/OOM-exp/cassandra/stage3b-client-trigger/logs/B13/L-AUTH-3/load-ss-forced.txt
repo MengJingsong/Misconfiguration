@@ -1,0 +1,38 @@
+READY 16 sockets; SO_RCVBUF 131072; mode stall; auth nogrant; handshakes 2.4 s; query 'SELECT * FROM system_schema.columns'
+REQ_BYTES 64 (one request incl. segment framing)
+LOAD_START 1795537298480
+WAVE 1795537298481 320
+231
+WAVE 1795537527481 73600
+WAVE 1795537528481 73920
+
+State Recv-Q Send-Q Local Address:Port Peer Address:PortProcess
+6430-	at java.base/java.lang.Thread.run(Thread.java:829)
+6431:ERROR [ReadStage-73] 2026-11-24T16:25:27,560 JVMStabilityInspector.java:197 - Force heap space OutOfMemoryError in the presence of
+6432-java.lang.OutOfMemoryError: Direct buffer memory
+6433-	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+6434-	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+6435-	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+6436-	at org.apache.cassandra.io.compress.BufferType$2.allocate(BufferType.java:35)
+6437-	at org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer.getBlock(ThreadLocalReadAheadBuffer.java:84)
+6438-	at org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer.allocateBuffer(ThreadLocalReadAheadBuffer.java:76)
+6439-	at org.apache.cassandra.io.util.CompressedChunkReader$ScanCompressedReader.allocateResources(CompressedChunkReader.java:204)
+6440-	at org.apache.cassandra.io.util.CompressedChunkReader$Standard.forScan(CompressedChunkReader.java:244)
+6441-	at org.apache.cassandra.io.util.CompressedChunkReader.instantiateRebufferer(CompressedChunkReader.java:95)
+6442-	at org.apache.cassandra.io.util.FileHandle.instantiateRebufferer(FileHandle.java:204)
+6443-	at org.apache.cassandra.io.util.FileHandle.createReader(FileHandle.java:156)
+6444-	at org.apache.cassandra.io.util.FileHandle.createReaderForScan(FileHandle.java:139)
+6445-	at org.apache.cassandra.io.sstable.format.SSTableReader.openDataReaderForScan(SSTableReader.java:1385)
+6446-	at org.apache.cassandra.io.sstable.format.SSTableScanner.<init>(SSTableScanner.java:78)
+6447-	at org.apache.cassandra.io.sstable.format.big.BigTableScanner.<init>(BigTableScanner.java:62)
+6448-	at org.apache.cassandra.io.sstable.format.big.BigTableScanner.getScanner(BigTableScanner.java:53)
+6449-	at org.apache.cassandra.io.sstable.format.big.BigTableReader.partitionIterator(BigTableReader.java:149)
+6450-	at org.apache.cassandra.io.sstable.format.big.BigTableReader.partitionIterator(BigTableReader.java:85)
+6451-	at org.apache.cassandra.db.PartitionRangeReadCommand.queryStorage(PartitionRangeReadCommand.java:340)
+6452-	at org.apache.cassandra.db.ReadCommand.executeLocally(ReadCommand.java:452)
+6453-	at org.apache.cassandra.service.StorageProxy$LocalReadRunnable.runMayThrow(StorageProxy.java:2209)
+6454-	at org.apache.cassandra.service.StorageProxy$DroppableRunnable.run(StorageProxy.java:2608)
+6455-	at org.apache.cassandra.concurrent.ExecutionFailure$2.run(ExecutionFailure.java:163)
+6456-	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+6457-	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+6458-	at java.base/java.lang.Thread.run(Thread.java:829)

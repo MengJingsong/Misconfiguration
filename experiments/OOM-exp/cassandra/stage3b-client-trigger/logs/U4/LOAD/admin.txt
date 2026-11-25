@@ -1,0 +1,30 @@
+== role cassandra
+03:07:13 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+OK   CREATE KEYSPACE u4 WITH replication = {'class':'SimpleStrategy','replication_factor':1}  rows=0
+OK   CREATE TABLE u4.t (pk int, ck int, v blob, PRIMARY KEY (pk, ck))  rows=0
+OK   CREATE ROLE attacker WITH PASSWORD = 'att-pw' AND LOGIN = true AND SUPERUSER = false  rows=0
+OK   CREATE ROLE reader WITH PASSWORD = 'rd-pw' AND LOGIN = true AND SUPERUSER = false  rows=0
+OK   CREATE ROLE nogrant WITH PASSWORD = 'ng-pw' AND LOGIN = true AND SUPERUSER = false  rows=0
+OK   CREATE ROLE victim WITH PASSWORD = 'vic-pw' AND LOGIN = true AND SUPERUSER = false  rows=0
+OK   GRANT SELECT ON TABLE u4.t TO attacker  rows=0
+OK   GRANT MODIFY ON TABLE u4.t TO attacker  rows=0
+OK   GRANT SELECT ON TABLE u4.t TO reader  rows=0
+OK   CREATE KEYSPACE vks WITH replication = {'class':'SimpleStrategy','replication_factor':1}  rows=0
+OK   CREATE TABLE vks.kv (k int PRIMARY KEY, v blob)  rows=0
+OK   GRANT SELECT ON TABLE vks.kv TO victim  rows=0
+OK   GRANT MODIFY ON TABLE vks.kv TO victim  rows=0
+OK   LIST ALL PERMISSIONS OF attacker  rows=2
+    Row[attacker, attacker, <table u4.t>, SELECT]
+    Row[attacker, attacker, <table u4.t>, MODIFY]
+OK   LIST ALL PERMISSIONS OF reader  rows=1
+    Row[reader, reader, <table u4.t>, SELECT]
+OK   LIST ALL PERMISSIONS OF nogrant  rows=0
+OK   LIST ALL PERMISSIONS OF victim  rows=2
+    Row[victim, victim, <table vks.kv>, SELECT]
+    Row[victim, victim, <table vks.kv>, MODIFY]
+OK   LIST ROLES  rows=5
+    Row[attacker, false, true, {}, ALL]
+    Row[cassandra, true, true, {}, ALL]
+    Row[nogrant, false, true, {}, ALL]
+    Row[reader, false, true, {}, ALL]
+    Row[victim, false, true, {}, ALL]

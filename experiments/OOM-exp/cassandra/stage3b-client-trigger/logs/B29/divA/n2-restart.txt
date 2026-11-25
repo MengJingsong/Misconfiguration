@@ -1,0 +1,44 @@
+[23:27:42] operator: node 2 restart
+[2026-11-24 23:27:52 EST] stopped LOAD n2
+total 16
+drwxr-xr-x 2 jason92 misconfiguration 4096 Nov 24 21:27 .
+drwxr-xr-x 7 jason92 misconfiguration 4096 Nov 24 21:16 ..
+-rw-r--r-- 1 jason92 misconfiguration    8 Nov 24 21:27 6c73fcd3-d7a4-4f35-b42c-4cd692a41102-1795580761580-2.crc32
+-rw-r--r-- 1 jason92 misconfiguration 2138 Nov 24 21:26 6c73fcd3-d7a4-4f35-b42c-4cd692a41102-1795580761580-2.hints
+[2026-11-24 23:27:53 EST] started LOAD-n2b n2 pid 1160115 heap 8G
+[2026-11-24 23:29:09 EST] n2 died during start
+INFO  [PerDiskMemtableFlushWriter_0:3] 2026-11-25T04:29:06,868 Flushing.java:153 - Writing Memtable-sstable_activity@797322088(16B serialized bytes, 2 ops, 667B (0%) on-heap, 0B (0%) off-heap), flushed range = [min(-9223372036854775808), max(9223372036854775807))
+INFO  [PerDiskMemtableFlushWriter_0:3] 2026-11-25T04:29:06,869 Flushing.java:179 - Completed flushing /mydata/s4/3b-B29/n2/data/system/sstable_activity-5a1ff267ace03f128563cfae6103c65e/nb-2-big-Data.db (97B) for commitlog position CommitLogPosition(segmentId=1795580877710, position=73719)
+INFO  [MemtableFlushWriter:4] 2026-11-25T04:29:06,876 LogTransaction.java:249 - Unfinished transaction log, deleting /mydata/s4/3b-B29/n2/data/system/sstable_activity-5a1ff267ace03f128563cfae6103c65e/nb_txn_flush_c08983f0-e888-11f1-bae1-2b699a37c8e8.log 
+INFO  [StorageServiceShutdownHook] 2026-11-25T04:29:06,877 HintsService.java:234 - Paused hints dispatch
+INFO  [StorageServiceShutdownHook] 2026-11-25T04:29:06,898 StorageService.java:1004 - Cassandra shutdown complete
+listpendinghints: nodetool: Failed to connect to '127.0.0.1:7299' - ConnectException: 'Connection refused (Connection refused)'.
+total 16
+drwxr-xr-x 2 jason92 misconfiguration 4096 Nov 24 21:27 .
+drwxr-xr-x 7 jason92 misconfiguration 4096 Nov 24 21:16 ..
+-rw-r--r-- 1 jason92 misconfiguration    8 Nov 24 21:27 6c73fcd3-d7a4-4f35-b42c-4cd692a41102-1795580761580-2.crc32
+-rw-r--r-- 1 jason92 misconfiguration 2138 Nov 24 21:26 6c73fcd3-d7a4-4f35-b42c-4cd692a41102-1795580761580-2.hints
+after truncatehints:
+total 16
+drwxr-xr-x 2 jason92 misconfiguration 4096 Nov 24 21:27 .
+drwxr-xr-x 7 jason92 misconfiguration 4096 Nov 24 21:16 ..
+-rw-r--r-- 1 jason92 misconfiguration    8 Nov 24 21:27 6c73fcd3-d7a4-4f35-b42c-4cd692a41102-1795580761580-2.crc32
+-rw-r--r-- 1 jason92 misconfiguration 2138 Nov 24 21:26 6c73fcd3-d7a4-4f35-b42c-4cd692a41102-1795580761580-2.hints
+listpendinghints: nodetool: Failed to connect to '127.0.0.1:7299' - ConnectException: 'Connection refused (Connection refused)'.
+[23:29:35] node 2 restart failed: node 2 is not a seed and node 1 (the only seed) is down: "Unable to gossip with any peers" (runs/LOAD-n2b/n2/logs/system.log)
+operator: with both nodes down, remove node 2 hint files for node 1 (standing for an outage past max_hint_window: no hints written)
+n1/hints:
+total 8
+drwxr-xr-x 2 jason92 misconfiguration 4096 Nov 24 21:22 .
+drwxr-xr-x 7 jason92 misconfiguration 4096 Nov 24 21:16 ..
+
+n2/hints:
+total 16
+drwxr-xr-x 2 jason92 misconfiguration 4096 Nov 24 21:27 .
+drwxr-xr-x 7 jason92 misconfiguration 4096 Nov 24 21:16 ..
+-rw-r--r-- 1 jason92 misconfiguration    8 Nov 24 21:27 6c73fcd3-d7a4-4f35-b42c-4cd692a41102-1795580761580-2.crc32
+-rw-r--r-- 1 jason92 misconfiguration 2138 Nov 24 21:26 6c73fcd3-d7a4-4f35-b42c-4cd692a41102-1795580761580-2.hints
+after:
+total 8
+drwxr-xr-x 2 jason92 misconfiguration 4096 Nov 24 21:29 .
+drwxr-xr-x 7 jason92 misconfiguration 4096 Nov 24 21:16 ..

@@ -1,0 +1,66 @@
+INFO  [Service Thread] 2026-11-24T16:19:00,466 StatusLogger.java:121 - system.built_views                        0,0
+INFO  [Service Thread] 2026-11-24T16:19:00,466 StatusLogger.java:121 - system.peer_events                        0,0
+INFO  [Service Thread] 2026-11-24T16:19:00,467 StatusLogger.java:121 - system.peers_v2                           0,0
+INFO  [Service Thread] 2026-11-24T16:19:00,467 StatusLogger.java:121 - system.peers                              0,0
+ERROR [ReadStage-48] 2026-11-24T16:19:00,480 JVMStabilityInspector.java:70 - Exception in thread Thread[ReadStage-48,10,SharedPool]
+java.lang.OutOfMemoryError: Direct buffer memory
+	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+	at org.apache.cassandra.io.compress.BufferType$2.allocate(BufferType.java:35)
+	at org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer.getBlock(ThreadLocalReadAheadBuffer.java:84)
+	at org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer.allocateBuffer(ThreadLocalReadAheadBuffer.java:76)
+	at org.apache.cassandra.io.util.CompressedChunkReader$ScanCompressedReader.allocateResources(CompressedChunkReader.java:204)
+	at org.apache.cassandra.io.util.CompressedChunkReader$Standard.forScan(CompressedChunkReader.java:244)
+	at org.apache.cassandra.io.util.CompressedChunkReader.instantiateRebufferer(CompressedChunkReader.java:95)
+	at org.apache.cassandra.io.util.FileHandle.instantiateRebufferer(FileHandle.java:204)
+	at org.apache.cassandra.io.util.FileHandle.createReader(FileHandle.java:156)
+	at org.apache.cassandra.io.util.FileHandle.createReaderForScan(FileHandle.java:139)
+	at org.apache.cassandra.io.sstable.format.SSTableReader.openDataReaderForScan(SSTableReader.java:1385)
+	at org.apache.cassandra.io.sstable.format.SSTableScanner.<init>(SSTableScanner.java:78)
+	at org.apache.cassandra.io.sstable.format.big.BigTableScanner.<init>(BigTableScanner.java:62)
+	at org.apache.cassandra.io.sstable.format.big.BigTableScanner.getScanner(BigTableScanner.java:53)
+	at org.apache.cassandra.io.sstable.format.big.BigTableReader.partitionIterator(BigTableReader.java:149)
+	at org.apache.cassandra.io.sstable.format.big.BigTableReader.partitionIterator(BigTableReader.java:85)
+	at org.apache.cassandra.db.PartitionRangeReadCommand.queryStorage(PartitionRangeReadCommand.java:340)
+	at org.apache.cassandra.db.ReadCommand.executeLocally(ReadCommand.java:452)
+	at org.apache.cassandra.service.StorageProxy$LocalReadRunnable.runMayThrow(StorageProxy.java:2209)
+	at org.apache.cassandra.service.StorageProxy$DroppableRunnable.run(StorageProxy.java:2608)
+	at org.apache.cassandra.concurrent.ExecutionFailure$2.run(ExecutionFailure.java:163)
+	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+INFO  [Service Thread] 2026-11-24T16:19:00,701 StatusLogger.java:121 - system.peer_events_v2                     0,0
+INFO  [Service Thread] 2026-11-24T16:19:00,702 StatusLogger.java:121 - system.batches                            0,0
+INFO  [Service Thread] 2026-11-24T16:19:00,702 StatusLogger.java:121 - system.transferred_ranges                 0,0
+INFO  [Service Thread] 2026-11-24T16:19:00,703 StatusLogger.java:121 - system.transferred_ranges_v2                 0,0
+INFO  [Service Thread] 2026-11-24T16:19:00,703 StatusLogger.java:121 - system.view_builds_in_progress                 0,0
+INFO  [Service Thread] 2026-11-24T16:19:00,703 StatusLogger.java:121 - system.local                              0,0
+INFO  [Service Thread] 2026-11-24T16:19:00,704 StatusLogger.java:121 - system.sstable_activity                  5,40
+INFO  [Service Thread] 2026-11-24T16:19:00,704 StatusLogger.java:121 - system.top_partitions                     0,0
+INFO  [Service Thread] 2026-11-24T16:19:00,704 StatusLogger.java:121 - system.available_ranges_v2                 0,0
+INFO  [Service Thread] 2026-11-24T16:19:00,705 StatusLogger.java:121 - system.available_ranges                   0,0
+INFO  [Service Thread] 2026-11-24T16:19:00,705 StatusLogger.java:121 - system.prepared_statements                 0,0
+WARN  [Service Thread] 2026-11-24T16:19:01,732 GCInspector.java:284 - G1 Old Generation GC in 1353ms.  G1 Old Gen: 99919040 -> 99896528; 
+INFO  [Service Thread] 2026-11-24T16:19:01,733 StatusLogger.java:67 - Pool Name                       Active   Pending      Completed   Blocked  All Time Blocked
+INFO  [Service Thread] 2026-11-24T16:19:01,734 StatusLogger.java:71 - ReadStage                           32        93          73275         0                 0
+INFO  [Service Thread] 2026-11-24T16:19:01,734 StatusLogger.java:71 - Native-Transport-Auth-Requests         0         0             38         0                 0
+INFO  [Service Thread] 2026-11-24T16:19:01,735 StatusLogger.java:71 - CompactionExecutor                   0         0             51         0                 0
+INFO  [Service Thread] 2026-11-24T16:19:01,735 StatusLogger.java:71 - SecondaryIndexExecutor               0         0              0         0                 0
+INFO  [Service Thread] 2026-11-24T16:19:01,735 StatusLogger.java:71 - MutationStage                        0         0           2290         0                 0
+INFO  [Service Thread] 2026-11-24T16:19:01,738 StatusLogger.java:71 - MemtableReclaimMemory                0         0              5         0                 0
+INFO  [Service Thread] 2026-11-24T16:19:01,738 StatusLogger.java:71 - PendingRangeCalculator               0         0              2         0                 0
+INFO  [Service Thread] 2026-11-24T16:19:01,739 StatusLogger.java:71 - GossipStage                          0         0              0         0                 0
+INFO  [Service Thread] 2026-11-24T16:19:01,739 StatusLogger.java:71 - SecondaryIndexManagement             0         0              1         0                 0
+INFO  [Service Thread] 2026-11-24T16:19:01,739 StatusLogger.java:71 - HintsDispatcher                      0         0              0         0                 0
+INFO  [Service Thread] 2026-11-24T16:19:01,740 StatusLogger.java:71 - Native-Transport-Requests          128      1464          74947         0                 0
+INFO  [Service Thread] 2026-11-24T16:19:01,740 StatusLogger.java:71 - MigrationStage                       0         0              0         0                 0
+INFO  [Service Thread] 2026-11-24T16:19:01,740 StatusLogger.java:71 - StatusPropagationExecutor            0         0              0         0                 0
+INFO  [Service Thread] 2026-11-24T16:19:01,745 StatusLogger.java:71 - MemtableFlushWriter                  0         0              5         0                 0
+INFO  [Service Thread] 2026-11-24T16:19:01,746 StatusLogger.java:71 - MemtablePostFlush                    0         0              5         0                 0
+INFO  [Service Thread] 2026-11-24T16:19:01,746 StatusLogger.java:71 - PerDiskMemtableFlushWriter_0         0         0              3         0                 0
+INFO  [Service Thread] 2026-11-24T16:19:01,747 StatusLogger.java:71 - Sampler                              0         0              0         0                 0
+INFO  [Service Thread] 2026-11-24T16:19:01,747 StatusLogger.java:71 - ValidationExecutor                   0         0              0         0                 0
+INFO  [Service Thread] 2026-11-24T16:19:03,113 StatusLogger.java:71 - ViewBuildExecutor                    0         0              0         0                 0
+INFO  [Service Thread] 2026-11-24T16:19:03,114 StatusLogger.java:71 - CacheCleanupExecutor                 0         0              0         0                 0
+INFO  [Service Thread] 2026-11-24T16:19:03,337 StatusLogger.java:81 - CompactionManager                 0         0

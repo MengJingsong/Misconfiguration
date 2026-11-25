@@ -1,0 +1,61 @@
+{
+ "cmd": "cql",
+ "args": [
+  "LIST ALL PERMISSIONS OF attacker",
+  "SELECT * FROM victim.kv LIMIT 1",
+  "INSERT INTO victim.kv (k, v) VALUES (0, 'a')",
+  "CREATE ROLE evil WITH PASSWORD = 'x' AND LOGIN = true",
+  "ALTER TABLE victim.kv WITH comment = 'x'",
+  "GRANT SELECT ON TABLE victim.kv TO attacker",
+  "SELECT name, value FROM system_views.settings WHERE name = 'memtable_heap_space'"
+ ],
+ "start_ms": 1795537466395,
+ "user": "attacker",
+ "results": [
+  {
+   "q": "LIST ALL PERMISSIONS OF attacker",
+   "ok": true,
+   "n": 1,
+   "rows": [
+    [
+     "attacker",
+     "attacker",
+     "<all keyspaces>",
+     "CREATE"
+    ]
+   ],
+   "warnings": null
+  },
+  {
+   "q": "SELECT * FROM victim.kv LIMIT 1",
+   "ok": false,
+   "error": "Unauthorized('Error from server: code=2100 [Unauthorized] message=\"User attacker has no SELECT permission on <table victim.kv> or any of its parents\"')"
+  },
+  {
+   "q": "INSERT INTO victim.kv (k, v) VALUES (0, 'a')",
+   "ok": false,
+   "error": "Unauthorized('Error from server: code=2100 [Unauthorized] message=\"User attacker has no MODIFY permission on <table victim.kv> or any of its parents\"')"
+  },
+  {
+   "q": "CREATE ROLE evil WITH PASSWORD = 'x' AND LOGIN = true",
+   "ok": false,
+   "error": "Unauthorized('Error from server: code=2100 [Unauthorized] message=\"User attacker does not have sufficient privileges to perform the requested operation\"')"
+  },
+  {
+   "q": "ALTER TABLE victim.kv WITH comment = 'x'",
+   "ok": false,
+   "error": "Unauthorized('Error from server: code=2100 [Unauthorized] message=\"User attacker has no ALTER permission on <table victim.kv> or any of its parents\"')"
+  },
+  {
+   "q": "GRANT SELECT ON TABLE victim.kv TO attacker",
+   "ok": false,
+   "error": "Unauthorized('Error from server: code=2100 [Unauthorized] message=\"User attacker has no AUTHORIZE permission on <table victim.kv> or any of its parents\"')"
+  },
+  {
+   "q": "SELECT name, value FROM system_views.settings WHERE name = 'memtable_heap_space'",
+   "ok": false,
+   "error": "Unauthorized('Error from server: code=2100 [Unauthorized] message=\"User attacker has no SELECT permission on <table system_views.settings> or any of its parents\"')"
+  }
+ ],
+ "seconds": 0.41
+}

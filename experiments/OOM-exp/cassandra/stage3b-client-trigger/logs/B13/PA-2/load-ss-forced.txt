@@ -1,0 +1,52 @@
+READY 16 sockets; SO_RCVBUF 131072; mode stall; auth PREAUTH (AUTHENTICATE unanswered); handshakes 0.1 s; query 'SELECT v FROM b13.t WHERE pk = {pk}'
+REQ_BYTES 61 (one request incl. segment framing)
+LOAD_START 1795537975044
+WAVE 1795538321057 33312000
+WAVE 1795538322062 33408000
+
+State      Recv-Q Send-Q Local Address:Port Peer Address:Port Process                                                  
+CLOSE-WAIT 32     0        127.0.0.131:9042    127.0.0.1:44828
+	 skmem:(r1311,rb131072,t0,tb2626560,f2785,w0,o0,bl0,d0)
+ESTAB      31     0        127.0.0.131:9042    127.0.0.1:44850
+	 skmem:(r1311,rb131072,t0,tb2626560,f2785,w0,o0,bl0,d0)
+CLOSE-WAIT 32     0        127.0.0.131:9042    127.0.0.1:44814
+	 skmem:(r1311,rb131072,t0,tb2626560,f2785,w0,o0,bl0,d0)
+CLOSE-WAIT 32     0        127.0.0.131:9042    127.0.0.1:44840
+	 skmem:(r1311,rb131072,t0,tb2626560,f2785,w0,o0,bl0,d0)
+9353-WARN  [epollEventLoopGroup-5-7] 2026-11-24T16:38:46,324 ExceptionHandlers.java:181 - Unknown exception in client networking with peer /127.0.0.1:54004 null
+9354:ERROR [epollEventLoopGroup-5-6] 2026-11-24T16:38:46,326 JVMStabilityInspector.java:197 - Force heap space OutOfMemoryError in the presence of
+9355-java.lang.OutOfMemoryError: Direct buffer memory
+9356-	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+9357-	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+9358-	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+9359-	at org.apache.cassandra.utils.memory.BufferPool.allocate(BufferPool.java:238)
+9360-	at org.apache.cassandra.utils.memory.BufferPool$LocalPool.get(BufferPool.java:923)
+9361-	at org.apache.cassandra.utils.memory.BufferPool$LocalPool.getAtLeast(BufferPool.java:901)
+9362-	at org.apache.cassandra.utils.memory.BufferPool.getAtLeast(BufferPool.java:219)
+9363-	at org.apache.cassandra.net.BufferPoolAllocator.getAtLeast(BufferPoolAllocator.java:75)
+9364-	at org.apache.cassandra.net.BufferPoolAllocator.newDirectBuffer(BufferPoolAllocator.java:63)
+9365-	at io.netty.buffer.AbstractByteBufAllocator.directBuffer(AbstractByteBufAllocator.java:188)
+9366-	at io.netty.buffer.AbstractByteBufAllocator.directBuffer(AbstractByteBufAllocator.java:179)
+9367-	at io.netty.channel.unix.PreferredDirectByteBufAllocator.ioBuffer(PreferredDirectByteBufAllocator.java:53)
+9368-	at io.netty.channel.DefaultMaxMessagesRecvByteBufAllocator$MaxMessageHandle.allocate(DefaultMaxMessagesRecvByteBufAllocator.java:120)
+9369-	at io.netty.channel.epoll.EpollRecvByteAllocatorHandle.allocate(EpollRecvByteAllocatorHandle.java:75)
+9370-	at io.netty.channel.epoll.AbstractEpollStreamChannel$EpollStreamUnsafe.epollInReady(AbstractEpollStreamChannel.java:790)
+9371-	at io.netty.channel.epoll.AbstractEpollChannel$AbstractEpollUnsafe$1.run(AbstractEpollChannel.java:425)
+9372-	at io.netty.util.concurrent.AbstractEventExecutor.runTask(AbstractEventExecutor.java:173)
+9373-	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:166)
+9374-	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:472)
+9375-	at io.netty.channel.epoll.EpollEventLoop.run(EpollEventLoop.java:405)
+9376-	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:998)
+9377-	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+9378-	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+9379-	at java.base/java.lang.Thread.run(Thread.java:829)
+9380-WARN  [epollEventLoopGroup-5-3] 2026-11-24T16:38:46,319 ExceptionHandlers.java:181 - Unknown exception in client networking with peer /127.0.0.1:53988 null
+9381-WARN  [epollEventLoopGroup-5-4] 2026-11-24T16:38:46,319 ExceptionHandlers.java:181 - Unknown exception in client networking with peer /127.0.0.1:53994 null
+9382-WARN  [epollEventLoopGroup-5-10] 2026-11-24T16:38:46,319 ExceptionHandlers.java:181 - Unknown exception in client networking with peer /127.0.0.1:54038 null
+9383-WARN  [epollEventLoopGroup-5-12] 2026-11-24T16:38:46,315 ExceptionHandlers.java:181 - Unknown exception in client networking with peer /127.0.0.1:54062 null
+
+count Unexpected/ProtocolException in system.log, debug.log:
+V-logs/system.log:1
+V-logs/debug.log:1
+Maximum memory usage lines:
+1

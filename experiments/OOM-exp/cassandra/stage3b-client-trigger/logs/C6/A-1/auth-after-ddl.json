@@ -1,0 +1,139 @@
+{
+ "cmd": "cql",
+ "args": [
+  "LIST ALL PERMISSIONS OF attacker",
+  "SELECT * FROM victim.kv LIMIT 1",
+  "INSERT INTO victim.kv (k, v) VALUES (0, 'a')",
+  "CREATE ROLE evil WITH PASSWORD = 'x' AND LOGIN = true",
+  "ALTER TABLE victim.kv WITH comment = 'x'",
+  "GRANT SELECT ON TABLE victim.kv TO attacker",
+  "SELECT name, value FROM system_views.settings WHERE name = 'memtable_heap_space'",
+  "LIST ALL PERMISSIONS OF attacker ON KEYSPACE ks",
+  "LIST ALL PERMISSIONS OF attacker ON TABLE ks.t2499"
+ ],
+ "start_ms": 1795538888927,
+ "user": "attacker",
+ "results": [
+  {
+   "q": "LIST ALL PERMISSIONS OF attacker",
+   "ok": true,
+   "n": 17514,
+   "rows": [
+    [
+     "attacker",
+     "attacker",
+     "<all keyspaces>",
+     "CREATE"
+    ],
+    [
+     "attacker",
+     "attacker",
+     "<keyspace ks>",
+     "CREATE"
+    ],
+    [
+     "attacker",
+     "attacker",
+     "<keyspace ks>",
+     "ALTER"
+    ],
+    [
+     "attacker",
+     "attacker",
+     "<keyspace ks>",
+     "DROP"
+    ],
+    [
+     "attacker",
+     "attacker",
+     "<keyspace ks>",
+     "SELECT"
+    ],
+    [
+     "attacker",
+     "attacker",
+     "<keyspace ks>",
+     "MODIFY"
+    ],
+    [
+     "attacker",
+     "attacker",
+     "<keyspace ks>",
+     "AUTHORIZE"
+    ],
+    [
+     "attacker",
+     "attacker",
+     "<keyspace ks>",
+     "UNMASK"
+    ],
+    [
+     "attacker",
+     "attacker",
+     "<keyspace ks>",
+     "SELECT_MASKED"
+    ],
+    [
+     "attacker",
+     "attacker",
+     "<table ks.t0>",
+     "ALTER"
+    ],
+    [
+     "attacker",
+     "attacker",
+     "<table ks.t0>",
+     "DROP"
+    ],
+    [
+     "attacker",
+     "attacker",
+     "<table ks.t0>",
+     "SELECT"
+    ]
+   ],
+   "warnings": null
+  },
+  {
+   "q": "SELECT * FROM victim.kv LIMIT 1",
+   "ok": false,
+   "error": "Unauthorized('Error from server: code=2100 [Unauthorized] message=\"User attacker has no SELECT permission on <table victim.kv> or any of its parents\"')"
+  },
+  {
+   "q": "INSERT INTO victim.kv (k, v) VALUES (0, 'a')",
+   "ok": false,
+   "error": "Unauthorized('Error from server: code=2100 [Unauthorized] message=\"User attacker has no MODIFY permission on <table victim.kv> or any of its parents\"')"
+  },
+  {
+   "q": "CREATE ROLE evil WITH PASSWORD = 'x' AND LOGIN = true",
+   "ok": false,
+   "error": "Unauthorized('Error from server: code=2100 [Unauthorized] message=\"User attacker does not have sufficient privileges to perform the requested operation\"')"
+  },
+  {
+   "q": "ALTER TABLE victim.kv WITH comment = 'x'",
+   "ok": false,
+   "error": "Unauthorized('Error from server: code=2100 [Unauthorized] message=\"User attacker has no ALTER permission on <table victim.kv> or any of its parents\"')"
+  },
+  {
+   "q": "GRANT SELECT ON TABLE victim.kv TO attacker",
+   "ok": false,
+   "error": "Unauthorized('Error from server: code=2100 [Unauthorized] message=\"User attacker has no AUTHORIZE permission on <table victim.kv> or any of its parents\"')"
+  },
+  {
+   "q": "SELECT name, value FROM system_views.settings WHERE name = 'memtable_heap_space'",
+   "ok": false,
+   "error": "Unauthorized('Error from server: code=2100 [Unauthorized] message=\"User attacker has no SELECT permission on <table system_views.settings> or any of its parents\"')"
+  },
+  {
+   "q": "LIST ALL PERMISSIONS OF attacker ON KEYSPACE ks",
+   "ok": false,
+   "error": "<Error from server: code=2000 [Syntax error in CQL query] message=\"line 1:33 mismatched input 'ON' expecting EOF (LIST ALL PERMISSIONS OF attacker [ON]...)\">"
+  },
+  {
+   "q": "LIST ALL PERMISSIONS OF attacker ON TABLE ks.t2499",
+   "ok": false,
+   "error": "<Error from server: code=2000 [Syntax error in CQL query] message=\"line 1:33 mismatched input 'ON' expecting EOF (LIST ALL PERMISSIONS OF attacker [ON]...)\">"
+  }
+ ],
+ "seconds": 3.15
+}

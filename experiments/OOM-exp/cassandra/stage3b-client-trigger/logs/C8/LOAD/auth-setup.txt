@@ -1,0 +1,107 @@
+== superuser statements (cqlsh as cassandra)
+CREATE ROLE attacker WITH PASSWORD = 'attacker-pw-3b' AND LOGIN = true AND SUPERUSER = false;
+GRANT CREATE ON ALL KEYSPACES TO attacker;
+CREATE ROLE nogrant WITH PASSWORD = 'nogrant-pw-3b' AND LOGIN = true AND SUPERUSER = false;
+CREATE ROLE victim WITH PASSWORD = 'victim-pw-3b' AND LOGIN = true AND SUPERUSER = false;
+CREATE KEYSPACE victim WITH replication = {'class':'SimpleStrategy','replication_factor':1};
+CREATE TABLE victim.kv (k int PRIMARY KEY, v text);
+GRANT SELECT ON TABLE victim.kv TO victim;
+GRANT MODIFY ON TABLE victim.kv TO victim;
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+== setup OK
+== LIST ROLES
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+
+ role      | super | login | options | datacenters
+-----------+-------+-------+---------+-------------
+  attacker | False |  True |        {} |         ALL
+ cassandra |  True |  True |        {} |         ALL
+   nogrant | False |  True |        {} |         ALL
+    victim | False |  True |        {} |         ALL
+
+(4 rows)
+== LIST ALL PERMISSIONS OF attacker (before attacker DDL)
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+
+ role     | username | resource        | permission
+----------+----------+-----------------+------------
+ attacker | attacker | <all keyspaces> |     CREATE
+
+(1 rows)
+== LIST ALL PERMISSIONS OF victim (before attacker DDL)
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+
+ role   | username | resource          | permission
+--------+----------+-------------------+------------
+ victim |   victim | <table victim.kv> |     SELECT
+ victim |   victim | <table victim.kv> |     MODIFY
+
+(2 rows)
+== LIST ALL PERMISSIONS OF nogrant (before attacker DDL)
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+
+ role | resource | permissions
+------+----------+-------------
+
+
+(0 rows)
+== attacker negative checks (expect Unauthorized)
+<stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User attacker has no SELECT permission on <table victim.kv> or any of its parents"
+<stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User attacker has no ALTER permission on <table victim.kv> or any of its parents"
+<stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User attacker has no ALTER permission on <table victim.kv> or any of its parents"
+== nogrant negative checks (expect Unauthorized)
+<stdin>:1:Unauthorized: Error from server: code=2100 [Unauthorized] message="User nogrant has no CREATE permission on <all keyspaces> or any of its parents"
+== unauthenticated cqlsh (expect AuthenticationFailed)
+Connection error: ('Unable to connect to any servers', {'127.0.0.1:9042': AuthenticationFailed('Remote end requires authentication')})
+== attacker DDL (cqlsh as attacker)
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+== attacker DDL OK
+== LIST ALL PERMISSIONS OF attacker (after DDL; creator auto-grants)
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+
+ role     | username | resource              | permission
+----------+----------+-----------------------+---------------
+ attacker | attacker |       <all keyspaces> |        CREATE
+ attacker | attacker |         <keyspace c8> |        CREATE
+ attacker | attacker |         <keyspace c8> |         ALTER
+ attacker | attacker |         <keyspace c8> |          DROP
+ attacker | attacker |         <keyspace c8> |        SELECT
+ attacker | attacker |         <keyspace c8> |        MODIFY
+ attacker | attacker |         <keyspace c8> |     AUTHORIZE
+ attacker | attacker |         <keyspace c8> |        UNMASK
+ attacker | attacker |         <keyspace c8> | SELECT_MASKED
+ attacker | attacker |        <table c8.big> |         ALTER
+ attacker | attacker |        <table c8.big> |          DROP
+ attacker | attacker |        <table c8.big> |        SELECT
+ attacker | attacker |        <table c8.big> |        MODIFY
+ attacker | attacker |        <table c8.big> |     AUTHORIZE
+ attacker | attacker |        <table c8.big> |        UNMASK
+ attacker | attacker |        <table c8.big> | SELECT_MASKED
+ attacker | attacker | <all functions in c8> |        CREATE
+ attacker | attacker | <all functions in c8> |         ALTER
+ attacker | attacker | <all functions in c8> |          DROP
+ attacker | attacker | <all functions in c8> |     AUTHORIZE
+ attacker | attacker | <all functions in c8> |       EXECUTE
+
+(21 rows)

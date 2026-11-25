@@ -1,0 +1,29 @@
+[2026-11-24 13:26:44 1795552004714] RUN NF-1 mode=NF heap=2G guard=16G table=n1m mode=set c=16 window=180 role=attacker start_epoch=1795552004
+[2026-11-24 13:26:45 1795552005069] + systemd-run --user --scope -p MemoryMax=16G -p MemorySwapMax=0 --unit=3bu3-NF-1 env MAX_HEAP_SIZE=2G bin/cassandra -f
+[2026-11-24 13:27:10 1795552030784] NODE up daemon_pid=858362 cgroup=/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/3bu3-NF-1.scope memory.max=17179869184 swap.max=0
+[2026-11-24 13:27:10 1795552030796] JVMARGS -XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M 
+[2026-11-24 13:27:10 1795552030811] RESOLVED authenticator=PasswordAuthenticator{}; authenticator=null; authorizer=AllowAllCIDRAuthorizernull; authorizer=CassandraAuthorizer{}; collection_size_fail_threshold=null; collection_size_warn_threshold=null; concurrent_reads=32; items_per_collection_fail_threshold=-1; items_per_collection_warn_threshold=-1; native_transport_max_concurrent_connections=-1; native_transport_max_threads=128; native_transport_rate_limiting_enabled=false; network_authorizer=AllowAllNetworkAuthorizer{}; permissions_validity=2000ms; read_request_timeout=5000ms; read_thresholds_enabled=false; role_manager=CassandraRoleManager{}; roles_validity=2000ms; 
+[2026-11-24 13:27:45 1795552065744] load start (attacker appends into u3.n1m, no flush) at_ms 1795552065733
+[2026-11-24 13:27:45 1795552065756] + [attacker] u3client3b.py loadset n1m 1000000 100000 8
+[2026-11-24 13:28:59 1795552139206] RESULT loadset table=n1m M=1000000 chunk=100000 P=8 accepted=80 rejected=0 seconds=72.0 first=None
+[2026-11-24 13:28:59 1795552139216] LOAD attacker loadset n1m took 74 s
+[2026-11-24 13:28:59 1795552139228] load end at_ms 1795552139219
+[2026-11-24 13:29:03 1795552143786] N1M SSTable count: 4;Old SSTable count: 0;Space used (live): 30996784;Memtable cell count: 3;Memtable data size: 7200041;
+[2026-11-24 13:29:08 1795552148799] CLIENTS start epoch=1795552148.793316463 table=n1m mode=set c=16 role=attacker
+[2026-11-24 13:29:08 1795552148811] attack start role=attacker table=n1m c=16 at_ms 1795552148802
+[2026-11-24 13:29:36 1795552176795] OOME seen (node-events) at t=27s: 1795552176246 java.lang.OutOfMemoryError: Java heap space
+[2026-11-24 13:32:09 1795552329868] attack clients ended; daemon alive (hold end) at_ms 1795552329790
+[2026-11-24 13:32:11 1795552331094] CLIENTS stopped epoch=1795552331.047478138
+[2026-11-24 13:32:11 1795552331177] dump in progress at window end: wait <= 600 s
+[2026-11-24 13:34:17 1795552457155] OOME thrown, daemon alive at window end: wait <= 150 s for the shipped kill -9
+[2026-11-24 13:35:17 1795552517909] DAEMON DIED (after window) at epoch=1795552517.903120831
+[2026-11-24 13:35:17 1795552517915] victim after-phase 30 s
+[2026-11-24 13:35:49 1795552549931] OOMKILL 1795552518135 end 
+[2026-11-24 13:35:49 1795552549946] STDOUT-OOM 1 | java.lang.OutOfMemoryError: Java heap space Dumping heap to /mydata/s4/3b-U3/runs/NF-1/logs/cassandra-1795552005-pid858362.hprof ... Heap dump file created [3125178703 bytes in 280.476 secs] # java.lang.OutOfMemoryError: Java heap space 
+[2026-11-24 13:35:49 1795552549966] SYSLOG ERROR=0 WARN=6 first_error=
+[2026-11-24 13:35:49 1795552549977] AUTHZ-LOG 0
+[2026-11-24 13:35:49 1795552549990] AUTHZ-DEBUG 3 3 
+[2026-11-24 13:35:49 1795552550001] OUTCOME-RAW survived
+[2026-11-24 13:35:50 1795552550076] no Cassandra daemon left
+[2026-11-24 13:35:50 1795552550095] HPROF /mydata/s4/3b-U3/runs/NF-1/logs/cassandra-1795552005-pid858362.hprof 3125178703 birth=1795552176 mtime=1795552456
+[2026-11-24 13:35:50 1795552550221] END end_epoch=1795552550 daemons_left=0 clients_left=0

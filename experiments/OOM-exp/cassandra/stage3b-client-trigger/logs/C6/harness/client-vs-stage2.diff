@@ -1,0 +1,46 @@
+2c2,3
+< """C6 stage-2 client (design §2.5). Bundled Python driver from $CASSANDRA_HOME/lib, protocol 4, CL ONE,
+---
+> """C6 stage-3-b confirm client (2026-11-24; from the stage-2 client.py: PlainTextAuthProvider from env CQL_USER/CQL_PW,
+> `cql` command, warnings recorded in `schema`). C6 stage-2 client (design §2.5). Bundled Python driver from $CASSANDRA_HOME/lib, protocol 4, CL ONE,
+6a8
+>   client.py <host> cql <stmt> [<stmt> ...]           run each statement, record rows (first 50) or the error
+19c21
+< CASS = os.environ.get('CASSANDRA_HOME', '/mydata/s4/c6-w2/cassandra')
+---
+> CASS = os.environ.get('CASSANDRA_HOME', '/mydata/s4/3b-C6/cassandra')
+40a43
+> from cassandra.auth import PlainTextAuthProvider  # noqa: E402
+46c49,50
+<     c = Cluster([host], port=9042, protocol_version=4, execution_profiles={EXEC_PROFILE_DEFAULT: prof},
+---
+>     ap = PlainTextAuthProvider(os.environ['CQL_USER'], os.environ['CQL_PW']) if os.environ.get('CQL_USER') else None
+>     c = Cluster([host], port=9042, protocol_version=4, execution_profiles={EXEC_PROFILE_DEFAULT: prof}, auth_provider=ap,
+156a161,172
+>         elif cmd == 'cql':
+>             res = []
+>             for q in a[2:]:
+>                 try:
+>                     rs = s.execute(q)
+>                     rows = [list(map(str, r)) for r in rs] if rs is not None else []
+>                     res.append({'q': q, 'ok': True, 'n': len(rows), 'rows': rows[:50],
+>                                 'warnings': rs.response_future.warnings if rs is not None else None})
+>                 except Exception as e:
+>                     res.append({'q': q, 'ok': False, 'error': repr(e)[:400]})
+>             out['user'] = os.environ.get('CQL_USER')
+>             out['results'] = res
+164c180,183
+<             s.execute("CREATE KEYSPACE IF NOT EXISTS ks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}")
+---
+>             warns = []
+>             rs = s.execute("CREATE KEYSPACE IF NOT EXISTS ks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}")
+>             if rs.response_future.warnings:
+>                 warns.append(['ks', rs.response_future.warnings])
+167c186,188
+<                 s.execute(f'CREATE TABLE IF NOT EXISTS ks.t{i} (k int PRIMARY KEY, v blob)')
+---
+>                 rs = s.execute(f'CREATE TABLE IF NOT EXISTS ks.t{i} (k int PRIMARY KEY, v blob)')
+>                 if rs.response_future.warnings and len(warns) < 20:
+>                     warns.append([i, rs.response_future.warnings])
+171a193
+>             out['warnings'] = warns

@@ -1,0 +1,181 @@
+{
+ "cmd": "cql",
+ "args": [
+  "CREATE ROLE victim WITH PASSWORD = 'vic-pw-3b' AND LOGIN = true",
+  "CREATE ROLE attacker WITH PASSWORD = 'atk-pw-3b' AND LOGIN = true",
+  "CREATE KEYSPACE victim WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}",
+  "CREATE TABLE victim.kv (k int PRIMARY KEY, v text)",
+  "GRANT SELECT ON TABLE victim.kv TO victim",
+  "GRANT MODIFY ON TABLE victim.kv TO victim",
+  "GRANT CREATE ON ALL KEYSPACES TO attacker",
+  "LIST ALL PERMISSIONS OF attacker",
+  "LIST ALL PERMISSIONS OF victim",
+  "LIST ROLES",
+  "DESCRIBE KEYSPACES"
+ ],
+ "start_ms": 1795537463475,
+ "user": "cassandra",
+ "results": [
+  {
+   "q": "CREATE ROLE victim WITH PASSWORD = 'vic-pw-3b' AND LOGIN = true",
+   "ok": true,
+   "n": 0,
+   "rows": [],
+   "warnings": null
+  },
+  {
+   "q": "CREATE ROLE attacker WITH PASSWORD = 'atk-pw-3b' AND LOGIN = true",
+   "ok": true,
+   "n": 0,
+   "rows": [],
+   "warnings": null
+  },
+  {
+   "q": "CREATE KEYSPACE victim WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}",
+   "ok": true,
+   "n": 0,
+   "rows": [],
+   "warnings": null
+  },
+  {
+   "q": "CREATE TABLE victim.kv (k int PRIMARY KEY, v text)",
+   "ok": true,
+   "n": 0,
+   "rows": [],
+   "warnings": null
+  },
+  {
+   "q": "GRANT SELECT ON TABLE victim.kv TO victim",
+   "ok": true,
+   "n": 0,
+   "rows": [],
+   "warnings": null
+  },
+  {
+   "q": "GRANT MODIFY ON TABLE victim.kv TO victim",
+   "ok": true,
+   "n": 0,
+   "rows": [],
+   "warnings": null
+  },
+  {
+   "q": "GRANT CREATE ON ALL KEYSPACES TO attacker",
+   "ok": true,
+   "n": 0,
+   "rows": [],
+   "warnings": null
+  },
+  {
+   "q": "LIST ALL PERMISSIONS OF attacker",
+   "ok": true,
+   "n": 1,
+   "rows": [
+    [
+     "attacker",
+     "attacker",
+     "<all keyspaces>",
+     "CREATE"
+    ]
+   ],
+   "warnings": null
+  },
+  {
+   "q": "LIST ALL PERMISSIONS OF victim",
+   "ok": true,
+   "n": 2,
+   "rows": [
+    [
+     "victim",
+     "victim",
+     "<table victim.kv>",
+     "SELECT"
+    ],
+    [
+     "victim",
+     "victim",
+     "<table victim.kv>",
+     "MODIFY"
+    ]
+   ],
+   "warnings": null
+  },
+  {
+   "q": "LIST ROLES",
+   "ok": true,
+   "n": 3,
+   "rows": [
+    [
+     "attacker",
+     "False",
+     "True",
+     "{}",
+     "ALL"
+    ],
+    [
+     "cassandra",
+     "True",
+     "True",
+     "{}",
+     "ALL"
+    ],
+    [
+     "victim",
+     "False",
+     "True",
+     "{}",
+     "ALL"
+    ]
+   ],
+   "warnings": null
+  },
+  {
+   "q": "DESCRIBE KEYSPACES",
+   "ok": true,
+   "n": 8,
+   "rows": [
+    [
+     "system",
+     "keyspace",
+     "system"
+    ],
+    [
+     "system_auth",
+     "keyspace",
+     "system_auth"
+    ],
+    [
+     "system_distributed",
+     "keyspace",
+     "system_distributed"
+    ],
+    [
+     "system_schema",
+     "keyspace",
+     "system_schema"
+    ],
+    [
+     "system_traces",
+     "keyspace",
+     "system_traces"
+    ],
+    [
+     "system_views",
+     "keyspace",
+     "system_views"
+    ],
+    [
+     "system_virtual_schema",
+     "keyspace",
+     "system_virtual_schema"
+    ],
+    [
+     "victim",
+     "keyspace",
+     "victim"
+    ]
+   ],
+   "warnings": null
+  }
+ ],
+ "seconds": 1.78
+}
