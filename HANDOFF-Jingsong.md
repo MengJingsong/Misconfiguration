@@ -774,3 +774,21 @@ FQL/audit BinLog queue weight is released before the record is written (72).
 
 **Next:** clear `pc99`'s lock, then stage 4 for 57, 64, 70, 116, 125 and batch 2's 20, then stage 5 for them; band C
 continues after order 239.
+
+## Next session (written 2026-11-25 ≈ 09:30 EST)
+
+State after the 2026-11-24/25 runs (all filed and pushed; last commit `d8d6dc8ac`):
+- **Cassandra extension set** (`writeup-set-ext.csv`): rows reviewed through order **415** (40 case files in batches 1–2;
+  142 rows recorded as covered by the screen + review); 100 A–C rows left. Next batch: run
+  `make-writeup-set-ext.py --screen` first (only annotates open rows), review the flags, take the next 20 new rows.
+- **Stage 4 waiting, Cassandra (25):** orders 57, 64, 70, 116, 125 (batch 1; 116/125 have audits and harnesses ready in
+  `~/writeup-ext/out/o116/`, `o125/`; 57's draft in `o57/`) and 137, 145, 158, 167, 169, 172, 173, 180, 181, 202, 205, 207,
+  208, 212, 219, 235–239 (batch 2). Your calls from batch 1: 115's cluster band miss, 133's rerun gate (see above).
+- **Hadoop (queue.csv):** written up through order **45** (46 case files incl. Yang's 1); next unwritten order **46**.
+  **Stage 4 waiting (23):** 6, 14, 22, 26–45. Stage 5 for orders 1–5 done (Hadoop OC-6…23).
+- **Stage 5** follows stage 4 for each of these (two agents per case; append to the candidate list and coverage.csv).
+- **Nodes:** Hadoop builds at `/mydata/jingsong-s4/hadoop-base` on pc91/82/72/75/99 (`environment.md` Node table);
+  Cassandra stage 4 copies `/mydata/s4/cassandra-base` on any node. Small logs from earlier runs remain in
+  `/mydata/jingsong-cass-s4/o<order>/` and `/mydata/jingsong-s4/<stem>-run1/`. Use the node-lock and cleanup rules in
+  `HANDOFF.md` "Latest state and next steps".
+

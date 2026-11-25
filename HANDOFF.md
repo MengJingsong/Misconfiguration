@@ -33,7 +33,54 @@ The running plan and findings live in two Google Docs —
 [*Meeting Summary*](https://docs.google.com/document/d/1tldFFEk28qtQD0QdsnC2Br-BisTyOUp8OCwG1SZ_6Jk/edit)
 and [*Progress Report*](https://docs.google.com/document/d/1gMRFwaTvgahSiRi10ad_Y3CLDkxyF1QTYkAhZ4be4x8/edit).
 
-## Redesign of the two experiments (2026-11-17) — start here
+## Latest state and next steps (2026-11-25 ≈ 09:30 EST) — start here
+
+**Numbers.** [`experiments/FLOWCHART.md`](experiments/FLOWCHART.md) §5 is current (as of 2026-11-25): the chart's arrow labels
+and box `left:` lines, the §5.1 splits (each step as in = out + left, all closing) and the §5.2 open work with what each
+item waits on. Headline (Cassandra/Hadoop): phase-1 case files 344/46, stage 4 run 276/23, stage-5 candidates 636/98
+(open 117/98); OOM-exp 79 cases → **52 true positive**, 4 false positive, 23 retry; stage 3-a: 23 known in JIRA, 24 new;
+stage 3-b: 36 triggerable by an ordinary user alone (4 pre-auth, 6 any login without grants), 35 confirmed by runs.
+
+**What the 2026-11-23/24 sessions added** (details in the sections below and in `HANDOFF-Jingsong.md`):
+- OOM-exp stage 3 split into **3-a (JIRA check)** and **3-b (client trigger check)**; the scope rule **default constraints
+  only**; owner rulings (B8/B10/B15/C7/R14 `known-fixed (incomplete)`, an opt-in fix counts, R21/U4 `known-fixed`); wave 7
+  (8 true positive incl. R23 = B8 at deployment level, U17 = the vector-literal path; R25, U16 retry).
+- Phase 1 as Jingsong: Cassandra extension batches 1–2 (40 case files), Hadoop orders 6–45 (40 case files, stage 4 on the
+  newly built pc nodes, first Hadoop stage-5 candidates); `make-writeup-set-ext.py --screen` (covered-constraint screen).
+- FLOWCHART rules (experiments/CLAUDE.md): update it with every design **or result-number** change; numbers as
+  Cassandra/Hadoop; boxes carry a `left:` line.
+
+**Next work, ready to run** (nodes all idle, no locks, 2026-11-25 09:30):
+1. Phase-1 stage 4 (+ stage 5): Cassandra extension 25 waiting (orders 57, 64, 70, 116, 125, 137–239 of batch 2), Hadoop
+   (Jingsong) 23 waiting (6, 14, 22, 26–45). See `HANDOFF-Jingsong.md` "Next session".
+2. Phase-1 stage 3 next batches: Cassandra extension rows after order 415 (100 left in A–C), Hadoop from order 46.
+3. OOM-exp next batch from the 117 open candidates; the 2 open retries (U16, R25 — R25 has a concrete redesign in its row).
+4. One stage-3-b confirm run left (see `OOM-exp/cassandra/stage3b-client-trigger/README.md`).
+
+**Waiting on the owner:** the `none`-type stage-4 design (29 Cassandra cases); rulings B19 (T2's form), B21 (failed I-2G
+intervention), U13 (deployment vs diagnostic), U15 ("not corrupt input"), B15 (proposed status), R23 (`deployment` for a
+point-in-time restore onto a 100 ms dm-delay data volume); stage-3-a flags B10, C7, C8; whether to queue the extension's
+band D (5,918/8,993 units); deleting B27's first-attempt data on `pc82:/mydata/s4/b27/` (≈ 49 GB, 10 hprofs; B27 is a true
+positive from its clean run on pc91).
+
+**How the 2026-11-24 runs were operated (reuse this):**
+- **Node lock:** every node run takes `mkdir /mydata/s4/NODE-LOCK` (owner line inside) and removes it at the end; a run
+  that finds it held waits ≤ 60 min, then reports blocked.
+- **Usage limit:** two runs hit the 5-hour API limit (≈ 9 M subagent tokens in ≈ 1 h at 16 agents). Keep **≤ 3–5 agents
+  at once** for node work.
+- **Stopping agents does not stop their node jobs.** Detached drivers (nohup/setsid `batch.sh`, `arm.sh`, harness loops,
+  Cassandra/Hadoop daemons, local `rsync`/`ssh` loops) keep running and restarting arms. After any stop or limit hit,
+  check every node and this machine with `ps -u $(id -un) -o pid=,args= | awk '/pattern/ && !/awk/'` (not `pgrep -f`, whose
+  pattern also matches the checking shell), kill by PID, remove stale locks. Agents are now told to record a detached
+  driver's PID (`/mydata/s4/DRIVER-<who>.pid`) and stop it themselves.
+- **Local node** of these sessions: `node0.jason92-327358` (40 cores, 251 GiB; `/mydata` root-owned, not writable). Outside
+  the repo on it: source copies `~/cassandra-5.0.9`, `~/hadoop-3.4.2`; stage-3 kits `~/writeup-ext/`, `~/writeup-hadoop/`
+  (playbook + template copies; `out/o<order>/` holds stage-3/4 outputs and drafts); Cassandra git history for 3-a
+  `~/jira-s3/cassandra-history.git`; R25 evidence `/mydata/r25-evidence/`.
+- **Hadoop stage 4** needs the x86 build from `hadoop/stage4-runtime-verification/jingsong/setup-node.sh` (done 2026-11-24 on
+  pc91, pc82, pc72, pc75, pc99); Cassandra stage 4 runs on any node (`/mydata/s4/cassandra-base`).
+
+## Redesign of the two experiments (2026-11-17)
 
 Owner's redesign; map and flowchart in [`experiments/FLOWCHART.md`](experiments/FLOWCHART.md), relations in
 [`experiments/README.md`](experiments/README.md).
@@ -267,15 +314,12 @@ from the retry list: B8 → R23, B22 → R24, R19 → R25.
   U17), pc99 (C4, B27), ms0625 (C8, U3, B28), pc91 (U4), pc82 (R15-B, B29), pc72 (U2), ms0640 (B10), ms0604 (B12), ms0611
   (B13), ms0617 (C6). Delete on the owner's word.
 
-**Other open work:**
-- 342 candidate rows are `open` (2026-11-23, after wave 6 and OC-579). All of OC-63…577 are now triaged (2026-11-18 and 2026-11-20 files); the 11-18
-  triage's §2 "not reachable at shipped defaults" and §3 "too slow / too much disk" lists were **not** closed (owner
-  closed only the already-covered list), and the 11-20 triage's "covered" list is not closed either.
-- Retry list: 2 rows `open` after wave 7 (U16, R25, both 2026-11-24); R19, B22 and B8 were re-tried in wave 7 and closed.
-- Candidate list: OC-579 (vector literal write path, follow-up of U8) added 2026-11-23, `open`.
-- Hadoop: JIRA OOM report built; stage 5 runs with Yang's and Jingsong's batches (`hadoop/PROCEDURE.md` 5b);
-  no Hadoop phase 2 yet. Jingsong's Hadoop stage-4 nodes `pc41`, `pc39`, `pc29` failed SSH host-key checks on
-  2026-11-18 (probably reallocated): a new Hadoop stage-4 node needs `jingsong/setup-node.sh`.
+**Other open work** (updated 2026-11-25; the full list is FLOWCHART §5.2):
+- Candidate list: **117 open** (Cassandra) and 98 (Hadoop, all new 2026-11-24/25). The 2026-11-18 §2/§3 and 2026-11-20
+  "covered" triage lists and B18's rows were closed on 2026-11-24 under the owner's rules; 65 rows were recorded as passed
+  over by the wave-7 pick (owner: they stand).
+- Retry list: 2 rows `open` (U16, R25).
+- Hadoop: JIRA OOM report built; phase-1 stages 3–5 running in Jingsong's queue (orders 1–45 written up); no Hadoop phase 2.
 - Earlier verdict calls (R1/R6 take their `-V` verdict; C3 retry by the mixed-status rule; B1 false positive;
   disk case closed as skipped) stand unless the owner revisits them.
 
@@ -521,7 +565,7 @@ Protocol: `stage4-runtime-verification/README.md` ("The run protocol").
 - **`undetermined.md` §2 re-audit** (rejections made under the old pattern-(a)-only scope) and
   **band D** (4,387 units, one filed case already came from it).
 
-## Nodes and access (updated 2026-11-18)
+## Nodes and access (updated 2026-11-18; 2026-11-25: local node `node0.jason92-327358`, all ten idle, Hadoop built on the pc nodes)
 
 **Available remote nodes (owner's list, 2026-11-17):** the ten below, all reached from the local node
 `pc96` with plain `ssh <name>` (`setup-node.sh --peers` blocks in `~/.ssh/config`, shared deploy key,
