@@ -503,3 +503,20 @@ row, the shared-JVM row and the repetitions row; A5 (B3a) node, distribution cop
 readings; A6 (B3d/B3e) `jstat` instead of JDK 9's `GC.heap_info`, exact sampling and order; A7 (B3g) a verdict for every row,
 numbers, the DataNode row reported but not judged. Filed sha256 `f824ab0d…50feee84`; the sha256 after A1–A7 is recorded in the
 results file §1.
+
+**D2. Stage-4 run 1 and verdict (2026-11-25, node `pc82`).** Results file: `results/dfs.client.socketcache.capacity-putInternal-capacity--autonomous.md`
+(drafted at `~/writeup-hadoop/out/o11/results.md`). Frozen version: sha256 `54b7f50d…1bb5` (this file with A1–A7, re-audited
+2026-11-25, no new amendment). Harness: `TestPeerCacheCapacityProbe.java`, `unit-run.sh`, `PeerCacheProbe.java`, `sample.sh`,
+`cluster-run.sh`, `summarize.py`. Runbook defects: none.
+- **Unit tier: Confirmed — does not cap** (A4 row 1). Part 1 exact for C ∈ {0, 1, 16, 256, 1024} (`maxSize = size = min(2048, C)`,
+  `closed = 2048 − min(2048, C)`). Part 2, both reps: `size` = 0/16/256/1024 = DataNode xceivers; client cache objects
+  B_client = 232 B per entry (237,496 B at C = 1024); whole-JVM ΔH(1024) = −98.9 / −99.6 MiB by MemoryMXBean (noisy) and
+  +3.96 / +3.90 MiB by the live class histogram (DataNode-side idle-thread objects); positive control +65.06 MiB direct and
+  ≥ 5114 FDs with 1024 readers open in every run.
+- **Cluster tier: Confirmed — does not cap** (A7 row 1). Window-2 connections = `size` = DN XceiverCount = 0/16/256/1024, both reps;
+  client heap ΔH2(1024) = +0.75 / +0.76 MiB, ΔRSS2(1024) = +2.6 / +2.6 MiB; disk unchanged (0 B) in every run; positive control
+  +64.54 MiB direct and 1024 connections in window 1 of every run. Reported, not judged: DataNode RSS +25–44 MiB and NMT Thread
+  +1 GiB reserved stack at C = 1024 (one idle `DataXceiver` per cached socket).
+- **Effect on the constraint:** `does not cap` (both tiers). **Outcome class: true negative.** The estimate stands.
+- Feedback (not applied): A3's `fdClosed − fd0 = 2 × size ± 20` misses the pooled NIO selectors of `SocketIOWithTimeout` (3 FDs each);
+  the unit ΔH should be read from the live class-histogram total rather than MemoryMXBean in a shared client+DataNode JVM.

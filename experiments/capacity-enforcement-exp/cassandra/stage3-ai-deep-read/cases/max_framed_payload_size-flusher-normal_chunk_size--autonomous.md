@@ -190,6 +190,7 @@ Compile with `javac -cp "$CLASSPATH" -d $W/probe/classes $W/probe/src/org/apache
 - `AFTER_RELEASE dUsed = 0` (±32 B).
 - For every K, dUsed is linear in N (doubling N doubles dUsed within 1%). It is never ≤ a small multiple of K.
 - **LZ4, K = 131060:** F = 33, every frame is unpooled, `dOverflow ≈ F·(K+12) ≈ 4.0 MiB`, `dSize − dOverflow ≈ 0` for frames.
+  > **Clarification 2026-11-25 (stage-4 audit, before run 1).** `dSize` grows in whole 8 MiB macro chunks (`BufferPool.java:385`), and the LZ4 path still takes each frame's pre-compression input buffer (`getAtLeast(K)`) from the pool before releasing it, so `dSize − dOverflow` may read one macro chunk (8 MiB) even though no output frame is pooled. "≈ 0 for frames" is read from `dUsed − dOverflow` (pooled bytes **in use**), not from `dSize`. Prediction and readings tables unchanged.
 - **LZ4, K = 16384:** request 16476 ≤ 128 KiB, so frames are pooled, `dOverflow ≈ 0`, `dUsed ≈ 4.5 MiB`.
 - **Positive control (cache 4 MiB, N = 16 MiB):** `dSize − dOverflow ≤ 4 MiB`, because the pooled part is capped by `networking_cache_size`. `dOverflow ≥ 12 MiB`. `dUsed ≈ 16 MiB`, the same total as with 512 MiB.
 
@@ -242,6 +243,7 @@ public class ClusterProbe {
   }
   public static void main(String[] a) throws Exception {
     DatabaseDescriptor.clientInitialization();
+    DatabaseDescriptor.setNativeTransportMaxMessageSizeInBytes(256L << 20);   // fix 2026-11-25 (stage-4 runbook defect 1)
     String mode = a[0]; int port = Integer.parseInt(a[1]); int m = Integer.parseInt(a[2]); int b = Integer.parseInt(a[3]);
     if (mode.equals("load")) {
       SimpleClient c = new SimpleClient("127.0.0.1", port, ProtocolVersion.V5).connect(false);
@@ -256,22 +258,25 @@ public class ClusterProbe {
     // mode read: a[4]=jmxPort a[5]=pauseFile a[6]=holdMillis ; port = proxy port
     mbs = JMXConnectorFactory.connect(new JMXServiceURL("service:jmx:rmi:///jndi/rmi://127.0.0.1:" + a[4] + "/jmxrmi")).getMBeanServerConnection();
     Path pause = Paths.get(a[5]); long hold = Long.parseLong(a[6]);
+    boolean noPause = a.length > 7 && a[7].equals("nopause");   // amendment 2026-11-25: unpaused control (B3e step 8)
     SimpleClient c = new SimpleClient("127.0.0.1", port, ProtocolVersion.V5).connect(false);   // no compression -> CRC frames
     c.execute("SELECT v FROM probe.blobs WHERE k = 0", ConsistencyLevel.ONE);                  // warm-up
     Thread.sleep(1000); sample("baseline");
-    Files.createFile(pause); Thread.sleep(200);
+    if (!noPause) { Files.createFile(pause); } Thread.sleep(200);
     List<Message.Request> reqs = new ArrayList<>();
     for (int k = 0; k < m; k++) reqs.add(new QueryMessage("SELECT v FROM probe.blobs WHERE k = " + k, QueryOptions.forInternalCalls(ConsistencyLevel.ONE, List.of())));
     final Object[] res = new Object[1];
     Thread t = new Thread(() -> { try { res[0] = c.execute(reqs); } catch (Throwable e) { res[0] = e; } }); t.start();
     Thread.sleep(hold); sample("held");
-    Files.delete(pause); t.join();
+    if (!noPause) Files.delete(pause); t.join();
     System.out.println("RESULT," + (res[0] instanceof Map ? "ok,responses=" + ((Map<?,?>) res[0]).size() : "error," + res[0]));
     Thread.sleep(3000); sample("after");
     c.close(); System.exit(0);
   }
 }
 ```
+
+> **Runbook fix 2026-11-25 (stage-4 run 1, defect 1; B3f/B3g unchanged).** As filed, every `read` failed: the warm-up `SELECT` timed out after 10 s with `NullPointerException` at `ClientMetrics.markRequestDiscarded` (`CQLMessageHandler.java:553`). In a client-mode JVM, `DatabaseDescriptor.clientInitialization()` never sets the cached `nativeTransportMaxMessageSizeInBytes` (it is set only in `applySimpleConfig`, `DatabaseDescriptor.java:903-918`), so it stays 0. SimpleClient's own `CQLMessageHandler` then rejects every multi-frame (> 128 KiB) response at `CQLMessageHandler.java:550-553`. The fix is the marked line above, in the probe (the client) only, which sets the client's limit to 256 MiB. The node is not changed. The cluster tier was restarted from step 1 with fresh data.
 
 - Write a pausing TCP proxy `$W/probe/pause-proxy.py` (stdlib only). While the flag file exists, it stops reading the server→client direction, so the node sees a stalled reader. Client→server traffic keeps flowing.
 
@@ -333,6 +338,7 @@ while True:
 6. Positive control 1: K unset, M = 64.
 7. Positive control 2: K unset, `networking_cache_size: 32MiB`, M = 32.
 8. Unpaused control: K unset, M = 32. Use a variant run with the pause file never created: delete it right after creation, or add the argument `holdMillis=0` and skip `Files.createFile`.
+   > **Amendment 2026-11-25 (stage-4 audit, before run 1).** The probe as filed had no way to skip the pause, so this step could not run as written. `ClusterProbe` now takes an optional 8th argument `nopause` (see the three marked lines in B3a): the pause file is never created or deleted, and the **same** 5000 ms hold is kept, so the `held` sample is taken at the same time point as in the paused runs. Command: `... ClusterProbe read 19042 32 4194304 7199 $W/pause.flag 5000 nopause`. B3f/B3g are unchanged.
 
 **B3f. Predictions.** Let held − baseline `UsedSize` = Δ. Let D be the kernel drain measured by `ss`, at most about 4.2 MiB.
 
@@ -413,4 +419,11 @@ https://issues.apache.org/jira/browse/CASSANDRA-15299 (cited from CHANGES.txt; n
 
 ## D. Stage-4 feedback
 
-none yet
+**2026-11-25, run 1 (Jingsong, stage-4 agent, node `ms0625`, aarch64). Results: `results/max_framed_payload_size-flusher-normal_chunk_size--autonomous.md` (written at `~/writeup-ext/out/o132/results.md`).**
+
+- **Unit: Confirmed — does not cap** (B2g row 1). dUsed equals B2f's exact value in all 12 K × N cells, 3/3 repetitions. dUsed/N is 1.000 / 1.031 / 1.125 / 1.502 for K = 131060 / 65536 / 16384 / 4096; linear in N; maxFrame = K + 4. The positive control (cache 4 MiB) pins the pooled part (0 B) with all 16 MiB in overflow.
+- **Cluster: Confirmed — does not cap** (B3g row 1, with row 3's controls). Δ = 125.6 / 129.5 / 141.2 / 186.4 MiB for 32 × 4 MiB responses behind a stalled reader. PC1 (M = 64) doubles Δ (2.02×). PC2 (cache 32 MiB) holds the pooled part at exactly 32.00 MiB, with 93.7 MiB overflow and Δ unchanged. Unpaused Δ = 0.
+- **Outcome class: true negative.**
+- **Amendments (2026-11-25):** `nopause` for B3e step 8 (audit); a B2f LZ4 `dSize` clarification (audit); runbook defect 1 fixed in B3a. Defect 1: a client-mode `SimpleClient` rejected every multi-frame response because the cached max message size stays 0 after `clientInitialization()`. The cluster tier was restarted.
+- **Deviation:** `AFTER_RELEASE` was −768 / −16,928 in the two unpooled-overflow control cells. This is not a leak: Cassandra's `BufferPool` subtracts the trimmed tail of an unpooled buffer in `putUnusedPortion` and then the full capacity in `put` (`BufferPool.java:880-885`, `:241-247`). The B2g row should read "> 0".
+- **For stage 5 (unverified):** after 64 × 4 MiB v5 inserts, the node's networking pool `UsedSize` stayed at 268,518,368 B until restart.

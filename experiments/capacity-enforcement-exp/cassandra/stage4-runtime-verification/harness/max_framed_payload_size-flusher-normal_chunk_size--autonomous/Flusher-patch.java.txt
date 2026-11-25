@@ -1,0 +1,6 @@
+    @VisibleForTesting
+    public static final int MAX_FRAMED_PAYLOAD_SIZE =
+        Math.min(Integer.getInteger("cassandra.test.max_framed_payload_size", Integer.MAX_VALUE),
+                 Math.min(BufferPool.NORMAL_CHUNK_SIZE,
+                          FrameEncoder.Payload.MAX_SIZE - Math.max(FrameEncoderCrc.HEADER_AND_TRAILER_LENGTH, FrameEncoderLZ4.HEADER_AND_TRAILER_LENGTH)));
+    static { logger.info("MAX_FRAMED_PAYLOAD_SIZE={}", MAX_FRAMED_PAYLOAD_SIZE); }

@@ -126,6 +126,9 @@ same `cluster_name`, the seed node's control address under `seeds`, and each nod
   (probe until a run of prompt writes) before a control that depends on write latency.
 - **`JVM_EXTRA_OPTS` is scoped to the `bin/cassandra` command**, never exported: an agent on a client JVM (`nodetool`, stress, `cqlsh`)
   would clash with the node's Byteman listener on port 9091.
+- **`CQLSSTableWriter` output plus `nodetool import` on 5.0 needs `storage_compatibility_mode: NONE` on the node** (added
+  2026-11-25, order 117): the writer always writes the 5.0 `oa` format, and a node left at the shipped `CASSANDRA_4` mode
+  rejects it as an incompatible version and imports nothing, silently. Stop a script when an import brings in 0 SSTables.
 
 ## 7. Nodes (checked 2026-10-07; updated 2026-10-13 and 2026-10-20)
 
@@ -161,6 +164,18 @@ Work in a fresh directory named for your run, and never open, reuse or delete th
 - GitHub: `id_ed25519` works for `git push` (the `github.com` stanza).
 
 **2026-11-24: Utah m400 nodes for extension-set stage 4.** `ms0625`, `ms0640`, `ms0604`, `ms0611`, `ms0617` (aarch64, 8 cores, 62 GiB, Ubuntu 22.04.1, JDK 11 (11.0.33) + Ant 1.10.12; built copy `/mydata/s4/cassandra-base`) used for extension stage 4 from 2026-11-24 (Jingsong), run data `/mydata/jingsong-cass-s4/o<order>/`. `/mydata` is root-owned: `/mydata/jingsong-cass-s4` was created with `sudo` and chowned. The nodes are reserved for OOM-exp from 05:00 (EST) on 2026-11-24; the batch-1 run was interrupted before then by an API usage limit, so partial `o<order>/` folders may remain (see `HANDOFF-Jingsong.md`).
+
+**2026-11-25: deferred stage 4 of extension batch 1 on the UMass x86 nodes and `ms0625`.** 13 cases ran on `pc72` (orders
+96, 124, 134), `pc75` (114, 119, 133), `pc82` (100, 117, 127), `pc91` (115, 120) — experiment `jason92-326665`: `pc91`
+node0, `pc82` node1, `pc72` node2, `pc75` node3, `pc99` node4; x86_64, 32–40 cores, 125 GiB, Ubuntu 22.04.2 /
+`5.15.0-203-generic`, JDK 11.0.33, Ant 1.10.12, built copy `/mydata/s4/cassandra-base` (md5-checked against the repo
+source) — and on the Utah `ms0625` (72, 132). Run data `/mydata/jingsong-cass-s4/o<order>/`, created with `sudo` and
+chowned where missing; each run left only small logs and its harness there (0.6–24 MB). Per-node lock
+`/mydata/s4/NODE-LOCK` (one case per node). **`ms0625`'s `/mydata/s4/cassandra-base` has build output only (no `src/`,
+`test/` or `.build/`)**: a unit tier there needs the repo source copied over it (`copy-source.sh`) and `ant build-test`
+first (orders 72, 132 did so). **`pc99` is blocked:** its lock is held by `jingsong-o70-stage4` (2026-11-24 21:54 MST), a
+session that returned no result; no process runs on `pc99` and there is no `o70` folder (checked 2026-11-25 09:10 EST), so
+orders 116 and 125 (and Hadoop 6, 14, 22) gave up after 60 min. Confirm it is stale and remove it before using `pc99`.
 
 ## Logs
 

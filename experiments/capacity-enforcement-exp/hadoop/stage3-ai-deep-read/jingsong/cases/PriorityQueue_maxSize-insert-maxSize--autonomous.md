@@ -127,6 +127,27 @@ makes `getThreadAllocatedBytes` exact per allocation).
 > `1.8.0_504`, Maven 3.6.3. The harness is `harness/` beside the results file (`unit-run.sh`, `jdbcount.sh`,
 > `scan_insert.py`, the two test classes).
 
+> **Amendment A9 (stage-4 run 1 restarted clean, 2026-11-25, before any reading; both tiers).** The interrupted
+> 2026-11-24 attempt on `pc91` left no reading this run uses; run 1 starts again on `pc75` with a fresh private copy
+> (`/mydata/jingsong-s4/PriorityQueue_maxSize-insert-maxSize-run1/src`, repository commit `cd9e1cded`) and a harness
+> rewritten from A1–A8 (same file names and roles). JDK 8 here is `1.8.0_514`. Instrument details fixed before the
+> run: (i) `scan_insert.py` reads each class file's constant pool (superclass entry for the subclass closure;
+> `Methodref`/`InterfaceMethodref` to `<PriorityQueue or subclass>.insert:(Ljava/lang/Object;)Z` as a HIT); a
+> constant-pool entry is a superset of every `invoke*` site and method reference, so no HIT means no call site; jars
+> nested one level inside jars are read too. (ii) `jdbcount.sh` reports `attached=yes` only when jdb printed a
+> (deferred) breakpoint line; the jdb known answer must read exactly `insert=5 initialize=1 attached=yes`. (iii) The
+> cluster tier's reducer pass count (A6) counts the lines `Merging <n> sorted segments` and `Merging <n> intermediate
+> segments out of a total of <m>` of `org.apache.hadoop.mapred.Merger` in the reducer container's `syslog`. Claim,
+> predictions and conclusions are unchanged.
+
+> **Amendment A10 (stage-4 run 1, 2026-11-25 — runbook defect in A9 (iii), claim, predictions and conclusions unchanged; the
+> cluster tier restarts).** In a reduce container the `Merger` and `MergeManagerImpl` lines are written to `syslog.shuffle`,
+> not `syslog` (`yarn.app.mapreduce.shuffle.log.separate`, default `true`, `mapred-default.xml:874-875`; wired in
+> `MRApps.java:650-659`), and the AM's `syslog` also names attempt `_r_000000`. The first cluster attempt therefore read
+> the AM's log and counted 0 passes. Fix: the reducer container is the one whose `syslog` holds
+> `Task:attempt_<id>_r_000000_0 is done`, and the pass count is taken over its `syslog` + `syslog.shuffle`; every
+> application's container logs are copied when it ends.
+
 **B2b. Knobs.**
 - `k` = argument to `initialize` (= `maxSize`): `1, 16, 1024, 65536` — from the degenerate case to a
   size whose array (≈ 256 KiB) is well above measurement noise.
@@ -449,4 +470,12 @@ playbook-autonomous.md, _TEMPLATE-autonomous.md
 
 ## D. Stage-4 feedback
 
-none yet
+**D1 — stage-4 run 1, 2026-11-25 (node `pc75`, Jingsong's share; results: `results/PriorityQueue_maxSize-insert-maxSize--autonomous.md`).**
+Unit **Confirmed — does not cap** (B2g row 1); cluster **Confirmed — does not cap** (B3g row 1 with A7). Outcome class
+**true negative**. Every A4 number met exactly: `allocCtor` = 48 / 112 / 4,144 / 262,192 B for k = 1 / 16 / 1,024 / 65,536;
+`allocInsertLoop` = 0 B in all rows (up to 199,992 rejected inserts per row); `heap.length` = k+1 before and after; `put`
+threw at put k+1; `insert` 0 and `initialize` 20 / 1 / 12 / 3 in the Sorter f = 2 / f = 100, `TestMerger` and
+`TestSequenceFileMergeProgress` runs; no static call site. Cluster: `insert` 0 in a terasort reducer (f = 2 / 10 / 100,
+`initialize` 15 / 9 / 9, each equal to the reducer's logged merge passes) and a DistCp client (f = 2 / 100, 18 / 2); no call
+site in any distribution jar. Runbook defect: the reducer's merge lines are in `syslog.shuffle` (A10); cluster tier restarted.
+Amendments A9 (before the run) and A10 made by stage 4. No change to the trace or the estimate.

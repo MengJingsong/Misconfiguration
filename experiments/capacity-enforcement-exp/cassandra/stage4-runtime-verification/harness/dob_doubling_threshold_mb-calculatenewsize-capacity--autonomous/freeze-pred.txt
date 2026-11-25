@@ -1,0 +1,103 @@
+**B2f. Predictions.** These were computed from `DataOutputBuffer.java:158-172` and `BufferedDataOutputStreamPlus.java:102-136` before any run. Capacities are in bytes, with MiB in brackets.
+
+| T | mode, n | last-but-one capacity | final capacity C | C / S | transient old+new at last resize | # resizes |
+|---|---|---|---|---|---|---|
+| unset (= 64) | bytes 200 | 201,326,592 (192.00) | 301,989,888 (288.00) | 1.440 | 480.00 MiB | 14 |
+| 0 | bytes 200 | 193,710,244 (184.74) | 290,565,366 (277.10) | 1.386 | 461.84 MiB | 21 |
+| 16 | bytes 200 | 169,869,312 (162.00) | 254,803,968 (243.00) | 1.215 | 405.00 MiB | 15 |
+| 64 | bytes 200 | 201,326,592 (192.00) | 301,989,888 (288.00) | 1.440 | 480.00 MiB | 14 |
+| 128 | bytes 200 | 134,217,728 (128.00) | 268,435,456 (256.00) | 1.280 | 384.00 MiB | 13 |
+| 1024 | bytes 200 | 134,217,728 (128.00) | 268,435,456 (256.00) | 1.280 | 384.00 MiB | 13 |
+| 0 / 16 / 64 / 128 / 1024 | bytes 100 | 82.11 / 72.00 / 64.00 / 64.00 / 64.00 MiB | 129,140,163 / 113,246,208 / 134,217,728 / 134,217,728 / 134,217,728 | 1.23 / 1.08 / 1.28 / 1.28 / 1.28 | 205.3 / 180.0 / 192.0 / 192.0 / 192.0 MiB | 19 / 13 / 12 / 12 / 12 |
+| unset (= 64) | rows 200 | 151,002,432 (144.01) | 226,503,648 (216.01) | 1.080 | 360.02 MiB | 10 |
+| 0 | rows 200 | 204,083,397 (194.63) | 306,125,095 (291.94) | 1.460 | 486.57 MiB | 15 |
+| 16 | rows 200 | 191,112,453 (182.26) | 286,668,679 (273.39) | 1.367 | 455.65 MiB | 12 |
+| 64 | rows 200 | 151,002,432 (144.01) | 226,503,648 (216.01) | 1.080 | 360.02 MiB | 10 |
+| 128 | rows 200 | 201,336,576 (192.01) | 302,004,864 (288.01) | 1.440 | 480.02 MiB | 10 |
+| 1024 | rows 200 | 134,224,384 (128.01) | 268,448,768 (256.01) | 1.280 | 384.02 MiB | 9 |
+| 0 / 16 / 64 / 128 / 1024 | rows 100 | 86.50 / 81.00 / 96.00 / 64.00 / 64.00 MiB | 136,055,598 / 127,408,302 / 151,002,432 / 134,224,384 / 134,224,384 | 1.30 / 1.22 / 1.44 / 1.28 / 1.28 | 216.3 / 202.5 / 240.0 / 192.0 / 192.0 MiB | 13 / 10 / 9 / 8 / 8 |
+| any | fixed 200 | n/a | 1,048,576 (1.00), constant | n/a | n/a | 0, then `OVERFLOW position=1048576` |
+
+Relations predicted:
+- **(i)** C ≥ S in every growable row.
+- **(ii)** Every `EXPAND` ratio is exactly 2.0, or `(before+count)/before` on the first resize, while `before` ≤ T·2^20. It is 1.5 (floor) once `before` > T·2^20.
+- **(iii)** C is not monotone in T. For `rows 200`: T=64 < T=1024 < T=128. For `bytes 200`: T=64 = unset > T=1024.
+- **(iv)** `DOUBLING_THRESHOLD_MB` prints the T passed, and 64 when unset.
+- **(v)** Halving S roughly halves C at each T: the ratios C(200)/C(100) are between 1.5 and 2.25.
+
+**B2g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| (i)-(v) hold, the table matches exactly, and `fixed` overflows at 1 MiB | Claim confirmed at unit level: T changes only the growth ratio. Capacity follows the payload and is never held at or near T, while a real cap (fixed buffer) does bind. |
+| For some T, C < S with no `OVERFLOW`, or growth stops near T MiB while writes still succeed | The knob caps usage. **Claim refuted.** |
+| C decreases steadily as T decreases, proportionally to T (for example about T·k MiB) | Usage follows the knob. **Claim refuted.** |
+| C flat across T at the T=1024 values, and `DOUBLING_THRESHOLD_MB` shows 64 for every run | The property was not applied. Invalid: fix the `-D` spelling (case-sensitive key) and rerun. |
+| Usage follows the payload (C changes 100 → 200 MiB) while it is flat or non-monotone in T, and `fixed` binds | Claim confirmed: the positive control moved and the knob did not cap. |
+| `fixed` does not overflow, or S never exceeds T for any T < 1024 | Not confirmed: the instrument or the workload did not reach the regime under test. |
+| Numbers differ slightly from B2f but (i)-(iii) hold | The write path differs from the trace (for example extra flushes). The claim stands; record the difference in D. |
+
+**B2h. Controls.**
+**B3f. Predictions.** These were stated before any run. They come from the same rule as B2f, assuming the page starts with h ≈ 20-60 header bytes before the first value, so the first large capacity is 1 MiB + h. Values are given to about ±0.1 MiB.
+
+| T | last-but-one buffer capacity per query | largest buffer capacity C per query | consecutive ratio pattern (from about 1 MiB up) |
+|---|---|---|---|
+| unset = 64 | ≈ 144.0 MiB | ≈ 216.0 MiB | 2.0 ×6 (1 → 64.0x MiB), then 1.5 ×3 (96, 144, 216) |
+| 0 | ≈ 194.6 MiB | ≈ 291.9 MiB | 1.5 throughout |
+| 16 | ≈ 182.3 MiB | ≈ 273.4 MiB | 2.0 up to about 16.0x MiB, then 1.5 |
+| 64 | ≈ 144.0 MiB | ≈ 216.0 MiB | as unset |
+| 128 | ≈ 192.0 MiB | ≈ 288.0 MiB | 2.0 up to about 128.0x MiB, then 1.5 |
+| 1024 | ≈ 128.0 MiB | ≈ 256.0 MiB | 2.0 throughout |
+| control (fetch 100), T=64 / unset | ≈ 96.0 MiB | ≈ 144.0 MiB per internal page (2 pages per query) | as T=64 |
+| control (fetch 100), T=1024 | ≈ 64.0 MiB | ≈ 128.0 MiB per internal page | 2.0 throughout |
+
+Relations predicted:
+- In every T run, C ≥ S ≈ 200.0 MiB, and C ≥ T MiB whenever T < 200.
+- C is not monotone in T: C(64) < C(1024) < C(128).
+- The three queries of one T give the same sizes (±0.1 MiB).
+- In the control, C drops by a factor of about 1.5 (T=64: 216 → 144) to 2 (T=1024: 256 → 128). The page size moves usage; T does not cap it.
+- GC log: Humongous region growth during a query of at least ceil(C/region size). With 4 GB G1 the region size is 2 MiB, so at least 108 regions for T=64 and at least 144 for T=128.
+
+**B3g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| Per T, largest capacity ≥ 200 MiB, ratios as in B3f, C non-monotone in T, and control C about 1.5-2x smaller | **Claim confirmed:** usage follows the page, not T. T only sets the growth factor. |
+| Largest capacity at or near T MiB (for example ≤ about 2·T for T=16) while the query still succeeds and returns 1 MiB | The knob caps the buffer. **Claim refuted.** |
+| Largest capacity decreases monotonically with T, roughly in proportion | Usage follows the knob. **Claim refuted.** |
+| Usage flat across T (all values equal to T=1024's ≈ 256 MiB) and the system property absent | The knob was not applied. Invalid run: fix `JVM_EXTRA_OPTS` and redo. |
+| Capacities flat or non-monotone across T while the fetch-100 control drops them | **Claim confirmed**, with the positive control moved. |
+| Control does not reduce C, or no `LocalDataResponse` events at all | Not confirmed. Either the read did not take the local path (for example remote replica, other coordinator, or digest read) or JFR did not capture the event. Check the stack depth, the event enablement, and that RF=1 on one node. |
+| Query fails (`OutOfMemoryError`, timeout) | The node is undersized. Raise `MAX_HEAP_SIZE` to 6G, or use 150 rows (rerun B2 `rows 150` for exact predictions). That is not a cap. |
+| Sizes off by more than 1 MiB but the ratio rule holds | The serialisation header differs from the assumed h. The claim stands; record it in D. |
+
+**B3h. Controls.**
+**Stage-4 audit amendments (2026-11-25, stage-4 session working as Jingsong, before any reading of run 1).** They change no
+claim, prediction or conclusions row of B1, B2f, B3f; they fix where and how the runbook runs and give the B2g/B3g words a
+number. B2f and B3f were re-derived independently before the run by simulating `calculateNewSize` with the
+`BufferedDataOutputStreamPlus` write paths (stage-4 harness `sim_b2f.py`): every B2f cell agrees exactly.
+
+- **S4-A1 (B2a, B2e, B3a, B3e, B4: where it runs).** Node `pc75` (x86_64, experiment `jason92-326665`), `RUN=/mydata/jingsong-cass-s4/o119`.
+  The Cassandra tree is `cp -a /mydata/s4/cassandra-base $RUN/cassandra` (5.0.9, already built with `ant build-test`, which
+  includes `ant jar`'s classes; `conf/` and the cited sources md5-equal to the repository's `systems/cassandra/source`), so
+  B2a's `rsync` + `ant jar` is replaced by the copy. The B2e class path also lists `$RUN/cassandra/build/lib/jars/*` after
+  `lib/*`. The probe and parser sources are the B2a/B3a listings byte for byte. Before starting the node: `ulimit -n 100000`.
+  The node is stopped by its PID file; the process check is `ps -eo cmd | grep '[C]assandraDaemon'` (stage-4 safety rule),
+  not `pgrep -f`. B2e step 8 (optional `SafeMemoryWriter` variant) is not run. The B3e step 7 control is run for every T, not
+  only unset, 64 and 1024.
+- **S4-A2 (B2g: numbers for its words).** "The table matches exactly" = every growable run's `FINAL capacity` equals its B2f
+  cell to the byte, and the number of `EXPAND` lines equals B2f's # resizes. (ii) is checked on every `EXPAND` line:
+  ratio = 2.0 exactly or `(before+count)/before`, when `before` <= T·2^20; `after` = max(floor(1.5·before), before+count) when
+  `before` > T·2^20. (v): C(200)/C(100) in [1.5, 2.25] inclusive at every T and mode. "Growth stops near T MiB" (row 2) = some
+  T in {16, 64, 128} with FINAL capacity <= 2·T MiB while `written` = S. "Proportional to T" (row 3) = C strictly increasing
+  over T = 0, 16, 64, 128, 1024 **and** C(T)/C(1024) within ±25 % of T/1024 for T = 16, 64, 128. "Repeat identical" (step 6) =
+  the `DOUBLING`, `EXPAND` and `FINAL` lines byte-identical between the two `bytes 200` runs of each T.
+- **S4-A3 (B3g: numbers for its words).** Per query, a *burst* is the run of `JfrDob` lines on one thread between queries
+  (split at gaps > 2 s); capacity = `allocationSize − 16`; C = the largest capacity in the burst (for the fetch-100 control,
+  the largest over the query's internal pages). Row 1 holds when, for every T: all 3 recorded queries returned a 1,048,576-byte
+  value; every query's C >= 209,715,200 bytes; C agrees with B3f within ±1 MiB, or (row 8) the ratio rule holds (each
+  consecutive capacity pair >= 1 MiB: ratio 2.0 ± 0.001 while the previous capacity <= T MiB, 1.5 ± 0.001 above it, or the
+  previous + one write's remainder); the three queries' C agree within 0.1 MiB; C(64) < C(1024) < C(128); and the control's C
+  is <= 0.75 × that T's paging-off C. "At or near T MiB" (row 2) = C <= 2·T MiB for T = 16 or 64 while the query succeeds.
+  "Monotone, roughly in proportion" (row 3) = C strictly increasing over T = 0, 16, 64, 128, 1024 and C(T)/C(1024) within
+  ±25 % of T/1024 for T = 16, 64, 128. "Control does not reduce C" (row 6) = control C > 0.75 × paging-off C at T = unset, 64 or 1024.

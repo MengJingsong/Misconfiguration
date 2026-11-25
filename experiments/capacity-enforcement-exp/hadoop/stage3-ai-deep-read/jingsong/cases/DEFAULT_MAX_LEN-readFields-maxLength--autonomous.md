@@ -111,6 +111,12 @@ New test file:
 Run it with a reduced heap so an uncapped 1 GiB claim cannot be satisfied:
 `mvn -pl hadoop-common-project/hadoop-common test -Dtest=TestTextMaxLenProbe -Dmaven-surefire-plugin.argLine="-Xmx512m"`
 (the property is defined in hadoop-project/pom.xml:187 and used at :2469).
+*Amendment (stage-4 audit, 2026-11-25, A1):* on a node set up per the Hadoop stage-4 `environment.md` (§2–3), the
+local copy is made with `copy-source.sh /mydata/jingsong-s4/<stem>-run1/hadoop-src`, and the `-am install` step is
+skipped: every module is already in `~/.m2/repository` as `3.4.2` from the node's full base build of the same source,
+so `mvn -pl hadoop-common-project/hadoop-common test ...` compiles hadoop-common and its tests in the copy and resolves
+the rest from `~/.m2` (and does not overwrite the shared artifacts). The `-Xmx512m` override is checked by the
+1 GiB uncapped control: under the default `-Xmx2048m` that control would not throw `OutOfMemoryError`.
 
 **B2b. Knobs.**
 - `maxLength` passed directly to `Text.readFields(in, maxLength)`: 1024, 1048576
@@ -185,7 +191,11 @@ cap, not the short input, prevents it. (2) Baseline with `L = 0` removes excepti
 **B3a. Environment and build.** One Linux host, pseudo-distributed, non-secure
 (`hadoop.security.authentication=simple`). Distribution from the local copy:
 `mvn package -Pdist -DskipTests -Dtar -Dmaven.javadoc.skip=true`, unpack
-`hadoop-dist/target/hadoop-3.4.2.tar.gz` to `/mydata/<run>/hadoop`. Runtime JDK 11 (for
+`hadoop-dist/target/hadoop-3.4.2.tar.gz` to `/mydata/<run>/hadoop`.
+*Amendment (stage-4 audit, 2026-11-25, A2):* on a node set up per the Hadoop stage-4 `environment.md`, the distribution
+is `cp -a /mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2 /mydata/<run>/hadoop` (the same `-Pdist`
+build of the same pinned source, environment.md §4), not a second build. `HADOOP_PID_DIR=/mydata/<run>/pids` is also
+set, and `hadoop.security.authentication=simple` is written into `core-site.xml` explicitly. Runtime JDK 11 (for
 `jcmd JFR.*`; JDK 8u262 or later also has JFR). Daemons: **NameNode only** (no DataNode needed —
 the RPC under test touches no blocks). Config (`$HADOOP_CONF_DIR` = `/mydata/<run>/conf`):
 - `core-site.xml`: `fs.defaultFS=hdfs://localhost:9820` (pick a free port, `ss -ltn`),
@@ -221,7 +231,10 @@ Arithmetic: 200 × 1 MiB ≈ 200 MiB of short-lived allocations below the cap (c
 - JFR on the NameNode: `jcmd <nnpid> JFR.start name=probe settings=profile filename=/mydata/<run>/nn-<arm>.jfr`
   before an arm, `jcmd <nnpid> JFR.stop name=probe` after; `jfr print --events jdk.ObjectAllocationOutsideTLAB nn-<arm>.jfr`.
   Count events with `objectClass = byte[]`, `allocationSize ≥ 500000` whose stack contains
-  `org.apache.hadoop.io.Text.readWithKnownLength`. (With 1 MiB G1 regions, arrays ≥ 512 KiB are
+  `org.apache.hadoop.io.Text.readWithKnownLength`.
+  *Amendment (stage-4 run 1, 2026-11-25, runbook defect 1; predictions and readings unchanged):* `jfr print` shows the
+  class as `byte[]`, but a counter written against the `jdk.jfr.consumer` API sees `RecordedClass.getName()` = `[B`;
+  match either spelling, otherwise the below-cap arms read 0 events (the B3g "instrument not seeing the allocation" row). (With 1 MiB G1 regions, arrays ≥ 512 KiB are
   humongous and always allocated outside a TLAB, so each one is recorded.)
 - GC log: humongous allocations / "Humongous regions" lines per arm (secondary).
 - NN health: `jps` shows NameNode; `grep -c OutOfMemoryError $HADOOP_LOG_DIR/*namenode*.log`;
@@ -300,4 +313,18 @@ hadoop-project/pom.xml (surefire argLine)
 
 ## D. Stage-4 feedback
 
-none yet
+**2026-11-25 — run 1 (node `pc82`), verdict: Confirmed — caps (unit and cluster); outcome class true positive.**
+Results: `hadoop/stage4-runtime-verification/jingsong/results/DEFAULT_MAX_LEN-readFields-maxLength--autonomous.md`
+(written outside the repository first, `~/writeup-hadoop/out/o7/results.md`). Frozen version (after A1–A3):
+sha256 `8755de1ce16ff8ea0eb5396fec8ff072a9d8f5693c0750376c879c128a5c797d`.
+- Unit (B2g row 1): below the limit the allocation equals the claim (net 1064 / 1048632 / 67108920 B for
+  M = 1024 / 1 MiB / 64 MiB at L = M−1; real caller 524344 / 1048632 B); at and above it (L = M, M+1, 1 GiB) the
+  `maxLength = M` `IOException` fires with ≤ 2.3 KiB allocated and no OOM under `-Xmx512m`. Uncapped control: 256 MiB
+  allocated, 1 GiB → `OutOfMemoryError`. Writer/reader mismatch observed (owner of 1048576 bytes written, not readable).
+- Cluster (B3g row 1): NameNode `cancelDelegationToken` with an 8-byte payload — 200/200 `byte[]` allocations of
+  600016 and 1048592 B via `Text.readWithKnownLength` for claims 600000 and 1048575 (EOFException); 0 for 1048576 and
+  1 GiB (`tried to deserialize … maxLength = 1048576`); NN alive, no `OutOfMemoryError`, heap unchanged.
+- Amendments: A1 (B2a), A2 (B3a) from the audit; A3 (B3d) from runbook defect 1 (the harness's JFR counter matched
+  `byte[]` but the consumer API names it `[B`; cluster tier restarted). Predictions and readings tables unchanged.
+- The A3 bypasses (uncapped `readFields(DataInput)`, per-field cap) were not part of B1; the uncapped control confirms
+  that overload allocates the claimed length in full.

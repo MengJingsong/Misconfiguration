@@ -95,6 +95,14 @@
   - Run: `mvn -pl hadoop-hdfs-project/hadoop-hdfs-nfs test -Dtest=TestDumpWaterMark -Ddumpwm.dir=$S4/unit-dump`.
 - **JVM options:** surefire already runs with `-Xmx2048m` (`hadoop-project/pom.xml:187`), enough for the 64 MiB no-cap runs.
 
+> **Amendment A1 (stage-4 audit, 2026-11-25, before any run).** The paths above do not exist on the stage-4 nodes. On
+> Jingsong's nodes (`hadoop/stage4-runtime-verification/jingsong/environment.md`): `$S4 = /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-run-DUMP_WRITE_WATER_MARK--autonomous-run1`; copy the source with
+> `copy-source.sh $S4/src` (not `rsync ~/hadoop-3.4.2`); **no `install` build** (all 3.4.2 modules are in `~/.m2`); run the
+> test offline with `mvn -B -o test -pl hadoop-hdfs-project/hadoop-hdfs-nfs -Dtest=TestDumpWaterMark
+> "-Dmaven-surefire-plugin.argLine=-Xmx2048m -Ddumpwm.dir=$S4/unit-dump"` (this build passes JVM options to the forked
+> test JVM only through that property, `hadoop-project/pom.xml:187, 2469`), with `JAVA_HOME` = JDK 8. Read the surefire
+> report counts and the `DUMPWM` lines, not the Maven exit code. The test class is used exactly as printed below.
+
 ```java
 package org.apache.hadoop.hdfs.nfs.nfs3;
 
@@ -279,6 +287,22 @@ All of U1–U4 divide the 64 MiB total and are multiples of the chunk size, so t
 | U7 stuck = 1 and counter → 64 MiB | Dump-failure bypass confirmed: cap lost, one writer blocked indefinitely |
 | U7 stuck = 0 and counter stays ≤ M | The A3 failure analysis is wrong (note it in D) |
 
+> **Amendment A7 (stage-4 audit, 2026-11-25, before any run): verdicts for the rows of B2g** (B1 is a `positive` claim:
+> the mark caps heap-held out-of-order data per file).
+>
+> | Row | Unit verdict | Effect |
+> |---|---|---|
+> | 1 (U1–U4 within M, rounds = 64 MiB/M, dump = 64 MiB, heapDelta small) **and** row 4 (control reaches 64 MiB) | **Confirmed** | caps (per file; with the U7 bypass if row 6 holds: `caps only on some paths (bypass)`) |
+> | 2 (maxInHeap or heapDelta ≥ 60 MiB in U1–U4) | **Refuted** | does not cap |
+> | 3 (counter capped, rounds or dump length off) | **Not confirmed** | undetermined |
+> | 5 (U5/U6 do not reach 64 MiB) | **Invalid** | undetermined |
+> | U1–U4 never dump (rounds = 0): the limit was never reached | **Invalid** | undetermined |
+> | 6 (U7 stuck = 1, counter → 64 MiB) | bypass recorded with the verdict of row 1 | — |
+> | 7 (U7 stuck = 0, counter ≤ M) | does not change the verdict of rows 1–5; D feedback | — |
+>
+> `heapDelta` between the B2f bound and 60 MiB in U1–U4 is recorded as a deviation, not a refutation (B2h: the decision
+> rests on the counter, `maxInHeap` and the dump length).
+
 **B2h. Controls.**
 - U5 and U6 run the same workload with the cap out of play. U2 against U5 differs only in `M`, which isolates the constant as the cause.
 - `maxInHeap` is computed from `WriteCtx` states, independent of the counter.
@@ -293,6 +317,31 @@ All of U1–U4 divide the 64 MiB total and are multiples of the chunk size, so t
 - **Root:** needs `sudo` for portmap (port 111) and for `mount`/`umount`.
 - **Build:** `cd $S4/src && mvn package -Pdist -DskipTests -Dtar -Dmaven.javadoc.skip=true`, then `cp -a hadoop-dist/target/hadoop-3.4.2 $S4/hadoop`, `export HADOOP_HOME=$S4/hadoop HADOOP_CONF_DIR=$S4/hadoop/etc/hadoop`.
 - **Disk:** all data on local disk under `$S4`, ≥ 6 GiB free: HDFS about 1.3 GiB plus dump about 0.8 GiB plus logs.
+
+> **Amendment A2 (stage-4 audit, 2026-11-25, before any run).** On Jingsong's nodes: no new `-Pdist` build; copy the node's
+> distribution `cp -a /mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2 $S4/hadoop` and the configuration
+> `cp -r $S4/hadoop/etc/hadoop $S4/conf` (`HADOOP_CONF_DIR=$S4/conf`). `ssh localhost` does not work on these nodes, so
+> `start-dfs.sh`/`stop-dfs.sh` in B3e step 1 and B4 are replaced by `hdfs --daemon start|stop namenode` and `… datanode`,
+> then `hdfs dfsadmin -safemode wait`. `JAVA_HOME` = JDK 8 (`/usr/lib/jvm/java-8-openjdk-amd64`), and `jcmd`/`jstat`/`jps`
+> are taken from it (the default `jcmd` on the nodes is JDK 11).
+>
+> **Amendment A3 (stage-4 audit, 2026-11-25, before any run).** `nfs.stream.timeout = 60000` equals the driver's 60 s
+> `PAUSE`, and the stream monitor (`OpenFileCtxCache.java:148-170`, every 5 s, `OpenFileCtx.checkStreamTimeout`
+> `:190-192`) closes an idle stream **without checking for pending writes**: the stream could be cleaned up during the
+> pause, failing the out-of-order writes and deleting the dump file before the hole is filled. Set
+> `nfs.stream.timeout = 180000` instead, and in B3e step 7 wait 200 s (not 90 s) after `DONE` for the dump file to go.
+>
+> **Amendment A4 (stage-4 audit, 2026-11-25, before any run).** The node runs a system `rpcbind` (active). B3e step 2(b)
+> applies; the node is shared between people, so the system `rpcbind` is **not** stopped. Order: try `hdfs --daemon start
+> nfs3`; if `rpcinfo -p localhost` does not list 100003 and 100005 within 60 s, stop it and use the no-registration
+> launcher of step 2(b) (`harness/…/NoRegNfs3.java`, run with `HDFS_NFS3_OPTS` of the run and the run's log4j
+> configuration), then mount with `port=2049,mountport=4242,mountproto=tcp` added to the B3e step-4 options.
+>
+> **Amendment A5 (stage-4 audit, 2026-11-25, before any run).** C5 is **run**, not optional: without it the cluster tier
+> never varies the mark itself (audit group A). Its jar is built from the run's source copy: set line 73 to
+> `64L * 1024 * 1024`, `mvn -B -o package -pl hadoop-hdfs-project/hadoop-hdfs-nfs -Dmaven.test.skip=true`, keep the jar,
+> `git checkout` the file; the constant in each jar is checked with `javap -c -p -constants` before use. The gateway's
+> `share/hadoop/hdfs/hadoop-hdfs-nfs-3.4.2.jar` is swapped only in the run's own copy `$S4/hadoop` and restored after C5.
 
 **`core-site.xml`:**
 - `fs.defaultFS = hdfs://localhost:9000`
@@ -390,6 +439,9 @@ All config changes need a gateway restart (`hdfs --daemon stop nfs3; hdfs --daem
   - At each `CHECKPOINT`/`PAUSE` line, and every 5 s, run `jcmd $GWPID GC.class_histogram | awk '$4=="[B"{print $3}'`. This is total live `byte[]` bytes after the full GC the histogram triggers.
   - Also `jstat -gc $GWPID 1000 > $S4/obs/jstat.log` (old-gen used, full-GC count).
   - Find `$GWPID` with `jps | awk '/Nfs3/{print $1}'` or from `$S4/pids/hadoop-*-nfs3.pid`.
+  - *Amendment A6 (2026-11-25, before any run):* also take one histogram after the mount and before the driver starts
+    (the run's own baseline) and one after `DONE` + 200 s. The predictions keep their C1@25% reference; the per-run
+    baseline is recorded beside it so a C2 difference can be read within one gateway instance as well.
 - **Disk (where the data goes):** `while sleep 1; do date +%T; ls -l $S4/nfs-dump; du -sb $S4/nfs-dump; done > $S4/obs/dump.log`.
 - **End state:**
   - `hdfs dfs -ls /nfstest`: file sizes.
@@ -414,6 +466,11 @@ All config changes need a gateway restart (`hdfs --daemon stop nfs3; hdfs --daem
 5. **Start the samplers** (jcmd loop, jstat, dump.log) in the background into `$S4/obs/<run>/`.
 6. **Run the driver as the run user**, e.g. C1: `python3 $S4/ooo_write.py --dir $S4/mnt/nfstest/c1 --chunk 65536 --chunks 12288` (after `mkdir $S4/mnt/nfstest/c1`). At each `CHECKPOINT` and at `PAUSE`, run the `jcmd` histogram once by hand as well.
 7. **After `DONE`:** wait 90 s (stream timeout), record `ls -l $S4/nfs-dump`, `hdfs dfs -ls -R /nfstest`, the max counter, the mark-hit count and OOM count from the log. Stop the samplers.
+   - *Amendment A9 (stage-4 run 1, 2026-11-25; runbook defect, side observable only, B1/B3f/B3g unchanged):* with many
+     open files (C2, 32 streams) the gateway closes idle streams one after another, about 3.4 s each, after the stream
+     timeout, so 200 s after `DONE` most C2 files are still open and a read-back then sees a partial file. Before the
+     read-back integrity check, wait until `$S4/nfs-dump` holds no dump file (every stream closed), at most 900 s, and
+     compare every file. Run 1's C2 heap and counter readings are not affected; its read-back was repeated as C2b.
 8. **Repeat for C2–C4** (and optionally C5):
    - change `wsize` (re-mount) or `HDFS_NFS3_OPTS` (restart nfs3, re-mount) as the table says;
    - delete earlier test files with `hdfs dfs -rm -r -skipTrash /nfstest/c*` between runs to save disk;
@@ -448,6 +505,17 @@ All config changes need a gateway restart (`hdfs --daemon stop nfs3; hdfs --daem
 | C5 heap and counter about 64 MiB | The constant, not something else, sets the held amount (code-change run) |
 | Driver stalls; gateway log shows a dump `IOException` and no further replies | Dump-failure bypass (A3) reached; cap lost and connection stuck |
 | Read-back differs from 0xAB bytes | Dump/reload corrupts data (side finding; not part of the claim) |
+
+> **Amendment A8 (stage-4 audit, 2026-11-25, before any run): verdicts for the rows of B3g.**
+>
+> | Readings | Cluster verdict | Effect |
+> |---|---|---|
+> | C1 row 1 (completes in 256 MiB, `byte[]` flat ±8 MiB, dump 804,257,792 B, max counter 1,048,576) **and** C3 (no dump) **and** C4 (counter 0 at PAUSE, no OOM) **and** C5 (counter to 67,108,864, held heap about +64 MiB) | **Confirmed** | caps (per file) |
+> | as above, but C2 shows no heap difference | **Confirmed**, flagged: heap flatness rests on the counter and on completion in a heap smaller than the workload | caps |
+> | C1 `byte[]` rises with progress (> +50 MiB between 25% and PAUSE), or OOM, or max counter > 1,048,576 + 65,536 | **Refuted** | does not cap |
+> | C5 counter does not follow the patched mark although `javap` shows 67108864 in the loaded jar | **Refuted** (the constant does not set the held amount) | does not cap |
+> | Dump file does not reach about 767 MiB in C1/C4, or the counter never reaches the mark | **Not confirmed** | undetermined |
+> | A run cannot complete for a reason outside the claim (gateway does not start, mount fails, driver stalls with a dump `IOException`) | **Not confirmed** for that run; a dump `IOException` is the A3 bypass | undetermined |
 
 **B3h. Controls.**
 - The same driver, mount and heap size are used across C1/C3/C4, varying only size and chunk.
@@ -505,4 +573,28 @@ All config changes need a gateway restart (`hdfs --daemon stop nfs3; hdfs --daem
 
 ## D. Stage-4 feedback
 
-none yet
+**D1. Stage-4 audit amendments (2026-11-25, before any run):** A1 (B2a, node paths and surefire options), A2 (B3a, node
+distribution and daemon start), A3 (B3a/B3e, stream timeout 180 s, post-`DONE` wait 200 s), A4 (B3e step 2, system rpcbind
+kept, no-registration launcher), A5 (C5 run, patched jar), A6 (B3d, per-run heap baseline), A7 (B2g verdicts), A8 (B3g
+verdicts). None changes B1, B2f or B3f.
+
+**D2. Stage-4 run 1 (2026-11-25, node `pc91`): unit Confirmed, cluster Confirmed — caps (per open file), with the
+dump-failure bypass confirmed in the unit tier; outcome class true positive.** Results: `results/DUMP_WRITE_WATER_MARK-run-DUMP_WRITE_WATER_MARK--autonomous.md`
+(written outside the repository at run time: `~/writeup-hadoop/out/o16/results.md`).
+- Unit: U1–U4 matched B2f exactly (maxAfterReturn = M − 65,536, maxSampled = M, rounds = 256/64/16/4, dump file
+  67,108,864 B, final 0, heapDelta ≤ 10.7 MB); U5/U6/U7 held 67,108,864 B with heapDelta 64–74 MiB; U7 left one writer
+  stuck (`stuck=1`) while the counter grew to 64 MiB, so the A3 dump-failure bypass (the waiting writer is never woken,
+  later writes pass `waitForDump`) is **observed**, not only read from source. Gap: the test has no log4j configuration,
+  so the `Got failure when creating dump stream` line and the index of the stuck call were not recorded.
+- Cluster: C1 put 805,240,832 B of out-of-order data through a 256 MiB gateway with the counter at most 1,048,576
+  (767 times at the mark), live `byte[]` 14.07 → 15.49 MB from 25 % to PAUSE, a 804,257,792-B dump file, no OOM and a
+  correct 805,306,368-B HDFS file. C3 (below the mark) dumped nothing; C4 (1 MiB writes) dumped on every write with the
+  counter 0 at PAUSE; C2 held +30.4 MiB for 32 files (per-file cap, instrument resolves 1 MiB per file); C5 (patched
+  mark 64 MiB, code change) held +64.4 MiB with the counter at 67,043,328 at PAUSE and 11 hits of 67,108,864.
+- A3 note confirmed indirectly: the stream monitor closed each stream about 180–190 s after its last write, with no
+  check for pending writes (`OpenFileCtxCache.java:148-170`); the 60 s timeout of the filed B3a would have raced the
+  60 s PAUSE.
+- Side finding: no data corruption through dump and reload (C1, C3, C4, C5 and all 32 C2b files read back equal).
+- Recommendation for stage 3: in A3 bypasses, add that `cleanup()` does not reset `nonSequentialWriteInMemory` and does
+  not wake a writer blocked at `:294-299` (`OpenFileCtx.java:1218-1282`; read from source, not observed: the test
+  stops measuring the stuck call at its 10 s timeout).

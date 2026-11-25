@@ -178,6 +178,19 @@ held is O(mark) and dump-file size ≈ G. Moving the mark moves the threshold ac
   - `inHeap()` sums `count` over `getPendingWritesForTest().values()` whose private field `data` is non-null and whose `getDataState() != DUMPED`.
 - Tear down with `ctx.cleanup()`, `ads.shutdown()`, restoring the mark to 1 048 576, and deleting `dumpDir`.
 
+> **Amendment 2026-11-25 (stage-4 audit, before any reading; B2a/B2d/B2e runbook only, B2f/B2g unchanged).**
+> (1) Work in `copy-source.sh <run>/src` (`environment.md` §2), not `$WORK/hadoop-3.4.2`; skip the `-am install`
+> (all 3.4.2 modules are already in `~/.m2`) and run `mvn -B -o test -pl hadoop-hdfs-project/hadoop-hdfs-nfs -Dtest=TestDumpWaterMark`.
+> (2) The module has no `src/test/resources/log4j.properties`: create it (root `INFO, stdout` console appender to
+> `System.out`, plus `log4j.logger.org.apache.hadoop.hdfs.nfs.nfs3.OpenFileCtx=DEBUG`). The test writes its own
+> marker and reading lines through the same log4j appender (`DUMPWM ARM-BEGIN/ROW/SUMMARY/ARM-END`), so the DEBUG
+> `new value` lines can be attributed to each arm in order. (3) In the enabled and disabled arms each
+> `receivedNewWrite` runs on a daemon worker thread and is waited for up to 30 s; a call that does not return is
+> logged as `STUCK` and the arm stops (instrument only: it keeps an unexpected hang from hanging the build). A
+> daemon sampler thread busy-polls `nonSequentialWriteInMemory` as a second record of the peak beside the DEBUG
+> lines. (4) The K2 = 96 KiB arm uses N = 171 as in B2f (G = 16 416 KiB). (5) After the arm, `ctx.cleanup()` is called and
+> the dump file's existence is recorded (A3 step 6).
+
 **B2b. Knobs.**
 
 | Knob | Values | Why | How set |
@@ -279,6 +292,33 @@ held is O(mark) and dump-file size ≈ G. Moving the mark moves the threshold ac
   - `nfs.wtmax=1048576` (default)
 - `hadoop-env.sh`: `export HDFS_NFS3_OPTS="-Xmx512m -XX:+UseG1GC"`.
 - `log4j.properties`: add `log4j.logger.org.apache.hadoop.hdfs.nfs.nfs3.OpenFileCtx=DEBUG`.
+
+> **Amendment 2026-11-25 (stage-4 audit, before any reading; B3a/B3d/B3e/B4 runbook only, B3f/B3g unchanged).**
+> (1) Distribution: copy the node's built `/mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2` to
+> `<run>/hadoop` (`environment.md` §4) instead of unpacking a new tarball. Patched jars are built offline in the one
+> run copy of the source (edit line 73, `mvn -B -o package -pl hadoop-hdfs-project/hadoop-hdfs-nfs -Dmaven.test.skip=true`,
+> `git checkout` the file), not in second and third copies; the constant in every jar is checked with
+> `javap -c -p -constants` before use. (2) Daemons start with `hdfs --daemon start …` (no `start-dfs.sh`: no SSH to
+> localhost on the nodes). (3) The node's system `rpcbind` serves port 111 for other users (B4): it is **not** stopped
+> and the Hadoop `portmap` is not started; the gateway runs as `$USER` and registers `mountd`/`nfs` with the system
+> `rpcbind` (checked with `rpcinfo -p localhost`). Its registrations are removed with `sudo rpcinfo -d` at teardown.
+> If registration fails, the run stops (runbook defect). (4) Mount option `hard` is replaced by `soft,timeo=600,retrans=2`
+> (safety on a shared node; the gateway answers each WRITE after a dump, well within 60 s). (5) The run folder is
+> `$S4 = /mydata/jingsong-s4/DUMP_WRITE_WATER_MARK-run-DUMP_WRITE_WATER_MARK-2--autonomous-run1`. (6) The workload
+> data is a deterministic pattern; the local reference copy is written by `ooo.py` to `$S4/ref` and compared with
+> `hdfs dfs -cat /o17-file | cmp`. `hdfs dfs -stat %b` is recorded but may show only completed blocks while the
+> gateway keeps the HDFS stream open (it closes after `nfs.stream.timeout`); the integrity check is the `cmp`.
+> (7) Between points: unmount, stop the gateway, `hdfs dfs -rm -skipTrash /o17-file`, swap the jar, start the gateway
+> (the dump dir is wiped at start), mount.
+
+> **Amendment 2026-11-25 (stage-4 run 1, runbook defect D1 in B3e step 3.7; B3f/B3g unchanged; the cluster tier restarted from P1).**
+> In the first P1 attempt, `hdfs dfs -cat /o17-file` returned 16 384 B fewer than G + 1 MiB, with the returned prefix
+> identical to the reference: the gateway keeps the HDFS stream open (until `nfs.stream.timeout`) and the last bytes
+> written back after the client's final COMMIT were not yet visible to an HDFS reader. Fix: after `ooo.py` ends, unmount
+> and remount, and compare the file **read through the gateway** (`cmp $S4/mnt/o17-file $S4/ref`; an NFS READ makes the
+> gateway sync the stream, `checkCommit(..., fromRead=true)`), then `hdfs dfs -cat /o17-file | cmp - $S4/ref`. Both
+> results are recorded. Instrument addition (no effect on any prediction): a second baseline histogram 5 s after the first,
+> to show the baseline jitter of live `[B` against which the window Δ is read.
 
 **B3b. Knobs.**
 
@@ -414,4 +454,17 @@ After the gap is filled, all points give HDFS length G + 1 MiB with identical co
 
 ## D. Stage-4 feedback
 
-none yet
+**2026-11-25, run 1 on `pc82` (results: `results/DUMP_WRITE_WATER_MARK-run-DUMP_WRITE_WATER_MARK-2--autonomous.md`, drafted at
+`~/writeup-hadoop/out/o17/results.md`; case file at `bef6bc8a` + the dated amendments above, not committed).**
+- **Unit tier: Confirmed** (B2g rows 1, 5, 7). DEBUG peaks 262 144 / 1 048 576 / 4 194 304 (w = 64 KiB), 1 048 576 (w = 1 MiB),
+  1 081 344 (w = 96 KiB); dump file 16 MiB in steps of the mark; counter = referenced payload after every call; disabled dump
+  grows to 16 MiB; broken dump path leaves the writer `WAITING` in `waitForDump` (`:296`) with 1 MiB held and the dumper exited.
+- **Cluster tier: Confirmed** (B3g row 1). Stock and 4 MiB jars: max counter = mark, 64 resp. 16 dump rounds (mark → 0),
+  dump file 67 108 864 B at the window, live `[B` unchanged (±0.03 MB against a settled baseline); 1 GiB control: +67.1 MB live
+  `[B`, no dump file. Content identical after the hole was filled.
+- **Effect on the constraint: caps.** Outcome class **true positive**.
+- `:383` evidence: `Dumper woke up` = dump rounds − 1 in every arm and point (true branch of `:383`, `notifyAll` at `:384`).
+- Runbook notes for stage 3: B3d's first post-mount histogram carries ~8 MB of transient live `[B`, so Δ needs a settled
+  baseline; `hdfs dfs -cat` may miss the tail while the gateway keeps the stream open (read through the gateway first, D1);
+  the 512 KiB point held ~1.0 MB of live `[B` for 0.5 MiB of payload (unexplained, not decisive).
+

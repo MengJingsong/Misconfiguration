@@ -72,6 +72,7 @@
 - Linux, JDK 11 (`java -version` shows 11), Apache Ant ≥ 1.10, and network access to Maven Central for the first build.
 - **Work directory on local disk:** `export WORK=/mydata/o124-s3` (any local-disk directory with ≥ 15 GiB free; check with `df -h $WORK`).
 - **Copy of the source:** `rsync -a --exclude build ~/cassandra-5.0.9/ $WORK/src/`. All edits, builds and data stay under `$WORK`. Never build in the shared tree.
+  - *Amendment 2026-11-25 (stage-4 audit, A1; environment only, B2f/B2g unchanged):* on the stage-4 nodes the work directory is `WORK=/mydata/jingsong-cass-s4/o124` and the copy is `cp -a /mydata/s4/cassandra-base $WORK/src` (the built `copy-source.sh` copy of the repository's `systems/cassandra/source/`, `cassandra-5.0.9`), per `cassandra/stage4-runtime-verification/environment.md`.
 - **Test source:** `$WORK/src/test/unit/org/apache/cassandra/transport/FrameMaxSizeProbeTest.java` (text in B2e). It must be in package `org.apache.cassandra.transport`, because `Flusher`, `Flusher.immediate` and `FlushItem.Framed` are package-private.
 - **JVM:** whatever `ant testsome` uses (test config `test/conf/cassandra.yaml`, test heap from `build.xml`). No extra options.
 
@@ -177,6 +178,7 @@ public class FrameMaxSizeProbeTest
 }
 ```
 2. **Run M17.** `cd $WORK/src && sed -n 41p src/java/org/apache/cassandra/net/FrameEncoder.java` (must show `1 << 17`). Then `ant clean && ant testsome -Dtest.name=org.apache.cassandra.transport.FrameMaxSizeProbeTest`. Then `grep -o 'PROBE[^<]*' build/test/output/TEST-org.apache.cassandra.transport.FrameMaxSizeProbeTest.xml | tee $WORK/unit-M17.txt`.
+   - *Amendment 2026-11-25 (stage-4 runbook defect D1; B2f/B2g unchanged):* the `ant testsome` JVM routes `System.out` through a logger (`SubstituteLogger`), one log line per `printf` fragment, and the JUnit XML carries no stdout, so the `grep … TEST-*.xml` step finds nothing. Capture the ant output (`ant testsome … > $WORK/logs/unit-M17-testsome.log 2>&1`) and rebuild the PROBE lines from it: `grep -F SubstituteLogger.java <log> | sed 's/.*SubstituteLogger\.java:[0-9]* - //' | tr -d '\n' | sed 's/PROBE /\nPROBE /g' | grep '^PROBE' > $WORK/unit-M17.txt` (the same in steps 3 and 4).
 3. **Run M16.** `sed -i '41s/1 << 17/1 << 16/' src/java/org/apache/cassandra/net/FrameEncoder.java`, then repeat the `ant clean && ant testsome …` and grep steps, writing to `$WORK/unit-M16.txt`.
 4. **Run M15.** `sed -i '41s/1 << 16/1 << 15/' …`, then repeat, writing to `$WORK/unit-M15.txt`.
 5. **Restore.** `sed -i '41s/1 << 15/1 << 17/' …`, then `ant clean jar` so the copy is back at the default for the cluster tier's M17 run.
@@ -222,6 +224,7 @@ public class FrameMaxSizeProbeTest
 - **Environment before start:**
   - `export MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M`
   - `export JVM_EXTRA_OPTS="-XX:NativeMemoryTracking=summary"`
+  - *Amendment 2026-11-25 (stage-4 audit, A2; environment only, B3f/B3g unchanged):* scope `JVM_EXTRA_OPTS`, `MAX_HEAP_SIZE` and `HEAP_NEWSIZE` to the `bin/cassandra` command instead of exporting them (environment.md §6), and run `ulimit -n 100000` first (the stage-4 nodes default to a soft limit of 1024). `HEAP_NEWSIZE` is ignored under G1 (the node prints a warning); harmless.
 - **`conf/cassandra.yaml` edits in `$WORK/src`:**
   - `networking_cache_size: 128MiB` (equal to the default at a 2 GiB heap; written out for clarity);
   - everything else stays at the default. In particular `native_transport_max_message_size` is unset; its default is min(max_mutation_size 16 MiB, in-flight limits) = 16 MiB, so an 8 MiB write is accepted.
@@ -316,6 +319,7 @@ ss -tmn '( dport = :9042 )' | awk 'NR>1{print "proxyRecvQ", $2}'
    - Check that `system.log` contains `Global buffer pool limit is 128.000MiB for networking` (`BufferPools.java:48-52`).
 5. **Workload control (M17, K = 4):** `python3 $WORK/probe.py probe 4 | tee $WORK/cluster-M17-K4.txt`.
 6. **Stop the node and proxy:** `kill $(cat $WORK/cassandra.pid)`; wait for exit (`while kill -0 $(cat $WORK/cassandra.pid) 2>/dev/null; do sleep 1; done`); `kill $(cat $WORK/proxy.pid)`.
+   - *Amendment 2026-11-25 (stage-4 runbook defect D2; B3f/B3g unchanged):* the JVM deletes the pidfile (`deleteOnExit`) at the **start** of shutdown, so `while kill -0 $(cat $WORK/cassandra.pid)` ends at once while the node is still shutting down and the next start finds ports 7000/7199 busy. Read the pid once after start (`cp $WORK/cassandra.pid $WORK/node.pid`) and wait on that copy: `NP=$(cat $WORK/node.pid); kill $NP; while kill -0 $NP 2>/dev/null; do sleep 1; done`. The same applies to steps 7 to 9 and B4.
 7. **Positive control (M17, cap 16 MiB):** set `networking_cache_size: 16MiB`, restart node and proxy, and run probe 8 into `$WORK/cluster-M17-cache16.txt`. The data is still on disk, so setup is not needed. Stop the node and proxy, then set `networking_cache_size` back to `128MiB`.
 8. **M16:** stop everything, edit line 41 to `1 << 16`, `ant clean jar` (the data directory survives `ant clean`), restart node and proxy, probe 8 into `$WORK/cluster-M16-K8.txt`, stop.
 9. **M15:** do the same with `1 << 15`, into `$WORK/cluster-M15-K8.txt`, then stop.
@@ -350,6 +354,7 @@ ss -tmn '( dport = :9042 )' | awk 'NR>1{print "proxyRecvQ", $2}'
 
 **B3h. Controls.**
 - **Path checks:** the `pool hosts` line must show only `127.0.0.1:19042`, so the driver went through the proxy. `ss` must show a single client connection on 9042, from the proxy.
+  - *Amendment 2026-11-25 (stage-4 audit, A3; B3g unchanged):* the driver's control connection also goes through the proxy, so `ss` shows **two** server-side connections on 9042, both from the proxy (control connection and the one pool connection). B_k is summed over both.
 - **Baseline:** taken after warm-up, so chunk-cache and pool warming are excluded.
 - **Kernel buffer:** B_k is measured, not assumed, and subtracted.
 - **Positive controls:** K = 4 vs K = 8 (usage follows load), and `networking_cache_size` 16 MiB (a known cap binds on the same pool).
@@ -399,4 +404,18 @@ ss -tmn '( dport = :9042 )' | awk 'NR>1{print "proxyRecvQ", $2}'
 
 ## D. Stage-4 feedback
 
-none yet
+**2026-11-25, stage 4 run 1 (Jingsong; node `pc72`, x86_64; results `results/frameencoder_payload_max_size-payload-max_size--autonomous.md`).**
+- **Unit tier: Confirmed — does not cap.** At `MAX_SIZE` = 131072 / 65536 / 32768 an 8 MiB response became 65 / 129 / 257 frames
+  (maxData 131054 / 65518 / 32750, as B2f), while the networking-pool delta with every frame held was 8,390,656 / 8,392,704 /
+  8,394,752 B (0.05% spread; every B2f figure matched exactly). S = 4 MiB halved it (4,194,912 / 4,196,352 / 4,198,400 B).
+  releasedDelta 0; the literal 128 KiB check rejected 131072 and accepted 131071 at all three values.
+- **Cluster tier: Confirmed — does not cap.** With the client paused, K = 8 × 8 MiB responses held ΔU = 57,948,160 /
+  57,438,208 / 57,878,528 B of networking-pool memory at M17 / M16 / M15 (M16 and M15 are 0.991 and 0.999 of M17), each within
+  0.06% of R − B_k. K = 4: ΔU = 23,861,248 B (1.003 × R − B_k). With `networking_cache_size: 16MiB` the pooled part stopped at
+  exactly 16,777,216 B and the remainder went to overflow (+44,823,888 B), with ΔU unchanged (1.001 × R − B_k). Gap: NMT `Other`
+  rose by ≈ ΔU in the M16/M15 runs but not in the M17 K = 8 run, which followed the 64 MiB data load in the same JVM (see results §4.2).
+- **Outcome class: true negative.** Runbook defects D1 (B2e PROBE extraction) and D2 (B3e step 6 pidfile wait) were fixed by the
+  dated amendments above; audit amendments A1–A3 are environment-only. B2f/B2g/B3f/B3g are unchanged.
+- **Side observation, outside this constraint:** after 8 inbound 8 MiB INSERTs the networking pool's `OverflowSize` stayed at
+  67,113,472 B (64 MiB + 4.5 KiB) for the rest of the JVM's life, and once read −2,052 B after release in the 16 MiB run; this
+  looks like an overflow-accounting mismatch on the inbound large-message path, and may be worth a case of its own.

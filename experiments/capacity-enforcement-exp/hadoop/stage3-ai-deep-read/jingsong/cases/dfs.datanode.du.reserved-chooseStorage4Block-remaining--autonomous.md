@@ -125,6 +125,7 @@ These consume the reservation rather than HDFS's budget; see the A2 algebra. If 
 **B2a. Environment and build.** JDK 8, Maven ≥ 3.3, Linux.
 
 1. Copy the tag tree to local disk (never the shared copy): `rsync -a <hadoop-3.4.2 source>/ $WORK/hadoop-src/`.
+   *Amendment D1-4 (2026-11-25, environment only): on the stage-4 nodes the copy is made with `copy-source.sh /mydata/jingsong-s4/<stem>-run1/src`, and step 2 is replaced by an offline `mvn -o -pl hadoop-hdfs-project/hadoop-hdfs test-compile`, because every 3.4.2 module is already installed in `~/.m2` by the node build (`environment.md` §3). `$WORK/minidfs` is `-Dtest.build.data=<run>/test-data` (the test puts each cluster under `<test-data>/o25/<tag>`).*
 2. Build the dependencies: `cd $WORK/hadoop-src && mvn -pl hadoop-hdfs-project/hadoop-hdfs -am install -DskipTests -Dmaven.javadoc.skip=true`.
 3. Add the test class `hadoop-hdfs-project/hadoop-hdfs/src/test/java/org/apache/hadoop/hdfs/server/blockmanagement/TestChooseStorage4BlockReserved.java`. It must be in this package to call the package-private `DatanodeStorageInfo.getRemaining()` and `DatanodeDescriptor.incrementBlocksScheduled(StorageType)`.
 4. Run it: `mvn -pl hadoop-hdfs-project/hadoop-hdfs test -Dtest=TestChooseStorage4BlockReserved -Dhdfs.minidfs.basedir=$WORK/minidfs`. `$WORK` is on local disk with at least 2 GiB free.
@@ -156,6 +157,7 @@ U2 (the operand derived from the key, with a real DataNode):
 
 U1: build a descriptor with `DatanodeStorageInfo s = DFSTestUtil.createDatanodeStorageInfos(1)[0]` and take `dn = s.getDatanodeDescriptor()`. For each knob tuple:
 1. `s.setUtilizationForTesting(cap=10·B, dfsUsed=0, remaining=R, bpUsed=0)`.
+   *Amendment D1-1 (stage 4, 2026-11-25): `s` must be the descriptor's registered storage, `s = dn.getStorageInfo(s0.getStorageID())` with `s0 = DFSTestUtil.createDatanodeStorageInfos(1)[0]`. The object `createDatanodeStorageInfos` returns is a second `DatanodeStorageInfo`, not the one in the descriptor's storage map (`DFSTestUtil.java:1295-1305`, `BlockManagerTestUtil.java:357-375`), so utilization set on it never reaches `chooseStorage4Block`. Use a fresh descriptor per tuple; heartbeat first, then call `incrementBlocksScheduled` s times (the first heartbeat may roll the scheduled counters, `DatanodeDescriptor.java:877-883`).*
 2. `dn.updateHeartbeat(BlockManagerTestUtil.getStorageReportsForDatanode(dn), 0, 0, 0, 0, null)`.
 3. Call `dn.chooseStorage4Block(StorageType.DISK, B, k)` and record whether it returns null.
 
@@ -176,6 +178,7 @@ Arithmetic for U2: each finalized block adds `b' = B + meta` to `dfsUsed`. With 
 After each write:
 - success or failure, and the exception message
 - DataNode-side `FsVolumeImpl.getAvailable()`, `getDfsUsed()` and `getReserved()` (via `cluster.getDataNodes().get(0).getFSDataset().getFsVolumeReferences()`)
+  *Amendment D1-2 (2026-11-25): `FsVolumeImpl.getReserved()` is package-private (`FsVolumeImpl.java:556`) and the test lives in the `blockmanagement` package; it is read by reflection (`setAccessible`). The NameNode-side operand is read from the NameNode's own descriptor, `cluster.getNamesystem().getBlockManager().getDatanodeManager().getDatanode(dn.getDatanodeId())`.*
 - the bytes of block files on disk (sum of file lengths under the volume's `current/BP-*/current/finalized`)
 
 What cannot be observed directly: the exact moment a heartbeat lands. It is controlled by the sleep.
@@ -200,7 +203,8 @@ What cannot be observed directly: the exact moment a heartbeat lands. It is cont
 | 64 MiB (67,108,864) | 1 | floor(62,914,560/4,227,079)+1 = **15** | ≈ 63.4 MB ≤ H |
 | 64 MiB | 3 | floor(54,525,952/4,227,079)+1 = **13** | ≈ 55.0 MB |
 
-The first failure in every case is a NameNode-side `IOException … could only be written to 0 of the 1 minReplication nodes`, with INFO `Not enough replicas was chosen. Reason: {NOT_ENOUGH_STORAGE_SPACE=1}`. For U1, `null` exactly when `R − s·B < k·B`; for example, R = k·B, s = 0 gives non-null, and R = k·B − 1 gives null.
+The first failure in every case is a NameNode-side `IOException … could only be written to 0 of the 1 minReplication nodes`, with INFO `Not enough replicas was chosen. Reason: {NOT_ENOUGH_STORAGE_SPACE=1}`.
+*Amendment D2-1 (2026-11-25, after unit attempt 1; numbers unchanged, unit tier restarted): the INFO reason map cannot carry `NOT_ENOUGH_STORAGE_SPACE` here. The writer runs on the DataNode's host, so placement first tries `chooseLocalStorage` (`BlockPlacementPolicyDefault.java:630-655`), which calls the check and records the reason, and then falls back to `chooseRandom`, which **clears** the reason map at entry (`:835`) and, with the only node already excluded, records `NO_REQUIRED_STORAGE_TYPE` (`:845-852`). The disallow-branch evidence is therefore the check's own DEBUG line, `The node … does not have enough DISK space (required=k·B, scheduled=…, remaining=R)` (`DatanodeDescriptor.java:834-837`, logger `BlockPlacementPolicy` at DEBUG), logged by a NameNode `IPC Server handler` thread at each refused write with `remaining < required`. Wherever B2f/B2g/B3f/B3g/B3h say "`NOT_ENOUGH_STORAGE_SPACE`" read "that DEBUG line (and the client's `could only be written to 0 of the 1 minReplication nodes`)". The client message alone does not separate the gates: after a DataNode `Out of space` the client excludes the node and the NameNode then gives the same message.* For U1, `null` exactly when `R − s·B < k·B`; for example, R = k·B, s = 0 gives non-null, and R = k·B − 1 gives null.
 
 **B2g. Readings.**
 
@@ -215,6 +219,9 @@ The first failure in every case is a NameNode-side `IOException … could only b
 | U2: N changes with k as predicted | demand side of the check confirmed too |
 
 **B2h. Controls.**
+
+*Amendment D1-3 (2026-11-25): the `MiniDFSCluster.Builder` constructor itself sets `additional-available-space = 0` (`MiniDFSCluster.java:551-553`). The main runs keep that (as B2b asks); Control B sets the key to its 1 GiB default **after** the Builder is constructed and before `build()`, otherwise Control B would silently run with 0.*
+
 - **Control A (cap absent):** the same loop with `H = 512 MiB` and 40 files of 4 MiB (160 MiB). All 40 should succeed. This shows the refusals come from H, not the workload.
 - **Control B (other gate):** `H = 64 MiB` with `additional-available-space` left at its 1 GiB default. The first write should fail at the DataNode (`Out of space`). This shows the main runs isolate the NameNode check.
 - **Prediction check:** `pred` recorded before each write lets each outcome be matched to the check's own evaluation.
@@ -223,6 +230,8 @@ The first failure in every case is a NameNode-side `IOException … could only b
 ### B3. Cluster tier
 
 **B3a. Environment and build.** One Linux host, pseudo-distributed HDFS: one NameNode and one DataNode, with no YARN and no SecondaryNameNode. JDK 8.
+
+*Amendment D1-5 (2026-11-25, environment only): the distribution is the node's full build `/mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2`, copied with `cp -a` to `$RUN/hadoop` (`environment.md` §4), instead of rebuilding and untarring. `$RUN = /mydata/jingsong-s4/<stem>-run1/cluster`; each fresh cluster (each H and each control) gets its own `HADOOP_LOG_DIR = $RUN/logs-<label>`, so the B3d log greps count per run. Daemons are started and stopped with `hdfs --daemon` (no SSH to localhost on the nodes).*
 
 Build:
 ```
@@ -254,6 +263,8 @@ Environment variables (in `etc/hadoop/hadoop-env.sh` or exported):
 | `dfs.datanode.round-robin-volume-choosing-policy.additional-available-space` | `0` |
 | `dfs.namenode.block-placement.min-blocks-for.write` | `1` |
 | `dfs.datanode.du.reserved` | (B3b) |
+
+*Amendment D2-1 (cluster): add `log4j.logger.org.apache.hadoop.hdfs.server.blockmanagement.BlockPlacementPolicy=DEBUG` to `$HADOOP_CONF_DIR/log4j.properties`, so the NameNode log carries the check's DEBUG line (see B2f).*
 
 Ports, moved off the defaults to avoid clashes on a shared host:
 
@@ -351,11 +362,15 @@ Further predictions:
 | failures come with DataNode `Out of space` and no NameNode `NOT_ENOUGH_STORAGE_SPACE` | the DataNode gate bound, not the target check: not confirmed for this check (check additional-available-space = 0) |
 | k = 4 run gives 28 accepted puts vs 31 at k = 1 | demand side of the check confirmed |
 | refusal while `DFS Remaining` ≥ k·B + slack | an unknown gate is binding: claim refuted for the mechanism |
+| *(D1-6)* Control 3: `Remaining` unchanged within 1 MiB, `df used` +≈200 MiB | the reservation algebra holds |
+| *(D1-6)* Control 3: `Remaining` drops by ≈200 MiB | the budget is not set by H as derived: cluster tier Not confirmed |
+| *(D1-7)* Control 1 refuses a put, or Control 2's first put succeeds | the workload or the isolation of the two gates is broken: cluster tier Invalid |
 
 **B3h. Controls.**
 - **Control 1 (cap far away):** H = 2 GiB with the same 80-put workload stopped at 64 puts (1 GiB). All 64 succeed and `du` ≈ 64·b' = 1,082,130,880. This shows the workload itself does not fail.
 - **Control 2 (DataNode-side gate):** H = 512 MiB with `additional-available-space` removed (1 GiB default). The first put fails, the DataNode log shows `Out of space`, and the NameNode log shows no `NOT_ENOUGH_STORAGE_SPACE`. It separates the two gates.
 - **Control 3 (non-HDFS writes):** during the H = 512 MiB run, write a 200 MiB non-HDFS file into `$RUN/scratch` on the same filesystem, and remove it afterwards. Per A2, `Remaining` must not change, because non-HDFS use stays below R. This confirms the reservation algebra.
+  *Amendment D1-6 (2026-11-25): exact timing and reading. The file is written right after put 10's readings, with `dd if=/dev/zero bs=1M count=200 conv=fsync`; JMX `Remaining` and the report's `DFS Remaining` are read 3 s before the `dd` and 4 s and 7 s after it, with no put in between, and `df used` is recorded alongside to show the file landed. Conclusion rows (added to B3g): `Remaining` unchanged within 1 MiB while `df used` grows by ≈200 MiB → the A2 algebra holds (other users' files consume the reservation, not HDFS's budget); `Remaining` drops by ≈200 MiB → the budget is not `T' − R − dfsUsed`, the H arithmetic of B3f does not hold, and the verdict is at most Not confirmed for the cluster tier.*
 - **Interference checks:** record `df` throughout to rule out other users' activity crossing R. Run `jps` before start to make sure no other NameNode or DataNode of this run is present.
 
 **B4. Risks and cleanup.**
@@ -396,4 +411,25 @@ Further predictions:
 
 ## D. Stage-4 feedback
 
-none yet
+**2026-11-25, stage 4 run 1 (node `pc75`, Jingsong's share): Confirmed — caps (both tiers); outcome class true positive.** Results: `results.md` beside this file (to be filed as `hadoop/stage4-runtime-verification/jingsong/results/dfs.datanode.du.reserved-chooseStorage4Block-remaining--autonomous.md`).
+
+- Unit tier: U1 30/30 tuples match `null ⇔ k·B > R − s·B`; U2 accepted blocks 7 / 5 / 15 / 13 for (32 MiB, 1) / (32 MiB, 3) / (64 MiB, 1) / (64 MiB, 3), exactly N(H,k); `remaining` fell by exactly b' = 4,227,079 per block; finalized bytes ≤ H throughout; each refusal had the check's DEBUG line from a NameNode IPC thread. Control A 40/40; Control B refused at the DataNode (`Out of space`) with no NameNode check line.
+- Cluster tier: accepted puts 15 / 31 / 63 at H = 256 / 512 / 1024 MiB (k = 1) and 28 at H = 512 MiB, k = 4; finalized bytes 253,624,425 / 524,157,145 / 1,065,222,585 / 473,432,260, equal to B3f; `DFS Remaining` at stop < k·B; the check's DEBUG line at every refused put; no DataNode `Out of space`. Control 1 64/64; Control 2 0 accepted with DataNode `Out of space` only; Control 3 left `Remaining` unchanged (to the byte) while `df used` grew by 200 MiB.
+- Runbook defect (D2-1): the INFO reason `NOT_ENOUGH_STORAGE_SPACE` never appears with a writer on the DataNode's host (the reason map shows `NO_REQUIRED_STORAGE_TYPE`); the disallow evidence is the check's DEBUG line. Stage 3 should predict log signatures from the whole placement path (`chooseLocalStorage` then `chooseRandom`), not from the check alone.
+
+### D1. Stage-4 audit amendments (2026-11-25, before any reading)
+
+Applied by the stage-4 session (Jingsong's share, queue order 25) before run 1; none changes B1's claim or the B2f/B3f numbers.
+
+| Id | Where | What | Why |
+|---|---|---|---|
+| D1-1 | B2c U1 step 1 | set utilization on the descriptor's registered storage | the returned storage object is not the one the check iterates |
+| D1-2 | B2d | read `getReserved()` by reflection; NameNode-side values from the NameNode's descriptor | package-private accessor |
+| D1-3 | B2h | Control B sets `additional-available-space` after the Builder | the Builder forces it to 0 |
+| D1-4 | B2a | per-case copy by `copy-source.sh`, offline test-compile | node environment |
+| D1-5 | B3a | node's built distribution copied per run; per-run log dirs; `--daemon` | node environment |
+| D1-6 | B3h, B3g | exact timing and conclusion rows for Control 3 | the control had no reading rule |
+| D1-7 | B3g | rows for a failed Control 1 / Control 2 | unstated outcomes |
+| D2-1 | B2f, B2g, B3a, B3d, B3f, B3g, B3h | disallow-branch evidence is the check's DEBUG line from a NameNode IPC thread, not the INFO `NOT_ENOUGH_STORAGE_SPACE` reason | runbook defect found in unit attempt 1: with a co-located writer the reason map is cleared by `chooseRandom` (source fact, `BlockPlacementPolicyDefault.java:630-655, 835, 845-852`); counts and claim unchanged; unit tier restarted |
+
+Recommendations not applied (for stage 3): the knob's default (`du.reserved = 0`, H = the whole 750 GB disk) is not run, because filling the disk is not allowed on the shared node; Controls A and 1 (cap far away) stand in for it. The unit tier has two H values (plus Control A at 512 MiB); a third would make "follows H" a three-point relation in-JVM too.

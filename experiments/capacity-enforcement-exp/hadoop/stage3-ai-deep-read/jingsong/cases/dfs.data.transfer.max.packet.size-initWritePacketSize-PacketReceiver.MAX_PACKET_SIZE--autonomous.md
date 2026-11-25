@@ -182,6 +182,12 @@ usage-side operand is the field `writePacketSize` (from key `dfs.client-write-pa
 - Test data: `MiniDFSCluster` with 1 DataNode, `dfs.replication=1`, base dir under the module `target/`
   (local disk).
 
+> **Amendment A1 (2026-11-25, stage-4 audit, before any reading):** Paths and build on the stage-4 node. The local copy is `/mydata/jingsong-s4/<stem>-run1/src` (made with `jingsong/copy-source.sh`, not `~/hadoop-3.4.2`). No `install` build is run: every 3.4.2 module is already in `~/.m2` from the node's base build of the same source (`environment.md` §3), so the tests run with `mvn -B -pl hadoop-hdfs-project/hadoop-hdfs test -Dtest=<Class> -DfailIfNoTests=false` from the copy's root. Surefire failures do not fail `mvn test` in this build: read the surefire counts, not the exit code. JDK 8 (`/usr/lib/jvm/java-8-openjdk-amd64`) is exported as `JAVA_HOME` explicitly.
+
+
+> **Amendment A2 (2026-11-25, stage-4 audit, before any reading):** The 4 MiB class's `static {}` block must first load `HdfsConfiguration` (`new HdfsConfiguration();` or `HdfsConfiguration.init();`) and only then call `Configuration.addDefaultResource("maxpkt-4m-site.xml")`. Default resources are loaded in the order they are added and later ones win; added first, `maxpkt-4m-site.xml` would be overridden by `hdfs-default.xml`, which `HdfsConfiguration`'s static initializer adds after it (`HdfsConfiguration.java:33-40`). The assertion `PacketReceiver.MAX_PACKET_SIZE == 4194304` (B2e step 3) stays and would catch this.
+
+
 **B2b. Knobs.**
 - `dfs.client-write-packet-size` (C), set with `conf.setInt` on the `MiniDFSCluster` conf. Values:
   - 65536: default, control.
@@ -222,6 +228,16 @@ field is private.
   "Incorrect value for packet payload size", captured with `GenericTestUtils.LogCapturer` on the
   `PacketReceiver` / `DataNode` loggers.
 - (g) The client WARN "Configured write packet exceeds" (LogCapturer on the `DFSOutputStream` logger).
+
+> **Amendment A3 (2026-11-25, stage-4 audit, before any reading):** How (e), (f) and (g) are read. (e): the big file is written in 64 KiB `write` calls; the first packet object is taken from `currentPacket` after the first call, and after each later call the test checks whether `currentPacket` is a different, non-null object; the first such object is the second packet, and (e) is its `buf.length` (with `packetSize` and `chunksPerPacket` at that moment). FSOutputSummer hands chunks to `writeChunk` in groups of up to 9 (`FSOutputSummer.java:51-56`), so "exactly `chunksPerPacket`·512 bytes, then one more chunk" is not observable at a `write` boundary; the identity change is. If the stream fails before a second packet exists, (e) is recorded as `none` (expected only for C = 268435456, whose first packet never fills). (f): the DataNode's refusal can surface in a later `write`, in `hflush` or in `close`; the test records which call threw first, the exception class and message, and the file length the NameNode reports afterwards. The DataNode line "Incorrect value for packet payload size" and the client WARN (g) are counted in the test's surefire output file (`*-output.txt`, which holds the in-JVM DataNode and client log), between per-test `BEGIN`/`END` marker lines the test prints; LogCapturer is not needed. Test timeout 300 s per test (pipeline recovery with one DataNode retries before failing).
+
+> **Amendment A7 (2026-11-25, runbook defect found in unit run 1, attempt 1; B2f, B2g and B2h unchanged):** the first
+> `write` of each file is **4608 bytes** (one FSOutputSummer group of 9 chunks), not 64 KiB, and (c) and (d) are read
+> after it; the rest of the file follows in 64 KiB writes (the last one shorter) to exactly 1 MiB / 48 MiB. Reason: at
+> C = 65536 the first packet holds 126 chunks (64512 B), so a 64 KiB first write fills and queues it before (c) is read
+> and `currentPacket` is null (attempt 1 read -1). 9 chunks cannot fill a packet at any C in B2b. The unit tier
+> restarts from its beginning.
+
 - Not observable here: the real resident memory of a separate client process. That is measured in the
   cluster tier.
 
@@ -354,6 +370,9 @@ The WARN (g) should appear exactly when C > MAX.
     ≤ the DataNode's 16 MiB, so it is accepted. The rest are ≤ 4194081 B.
 - Each command takes a few seconds.
 
+> **Amendment A4 (2026-11-25, stage-4 audit, before any reading):** Cluster set-up on the stage-4 node. The distribution is copied from the node's base build (`cp -a /mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2 <run>/hadoop`, `environment.md` §4), which is built from the same pinned source; it is not rebuilt. SSH to `localhost` does not work on these nodes, so `start-dfs.sh` / `stop-dfs.sh` are replaced by `hdfs --daemon start|stop namenode` and `hdfs --daemon start|stop datanode`; no SecondaryNameNode is started (it plays no part in a write). `dfs.namenode.rpc-address` is the `fs.defaultFS` port 19000; the B3a ports are used and checked free with `ss -ltn` first. `JAVA_HOME` is the JDK 8 path (8u514, which has JFR and `jfr`). The client options add `dumponexit=true` to `-XX:StartFlightRecording` so the recording is written however the client JVM ends, and the client heap actually in force is read from the recording's `jdk.JVMInformation` / `jdk.GCHeapConfiguration` events (a known-answer check of `-Xmx`). The file argument is `-put -f <file> /t/<tag>`; between runs `hdfs dfs -rm -f -skipTrash /t/*`.
+
+
 **B3d. Observables and instruments.**
 - (1) JFR, `jdk.ObjectAllocationOutsideTLAB` events (enabled in the `profile` settings; packet arrays are far
   larger than a TLAB):
@@ -373,6 +392,9 @@ The WARN (g) should appear exactly when C > MAX.
 - Not observable directly: which Java statement chose the size. JFR stack frames give
   `createPacket` ← `writeChunkPrepare`, and that is the link to the code.
 
+> **Amendment A5 (2026-11-25, stage-4 audit, before any reading):** Reading the JFR sizes. `allocationSize` of a `byte[]` is the array length plus the 16-byte header, rounded up to a multiple of 8, so the expected value is `ceil((L + 16)/8)·8` for a buffer of length L (for example 65049 → 65072, 16776741 → 16776760, 33553965 → 33553984, 268435101 → 268435120, 8388129 → 8388152, 4194081 → 4194104). A reading matches when it equals that value. So that every packet buffer, including the 65049-byte one of the C = 65536 control, is an allocation outside a TLAB, the client options also get `-XX:TLABSize=16k -XX:-ResizeTLAB` (a fixed 16 KiB TLAB: any array above it is allocated outside one); `jdk.ObjectAllocationInNewTLAB` events with a `createPacket` frame are read as well, as a backup. Only `byte[]` events whose stack contains `DFSOutputStream.createPacket` are counted; packet buffers of length 33 (`createPacket(0, …)`, the end-of-block packet) and any below 1 KiB stay in TLABs or are ignored. 'First buffer' is the first such event of the run; 'later buffers' are the rest that are not the end-of-block packet. Set 2: the `OutOfMemoryError` is read from the client's stderr; the JFR recording of an OOM run may still lack the allocation event (the allocation did not succeed), which is not an instrument failure for set 2.
+
+
 **B3e. Procedure.**
 1. Build, unpack, write the configs, format, `start-dfs.sh`. Check `jps` shows NameNode, DataNode,
    SecondaryNameNode, and `hdfs dfsadmin -report` shows 1 live DN.
@@ -382,6 +404,9 @@ The WARN (g) should appear exactly when C > MAX.
 4. Set 3: `HADOOP_CONF_DIR=/mydata/<run>/conf-c4` for the client only (the DN stays at 16M). C ∈ {4194304,
    8388608}, files `f1m` and `f48m`, H = 1024m. Record (1) to (5).
 5. Run `stop-dfs.sh`, then check `jps` shows no NameNode, DataNode or SecondaryNameNode.
+
+> **Amendment A6 (2026-11-25, stage-4 audit, before any reading):** Step 1 and step 5 use `hdfs --daemon start|stop` (A4). After step 5 the check is `ps -eo pid,cmd | grep -E '[N]ameNode|[D]ataNode'` and `jps` on the node; nothing of this run may remain.
+
 
 **B3f. Predictions.** JFR first `createPacket` allocation ≈ buffer + 16 B.
 
@@ -461,4 +486,17 @@ The WARN (g) should appear exactly when C > MAX.
 
 ## D. Stage-4 feedback
 
-none yet
+**D1. Stage-4 audit amendments (2026-11-25, before any reading).** A1 (unit paths, no install build, read surefire
+counts), A2 (order of default resources in the 4 MiB class), A3 (how (e), (f), (g) are read; per-test timeout), A4
+(cluster set-up on the node: base distribution, `hdfs --daemon`, ports, JFR `dumponexit`, heap check), A5 (reading
+JFR sizes, with exact expected values), A6 (stop and check); A7 (after unit attempt 1: first write of 4608 bytes, so (c) sees the first packet at C = 65536). None changes the claim (B1), the predictions (B2f,
+B3f) or the readings tables (B2g, B3g). Results: `hadoop/stage4-runtime-verification/jingsong/results/<stem>.md`.
+
+**D2. Stage-4 result (2026-11-25).** Unit **Confirmed** (B2g row 1), cluster **Confirmed** (B3g row 1); effect `does not
+cap`; outcome class **true negative**. Run on `pc72`, one run 1 per tier (each restarted once after a runbook defect:
+A7 for the unit tier, a harness input-file fix for the cluster tier). Every reading equalled B2f / B3f to the byte:
+first packet buffer 33553965 / 268435101 B at MAX 16 MiB and 8388129 B at MAX 4 MiB while the clamped `writePacketSize`
+read MAX; packets after the first 16776741 / 4194081 B (positive control); big writes whose first packet exceeded the
+DataNode's MAX failed with "Incorrect value for packet payload size"; a `-Xmx192m` client ran out of heap at C = 256 MiB
+and succeeded at C = 16 MiB. Results: `hadoop/stage4-runtime-verification/jingsong/results/dfs.data.transfer.max.packet.size-initWritePacketSize-PacketReceiver.MAX_PACKET_SIZE--autonomous.md`
+(§8 notes that the clamp binds on packets 2..n, so the Effect field could be read as a bypass).

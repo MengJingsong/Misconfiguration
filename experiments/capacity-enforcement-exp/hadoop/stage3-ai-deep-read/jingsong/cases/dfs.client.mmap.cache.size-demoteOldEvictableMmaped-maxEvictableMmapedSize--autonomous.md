@@ -187,6 +187,15 @@ with `S`.
   `hdfs-site.xml` already sets `dfs.namenode.fs-limits.min-block-size=0`.
 - **Surefire JVM:** default; the mapped files are 12 MiB in total.
 
+> **Amendment A1 (2026-11-25, stage-4 audit, before any reading; runbook only, B1/B2f/B2g claim unchanged).** Node and build
+> specifics for the run on `pc91` (Jingsong's stage-4 environment): run folder `R1=/mydata/jingsong-s4/<stem>-run1/`; source
+> copy `R1/src` by `copy-source.sh` (not `rsync ~/hadoop-3.4.2`); native prerequisites `cmake zlib1g-dev libssl-dev
+> pkg-config` by `apt-get` (protobuf is not needed for `hadoop-common`: the build downloads `protoc`); native library by
+> `mvn -pl hadoop-common-project/hadoop-common package -Pnative -DskipTests` in the copy. No `install` of `hadoop-hdfs` is
+> needed (the node's `~/.m2` holds the 3.4.2 artifacts from the base build); `-Pnative` is not passed to the `hadoop-hdfs`
+> test run (surefire's `LD_LIBRARY_PATH` already names `hadoop-common/target/native/target/usr/local/lib`,
+> `hadoop-project/pom.xml:2474`). Surefire counts, not the Maven exit code, decide pass/fail.
+
 **B2b. Knobs.**
 - **Varied:** `S = dfs.client.mmap.cache.size ∈ {0, 1, 2, 3, 5, 8, 13, 256}`.
   - 0 and 1 test the off-by-one.
@@ -206,6 +215,14 @@ with `S`.
     `ShortCircuitCache`.
 - **How set:** each value is set on the test's `HdfsConfiguration`. Use one `MiniDFSCluster` per
   value, or one cluster and a fresh `FileSystem` (`FileSystem.newInstance`) per context.
+
+> **Amendment A2 (2026-11-25, stage-4 audit, before any reading; runbook only).** `ClientContext` instances are cached statically
+> by name and their `ShortCircuitCache` is never closed, so (a) every phase of the test (each S value, each control, each
+> repeat) uses its own context name `mmapcap-r<rep>-<tag>`, not `mmapcap-S<S>`, and its own `MiniDFSCluster` base directory
+> `…/mmapcap-r<rep>-<tag>`; (b) `blkMaps`/`blkMappedBytes` count only `/proc/self/maps` lines whose path lies under the
+> current phase's base directory (the all-JVM count of `/blk_` lines is printed beside it as `blkMapsJvm`); (c) after a
+> phase's last snapshot the test closes that context's `ShortCircuitCache` (all readings are taken before), so mappings of
+> one phase cannot leak into the next. The repeat is the whole sweep plus the controls run a second time (rep 2).
 
 **B2c. Workload.**
 - Write one file `/mmapcap` of `N × 1 MiB = 12 MiB` (`DFSTestUtil.createFile(fs, path, 12L<<20,
@@ -235,6 +252,12 @@ with `S`.
 - **Sampling:** a snapshot after each `releaseBuffer`, one after `close()`, and one 2 s later.
 - **Not observable directly:** which entry was demoted. Enable TRACE on `ShortCircuitCache` to see
   `demoteOldEvictable: demoting ... because we need more space` (`ShortCircuitCache.java:550-555`).
+
+> **Amendment A3 (2026-11-25, stage-4 audit, before any reading).** Direct evidence that the disallow branch fired is required,
+> not optional: the test sets `org.apache.hadoop.hdfs.shortcircuit.ShortCircuitCache` to TRACE and counts, per phase and
+> before the cache is closed, the TRACE messages `demoteOldEvictable: demoting … because we need more space` (`demoteNeed`),
+> `… because it's too old` (`demoteOld`) and `trimEvictionMaps is purging` (`purge`). Each IFCHK line carries the three
+> counts.
 
 **B2e. Procedure.**
 1. Build as in B2a.
@@ -272,6 +295,12 @@ with `S`.
 - **Relation:** the after-close count is non-decreasing in S, equals S−1 for 2 ≤ S ≤ 13, and is
   0 at S ≤ 1.
 
+> **Amendment A4 (2026-11-25, stage-4 audit, before any reading; adds predictions, changes none).** Disallow-branch counts after
+> close (A3): `demoteNeed = 12 − M(S)` (12, 12, 11, 10, 8, 5, 0, 0 for S = 0, 1, 2, 3, 5, 8, 13, 256), `demoteOld = 0`,
+> `purge = 0`. Positive control (S = 256, streams cache 4): `demoteNeed = 0`, `purge = 8`. Time control: `demoteNeed = 0`,
+> `demoteOld + purge` brings evictableMmapped to 0 (`demoteOld ≥ 1`). Baseline: blkMaps = 0 at every snapshot, all three
+> counts 0. Repeat: rep 2 identical to rep 1 in every count. Exact match is required for every count (deterministic).
+
 **B2g. Readings.**
 
 | Observation | Meaning |
@@ -282,6 +311,15 @@ with `S`.
 | evictableMmapped capped but blkMaps not reduced (mappings stay) | Count is capped but memory is not: munmap is ineffective (check `CleanerUtil.UNMAP_SUPPORTED`); memory claim refuted on this JDK |
 | Counts identical for all S (e.g. always 12) | Key not reaching the cache (context reuse, conf not applied): run invalid; check the `ShortCircuitConf` log line / context names |
 | blkMaps = 0 and `UnsupportedOperationException` | Zero-copy not active (native missing, short-circuit off): the limit was never reached; not confirmed |
+
+> **Amendment A5 (2026-11-25, stage-4 audit, before any reading; adds rows, changes none).** Additional rows:
+>
+> | Observation | Meaning |
+> |---|---|
+> | Counts as in row 1 or 2 but `demoteNeed` = 0 for some S ≤ 12 (no direct evidence of the size branch) | Not confirmed: the bound came from another path (purge, timeout); the check is not shown to act |
+> | After-close evictableMmapped bounded by S and rising with S, but equal to neither M(S) nor min(12, S) | Confirmed in substance only if `demoteNeed` fired; the exact numbers in A3 are wrong (amend A3); otherwise Not confirmed |
+> | A control fails (positive control ≠ 4, time control ≠ 0, baseline ≠ 0) | Invalid: instrument or environment problem; no verdict until fixed |
+> | rep 2 differs from rep 1 | Invalid until the cause is found |
 
 **B2h. Controls.**
 - **Positive control (cap known to bind):** S=256 with
@@ -330,11 +368,22 @@ with `S`.
   of `/mydata` fails, use a directory such as `$HOME/mmapcap-sock` (mode 755) instead.
 - **Probe:** `MmapCapProbe.java` (below), compiled outside the source tree in `$R/probe`.
 
+> **Amendment A6 (2026-11-25, stage-4 audit, before any reading; runbook only).** On `pc91`: `R=/mydata/jingsong-s4/<stem>-run1/cluster`;
+> distribution = copy of `/mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2` (built 2026-11-24) plus
+> `libhadoop.so*` from the case copy's native `hadoop-common` build (A1), in a created `lib/native/`. **Socket path:**
+> `$R/sock/dn_socket` is 134 bytes, over the 108-byte `sun_path` limit of a UNIX domain socket, so the socket directory is
+> `/mydata/jingsong-s4/o12-sock` (mode 755, ancestors `/`, `/mydata` root 755, `/mydata/jingsong-s4` owner 755), removed
+> at cleanup. **Direct disallow evidence (as A3):** `$HADOOP_CONF_DIR/log4j.properties` gets
+> `log4j.logger.org.apache.hadoop.hdfs.shortcircuit.ShortCircuitCache=TRACE` (the NameNode and DataNode do not use this
+> class); the probe's stderr is kept per run and the same three messages are counted, split at the probe's
+> `after-close` line. `fs.defaultFS` port 9000 and 9870/9864/9866/9867 were free on `pc91`.
+
 `MmapCapProbe` (the whole workload client):
 ```java
 import java.nio.ByteBuffer; import java.nio.file.*; import java.util.*;
 import org.apache.hadoop.conf.Configured; import org.apache.hadoop.fs.*;
 import org.apache.hadoop.util.*;
+import org.apache.hadoop.fs.Path; import org.apache.hadoop.fs.FileSystem; // A9 (2026-11-25)
 public class MmapCapProbe extends Configured implements Tool {
   static String snap() throws Exception {
     long n = 0, bytes = 0;
@@ -375,6 +424,12 @@ public class MmapCapProbe extends Configured implements Tool {
   public static void main(String[] a) throws Exception { System.exit(ToolRunner.run(new MmapCapProbe(), a)); }
 }
 ```
+
+> **Amendment A9 (2026-11-25, stage-4 runbook defect D-2, found at B3e step 4 before any cluster reading; §9a unchanged).**
+> The probe as filed does not compile: `java.nio.file.*` and `org.apache.hadoop.fs.*` both export `Path` and `FileSystem`
+> (`javac`: "reference to Path is ambiguous"). Fix: the two single-type imports `import org.apache.hadoop.fs.Path;
+> import org.apache.hadoop.fs.FileSystem;` added after the on-demand imports (they shadow the `java.nio.file` names; the
+> probe still uses `java.nio.file.Files`/`Paths` for `/proc`). No other change; the cluster tier restarts from B3e step 1.
 
 **B3b. Knobs.**
 - **Varied:** `S = dfs.client.mmap.cache.size ∈ {0, 1, 2, 5, 9, 17, 256}`, passed per client run
@@ -453,6 +508,15 @@ public class MmapCapProbe extends Configured implements Tool {
 - **Relation:** retained mapped bytes are a step function of S with slope 64 MiB per unit for
   2 ≤ S ≤ 17, flat at 0 for S ≤ 1 and at 1 GiB for S ≥ 17.
 
+> **Amendment A7 (2026-11-25, stage-4 audit, before any reading; adds predictions and tolerances, changes none).** Before the
+> after-close snapshot: `demoteNeed = 16 − M(S)` (16, 16, 15, 12, 8, 0, 0 for S = 0, 1, 2, 5, 9, 17, 256), `demoteOld = 0`,
+> `purge = 0`. Positive control: after-close blkMaps 4, `purge = 12`, `demoteNeed = 0`. Unmap control: end blkMaps 0,
+> `demoteOld ≥ 1`. blkMaps and blkMappedBytes must match exactly. RssFile delta vs the S = 0 run at `end`: within
+> ±(16 MiB + 5 % of M(S) × 64 MiB) of M(S) × 64 MiB. VmSize is recorded as shape only (it moves with JVM arenas); the
+> virtual-size reading that decides is `blkMappedBytes`. Repeats (S = 2, 9, 256): blkMaps and blkMappedBytes identical,
+> RssFile within the same tolerance. The optional JDK 11 client runs (S = 5, 256, unmap control; daemons stay on JDK 8)
+> must give the same blkMaps.
+
 **B3g. Readings.**
 
 | Observation | Meaning |
@@ -463,6 +527,14 @@ public class MmapCapProbe extends Configured implements Tool {
 | blkMaps ≤ S but RssFile/VmSize not reduced vs S=256 | Entries demoted but mappings not freed (unmap unsupported on this JDK): memory claim refuted |
 | Same blkMaps (16) for every S | Key not applied (check the probe's `conf` line) or a different cache in use: run invalid |
 | `UnsupportedOperationException` / blkMaps always 0 | Zero-copy short-circuit not active (no libhadoop, socket path rejected): limit never reached; not confirmed |
+
+> **Amendment A8 (2026-11-25, stage-4 audit, before any reading; adds rows, changes none).** Additional rows:
+>
+> | Observation | Meaning |
+> |---|---|
+> | Row 1 or 2 numbers but `demoteNeed` = 0 for some S ≤ 16 | Not confirmed: the size branch is not shown to act |
+> | blkMaps after close = M(S) but RssFile delta outside A7's tolerance while blkMappedBytes matches | Count and virtual size capped; resident size not as predicted: Confirmed for mappings, RssFile gap named (page reclaim or accounting) |
+> | A control fails (positive control ≠ 4, unmap control ≠ 0, `-cat` baseline ≠ 0) | Invalid until fixed |
 
 **B3h. Controls.**
 - **Positive control (cap known to bind):** S=256 with
@@ -518,4 +590,32 @@ public class MmapCapProbe extends Configured implements Tool {
 
 ## D. Stage-4 feedback
 
-none yet
+**D1. Audit amendments (2026-11-25, stage-4 audit on `pc91`, before any reading).** A1 (B2a: node paths, native
+`hadoop-common` build in the copy, surefire counts), A2 (B2b: one context name and base directory per phase, `blkMaps`
+filtered to the phase, cache closed after the last reading, repeat = whole sweep + controls), A3 (B2d: TRACE counts of the
+three trimming branches required as disallow evidence), A4 (B2f: predicted `demoteNeed = 12 − M(S)`, control counts, exact
+match), A5 (B2g: rows for missing disallow evidence, other bounded numbers, failed controls, repeat mismatch), A6 (B3a:
+`pc91` paths, socket directory `/mydata/jingsong-s4/o12-sock` because `$R/sock/dn_socket` is 134 bytes > 108, TRACE via
+`log4j.properties`), A7 (B3f: predicted `demoteNeed = 16 − M(S)`, control counts, RssFile tolerance, repeats, JDK 11 client
+runs), A8 (B3g: rows for missing disallow evidence, RssFile gap, failed controls). None changes B1, a predicted number of
+B2f/B3f or a row of B2g/B3g. Frozen whole-file sha256 after A1–A8: `d03cfaa7ace27764b34e3da6c4899a072d4fe95a17e71eac3193ba3a2776bbb8`.
+A9 (runbook defect D-2 in the B3a probe, 2026-11-25, after the unit readings and before any cluster reading; B3f/B3g
+unchanged; cluster tier restarted from B3e step 1): sha256 `9b31bc40999d63af31646d1239f692a47d3b07b4bf3fbbbab3e0747c72c31bac`.
+
+**D2. Stage-4 result (2026-11-25, run 1 on `pc91`, no run 2).** Results: `~/writeup-hadoop/out/o12/results.md`
+(to be filed as `hadoop/stage4-runtime-verification/jingsong/results/<stem>.md`).
+- **Unit (B2): Confirmed — caps.** B2g row 1. After-close `evictableMmapped` = `blkMaps` = 0, 0, 1, 2, 4, 7, 12, 12 at
+  S = 0, 1, 2, 3, 5, 8, 13, 256 (= M(S) = `min(12, max(S−1, 0))`), mapped bytes M(S) × 1 MiB, `demoteNeed` = 12 − M(S);
+  every per-step value of B2f matched; rep 2 identical; positive control 4 / 4 MiB with 8 purges; time control 0 after
+  3 s (12 age demotions); baseline 0 mappings. 1351/1351 checks.
+- **Cluster (B3): Confirmed — caps.** B3g row 1. After-close and end `blkMaps` = 0, 0, 1, 4, 8, 16, 16 at
+  S = 0, 1, 2, 5, 9, 17, 256, mapped bytes M(S) × 64 MiB, RssFile above the S = 0 run by 64.1, 256.1, 511.9, 1020.4,
+  1020.1 MiB for S = 2, 5, 9, 17, 256; `demoteNeed` = 16 − M(S); external `/proc/<pid>/maps` agrees; repeats (S = 2, 9,
+  256) and JDK 11 client runs (S = 5, 256) identical; positive control 4 mappings / 256 MiB (12 purges); unmap control
+  16 → 0 mappings and RssFile back to baseline on JDK 8 and JDK 11; `hdfs dfs -cat` baseline 0 mappings. 520/520 checks.
+- **The off-by-one of A3 step 4 is confirmed at runtime:** the key keeps at most `S − 1` idle mappings (none at S = 1),
+  one fewer than `hdfs-default.xml` says.
+- **Counter observation (A3 "Close path"):** in the positive control the cache's `outstandingMmapCount` read 12 while 4
+  mappings remained (purged replicas are unmapped by `ShortCircuitReplica.close` without the decrement), as A3 predicted;
+  the `/proc` count is the reliable instrument.
+- Outcome class: **true positive** (estimate `positive`, effect `caps` at both tiers).

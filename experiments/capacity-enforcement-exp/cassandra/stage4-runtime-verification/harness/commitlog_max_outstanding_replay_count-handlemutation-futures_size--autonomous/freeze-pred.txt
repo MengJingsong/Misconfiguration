@@ -1,0 +1,94 @@
+**B2f. Predictions.**
+
+| Run | `peak_queue` | `peak_not_yet_run` | `handled` |
+|---|---|---|---|
+| C = 16 | exactly 17 | ≤ 17 | ≥ 20000 |
+| C = 256 | exactly 257 | ≤ 257 and ≥ 250 | ≥ 20000 |
+| C = 4096 | exactly 4097 | ≤ 4097 and ≥ 4000 | ≥ 20000 |
+| Control 1: bytes cap 4096 B, C = 4096 | ≈ 4096 / (avg entry size ≈ 40–60 B) + 1 ≈ 70–110, far below 4097 | — | — |
+| Control 2: no consumer delay | ≪ 4097 (expected < 100) | — | — |
+
+Control 1 also predicts `peak_pending_bytes` ≤ 4096 + one entry.
+
+Runs repeat exactly: the peak is a deterministic consequence of the `while` condition once the backlog exists.
+The claim is wrong if any `peak_queue` > C + 1 with the bytes cap at `Long.MAX_VALUE`, or if `peak_queue` stays
+far below C + 1 while the consumer is slow.
+
+**B2g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| `peak_queue` = C + 1 for all three C, and control 1 well below 4097 | Claim confirmed: the count bounds the outstanding entries, and the bytes cap binds when set low (positive control moves). |
+| `peak_queue` > C + 1 for some C | Claim wrong: the count does not bound the queue (for example the property is not read, or another path enqueues). |
+| `peak_queue` ≪ C + 1 for C = 4096, with `handled` ≥ 20000 and control 2 also small | The consumer is not slower than the reader. Not confirmed; raise `replay.consumer_nanos` to 1000000 and rerun. |
+| `handled` < 20000 | The workload did not reach replay (segments not found, or filtered by position). Not confirmed; fix setup. |
+| Control 1 `peak_queue` ≈ 4097 | The bytes override was not effective. The positive control failed; not confirmed. |
+
+**B2h. Controls.**
+**B3f. Predictions.**
+
+| Run | Outstanding entries (`MutationInitiator$1` count) | Live heap |
+|---|---|---|
+| C1024 | max ≤ 1025; plateau ≥ 900 | Baseline H₁ |
+| C16384 | max ≤ 16385; plateau ≥ 14000 | H₁ + (15360 × e), with e ≈ 0.6–2 KB per entry → +9–31 MB |
+| C131072 | max ≤ 131073; plateau ≥ 110000 (if the plateau is reached before replay ends) | H₁ + (130048 × e) → +78–260 MB |
+| ctlBytes | ≈ 4 MiB / 120 B ≈ 30k–40k, clearly < 131072 | Heap between C16384 and C131072 |
+| ctlFast | Far below 131072 (expected < 5000): no backlog without the delay | Near H₁ |
+| ctlFull | — | — |
+
+- `Mutation` instance counts track the `MutationInitiator$1` counts within a few hundred.
+- Δheap / Δcount gives the same e for C16384 and C131072, within ±30%.
+- ctlFull logs "Log replay complete, N replayed mutations" with N ≥ 300000.
+- The claim is wrong if any run's count exceeds C + 1 plus a handful (finished-but-unpolled tasks hold no
+  `MutationInitiator$1`, so they cannot inflate it), or if C131072's plateau heap is within 10 MB of C1024 while
+  its count plateau is ≥ 110000.
+
+**B3g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| Counts plateau at ≈ C, never above C + 1, and heap rises with C at a stable e; ctlBytes below 131072 | Claim confirmed: the count caps in-flight replay mutations and their heap. |
+| Count for some run > C + 1 (beyond sampling noise of a few) | Claim wrong: the property does not bound outstanding work. |
+| Counts follow C but heap is flat (Δ < 10 MB between C131072 and C1024) | The cap holds but bounds nothing memory-significant for this mutation shape. Report as count-confirmed, heap-negative. |
+| C131072 count never exceeds ~ C16384's | The backlog was too short (replay ended before the plateau). Not confirmed; raise n to 600000 or the park to 2 ms and rerun. |
+| ctlBytes count ≈ 131072 | The bytes property was not applied, so the positive control failed; recheck `JVM_EXTRA_OPTS` (`ps -o args -p $PID`). |
+| ctlFull replays < 300000 | The log did not hold the workload (flushed during load); redo the load with a larger `memtable_heap_space`. |
+
+**B3h. Controls.**
+### Stage-4 audit amendments (2026-11-25, Jingsong's stage-4 session, node `pc82`, before any reading)
+
+Applied before the freeze. None changes B1, a prediction (B2f, B3f) or a conclusion row's meaning; S4-A3 and S4-A4
+fix thresholds for words the tables leave undefined, add verdict labels, and add rows for outcomes the tables did not cover.
+
+- **S4-A1 (paths, build, node limits; B2a, B3a, B4).** Unit tree `SRC=/mydata/jingsong-cass-s4/o100/c509-unit`, node tree
+  `SRC=/mydata/jingsong-cass-s4/o100/c509-node`, `RUN=/mydata/jingsong-cass-s4/o100/replay-count`; both trees are `cp -a`
+  copies of the node's built `/mydata/s4/cassandra-base` (5.0.9; `CommitLogReplayer.java`, `CommitLogReader.java`,
+  `CassandraRelevantProperties.java`, `build.xml` md5-equal to the repository's `systems/cassandra/source`), which already
+  holds `ant build-test` and the stress classes, so `ant clean jar stress-build build-test` is not run (`clean` would discard
+  the build). Byteman: `$SRC/build/lib/jars/byteman-4.0.20.jar`. Default ports 7000/7199/9042 (free; the node is held under
+  the stage-4 node lock). `ulimit -n 100000` before each node start (soft limit is 1024). The node is stopped by its recorded
+  PID only.
+- **S4-A2 (B2e.1-2, output).** The `RESULT` line is printed with one `System.out.println(String.format(...))` (the test JVM
+  routes `System.out` through the logger; a `printf` came out split in another case, o123 defect D1), and it is read from
+  the test log `build/test/logs/_jdk11/TEST-<class>.log` as well as the XML. Known-answer check of the instrument before
+  run 1: C = 2, N = 2000 gave `peak_queue=3` (= C + 1), `handled=2000`.
+- **S4-A3 (B2g thresholds and labels).** "`peak_queue` = C + 1" must hold in all 3 repeats of each C. "Well below 4097"
+  (control 1) and "small" (control 2) = `peak_queue` ≤ 410 (0.1 × 4097); "`peak_queue` ≪ C + 1 for C = 4096" = < 2049
+  in a repeat; "control 1 ≈ 4097" = ≥ 2049. Labels: row 1 **Confirmed** (effect `caps`); row 2 **Refuted** (`does not cap`);
+  rows 3-5 **Not confirmed**. Added row: *control 2 `peak_queue` > 410 while row 1 holds* — the reader outruns even an
+  undelayed consumer; the cap still bounds the queue, so row 1 stands, and control 2's "no backlog" baseline is recorded as
+  not shown (a gap, not a contradiction).
+- **S4-A4 (B3d, B3e.4, B3g thresholds and labels).** Live heap: the primary reading is the `Total` bytes of the same
+  `jmap -histo:live` (live objects at the full GC it forces); `GC.heap_info` "used" is kept as a secondary reading, because
+  it also counts what the reader allocates after that GC (seen as noise of tens of MB in cases o32 and o123), the size of
+  the C16384 effect. Plateau = samples that start inside the middle 50 % of the window from the first `Replaying` line to
+  `Log replay complete` (system.log timestamps); "plateau ≥ X" = the plateau median ≥ X. "A handful / a few" (count above
+  C + 1) = 10 instances. "Within a few hundred" (`Mutation` vs `MutationInitiator$1`) = plateau medians within 500. "Heap
+  rises with C at a stable e" = plateau-median live heap C1024 < C16384 < C131072 and e = Δheap / Δcount (each against
+  C1024, plateau medians) for C16384 and C131072 within ±30 % of each other. ctlBytes "clearly < 131072" = max ≤ 65536;
+  "C131072 never exceeds ~ C16384's" = max(C131072) ≤ 1.5 × max(C16384). Each C run is done twice and both runs must
+  meet the row. Labels: row 1 **Confirmed** (`caps`); row 2 **Refuted** (`does not cap`); row 3 (counts follow C, heap
+  flat) **Refuted** on B1's heap clause if ctlBytes's live heap is ≥ 10 MB above C1024's, otherwise **Not confirmed**;
+  rows 4-6 **Not confirmed**. Added rows: *ctlFast max > 65536* — a backlog forms without the Byteman delay; no effect on
+  row 1, the no-backlog control is recorded as not shown; *counts follow C and heap rises, but e is not stable within
+  ±30 %* — **Not confirmed** (no matching row 1).

@@ -236,6 +236,8 @@ Compute Δ = median(during) − median(base) per MBean.
 
 > **Amendment A5 (stage-4 audit, 2026-11-24; sampling made exact, B3f/B3g unchanged).** Each `nodetool sjk mx` call starts a JVM, so one sample reads the three MBeans in parallel and records its epoch second; the real period is 5 s plus the call time. Each `during` sample also runs `nodetool compactionstats`; only `during` samples taken while it lists the compaction of `p.t` enter median(during), and fewer than 3 such samples matches the B3g row "compaction finished before sampling". Step 7 uses `nodetool stop COMPACTION` after the 120 s window. Step 8: the process check is `ps -eo cmd | grep '[C]assandraDaemon'` (stage-4 README), and the run's logs (`system.log`, samples) are kept while data, commit log, hints and caches are deleted. A run is driven by `harness/cluster-run.sh <v> <PARTS> <ROWS> <VSIZE> <K> <label>`, which logs every command, and analysed by `harness/cluster-analyze.py`.
 
+> **Amendment A7 (stage-4 run 1, 2026-11-25; runbook defect D2, B3f/B3g unchanged).** `nodetool compact p t` starts a task of type `Major compaction` (`compactionstats` lists `Major compaction p t …`), (`CompactionManager.java:1061`, `OperationType.java:30`), and `nodetool stop COMPACTION` stops only tasks whose type equals `COMPACTION` (`CompactionManager.java:2217-2225`), so step 7 as written leaves the major compaction running: in run 1 it kept running through the six `after` samples and ended only at `nodetool stopdaemon` in step 8. Step 7 is therefore `nodetool stop MAJOR_COMPACTION` (or `nodetool stop -id <compaction id>`). The `after` samples carry no prediction in B3f, so run 1's readings (Δ = median(during) − median(base)) do not depend on this step; see the results file §3.
+
 **B3f. Predictions.**
 
 | Run | ΔUsedSize | ΔOverflowSize | Δ direct MemoryUsed |
@@ -313,4 +315,4 @@ https://issues.apache.org/jira/browse/CASSANDRA-8630 (cited from the source comm
 
 ## D. Stage-4 feedback
 
-none yet
+- **2026-11-25, stage-4 run 1 (Jingsong, node `pc91`, x86_64; results `results/max_buffer_size-roundbuffersize-size--autonomous.md`).** Audit: Ready (A1–A6 already applied; frozen sha256 `37fa5497…b250`, commit `bef6bc8a6`). **Unit: Confirmed** — B2g row 1: 48/48 rows equal B2f; per-reader buffer 65536 on v64 for every r ≥ 65536, 32768 on v32, 1048576 on v1m (with 32 MiB overflow at K=32). **Cluster: Confirmed** — B3g row 1 (and row 5): v64 1 MiB partitions ΔUsedSize 2.000 MiB = 32 x 64 KiB, overflow 0, Δdirect ≈ 0 (pooled); K=8 0.5 MiB; v1m ΔUsedSize = ΔOverflowSize = 32 MiB, Δdirect 31.99 MiB; v32 1.000 MiB; 8 KiB partitions 0.25 MiB in v64 and v1m alike. **Effect: caps** (per reader; total = K x cap). **Outcome class: true positive.** Runbook defect D2 fixed by amendment A7 (step 7); harness defects H1–H4 are in the results file §3. No run 2.

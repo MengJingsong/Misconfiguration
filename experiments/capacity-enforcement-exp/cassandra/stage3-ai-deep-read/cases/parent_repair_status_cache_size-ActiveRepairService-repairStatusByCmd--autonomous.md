@@ -395,4 +395,70 @@ https://github.com/google/guava/wiki/CachesExplained
 
 ## D. Stage-4 feedback
 
-none yet
+**Stage-4 audit amendments (2026-11-25, 08:00 UTC, node `pc82`, before any reading of a swept value).** Only the unit
+shakedown (N=10, m=200) had run. B2f and B3f predictions are unchanged; the amendments add thresholds, labels and runbook
+details the file left open.
+
+- **S4-A1 (B2a, B2e.1, B3a, B3e; runbook).** Paths and build: the run copies the built 5.0.9 tree `/mydata/s4/cassandra-base`
+  (`cp -a`) to `/mydata/jingsong-cass-s4/o127/c509` instead of `rsync` + `ant jar && ant build-test` (the base is built with
+  `ant build-test`; `ant testsome` compiles the added class). `$RUN` = `/mydata/jingsong-cass-s4/o127/node`. Before starting a
+  node: `ulimit -n 100000` (soft limit 1024 on the node), ports 7000/7199/9042 checked free. The node is stopped by the PID in
+  `$RUN/pid` (`kill`, then `kill -9` after 15 s), and `ps -eo cmd | grep '[C]assandraDaemon'` must print nothing. cqlsh is
+  called with `-e` on the default port.
+- **S4-A2 (B2e.3; runbook).** The test's `O127` lines go through the test logger to
+  `build/test/logs/_jdk11/TEST-...ParentRepairStatusCapTest.log`, not to the XML (shakedown); the readings are taken from
+  that log (the XML still gives pass/fail).
+- **S4-A3 (B3a driver; runbook).** The batch wait falls back to the `Repair-Task` pool (JMX gauges
+  `org.apache.cassandra.metrics:type=ThreadPools,path=internal,scope=Repair-Task,name=ActiveTasks|PendingTasks`, both 0) once
+  the batch's last cmd has read `null` for 5 s. The file names this hazard for very small N; at N=100 a batch of 500 can also
+  evict the last cmd's entry before the poll. Added modes: `probe <cmd>` (status and message length of one entry, B3g
+  row 6's check, taken right after the drive in every run) and `pool`; `count` also reports `in_progress` and `failed`.
+  B3e.8 uses `pool` (Active 0, Pending 0) in place of the `tpstats` grep, which is kept as a log line.
+- **S4-A4 (B2g; thresholds and labels).** Unit verdict rows, with B0 = `deep` at i=0 of the same run:
+  - **Row 1, Confirmed — caps** when all hold: final `size` = `present` = min(N, 50000) for N ∈ {0, 1, 1000, 10000, default};
+    for N ∈ {1, 1000, 10000} no checkpoint has `size` > N; for N ∈ {1000, 10000} the final `deep` is within ±10 % of `deep`
+    at the first checkpoint with i ≥ 2N ("flat"); and the positive control holds (default run final `size` = 50000 and
+    `deep` − B0 ≥ 4 × the N=10000 run's `deep` − B0; the entry ratio is 50000 / 10000 = 5).
+  - **Row 2, Refuted — does not cap**: `size` > N at any checkpoint, or `size` reaches 50000 at N=1000 or 10000 with the
+    `O127 cap=` line echoing N.
+  - **Invalid**: the `cap=` line does not echo N, or the default control stays near 1000 / 10000 entries.
+  - **Count-not-bytes check** (B1's third bullet): ratio (`deep` − B0 at len=10000) / (`deep` − B0 at len=100), both N=1000,
+    in [20, 50] confirms it; < 2 contradicts the per-entry model (B2g row 7) and makes the bytes part **Not confirmed**
+    without changing the count verdict.
+  - Byte ranges of B2f are model checks: a value outside its range with Row 1 holding is recorded as a deviation of the
+    per-entry model, not a refutation. B2f's unranged rows get ±30 %: len=100 → 0.20–0.38 MB, len=10000 → 7.1–13.3 MB.
+  - `presentInLastN` ≥ 0.9 × `present` at N ∈ {1000, 10000}: informational (B2f), not a verdict condition.
+- **S4-A5 (B3d, B3f, B3g; thresholds and labels).** Primary heap reading = the `Total` bytes line of
+  `jcmd GC.class_histogram` (full GC), ΔTotal = after − base; also recorded per sample: the `[B` row, the instance count of
+  `com.google.common.cache.LocalCache$StrongAccessWriteEntry` (one per entry of `repairStatusByCmd`; `repairs` and
+  `participates` add ≤ 2 × 10 with `repair_state_size: 10`) and of `javax.management.Notification` subclasses (a JMX
+  notification buffer, if one is created by the driver's connection, retains a bounded number of repair notifications
+  with the same message; named here as a possible constant offset). Message length e₀ = `probe` of the last cmd.
+  - **Row 1, Confirmed — caps** when all hold: `present` = min(N, 30000) exactly for N ∈ {100, 10000, default}; ΔTotal at
+    N=100 < 30 MB; ratio ΔTotal(default) / ΔTotal(10000) in [2.4, 3.6]; per-entry e = ΔTotal / `present` for N=10000 and
+    default within [0.8, 1.4] × (e₀ + 200 B) and within ±25 % of each other; after and after+60s Totals within 10 %.
+    B3f's absolute MB ranges are model checks for the 11.4 KB message estimate; a miss there with e consistent with the
+    measured e₀ is a deviation of the estimate (B3g row 6), not a refutation.
+  - **Row 2, Refuted — does not cap**: `present` > N, or ΔTotal(10000) ≥ 0.8 × ΔTotal(default), or ΔTotal(100) ≥ 0.5 ×
+    ΔTotal(default).
+  - **Row 3, Not confirmed (heap; possible other holder)**: `present` = N but ΔTotal(100) ≥ 30 MB and < 0.5 × default.
+  - **Invalid**: the default control's ΔTotal < 100 MB or `present` < 29000, or any `DRIVE` cmd was 0, or the probe shows a
+    message < 1 KB.
+- **S4-A6 (B3d, B3e.6/9; runbook, 2026-11-25 08:08 UTC, after the cluster shakedowns at N=100, M=1000 and before any
+  swept cluster value).** Shakedown defect D1: `getParentRepairStatus` returns a Guava `ImmutableList`, which the driver
+  cannot deserialize without Guava, so the driver runs as `java -cp <tree>/build/lib/jars/guava-32.0.1-jre.jar Drive.java`.
+  The shakedowns also showed ~8 MB of live heap added between `after` and `after+60s` by memtable rows (11,565 `BTreeRow`,
+  the size-estimates writer with 256 ranges), unrelated to repair; `nodetool flush` now precedes every histogram sample
+  (base, after, after+60s) in every run. A one-time ~9 MB rise from base to after (12,000 JMX `ObjectName`s / `HashMap`s,
+  the same after 500 or 1000 repairs) is a constant of every run and does not scale with M.
+
+**Stage-4 result (2026-11-25, run 1, node `pc82`, x86_64; results `~/writeup-ext/out/o127/results.md`).** Outcome class:
+**true positive** (estimate `positive`; unit **Confirmed — caps**, cluster **Confirmed — caps**).
+- Unit (B2g row 1): final `size` = `present` = 0 / 1 / 1000 / 10000 / 50000 for N = 0 / 1 / 1000 / 10000 / default, no
+  checkpoint above N; `deep` − B0 = 0 / 1.2 KB / 1.196 MB / 11.909 MB / 59.728 MB, flat after i ≥ 2N (+0.29 %, +0.03 %);
+  at N=1000 len 100 → 0.300 MB and len 10000 → 10.196 MB (×34.0, the cap counts entries, not bytes); N=−1 fails with
+  `ExceptionInInitializerError` / `IllegalArgumentException: maximum size must not be negative`.
+- Cluster (B3g row 1): 30,000 skip-path repairs per value, message 11,292–11,330 chars; `present` 100 / 10000 / 30000 for
+  N = 100 / 10000 / default; live heap ΔTotal +11.4 / +125.2 / +354.7 MB (ratio default/10000 = 2.83), ≈ 11.5 KB per
+  retained entry; stable after 60 s. No section of the trace was refuted.
+- Runbook defect D1 (fixed in S4-A6): the B3a driver needs Guava on its classpath to read `getParentRepairStatus`.

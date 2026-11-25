@@ -535,4 +535,59 @@ https://issues.apache.org/jira/browse/CASSANDRA-8639 (cited from CHANGES.txt, no
 
 ## D. Stage-4 feedback
 
-`none yet`
+### Stage-4 audit amendments (2026-11-25, Jingsong's stage-4 session, node `pc82`, before any reading)
+
+Applied before the freeze. None changes B1, a prediction (B2f, B3f) or a conclusion row's meaning; S4-A3 and S4-A4
+fix thresholds for words the tables leave undefined, add verdict labels, and add rows for outcomes the tables did not cover.
+
+- **S4-A1 (paths, build, node limits; B2a, B3a, B4).** Unit tree `SRC=/mydata/jingsong-cass-s4/o100/c509-unit`, node tree
+  `SRC=/mydata/jingsong-cass-s4/o100/c509-node`, `RUN=/mydata/jingsong-cass-s4/o100/replay-count`; both trees are `cp -a`
+  copies of the node's built `/mydata/s4/cassandra-base` (5.0.9; `CommitLogReplayer.java`, `CommitLogReader.java`,
+  `CassandraRelevantProperties.java`, `build.xml` md5-equal to the repository's `systems/cassandra/source`), which already
+  holds `ant build-test` and the stress classes, so `ant clean jar stress-build build-test` is not run (`clean` would discard
+  the build). Byteman: `$SRC/build/lib/jars/byteman-4.0.20.jar`. Default ports 7000/7199/9042 (free; the node is held under
+  the stage-4 node lock). `ulimit -n 100000` before each node start (soft limit is 1024). The node is stopped by its recorded
+  PID only.
+- **S4-A2 (B2e.1-2, output).** The `RESULT` line is printed with one `System.out.println(String.format(...))` (the test JVM
+  routes `System.out` through the logger; a `printf` came out split in another case, o123 defect D1), and it is read from
+  the test log `build/test/logs/_jdk11/TEST-<class>.log` as well as the XML. Known-answer check of the instrument before
+  run 1: C = 2, N = 2000 gave `peak_queue=3` (= C + 1), `handled=2000`.
+- **S4-A3 (B2g thresholds and labels).** "`peak_queue` = C + 1" must hold in all 3 repeats of each C. "Well below 4097"
+  (control 1) and "small" (control 2) = `peak_queue` ≤ 410 (0.1 × 4097); "`peak_queue` ≪ C + 1 for C = 4096" = < 2049
+  in a repeat; "control 1 ≈ 4097" = ≥ 2049. Labels: row 1 **Confirmed** (effect `caps`); row 2 **Refuted** (`does not cap`);
+  rows 3-5 **Not confirmed**. Added row: *control 2 `peak_queue` > 410 while row 1 holds* — the reader outruns even an
+  undelayed consumer; the cap still bounds the queue, so row 1 stands, and control 2's "no backlog" baseline is recorded as
+  not shown (a gap, not a contradiction).
+- **S4-A4 (B3d, B3e.4, B3g thresholds and labels).** Live heap: the primary reading is the `Total` bytes of the same
+  `jmap -histo:live` (live objects at the full GC it forces); `GC.heap_info` "used" is kept as a secondary reading, because
+  it also counts what the reader allocates after that GC (seen as noise of tens of MB in cases o32 and o123), the size of
+  the C16384 effect. Plateau = samples that start inside the middle 50 % of the window from the first `Replaying` line to
+  `Log replay complete` (system.log timestamps); "plateau ≥ X" = the plateau median ≥ X. "A handful / a few" (count above
+  C + 1) = 10 instances. "Within a few hundred" (`Mutation` vs `MutationInitiator$1`) = plateau medians within 500. "Heap
+  rises with C at a stable e" = plateau-median live heap C1024 < C16384 < C131072 and e = Δheap / Δcount (each against
+  C1024, plateau medians) for C16384 and C131072 within ±30 % of each other. ctlBytes "clearly < 131072" = max ≤ 65536;
+  "C131072 never exceeds ~ C16384's" = max(C131072) ≤ 1.5 × max(C16384). Each C run is done twice and both runs must
+  meet the row. Labels: row 1 **Confirmed** (`caps`); row 2 **Refuted** (`does not cap`); row 3 (counts follow C, heap
+  flat) **Refuted** on B1's heap clause if ctlBytes's live heap is ≥ 10 MB above C1024's, otherwise **Not confirmed**;
+  rows 4-6 **Not confirmed**. Added rows: *ctlFast max > 65536* — a backlog forms without the Byteman delay; no effect on
+  row 1, the no-backlog control is recorded as not shown; *counts follow C and heap rises, but e is not stable within
+  ±30 %* — **Not confirmed** (no matching row 1).
+
+### Stage-4 result (2026-11-25, run 1 on `pc82`, x86_64; results `~/writeup-ext/out/o100/results.md`)
+
+- **Unit (B2g row 1): Confirmed — caps.** `peak_queue` = 17 / 257 / 4097 for C = 16 / 256 / 4096 in all 3 repeats
+  (`count_cap` printed from the field equals C; `handled` = 20000); control 1 (bytes cap 4096 B) 81 with
+  `peak_pending_bytes` 4149 (one entry above 4096); control 2 (no consumer delay) 3.
+- **Cluster (B3g row 1): Confirmed — caps.** Live `CommitLogReplayer$MutationInitiator$1` (and `Mutation`) instances
+  plateau at exactly C + 1 = 1025 / 16385 / 131073 in both repeats, never above; live heap (histogram `Total`) plateau
+  medians 68.1 / 84.0-84.1 / 202.9 MB, e = 1037 B per outstanding entry from both pairs (ratio 1.00); ctlBytes (4 MiB)
+  37450 entries and 105.9 MB; ctlFast and ctlFull replay in 2-4 s with 0-2 entries outstanding at the one sample; ctlFull
+  replays 300001 mutations.
+- **Feedback for stage 3.** (1) The trace (A2-A3) held: the cap bounds the queue at C + 1 entries during the drain wait
+  (the polled future's task stays reachable in the stage until it runs). (2) Heap per in-flight entry was about 1.04 KB for
+  a ~112-byte serialized mutation (4 MiB / 37450), about 9x its serialized size, inside B3f's 0.6-2 KB, which supports the
+  Estimate's point that the count, not the bytes cap, limits heap for small mutations; at the default 1024 the bound is
+  about 1 MB here. (3) ctlFast and ctlFull replay in 2-4 s, so the 5 s sampler took one sample each; "no backlog" rests
+  on that one sample and on the replay time. Recommendation (not applied): sample ctlFast at 0.2 s or record the peak
+  in-process.
+

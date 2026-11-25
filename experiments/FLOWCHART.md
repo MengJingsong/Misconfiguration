@@ -85,17 +85,17 @@ flowchart TD
     S3A["Stage 3: autonomous agent<br/>left: 8,355/19,624"]
     S3G["Stage 3: guided agent"]
     CF[("Phase-1 case files")]
-    S4["Stage 4: runtime verification<br/>left: not run 81/38"]
+    S4["Stage 4: runtime verification<br/>left: not run 68/23"]
     JR[("JIRA OOM reports")]
     CPAT[("OOM clue patterns")]
-    S5A["Stage 5: autonomous agent<br/>left: 38/39"]
-    S5G["Stage 5: guided agent<br/>left: 38/39"]
+    S5A["Stage 5: autonomous agent<br/>left: 25/24"]
+    S5G["Stage 5: guided agent<br/>left: 25/24"]
     CL[("Phase 1 OOM candidate list")]
   end
 
   subgraph P2["Phase 2: OOM-exp"]
     RL[("Phase 2 retry list")]
-    O1["Stage 1: OOM agent, pick and design<br/>left: open candidates 71/–, open retries 2/–"]
+    O1["Stage 1: OOM agent, pick and design<br/>left: open candidates 117/–, open retries 2/–"]
     CASE[("Phase-2 case files")]
     O2["Stage 2: OOM agent, verify"]
     TP["True positive"]
@@ -112,16 +112,16 @@ flowchart TD
   S2 -->|"targets: 29/–"| S3G
   S3A -->|"case files: 315/46"| CF
   S3G -->|"case files: 29/–"| CF
-  CF -->|"run: 263/8 (of 344/46)"| S4
-  S4 -.->|"TP 123/4, TN 99/3, FN 6/0"| CF
+  CF -->|"run: 276/23 (of 344/46)"| S4
+  S4 -.->|"TP 129/14, TN 103/7, FN 6/0"| CF
   JR -->|"issues kept: 246/368; 16 patterns"| CPAT
-  CF -->|"files read: 306/7"| S5A
-  CF -->|"files read: 306/7"| S5G
+  CF -->|"files read: 319/22"| S5A
+  CF -->|"files read: 319/22"| S5G
   CPAT --> S5G
-  S5A -->|"candidates: 257/10"| CL
-  S5G -->|"candidates: 269/13"| CL
+  S5A -->|"candidates: 280/46"| CL
+  S5G -->|"candidates: 292/52"| CL
 
-  CL -->|"candidates: 590/23, open 71/23, picked 0/–"| O1
+  CL -->|"candidates: 636/98, open 117/98, picked 0/–"| O1
   RL -->|"retry rows: 25/–, open 2/–, picked again 0/–"| O1
   O1 --> CASE
   CASE -->|"cases: 79/–"| O2
@@ -147,8 +147,9 @@ Notes on the chart:
 
 - **Stage 5 never chases a clue** and phase-1 agents never read phase-2 results; the only phase-2 signal
   that reaches phase 1 is a new clue pattern, which only the guided agent reads.
-- **Hadoop** has run phase 1 stages 1–3 (Jingsong's queue orders 1–45, Yang's first 5 rechecks), stage 4 on 8 of its 46
-  case files (38 wait), its JIRA OOM report and stage 5 on 7 case files (Jingsong's orders 1–5, 19, 21; 23 candidates);
+- **Hadoop** has run phase 1 stages 1–3 (Jingsong's queue orders 1–45, Yang's first 5 rechecks), stage 4 on 23 of its 46
+  case files (23 wait), its JIRA OOM report and stage 5 on 22 case files (Jingsong's orders 1–25 less 6, 14, 22; 98
+  candidates);
   its guided stage-3 agent and phase 2 are not started.
 
 ### 5.1 Results snapshot (as of 2026-11-25)
@@ -217,14 +218,15 @@ Hadoop: **46** case files = autonomous 46 = positive 36 + negative 10 (Yang 1 ne
 
 **Stage 4, runtime verification** (`_INDEX.md` outcome column, `stage4-runtime-verification/results/`).
 
-- **Cassandra: 344 = run 263 + not run 81.**
-  - run 263 = TP 123 + FP 0 + TN 99 + FN 6 + undetermined 16 + weak 19 (TP 6, TN 12, FN 1);
-  - not run 81 = `none`-type cases awaiting the owner's decision 29 + cases with a constraint type but no stage-4 run
-    recorded 14 + waiting 38 (extension batch 1 of 2026-11-24 18, run interrupted by an API usage limit, 2 of its 20
-    finished; extension batch 2 of 2026-11-24 20, queued for nodes).
-- **Hadoop: 46 = run 8 + waiting 38**; run 8 = TP 4 + TN 3 + undetermined 1; waiting 38 = Jingsong's batch 1 of 2026-11-24
-  18 (orders 6–25 less 19 and 21, which finished; run interrupted by the same usage limit) + batch 2 of 2026-11-24 20
-  (orders 26–45, queued for nodes).
+- **Cassandra: 344 = run 276 + not run 68.**
+  - run 276 = TP 129 + FP 0 + TN 103 + FN 6 + undetermined 17 + weak 21 (TP 8, TN 12, FN 1);
+  - not run 68 = `none`-type cases awaiting the owner's decision 29 + cases with a constraint type but no stage-4 run
+    recorded 14 + waiting 25 (extension batch 1 of 2026-11-24 5: 116 and 125 blocked on 2026-11-25 by `pc99`'s stale node
+    lock, 57, 64 and 70 returned no result from the deferred run; 15 of its 20 finished; extension batch 2 of 2026-11-24
+    20, queued for nodes).
+- **Hadoop: 46 = run 23 + waiting 23**; run 23 = TP 14 + TN 7 + undetermined 1 + weak 1 (TP 1); waiting 23 = Jingsong's
+  batch 1 of 2026-11-24 3 (orders 6, 14, 22, blocked on 2026-11-25 by `pc99`'s stale node lock; the other 17 finished) +
+  batch 2 of 2026-11-24 20 (orders 26–45, queued for nodes).
 
 **JIRA OOM report** (`<sys>/stage5-oom-clue-find/jira-oom-survey.csv`).
 
@@ -238,17 +240,17 @@ Hadoop: **46** case files = autonomous 46 = positive 36 + negative 10 (Yang 1 ne
 
 **Stage 5, clue find** (`<sys>/stage5-oom-clue-find/coverage.csv`, `phase1-oom-candidates.md`).
 
-- **Cassandra:** case files read 306 of 344 by each agent (coverage.csv has 613 rows = 306 + 306 + 1 placeholder row; the
-  38 waiting for stage 4 are not read yet); files with at least one candidate: autonomous 183, guided 197.
-- **Candidates 590** (OC-1–590), agent × Status:
+- **Cassandra:** case files read 319 of 344 by each agent (coverage.csv has 639 rows = 319 + 319 + 1 placeholder row; the
+  25 waiting for stage 4 are not read yet); files with at least one candidate: autonomous 195, guided 210.
+- **Candidates 636** (OC-1–636), agent × Status:
 
 | Agent \ Status | Open | Picked (phase-2 stage 1) | True positive | Covered | Retry | Skipped | Total |
 |---|---|---|---|---|---|---|---|
-| Autonomous | 21 | 0 | 42 | 124 | 0 | 70 | 257 |
-| Guided | 33 | 0 | 29 | 121 | 1 | 85 | 269 |
+| Autonomous | 44 | 0 | 42 | 124 | 0 | 70 | 280 |
+| Guided | 56 | 0 | 29 | 121 | 1 | 85 | 292 |
 | Legacy (migrated lists) | 17 | 0 | 27 | 5 | 1 | 12 | 62 |
 | Phase-2 | 0 | 0 | 1 | 0 | 1 | 0 | 2 |
-| **Total** | **71** | **0** | **99** | **250** | **3** | **167** | **590** |
+| **Total** | **117** | **0** | **99** | **250** | **3** | **167** | **636** |
 
   Covered 250 = by a true positive 216 + by a retry later re-tested as a true positive 16 (B14 → R13 7, B18 → R21 4,
   B11 → R12 2, U6 → R15 2, U5 → R14 1) + by a retry still retry 9 (B7 6, R8 3) + by a false positive 9 (B1 6, C3 3).
@@ -257,13 +259,13 @@ Hadoop: **46** case files = autonomous 46 = positive 36 + negative 10 (Yang 1 ne
   caveat, not a memory mechanism 2. Wave 7 wrote back the 23 picked rows: true positive 22 (B27 12, B25 2, B26 2, B29 2,
   R24 2, B28 1, U17 1) + retry 1 (U16, OC-578); OC-479 moved from retry (B22) to true positive (R24); OC-5 stays true
   positive (B8; R23). Retry 3 = OC-2 (B7), OC-140 (U6), OC-578 (U16).
-- **Hadoop:** case files read 7 of 46 by each agent (Jingsong's orders 1–5, 19, 21; coverage.csv has 14 rows); not read
-  39 = waiting for stage 4 38 + Yang's 1 of 2026-11-06; files with at least one candidate: autonomous 6, guided 6.
-  **Candidates 23** (`hadoop:OC-1`–`OC-23`) = autonomous 10 + guided 13, all open.
+- **Hadoop:** case files read 22 of 46 by each agent (Jingsong's orders 1–25 less 6, 14, 22; coverage.csv has 44 rows);
+  not read 24 = waiting for stage 4 23 + Yang's 1 of 2026-11-06; files with at least one candidate: autonomous 19, guided 19.
+  **Candidates 98** (`hadoop:OC-1`–`OC-98`) = autonomous 46 + guided 52, all open.
 
 #### Phase 2 — `OOM-exp` (Cassandra; Hadoop not started)
 
-**Inputs:** candidates 590 (open 71, picked 0, above). **Retry list** (`OOM-exp/cassandra/phase2-retry-list.md`): **25
+**Inputs:** candidates 636 (open 117, picked 0, above). **Retry list** (`OOM-exp/cassandra/phase2-retry-list.md`): **25
 rows = closed 23 + picked again 0 + open 2** (U16, R25, both 2026-11-24). Closed 23 = re-tried → true positive 9 (+ B22 →
 R24) + a true positive re-opened → true positive 1 (B8 → R23) + re-tried → retry again 7 (+ R19 → R25) + re-tried → split
 (U6 → R15) 1 + covered by the default re-tests (R2–R4) 3 + C3 false positive 1 + disk-paused skip 1.
@@ -322,11 +324,11 @@ the chart); **queue** = ordinary work for whoever runs that queue; **node** = a 
 | Stage 1 — CodeQL | nothing; optional: numeric `switch` case labels are not matched | — | `stage1-codeql-preprocessing/README.md` |
 | Stage 2 — banding | nothing | — | `bands.csv` |
 | Stage 3 — deep read | queued, not read **2,437/10,631** (C: band-D set A 2,164, extension band C 273 from order 240; H: Yang 8,930, Jingsong 1,701 from order 46); not queued **5,918/8,993** (extension band D); judged but not written up 169/– (set B); unresolved unit 1/–; notes backlog (stage-3 notes not applied to filed cases, `undetermined.md` §2 re-audit, `predicted-negative.md` §10 band-D lines); filer's calls of 2026-11-24 open to overrule (Cassandra extension: orders 100, 125 counted new, 70 and 122 typed `not-a-case`, builder/JMX arguments typed `query parameter`; batch 2: 207 (one verdict per place, P2 negative) counted positive, 145 typed `not-a-case`, 236–239 `scaling_parameters` typed `mixed ×2`) | **queue** (Jingsong: band-D set A, extension, Hadoop queue; Yang: set B write-ups, Hadoop queue); **owner**: whether to queue extension band D; the 2026-11-24 filer's calls | set CSVs, `hadoop/<name>/queue.csv`, `HANDOFF.md` "Open follow-ups", `HANDOFF-Jingsong.md` 2026-11-24 |
-| Stage 4 — runtime verification | not run **81/38**: C 29 `none`-type + 14 with no run recorded + **38 waiting** (extension batch 1 of 2026-11-24 18, interrupted; batch 2 of 2026-11-24 20, queued for nodes), H **38 waiting** (Jingsong's orders 6–25 less 19 and 21, interrupted; orders 26–45, queued for nodes); the 36 waiting runs were **interrupted at ≈ 02:30 on 2026-11-24 by an API usage limit**, and 8 of them (C 57, 72, 115, 117, 120; H 9, 11, 13) carry dated audit amendments of the interrupted run; undetermined **16/1** (rerun list in the handoff) | **owner**: the `none`-type design (29 cases); clean-up of the 10 nodes (Nodes row below); **node**: the 10 nodes are reserved for OOM-exp from 05:00 on 2026-11-24; **queue**: the 76 waiting cases (36 interrupted + 20 of Cassandra batch 2 + 20 of Hadoop orders 26–45) once the nodes are free and clean, reruns | `_INDEX.md` §1 (both systems), `HANDOFF-Jingsong.md` 2026-11-24, `HANDOFF.md` |
+| Stage 4 — runtime verification | not run **68/23**: C 29 `none`-type + 14 with no run recorded + **25 waiting** (extension batch 1 of 2026-11-24 5: 116, 125 blocked by `pc99`'s stale lock, 57, 64, 70 returned no result in the deferred run of 2026-11-25; batch 2 of 2026-11-24 20, queued for nodes), H **23 waiting** (Jingsong's orders 6, 14, 22, blocked by the same lock; orders 26–45, queued for nodes); 57 carries dated audit amendments of the interrupted 2026-11-24 run; undetermined **17/1** (rerun list in the handoff; C 133 added 2026-11-25: each tier missed one frozen control threshold); owner's call on H 10's effect (filed `does not cap`, could read `caps only on some paths`, which would make it a false negative) | **owner**: the `none`-type design (29 cases); H 10's effect call; **node**: `pc99`'s stale node lock (Nodes row below); **queue**: the 48 waiting cases (C 5 + 20 of batch 2; H 3 + 20 of orders 26–45), reruns | `_INDEX.md` §1 (both systems), `HANDOFF-Jingsong.md` 2026-11-24 and 2026-11-25, `HANDOFF.md` |
 | JIRA OOM report | nothing | — | `jira-oom-report.md` |
 | OOM clue patterns | nothing | — | `oom-clue-patterns.md` |
-| Stage 5 — clue find | case files not yet read **38/39** (C: the 38 waiting for stage 4; H: the 38 waiting + Yang's 1 of 2026-11-06) | **queue** (after stage 4 for the waiting cases) | `coverage.csv` |
-| Candidate list | open **71/23**; picked, at phase-2 stage 1 0/– (wave 7 wrote back all 23 on 2026-11-25); the 2026-11-18 / 2026-11-20 triage lists and B18's rows are closed (2026-11-24) | **queue** (OOM agent picks) | `phase1-oom-candidates.md` |
+| Stage 5 — clue find | case files not yet read **25/24** (C: the 25 waiting for stage 4; H: the 23 waiting + Yang's 1 of 2026-11-06) | **queue** (after stage 4 for the waiting cases) | `coverage.csv` |
+| Candidate list | open **117/98**; picked, at phase-2 stage 1 0/– (wave 7 wrote back all 23 on 2026-11-25); the 2026-11-18 / 2026-11-20 triage lists and B18's rows are closed (2026-11-24) | **queue** (OOM agent picks) | `phase1-oom-candidates.md` |
 
 **Phase 2 — `OOM-exp`** (Cassandra; Hadoop not started)
 
@@ -335,7 +337,7 @@ the chart); **queue** = ordinary work for whoever runs that queue; **node** = a 
 | Stages 1–2 — design, verify | cases at stage 1 or 2 **0** (wave 7 filed 2026-11-25: 8 true positive, 2 retry); open retries **2** (U16: a control that stays abort-free, or an owner ruling that the intervention arm serves as the matched control; R25: fixed rate and total from its diagnostics, smoothness judged on sends); owner rulings **6** (B19 T2's form, B21 failed I-2G intervention, U13 deployment vs diagnostic, U15 "not corrupt input", B15 proposed status, R23 proposed `deployment` with the archive restore and the slow data volume as an external fault); optional follow-ups 4 (R21 unclaimed lead, R22 512 MiB service-loss arm, R20 2 GiB matched set, B6 status caveat) | **owner**: the 6 rulings, U16's control ruling, a new batch; **queue**: the 2 retries, follow-ups | `cassandra/phase2-retry-list.md`, `cases/_INDEX.md`, `HANDOFF.md` waves |
 | Stage 3-a — JIRA check | true positives not checked **0**; not ruled: C9, R1-V labels (as filed); flagged for the owner on 2026-11-24: B10 (`new` if CASSANDRA-20052 is rated related), C7 (by design or known-open), C8 (CASSANDRA-20752 borderline partial); flagged from wave 7: R24 (`new` if CASSANDRA-15907 is rated related), B27 (known-open via 21091), B28 (known-open via 13157), B29 (by design via 19018, or known-fixed (incomplete) via 15907); U4 and R14 ruled 2026-11-24 (an opt-in fix counts) | **owner**: the 7 flags; **queue** | `stage3-jira-check/README.md` |
 | Stage 3-b — client trigger | true positives not analysed **0**; confirm runs not run: B26 (recommended, cheap: its login-role path is code reading only); confirm: U14 one more run (OOM 1 of 2), R24's victim effect (why 20 ops/s of other traffic prevents the OOM), repetition across nodes (all cases), B21 ring-wide fan-out, B20/U14 cluster-wide reach, B28 multi-node `system_traces` path, B27 `system_traces` no-grants path, B29 rolling restart; 7 cases of 2026-11-23 and 6 others not confirm-run (low value or outside condition decides) | **owner**: approve B26's confirm run; **queue** | `stage3b-client-trigger/README.md` |
-| Nodes (both experiments) | stale locks and orphaned runs from the 02:30 interrupt were cleared on 2026-11-24 at 09:15 (owner); stale locks from the 15:00 stop were cleared at 15:00; wave 7 left every node unlocked with no processes, small logs under `/mydata/s4/<case>` and `/mydata/s4/3b-<ID>`; larger leftovers: pc82 `/mydata/s4/b27` (≈ 49 GB, 10 hprofs, B27 attempt 1, deletable), pc91 `/mydata/s4/b26` 1.3 GB, pc82 `/mydata/s4/r24` ≈ 0.9 GB, pc72 `/mydata/s4/3b-R24` 693 MB, pc91 `/mydata/s4/b27` 508 MB | **owner**: delete wave-7 node data | `HANDOFF.md` |
+| Nodes (both experiments) | stale locks and orphaned runs from the 02:30 interrupt were cleared on 2026-11-24 at 09:15 (owner); stale locks from the 15:00 stop were cleared at 15:00; wave 7 left every node unlocked with no processes, small logs under `/mydata/s4/<case>` and `/mydata/s4/3b-<ID>`; larger leftovers: pc82 `/mydata/s4/b27` (≈ 49 GB, 10 hprofs, B27 attempt 1, deletable), pc91 `/mydata/s4/b26` 1.3 GB, pc82 `/mydata/s4/r24` ≈ 0.9 GB, pc72 `/mydata/s4/3b-R24` 693 MB, pc91 `/mydata/s4/b27` 508 MB; **2026-11-25:** `pc99`'s `/mydata/s4/NODE-LOCK` is held by `jingsong-o70-stage4` (2026-11-24 21:54 MST, no process, no run folder: looks stale; it blocked C 116, 125 and H 6, 14, 22); the deferred phase-1 stage-4 runs left small logs in `/mydata/jingsong-cass-s4/o<order>` and `/mydata/jingsong-s4/<stem>-run1` on `pc72`, `pc75`, `pc82`, `pc91`, `ms0625` | **owner**: delete wave-7 node data; confirm and remove `pc99`'s stale lock | `HANDOFF.md`, `HANDOFF-Jingsong.md` 2026-11-25 |
 
 ## 6. Change log of this page
 

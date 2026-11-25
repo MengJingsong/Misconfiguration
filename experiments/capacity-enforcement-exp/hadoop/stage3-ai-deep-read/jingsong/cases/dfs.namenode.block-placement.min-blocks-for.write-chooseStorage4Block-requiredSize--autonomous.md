@@ -119,6 +119,7 @@ All paths below are relative to `hadoop-hdfs-project/hadoop-hdfs/src/main/java/o
 
 - U1 sets N with the method argument.
 - U2 sets N with `conf.setInt("dfs.namenode.block-placement.min-blocks-for.write", N)` before the MiniDFSCluster starts. U2's control also changes it at runtime with `cluster.getNameNode().reconfigurePropertyImpl(key, "1")`.
+  - *Amendment 2026-11-25 (stage-4 audit, before run 1):* `reconfigurePropertyImpl` is `protected` in `NameNode` (`NameNode.java:2338`) and cannot be called from package `...blockmanagement`. Use the public `cluster.getNameNode().reconfigureProperty(key, "1")` (`ReconfigurableBase.java:224`), which checks that the key is reconfigurable and then calls `reconfigurePropertyImpl`. Same effect; B2f and B2g unchanged.
 
 Fixed:
 
@@ -159,7 +160,8 @@ Fixed:
 2. Write `TestMinBlocksForWriteCap`:
    - `@Test u1aThreshold`, `u1bScheduled`, `u1cPerStorageFilter`, `u1dFirstStorageReturned`;
    - `@Test u2Fill` (parameterised over N ∈ {1, 4, 8, 16}; a fresh cluster per N, shut down in `finally`);
-   - `@Test u2Reconfigure` (N = 16 fill until refused, then `reconfigurePropertyImpl(key,"1")`, continue the loop until refused again).
+   - `@Test u2Reconfigure` (N = 16 fill until refused, then `reconfigurePropertyImpl(key,"1")`, continue the loop until refused again). *(Amendment 2026-11-25: called through the public `reconfigureProperty`, see B2b.)*
+   - *Amendment 2026-11-25:* `@Test u2DnSideControl` runs the B2h side control (additional-available-space left at its 1 GiB default, N = 1, C = 32 MiB; expected K = 0 with a DataNode-side refusal). U1d also prints a supplementary variant (b) with the two `r` values swapped between the first- and second-iterated storage, to show bypass (d); it is a reading only, not a B2f prediction.
 3. Run with `-Dtest=TestMinBlocksForWriteCap`. Save `target/surefire-reports/*-output.txt`.
 4. Collect the CSV lines. Do not assert the exact K inside the test; print it, so a mismatch is a reading, not a crash.
 
@@ -209,6 +211,7 @@ Fixed:
 - **Disk of known size, without root.** Point `dfs.datanode.data.dir` at `$RUN/dn` on a local filesystem with ≥ 2 GiB free. Set `dfs.datanode.du.reserved` = (filesystem total bytes) − 268435456, computed as `R=$(( $(df -B1 --output=size $RUN | tail -1) - 268435456 ))`.
   - Then capacity = 256 MiB. While non-HDFS use stays below `R`, `getAvailable` reduces to `256 MiB − dfsUsed` (`FsVolumeImpl.java:474-482`, `:514-521`): other activity on the shared disk cancels out.
   - Check before the run: `df -B1 --output=used $RUN` < R, and free ≥ 1 GiB.
+  - *Amendment 2026-11-25 (stage-4 audit, before run 1; runbook defect 1).* The method above fails on a filesystem with root-reserved blocks. `DF.getAvailable()` is `File.getUsableSpace()` (blocks available to non-root) and `DF.getUsed()` is total − free (`hadoop-common .../fs/DF.java:85-97`), so the second operand of `getAvailable` is `usable + used − R − dfsUsed = 256 MiB − rootReserve − dfsUsed`. On the stage-4 nodes `/mydata` is ext4 with the default 5 % root reserve (about 41 GB on `pc91`: size 807902732288, used 12248985600, avail 754539712512), so remaining would be 0 from the start and every write would be refused at N = 1. **Use a loop filesystem without a root reserve instead, and keep the du.reserved arithmetic so the capacity is exactly 256 MiB:** `truncate -s 512M $RUN/vol.img; mkfs.ext2 -F -q -m 0 $RUN/vol.img; sudo mount -o loop $RUN/vol.img $RUN/dnfs; sudo chown $USER $RUN/dnfs`; `dfs.datanode.data.dir = $RUN/dnfs/dn`; `R=$(( $(df -B1 --output=size $RUN/dnfs | tail -1) - 268435456 ))`. With no root reserve, usable = free, so both operands of `getAvailable` reduce to `256 MiB − dfsUsed`. (*Second amendment, same day, at the setup check before any put:* ext4 even with `-m 0` keeps reserved clusters for delayed allocation, 2 % of the blocks capped at 4096 clusters, which `statfs` counts as free but not available; on the 512 MiB image that is 2621 × 4096 = 10735616 B, and the setup check read `DFS Remaining` 257675264 instead of 268410880. That would lower every K by about 2.5 blocks. ext2 has no such reserve; with it the setup check reads `DFS Remaining` = 268410880 = 256 MiB − d0.) The loop filesystem holds only this run's DataNode data, so other users of `/mydata` cannot move it. `du -sb` and the block count below read `$RUN/dnfs/dn`. Unmount in cleanup (B4 step 3). B3f and B3g are unchanged.
   - Alternative with sudo: a loop file `truncate -s 256M $RUN/vol.img; mkfs.ext4 -F -m 0 $RUN/vol.img; sudo mount -o loop $RUN/vol.img $RUN/dn`, `chown`, with du.reserved = 0.
 - **`core-site.xml`:**
   - `fs.defaultFS = hdfs://localhost:29820`
@@ -253,6 +256,7 @@ Fixed:
 | K (files written before the first failure) | The loop counter |
 | The failure text | `put-N.err`. Expect `could only be written to 0 of the 1 minReplication nodes. There are 1 datanode(s) running and ...` |
 | NameNode reason | `grep "NOT_ENOUGH_STORAGE_SPACE" $RUN/logs/hadoop-*-namenode-*.log`, from the INFO line `Not enough replicas was chosen` |
+| *Amendment 2026-11-25 (stage-4, before cluster run 1):* NameNode disallow evidence | With the writer on the DataNode's host (pseudo-distributed, and MiniDFSCluster), `NOT_ENOUGH_STORAGE_SPACE` is never logged: `chooseLocalStorage` adds the local node to `excludedNodes` before calling `chooseStorage4Block` (`BlockPlacementPolicyDefault.java:635`), and `chooseRandom` then clears the reason map (`:835`) and, the only node being excluded, logs `{NO_REQUIRED_STORAGE_TYPE=1}` (`:851`, `:925`); the client message ends `... and 1 node(s) are excluded in this operation`. The direct evidence that line 828/833 refused is the DEBUG line `The node ... does not have enough DISK space (required=N·B, scheduled=…, remaining=…)` (`DatanodeDescriptor.java:834`), so `log4j.logger.org.apache.hadoop.hdfs.server.blockmanagement.BlockPlacementPolicy=DEBUG` is **required**, not optional. Found in the unit tier's log (it applies to U2 as well) and checked in the source. |
 | DataNode side must be silent | `grep -c "Out of space\|less than the block size" $RUN/logs/*datanode*.log` must be 0 |
 | Actual bytes on disk | `du -sb $RUN/dn` after each N, and `find $RUN/dn -name 'blk_*' ! -name '*.meta' \| wc -l` |
 | Reported remaining and used | `hdfs dfsadmin -report` (Configured Capacity, DFS Used, DFS Remaining), and `curl -s 'http://localhost:29864/jmx?qry=Hadoop:service=DataNode,name=FSDatasetState*'` (Capacity, DfsUsed, Remaining). Sample both after each put (append to a CSV) and at refusal. |
@@ -297,6 +301,7 @@ Cannot be observed directly: the NameNode's blocks-scheduled count. Infer it fro
 | K ≈ 64 − N, refusal-time remaining in `[(N−1)B, NB)`, `du` falling about 4.2 MB per +1 N | Claim confirmed: N governs the bytes really stored on the DataNode. |
 | K identical for all N (≈ 63) | Claim refuted: N does not cap usage. |
 | Refusals come from the DataNode (`Out of space`), or the NameNode log has no `NOT_ENOUGH_STORAGE_SPACE` | Another check bound. Not a test of the claim; fix the configuration and repeat. |
+| *Amended 2026-11-25:* read the row above as: refusals come from the DataNode (`Out of space` / `less than the block size`), or the NameNode log has no DEBUG `does not have enough DISK space` line from `DatanodeDescriptor.java:834` at the refusal (with `remaining` < `required` = N·B) | Another check bound. Not a test of the claim. An INFO reason `NO_REQUIRED_STORAGE_TYPE` with that DEBUG line is the expected NameNode refusal for a local writer (B3d amendment). |
 | K larger than predicted by several blocks | Over-admission (stale remaining or scheduled counts). The cap exists but is loose; report the overshoot. |
 | Step 5 does not resume | The refusal was not caused by N. Refuted. |
 | Step 5 resumes to about 63 | Positive control: the same workload moves usage when only N changes. |
@@ -317,7 +322,7 @@ Cannot be observed directly: the NameNode's blocks-scheduled count. Infer it fro
 - **Cleanup.**
   1. `hdfs --daemon stop datanode; hdfs --daemon stop namenode`.
   2. `jps` must show no `NameNode` or `DataNode` started from `$RUN`. Check `ps -ef | grep $RUN`, and `kill` any leftover.
-  3. If the loop alternative was used: `sudo umount $RUN/dn`.
+  3. If the loop alternative was used: `sudo umount $RUN/dn` (*amended 2026-11-25:* `sudo umount $RUN/dnfs`, then `rm $RUN/vol.img`).
   4. `rm -rf $RUN/dn $RUN/nn $RUN/tmp $RUN/logs $RUN/pids` once the readings are saved.
   5. Unit tier: MiniDFSCluster is shut down in `finally`. Check `jps` for a surefire JVM left running.
 
@@ -356,4 +361,9 @@ hadoop-hdfs-project/hadoop-hdfs/src/test/java/org/apache/hadoop/hdfs/server/data
 
 ## D. Stage-4 feedback
 
-none yet
+**2026-11-25, stage 4 run 1 (Jingsong's share, node `pc91`): unit Confirmed — caps; cluster Confirmed — caps. Outcome class: true positive.** Results: `results/dfs.namenode.block-placement.min-blocks-for.write-chooseStorage4Block-requiredSize--autonomous.md`.
+
+- Unit (B2): U1a–U1d as predicted; U2 K = 31 / 28 / 24 / 16 for N = 1 / 4 / 8 / 16 (exactly B2f), refusal-time remaining 769831 / 3940156 / 8167256 / 16621456 B, each in `[(N−1)·B − m, N·B)`; u2Reconfigure 16 → +15 = 31; DataNode-side control K = 0. Each NN refusal has the DEBUG line of `DatanodeDescriptor.java:834`.
+- Cluster (B3, amended): K = 63 / 56 / 48 / 32 for N = 1 / 8 / 16 / 32 (exactly B3f); `DFS Remaining` at refusal 2.01 / 29.83 / 62.08 / 126.58 MB, each in `[(N−1)·B, N·B)`; `du -sb` 266.3 / 236.8 / 202.9 / 135.3 MB; step 5 32 → +31 = 63; step 6 K = 0 with a DataNode `Out of space`. No DataNode out-of-space line in any N run.
+- Supplementary U1d(b) shows bypass (d): with storages r = {1000 (first iterated), 4096} the node is accepted and the returned storage is the one that failed line 828.
+- Amendments made by the audit (dated 2026-11-25, above): B2b/B2e (`reconfigureProperty`; extra U2 DataNode-side control; U1d(b)); B3a (loop ext2 filesystem instead of du.reserved on the root-reserved `/mydata`); B3d/B3g (the NameNode reason for a local writer is `NO_REQUIRED_STORAGE_TYPE`; the disallow evidence is the DEBUG line at `:834`). For stage 3: B2c should say to set utilization on the descriptor's registered storage (`dn.getStorageInfo("s1")`), not on the object `DFSTestUtil.createDatanodeStorageInfo` returns, and that `MiniDFSCluster.Builder` forces additional-available-space = 0 (`MiniDFSCluster.java:551-553`).

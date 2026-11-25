@@ -60,6 +60,13 @@ The unit tier runs an in-process `Server` started by `CQLTester` inside the test
 - Build with `ant jar build-test`.
 - JVM: the test JVM `-Xmx` comes from `build.xml:1245-1255` (4G or 8G). Pass the knobs through `-Dtest.jvm.args` (`build.xml:1192`).
 
+> **Amendment S4-A1 (2026-11-25, stage-4 audit, before any reading; runbook only).** On the stage-4 node the tree is a copy of
+> the built `/mydata/s4/cassandra-base` (`cp -a` to `/mydata/jingsong-cass-s4/o133/c509`, md5-checked against the repository's
+> `systems/cassandra/source`), not an rsync of `~/cassandra-5.0.9`; `ant build-test` after adding the test file. Run data and
+> logs under `/mydata/jingsong-cass-s4/o133/`. The test's result line also echoes the channel's configured marks
+> (`cfgHigh`, `cfgLow`), the gate mode, `autoRead`, `open`, the stable-sample count and the pipeline handler names, and is printed
+> to stdout and stderr (both land in the junit XML). Each B2e cell is one `ant testsome` JVM run from a logged script.
+
 ```java
 package org.apache.cassandra.transport;
 
@@ -198,6 +205,21 @@ public class WriteWaterMarkBacklogTest extends CQLTester
 
 Notes on the test code:
 - In the gate variant, `produced` counts only the responses actually produced.
+
+> **Amendment S4-A2 (2026-11-25, stage-4 audit, before any reading; control instrument only, B2f/B2g unchanged).** The gate
+> as filed cannot pause reading: the server channel runs with `autoRead` on (Netty default; Cassandra turns it off only in
+> `PreV5Handlers.java:224`), and Netty 4.1.130's NIO read loop (`AbstractNioByteChannel$NioByteUnsafe.read`, bytecode checked on
+> the node) removes `OP_READ` only when `autoRead` is off, so reads continue without ever passing through a handler's `read()`.
+> The positive-control gate is therefore a first-position inbound handler that sets `autoRead` to `isWritable()` on every
+> `channelWritabilityChanged` (`-Dwm.gate=autoread`), which is the standard Netty consumer of writability. The as-filed gate
+> (`-Dwm.gate=true`) is run once as a labelled diagnostic (B65536, K256); its reading is not used for the verdict.
+>
+> **Fix D1 (2026-11-25, runbook defect from the K = 8 shakedown, before any sweep reading; B2f/B2g unchanged).** The test's
+> `ProbeConfigurator` passed `epoll = false`, so on a Linux node where `CQLTester`'s `Server` uses an `EpollEventLoopGroup`
+> the NIO server channel fails to register (`IllegalStateException: incompatible event loop type`, "Failed to bind port").
+> The configurator now passes `NativeTransportService.useEpoll()`, as `Server` does (`Server.java:107`). Epoll keeps the same
+> read semantics S4-A2 relies on (`AbstractEpollChannel` clears `EPOLLIN` only when `autoRead` is off; bytecode checked).
+> The result line reaches the `ant` console log, not the junit XML; the harness collects it from there.
 - `bytesSent` is incremented in `Envelope.Encoder.encode` (`Envelope.java:507`), so `produced/K` is the exact response size R, header included.
 
 **B2b. Knobs.**
@@ -248,6 +270,14 @@ Notes on the test code:
 | Client reads | ≤ 64 KiB (normally ≤ R) and clientBytes = produced | |
 | Gate (positive control) | ≤ 32 KiB + 4·R. For example, B=64 KiB: ≤ ~300 KiB, which is ≤ 2% of the stock 16 MiB. produced < K·R while held. | |
 
+> **Amendment S4-A3 (2026-11-25, stage-4 audit, before any reading; arithmetic, not data).** Netty counts each queued message as
+> its readable bytes **plus a fixed 96-byte entry overhead** (`ChannelOutboundBuffer` `CHANNEL_OUTBOUND_BUFFER_ENTRY_OVERHEAD`,
+> `io.netty.transport.outboundBufferEntrySizeOverhead`, default 96), and `Envelope.Encoder.encode` emits **two** messages per v4
+> response (header and body, `Envelope.java:503-512`). So the stock band is
+> **K·R − 64 KiB ≤ pendingSettled ≤ K·(R + 192)** (the upper end adds up to 48 KiB at K = 256), and the gate bound is
+> ≤ 32 KiB + 4·(R + 192). At high = 64 MiB, the cell B = 256 KiB, K = 256 has K·(R + 192) ≈ 64.05 MiB > 64 MiB, so `writable`
+> may read false there; the writable column is informational and no B2g row depends on it.
+
 **B2g. Readings.**
 
 | Observation | Meaning |
@@ -258,6 +288,19 @@ Notes on the test code:
 | Usage flat with respect to the mark, while the gate control keeps pending near 32 KiB + a few R and the client-reads control keeps it near 0 | The claim is confirmed: the same workload is bounded when a writability consumer exists, so the instrument and workload can show a binding cap. Without the consumer it is not bounded. |
 | Stock pendingSettled small because K·R never passed the kernel slack (produced < 100 KiB), or the gate control did not reduce pending | Not confirmed: the limit was never reached, or the control failed. Increase K or B, or check that the gate handler is in the pipeline. |
 | pendingSettled = −1 | The channel closed (for example an `OutOfDirectMemoryError` or an exception). Check the test log. Not confirmed. |
+
+> **Amendment S4-A4 (2026-11-25, stage-4 audit, before any reading; thresholds and labels for the rows above, no row changed).**
+> Let P(h, B, K) be pendingSettled. *Noise* n = max(64 KiB, 2 × the spread of the four stock (32768, 65536, 256) runs).
+> - **Stock in band:** every stock cell inside the S4-A3 band, with `writable=false`.
+> - **Flat in the mark:** for each (B, K), |P(1 MiB) − P(32 KiB)| ≤ n and |P(64 MiB) − P(32 KiB)| ≤ n.
+> - **Follows the workload:** P(·, ·, 256) / P(·, ·, 64) ∈ [3.5, 4.5] at each B for the stock mark.
+> - **Client-reads control holds:** P ≤ 64 KiB and clientBytes = produced. **Gate control holds:** P ≤ 32 KiB + 4·(R + 192),
+>   P ≤ 2 % of the stock P for the same (B, K), and produced < K·R.
+> - Row 1 / row 4 → **Confirmed — does not cap**: stock in band, flat in the mark, follows the workload, both controls hold.
+> - Row 2 → **Refuted — caps**: stock P ≤ 32 KiB + 4·(R + 192) in a cell with K·R ≥ 1 MiB. Row 3 → **Refuted — caps**: P(1 MiB)
+>   ≤ 1 MiB + 4·(R + 192) in a cell where P(32 KiB) > 2 MiB, or P(32 KiB) ≤ 32 KiB + 4·(R + 192) while P(64 MiB) is in band.
+> - Row 5 / row 6 → **Not confirmed**: produced < 100 KiB in a stock cell, a control fails, or P = −1 / `open=false`. Any other
+>   pattern (for example flat in the mark but outside the band) → **Not confirmed**, with the reason.
 
 **B2h. Controls.**
 - The client-reads run shows that the backlog comes from the client not reading, not from a leak.
@@ -388,6 +431,22 @@ print('drained bytes', got[0], 'R', got[0] // a.k)
 9. Repeat cell B once to check repeatability.
 10. Stop the node with `kill $(cat pid)`. Wait, then confirm with `pgrep -f CassandraDaemon -u $USER` (expect nothing) and `pgrep -f wm_client.py` (expect nothing). Remove `data/` and `logs/` in the copy.
 
+> **Amendment S4-A5 (2026-11-25, stage-4 audit, before any reading; runbook and definitions, B3f unchanged).** Paths: the node
+> runs from the same built copy `/mydata/jingsong-cass-s4/o133/c509` (no rebuild; the unit-tier test class does not touch
+> `conf/`), tools in `/mydata/jingsong-cass-s4/o133/harness/`, `ulimit -n 100000`, `MAX_HEAP_SIZE`/`HEAP_NEWSIZE`/`JVM_EXTRA_OPTS`
+> scoped to the `bin/cassandra` command only. Each cell is driven by `cluster-cell.sh`, which logs every command and adds: a
+> `GC.run` + `GC.heap_info` and an NMT `baseline` just before the cell's client starts; `BytesSent` read **also at the end of the
+> hold** (before `draining`), so B3g row 2's "produced ≪ K·R until the drain" is observable; `ss` read with `-tmn` on both ends;
+> `GC.run` + `GC.heap_info` and `summary.diff` at the end of the hold. **ΔOther of a cell** = NMT "Other" committed in the last
+> sample before `draining` minus the value in the sample just before the cell's client started (pooled chunks freed by the
+> previous cell's drain are not counted against the next cell). **Backlog** = BytesSent at end of hold − its pre-cell value −
+> server Send-Q − client Recv-Q (last sample before `draining`). Thresholds: row 1 holds if ΔOther(A) ≥ 48 MiB, ΔOther(B) ≥
+> 200 MiB, backlog(B)/backlog(A) ∈ [3, 5] and ΔOther(B)/ΔOther(A) ∈ [2.5, 6]; the control row (row 3) holds if ΔOther(C) ≤
+> ΔOther(B)/7 and ΔOther(D) ≤ 32 MiB; row 2 needs backlog(A) and backlog(B) ≤ 1 MiB + 32 KiB, or produced at end of hold < 25 %
+> of K·R with no ERROR frame; row 4 (instrument blind) is taken when backlog(B) ≥ 200 MB but ΔOther(B) < 48 MiB, and then RSS
+> (VmRSS rise over the same window) replaces ΔOther with the same thresholds. Labels: rows 1 + 3 → **Confirmed — does not cap**;
+> row 2 → **Refuted — caps**; row 4 without an RSS rise, a failed control, or row 6 → **Not confirmed** / **Invalid**.
+
 **B3f. Predictions.** ΔOther is NMT "Other" committed at the end of the hold minus the baseline. Kslack = SendQ + RecvQ, which should be ≤ about `tcp_wmem` max + 8 KiB.
 
 | Cell | produced (BytesSent Δ) | User-space backlog (produced − Kslack) | ΔOther (committed) |
@@ -454,4 +513,23 @@ print('drained bytes', got[0], 'R', got[0] // a.k)
 
 ## D. Stage-4 feedback
 
-none yet
+**Stage-4 audit amendments (2026-11-25, before any reading):** S4-A1 (B2a: node paths, built copy, extra echo fields),
+S4-A2 (B2a gate: the as-filed `read()` gate cannot pause an `autoRead` NIO channel; the control uses `setAutoRead(isWritable())`,
+the as-filed gate runs once as a diagnostic), S4-A3 (B2f: Netty's 96-byte entry overhead × 2 messages per v4 response widens the
+stock band to K·R − 64 KiB … K·(R + 192); the 64 MiB-mark writable column may read false in the largest cell), S4-A4 (B2g
+thresholds and verdict labels), D1 (B2a test: the configurator's `epoll` flag follows the server's; found in the shakedown), S4-A5 (B3e: paths, per-cell NMT baseline, BytesSent at end of hold, ΔOther and backlog defined,
+B3g thresholds and labels). Sections A, B1, B2b–B2e, B2g rows, B3a–B3d, B3f and the B3g rows are otherwise unchanged.
+
+**Stage-4 result (2026-11-25, run 1 on `pc75`, x86_64; results `~/writeup-ext/out/o133/results.md`):** unit tier **Not
+confirmed** (effect undetermined), cluster tier **Not confirmed** (effect undetermined); outcome class **undetermined**.
+Every main reading matches the claim (B2g row 1, B3g row 1): with the stock 32 KiB mark the server queued K·(R + 192) − (≤ 105 B)
+on a non-reading connection, 1.05 MB to 67.2 MB, byte-identical at marks of 32 KiB, 1 MiB and 64 MiB, ×4.0 in K and in B,
+`writable=false`; on a real node NMT "Other" rose +80 MiB (K 64) and +336 MiB (K 256) with heap flat, released on drain.
+Each tier misses one frozen **control** threshold: the S4-A2 gate bound (held 6 responses, 394,689 B, against ≤ 32 KiB +
+4·(R + 192) = 295,964 B and ≤ 2 % of stock; it did stop the server at 6 of 256 responses), and the S4-A5 cell-D bound
+(ΔOther ≤ 32 MiB; +112 MiB peak and +96 MiB at client exit while the 4 KiB-buffer reader lagged, back to baseline after).
+Under S4-A4/S4-A5 a missed control gives Not confirmed; the thresholds were not loosened after the readings. The as-filed
+gate (diagnostic) did not bind at all (pending = stock, `autoRead=true`), as S4-A2 found from Netty's bytecode.
+**For stage 3:** re-specify the two controls before a fresh run (the gate's in-flight allowance must cover the requests read
+before the first response marks the channel unwritable; cell D needs a reader that keeps pace or a window after it catches
+up), and the Estimate/trace need no change: no reading suggests the mark is enforced.

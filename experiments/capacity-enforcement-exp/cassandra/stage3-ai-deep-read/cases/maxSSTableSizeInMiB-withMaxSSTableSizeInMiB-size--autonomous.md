@@ -507,4 +507,70 @@ https://docs.oracle.com/en/java/javase/11/docs/api/
 
 ## D. Stage-4 feedback
 
-none yet
+**Stage-4 audit amendments (2026-11-25, Jingsong's stage-4 session, before any reading).** B2f, B2g, B3f and B3g are
+unchanged; these amendments add paths, an instrument output line, and the verdict labels and thresholds the readings
+tables did not state.
+
+- **S4-A1 (paths, build, instrument; runnable on the node).** `WORK=/mydata/jingsong-cass-s4/o114`. Instead of
+  `rsync ~/cassandra-5.0.9` + `ant -q jar`, `$WORK/src` is `cp -a /mydata/s4/cassandra-base` (5.0.9, already built with
+  `ant build-test`, so `build/classes/main` and `build/lib/jars` exist; the cited source files are md5-checked against
+  the repository's `systems/cassandra/source`). `run.sh` gains one output line, `data_by_id=`, the Data files in
+  generation order with their sizes, because `data_sizes` is sorted by size and so does not say which file is "the last"
+  (B2f/B3f "all but the last"). For the optional validity node (B3e step 4): `ulimit -n 100000`,
+  `CASSANDRA_LOG_DIR=$WORK/node/logs`, `cdc_raw_directory` also under `$WORK/node`, `read_request_timeout` and
+  `range_request_timeout` 120000 ms (so `count(*)` over 524,288 rows does not time out), `CASSANDRA_CONF` passed to
+  `nodetool`/`sstableloader`. The run drivers (`unit-all.sh`, `cluster-all.sh`, `validity.sh`) run B2e and B3e as written.
+- **S4-A2 (B2g labels and thresholds; unit verdict).**
+  - *Core verdict, from the insert runs (u-ins-1/4/16, s-ins-1/4/16):* **Confirmed — caps** when every u-ins run has
+    `max_operand` in (L − s, L], `syncs` and `data_files` within B2f's ±1 of n(L) − 1 and n(L), and every Data file but the
+    last (generation order) in B2f's band; and every s-ins run has `min_at_switch` > L·2^20, every file but the last in
+    (L·2^20, L·2^20 + 2,048] bytes, and `data_files` within ±1 of ⌈N·s_disk/(L·2^20)⌉. **Refuted — does not cap** when B2g
+    row 2 or row 3 holds in any insert run ("the file count does not change with L" = `data_files` at L = 1 less than 4 ×
+    `data_files` at L = 16). **Not confirmed** when B2g's last row holds (`max_operand` below 0.5·L in a run with T > L), a
+    run exits nonzero, or the readings miss a band without meeting row 2 or row 3.
+  - *Default handling (u-def, s-def):* recorded as "trace holds" (B2g row 5 and the B2f s-def row) or "trace wrong" (row 4);
+    it does not change the core verdict; a "trace wrong" result is a correction to A1.
+  - *Bypass (u-del-1):* B2g row 7 → Effect "caps (bypass: delete-only workloads are not counted and never flush)"; row 8 →
+    the bypass is refuted and Effect is "caps".
+- **S4-A3 (B3g labels and thresholds; client-process tier verdict).**
+  - "P is flat" = max P − min P over L ∈ {16, 64, 128, 256} ≤ 32 MiB. "The L = 1024 control rises" = its last sample is
+    ≥ 0.8·T (T from `first_row_delta` × N) above H0 and its `syncs` = 0. "P(L)/L far above 4" = above 4.0 for some L ≥ 64.
+  - **Confirmed — caps** when all of B3f's heap bullets hold (strictly increasing P; P(L)/L in [0.6, 4.0] for L ≥ 64;
+    P(256) − P(64) ≥ 150 MiB; P(16) ≤ 80 MiB), the control rises, and the disk bullets hold (file count within ±1 of
+    ⌈T/L⌉, non-last files in band, `du_bytes` within 3%). The heap-ceiling runs are supporting evidence: L = 16 pass and
+    L = 256 OOM strengthens it; both passing is recorded (B3g row 6) and does not by itself change the verdict.
+  - **Partial — caps** when P is strictly increasing and the control rises, but a magnitude bullet misses (a ratio
+    outside [0.6, 4.0], P(256) − P(64) < 150 MiB, or P(16) > 80 MiB), or a disk bullet misses: the cap holds in direction,
+    not in the predicted size.
+  - **Refuted — does not cap** (heap) when P is flat and the control rises (B3g row 2).
+  - **Not confirmed** when the control is flat (row 3), P is neither flat nor strictly increasing, or both ceiling runs
+    OOM also at `-Xmx448m` (row 7's rerun).
+  - Sorted contrast > 32 MiB (row 9) is a correction to the sorted-mode trace (A3 step 4) and does not change the
+    unsorted verdict.
+
+**Stage-4 runbook defect D1 (2026-11-25, optional validity step only).** B3e step 4.5 `SELECT count(*)` failed with
+`ReadTimeout` after 12 s although `read_request_timeout`/`range_request_timeout` were 120 s: Cassandra 5.0 also bounds a
+whole native request by `native_transport_timeout` (default 12 s, `Config.java:1399`). Fix: `native_transport_timeout: 600s`
+in the validity node's copied yaml. B3f/B3g are unchanged (the step is optional and feeds only B3h "valid output"); step 4
+was rerun from its beginning and returned `count = 524288`.
+
+**Stage-4 result (2026-11-25, Jingsong's stage-4 session, run 1 + self-check, node `pc75`, x86_64).**
+- **Unit tier (B2): Confirmed — caps (bypass recorded).** u-ins-1/4/16: `EFFECTIVE_LIMIT_BYTES` = L·2^20, `max_operand`
+  1,048,194 / 4,193,838 / 16,776,414 (each in (L − s, L], s = 1,062 B), syncs 66 / 16 / 4, data files 67 / 17 / 5, every
+  non-last file 1,037,400 / 4,147,500 / 16,587,900 B. s-ins-1/4/16: every non-last file and `min_at_switch` exactly
+  L·2^20 + 374 / + 446 / + 734 B (in (L, L + 2,048]); 66 / 17 / 5 files. Default handling as traced: `unset`, `0` and `-1`
+  all give 134,217,728 in the unsorted writer (1 sync, 2 files, first 132,702,150 B), and the warning "disables the size
+  limiting effectively" is printed for `0` and `-1` — so the warning is misleading; sorted gives −1,048,576 (no limit, 1 file).
+  **Bypass confirmed:** u-del-1 (262,144 partition deletes, L = 1 MiB) reached `max_operand` 6,815,744 (6.5 × L) with
+  syncs = 0 and one 6,029,312-B file.
+- **Client-process tier (B3): Confirmed — caps.** H0 = 21.4 MiB; P(16, 64, 128, 256) = 39.1, 173.0, 352.0, 722.1 MiB
+  (P/L = 2.70, 2.75, 2.82 for L ≥ 64; P(256) − P(64) = 549 MiB); L = 1024 control 752 MiB above H0 at the last sample
+  (T = 531 MiB serialized, so about 1.42 heap bytes per serialized byte), syncs = 0, 1 file; sorted P flat (−6.1 MiB at
+  both L); file counts 34 / 9 / 5 / 3 / 1, `du_bytes` spread 0.05% (total disk not capped). Under `-Xmx320m` L = 16 exits 0
+  and L = 256 dies with `OutOfMemoryError` (exit 1). The output loaded into one node with `sstableloader` and counted
+  524,288 rows. P/L ≈ 2 × 1.42 means about two full buffers live: the samples after the first flush never fall back to one
+  buffer, consistent with the DiskWriter thread's local `b` still referencing the last written buffer while it waits in
+  `take()` (inferred, not instrumented).
+- **Effect on the constraint:** caps (unsorted: heap ≈ 2.8 × L and per-file disk ≈ L; sorted: per-file disk L + one
+  partition), with a recorded bypass (delete-only workloads are not counted and never flush). Total disk is not capped.
+  **Outcome class: true positive.** Results and harness: `~/writeup-ext/out/o114/` (outside the repo).

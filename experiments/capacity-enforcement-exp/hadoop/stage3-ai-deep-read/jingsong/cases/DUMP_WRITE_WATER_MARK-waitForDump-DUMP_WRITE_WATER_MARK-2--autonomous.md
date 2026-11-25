@@ -100,6 +100,12 @@ Disk that this constant does not control:
 - Add the new test class `hadoop-hdfs-project/hadoop-hdfs-nfs/src/test/java/org/apache/hadoop/hdfs/nfs/nfs3/TestDumpWaterMark.java`. It must be in package `org.apache.hadoop.hdfs.nfs.nfs3`, because the `OpenFileCtx` constructor, `receivedNewWrite`, `getPendingWritesForTest` and `RpcProgramNfs3.metrics` are package-visible.
 - Default surefire JVM options are enough. Running the 4 MiB arm needs about 64 MiB of heap.
 
+> **Amendment 2026-11-25 (stage-4 audit, before any reading; B2f/B2g unchanged).** Environment of the Hadoop stage-4 nodes
+> (`hadoop/stage4-runtime-verification/jingsong/environment.md`): the local copy is made with that folder's
+> `copy-source.sh /mydata/jingsong-s4/<stem>-run1/src` (there is no `~/hadoop-3.4.2`), and the `-am install` step is skipped
+> because every 3.4.2 module is already in `~/.m2` on the node; the test runs offline (`mvn -o`). Surefire heap is set to
+> `-Xmx512m`.
+
 **B2b. Knobs.** The value of `DUMP_WRITE_WATER_MARK`, set by reflection before each arm (the field is static and non-final, and is read on every check) and restored in `@After`:
 
 ```java
@@ -125,6 +131,13 @@ Values for M:
 - Offset 0 is never written, so every write is `ALLOW_DUMP` and nothing is written back.
 - Arithmetic: 255 × 64 KiB = 15.94 MiB. That is about 64× the 256 KiB mark, 16× the 1 MiB mark and 4× the 4 MiB mark, so every capped arm spills many times.
 - Extra sub-test (shows that sequential data is not counted): one write at offset 0 into a fresh ctx.
+
+> **Amendment 2026-11-25 (stage-4 audit; instrument only, B2f/B2g unchanged).** Each `receivedNewWrite` call is run on a
+> daemon worker thread and the test waits at most 10 s for it. A call that does not return is logged as a `BLOCKED` row
+> (this is how step 5's "does not return" is observed, instead of relying on the JUnit timeout alone); the blocked writer is
+> then released (counter set to 0 plus `notifyAll()`) so `cleanup()` can run. In the bypass probe, after the block, a second
+> writer sends 16 more out-of-order writes to the same ctx and the counter is logged (extra observation for A3's
+> "no longer capped"; not a B2f prediction).
 
 **B2d. Observables and instruments.**
 After each `receivedNewWrite` returns, read and log one CSV row per write (`M,k,counted,dumpLen,dumped,maxSeen`):
@@ -266,6 +279,25 @@ Cannot be observed directly: the heap held only by payloads. Infer it as the `[B
    7. Stop the samplers.
 5. Restore the original jar.
 
+> **Amendment 2026-11-25 (stage-4 audit, before any reading; B3f/B3g unchanged).** Runbook fixes for the Hadoop stage-4
+> nodes (`environment.md` §4), none of which changes the workload, the knob values or the predictions:
+> 1. **Distribution:** copy the node's built distribution (`cp -a /mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2 <run>/hadoop`)
+>    instead of rebuilding it. The three changed jars (`8L * 1024 * 1024`, `64L * 1024 * 1024`, `Long.MAX_VALUE`) are built
+>    in the per-case copy with `mvn -B -o -q package -pl hadoop-hdfs-project/hadoop-hdfs-nfs -Dmaven.test.skip=true`, one
+>    `sed` per value on line 73, `git checkout` after each; the constant in each jar is checked with `javap -c` (`static {}`).
+> 2. **HDFS:** `ssh localhost` does not work on these nodes, so NameNode and DataNode are started with
+>    `hdfs --daemon start namenode|datanode` (not `start-dfs.sh`), `HADOOP_CONF_DIR=<run>/conf`, and
+>    `hdfs namenode -format -nonInteractive`.
+> 3. **Gateway and portmapper:** there is no `jsvc` for the privileged secure starter, so the gateway is started as `$USER`
+>    with `hdfs --daemon start nfs3` (`nfs.port.monitoring.disabled` left at its default). If it cannot register with the
+>    system `rpcbind`, the system `rpcbind` is stopped for the run (nothing else on the node is registered with it), the
+>    Hadoop `portmap` is started as root, and `rpcbind` is restarted at teardown.
+> 4. **Mount:** `vers=3,proto=tcp,nolock,noacl,sync,wsize=65536,soft,timeo=600,retrans=2` on `<run>/mnt` (`soft` only so a
+>    stalled gateway cannot leave an unkillable client; 60 s per try is far above any dump time).
+> 5. **Request size and order** are read from the `OpenFileCtx` DEBUG lines (`requested offset=… and current offset=…` and
+>    `Update nonSequentialWriteInMemory by 65536 …`), which carry the same information as the `WRITE … offset … count`
+>    lines named in B3d.
+
 **B3f. Predictions.** In-memory at hold = (4095 mod (M / 64 KiB)) × 64 KiB:
 
 | Arm | In memory at hold | Dump file at hold | Max counted (log) | `[B` delta at hold |
@@ -342,4 +374,17 @@ Further predictions:
 
 ## D. Stage-4 feedback
 
-none yet
+- **2026-11-25, run 1 on `pc72` (results: `results/DUMP_WRITE_WATER_MARK-waitForDump-DUMP_WRITE_WATER_MARK-2--autonomous.md`; frozen
+  version sha256 `3b8bfc582ed4982800f2973b95be0f8ecdd81af31cb33f4eee56ed6e2f976e5a`, after the three dated amendments above).**
+  - **Unit: Confirmed — caps** (B2g row 1). For M = 256 KiB / 1 MiB / 4 MiB the counter after every write was exactly (k mod q)·r,
+    the dump file grew only in steps of M (final 16,515,072 / 15,728,640 / 12,582,912 B), the in-call peak was exactly M, and
+    counted bytes equalled the referenced payload bytes; the dump-disabled control grew linearly to 16,711,680 B. Bypass probe:
+    write 16 blocked as A3 inferred; afterwards a second writer added 16 uncapped writes (counter 2 MiB, 2× the mark), so a dump
+    failure both stalls the waiting writer and removes the cap for that file (bypass recorded, source inference of A3 confirmed).
+  - **Cluster: Confirmed — caps** (B3g rows 1 and 3). Real gateway, 256 MiB out-of-order file: in-memory at hold 983,040 /
+    8,323,072 / 67,043,328 B and dump file 267,386,880 / 260,046,848 / 201,326,592 B for M = 1 / 8 / 64 MiB, exactly B3f;
+    `[B` delta +0.45 / +7.8 / +66.4 MB; every dump round went from M to 0; `Long.MAX_VALUE` kept all 268,369,920 B in heap
+    (+267.7 MB `[B`, no dump file); sequential control counted nothing. md5 matched in all arms.
+  - **Outcome class: true positive.** No change to A or B1. Recommendation for stage 3 (not applied): at 1 s sampling the per-step
+    dump growth cannot be seen for small M; name the dumper's `Start dump. Before dump … == M` / `After dump … == 0` DEBUG lines as
+    the step evidence.

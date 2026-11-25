@@ -1,0 +1,7 @@
+RULE slow replay task
+CLASS org.apache.cassandra.db.commitlog.CommitLogReplayer$MutationInitiator$1
+METHOD runMayThrow
+AT ENTRY
+IF true
+DO java.util.concurrent.locks.LockSupport.parkNanos(1000000L)
+ENDRULE

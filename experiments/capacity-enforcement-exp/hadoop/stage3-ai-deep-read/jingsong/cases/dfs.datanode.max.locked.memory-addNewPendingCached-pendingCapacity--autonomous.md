@@ -135,6 +135,13 @@ real `mlock`, reports page size 4096 and an effectively unlimited memlock limit.
 options are fine; set `-Dtest.build.data=/mydata/<run>/test-data` so MiniDFSCluster data stays on
 local disk.
 
+> **Amendment A1 (stage 4, 2026-11-25; node specifics, no change to B2f/B2g).** Node `pc82` (Jingsong's
+> environment). The copy is made with `copy-source.sh /mydata/jingsong-s4/<stem>-run1/src` (not `rsync`), and the
+> `-am install` step is not needed: the node's `~/.m2` holds all 3.4.2 modules from the base build, so the test runs
+> with `mvn -B -pl hadoop-hdfs-project/hadoop-hdfs test -Dtest=TestCacheCapacityCheck#testC* -Dtest.build.data=/mydata/jingsong-s4/<stem>-run1/test-data`
+> (the mutant: `-Dtest=TestCacheCapacityCheck#mutantC32768`). The test class also sets
+> `dfs.namenode.fs-limits.min-block-size = 4096` (B2b) and is the stage-4 harness `TestCacheCapacityCheck.java`.
+
 **B2b. Knobs.** `DFS_DATANODE_MAX_LOCKED_MEMORY_KEY` = C ∈ {16384, 32768, 65536} bytes (4, 8, 16 pages
 of 4096), set with `conf.setLong(...)` before building the cluster, one MiniDFSCluster per value
 (restart-only knob). Fixed: `dfs.blocksize = 4096` and `dfs.namenode.fs-limits.min-block-size = 4096`
@@ -161,6 +168,21 @@ unchanged for 5 consecutive polls, max 60 s):
   block has size".
 - Not observable here: real locked memory (mlock is stubbed). That is the cluster tier's job.
 
+> **Amendment A2 (stage 4, 2026-11-25; settle rule).** "Unchanged for 5 polls" (2.5 s) can settle before the first
+> 1-s rescan has scheduled anything, and cache commands are re-sent only every
+> `dfs.namenode.path.based.cache.retry.interval.ms` (default 30000, `DatanodeManager.java:1785-1789`). Settled now
+> means: the tuple (DN CacheUsed, NumBlocksCached, NumBlocksFailedToCache, NN CacheRemaining, NN cached,
+> NN pendingCached, BytesNeeded, BytesCached, FilesCached) unchanged for 10 consecutive 500-ms polls **and** at least
+> 35 s after the directive was added; give up at 90 s and record `settled=false`. The maxima of DN CacheUsed and of
+> NN pendingCached over all polls are recorded too.
+>
+> **Amendment A3 (stage 4, 2026-11-25; instrument and outcome rows).** `NumBlocksFailedToCache` is also incremented
+> when a cache command names a block the DataNode already holds or is caching (`FsDatasetCache.java:276-281`), not
+> only on a reserve failure (`:417-423`). The test therefore also counts, from a `LogCapturer` on `FsDatasetCache`,
+> the DataNode WARN lines "could not reserve more bytes" since the directive (the reserve refusal itself), and, from
+> the `CacheReplicationMonitor` capture, the TRACE lines "added to PENDING_CACHED on DataNode". Rows added to B2f and
+> B2g below.
+
 **B2e. Procedure.**
 1. In the test, for each C: set the cache manipulator to `NoMlockCacheManipulator` *before*
    building the cluster (so `CacheStats.PageRounder` sees 4096), build `MiniDFSCluster` with 1 DN,
@@ -180,6 +202,11 @@ unchanged for 5 consecutive polls, max 60 s):
 | 16384 | 4 | 16384 | 16384 | 0 | 0 | > 0 |
 | 32768 | 8 | 32768 | 32768 | 0 | 0 | > 0 |
 | 65536 | 16 | 65536 | 65536 | 0 | 0 | > 0 |
+| 32768, `/small` 2 blocks (B2h control; A3) | 2 | 8192 | 8192 | 0 | 0 | 0 |
+
+A3 (2026-11-25): in every unmutated row the DataNode logs 0 "could not reserve more bytes" lines; TRACE
+"added to PENDING_CACHED" lines = blocks cached (C/4096; 2 for the control). In the mutant row the TRACE reject
+count is 0 (the check is gone) and "could not reserve" lines ≥ 24.
 
 BytesNeeded = 131072 in every row. With line 745 disabled (mutation, C = 32768): DN CacheUsed still
 32768 and 8 blocks cached (DataNode reserve backstop), but the NameNode assigns all 32 blocks, so
@@ -198,6 +225,10 @@ NumBlocksFailedToCache > 0 (≥ 24 on the first round, growing with resends ever
 | Mutated run shows failures > 0 and non-empty pending, unmutated shows 0 | Line 745 is the scheduling cap (confirms its role) |
 | Mutated run identical to unmutated | Line 745 has no effect (another check, e.g. `:519-541`, does the work) |
 | Fewer blocks cached than C/4096 even with C ≥ 4096 and no TRACE rejections | Caching path broken (setup issue); not a reading of the claim |
+| (A3) NumBlocksFailedToCache > 0 in an unmutated row but 0 "could not reserve" lines, CacheUsed = C, pending empty | Duplicate cache commands (a resend before the cache report), not a block scheduled past C; the row reads as the first row ("claim holds") with this noted |
+| (A3) "could not reserve" lines > 0 in an unmutated row | The NN check let a block through that did not fit (stale remaining): the "partial confirmation" row above |
+| (A3) `/small` control caches fewer than 2 blocks | Caching path broken below the cap; the series is not a reading of the claim |
+| (A3) Mutant shows TRACE reject lines > 0 | Mutation not in effect; the mutant row is invalid and is re-run |
 
 **B2h. Controls.** C = 0 shows nothing is cached without the key; a directive on a file smaller than
 C (e.g. 2 blocks, C = 32768) must cache all of it (positive control: usage moves with the workload
@@ -226,6 +257,16 @@ Configuration:
   `dfs.datanode.max.locked.memory=<C>`, `dfs.namenode.path.based.cache.refresh.interval.ms=3000`,
   `dfs.cachereport.intervalMsec=3000`, name/data dirs as above.
 
+> **Amendment A4 (stage 4, 2026-11-25; node specifics, no change to B3f/B3g).** Node `pc82`. The distribution is a
+> copy of the node's base build `/mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2` (no `lib/native`),
+> with `libhadoop.so*` from `mvn -B -pl hadoop-common-project/hadoop-common package -Pnative -DskipTests` in the case
+> copy; `cmake`, `zlib1g-dev`, `libssl-dev`, `pkg-config` installed with apt for this (as on `pc75` for the
+> `CachePoolInfo_limit` case). All run state under `/mydata/jingsong-s4/<stem>-run1/cluster/`. Both files (`/big`
+> and `/small`) are written right after the first DataNode start (B3e steps 5 and 8): an uncached file uses no
+> locked memory, so this changes no reading. After each DataNode restart the run waits until both the DataNode's
+> JMX `CacheCapacity` and the NameNode's `dfsadmin -report` "Configured Cache Capacity" equal C (the NameNode
+> otherwise still shows the previous registration).
+
 **B3b. Knobs.** `dfs.datanode.max.locked.memory` C ∈ {0, 2097152 (2 MiB), 4194304 (4 MiB), 6291456
 (6 MiB)}; DataNode restart per value (NameNode can stay up). The values fit the common Linux default
 `ulimit -l` of 8192 KB; first run `ulimit -H -l` and `ulimit -S -l`: the DataNode must be started from
@@ -253,6 +294,12 @@ Duration: about 60 s per value after the directive.
   DataNode refusals: `grep -c "could not reserve more bytes" $HADOOP_LOG_DIR/*datanode*.log`.
 - Not directly observable: which pages are locked per block (only the process total).
 
+> **Amendment A5 (stage 4, 2026-11-25; settle rule and counts).** Sample every 5 s from the directive; stop when at
+> least 60 s have passed and the last 4 samples are equal on (CacheUsed, NumBlocksCached, NumBlocksFailedToCache,
+> VmLck, BYTES_CACHED); give up at 120 s (`settled=false`). The NameNode reject lines, "added to PENDING_CACHED"
+> lines and the DataNode "could not reserve" lines are counted from the log offsets taken just before the
+> directive. "VmLck ≈ X kB" in B3f means within 16 kB (4 pages) of X above the per-phase baseline.
+
 **B3e. Procedure.**
 1. Copy source to `/mydata/<run>/hadoop-src`, build the distribution and native lib, unpack to
    `/mydata/<run>/hadoop`, `export HADOOP_HOME=...`, write the config above, `hadoop checknative -a`.
@@ -277,6 +324,13 @@ Duration: about 60 s per value after the directive.
 | 4 MiB | starts | 4 | 4194304 | ≈ 4096 | 0 | > 0 |
 | 6 MiB | starts | 6 | 6291456 | ≈ 6144 | 0 | > 0 |
 | 6 MiB, `/small` 4 MiB (control) | starts | 4 | 4194304 | ≈ 4096 | 0 | 0 for `/small` blocks |
+| (A6) 64 MiB, `/big2` 512 MiB in 16-MiB blocks | starts | 4 | 67108864 | ≈ 65536 | 0 | > 0 |
+| (A6) 128 MiB, `/big2` | starts | 8 | 134217728 | ≈ 131072 | 0 | > 0 |
+| (A6) 256 MiB, `/big2` | starts | 16 | 268435456 | ≈ 262144 | 0 | > 0 |
+
+A6 (2026-11-25): `ulimit -l` on `pc82` is 16492912 kB (hard and soft), so the optional larger series of B3b is run
+after the main series; BYTES_NEEDED for `/big2` = 536870912. In every row the DataNode logs 0 "could not reserve"
+lines.
 
 BYTES_NEEDED = 16777216 for `/big`. `VmLck` never exceeds C/1024 kB plus baseline. A C above the
 soft `ulimit -l` (e.g. 16 MiB with an 8 MiB limit) makes the DataNode exit at startup with "is more
@@ -292,6 +346,8 @@ than the datanode's available RLIMIT_MEMLOCK ulimit" (`DataNode.java:1903-1910`)
 | CacheUsed = C but VmLck ≈ 0 | mlock not happening (native lib missing / stubbed); the tier did not measure the resource — fix native setup |
 | VmLck ≤ C but NumBlocksFailedToCache > 0 and DN "could not reserve" lines | Cap holds via the DataNode reserve; the NN check at 745 let through over-assignment (stale remaining) |
 | Nothing cached at any C > 0 and control also 0 | Caching path not working (directive, native, ulimit); not a reading of the claim |
+| (A7) NumBlocksFailedToCache > 0 with 0 "could not reserve" lines, VmLck and CacheUsed as predicted | Duplicate cache commands (resend before the cache report); reads as the first row with this noted |
+| (A7) The main series follows C but a phase did not settle (A5) | The phase's numbers are read at 120 s; if they still move, that value is Not confirmed for that tier |
 
 **B3h. Controls.** C = 0 run (nothing cached, no cache report); the `/small` positive control
 (usage follows workload below the cap); baseline `VmLck` before any directive (JVM itself locks
@@ -337,4 +393,23 @@ https://hadoop.apache.org/docs/r3.4.2/hadoop-project-dist/hadoop-hdfs/Centralize
 
 ## D. Stage-4 feedback
 
-none yet
+**D1. Audit amendments (2026-11-25, stage 4, before any reading).** A1 (B2a, node specifics), A2 (B2d, settle rule),
+A3 (B2d/B2f/B2g, "could not reserve" and "added to PENDING_CACHED" counts, small-control row, duplicate-command,
+failed-control and mutation-not-in-effect rows), A4 (B3a, native build and node specifics), A5 (B3d, settle rule and
+"≈" tolerance), A6 (B3f, larger series 64/128/256 MiB), A7 (B3g, duplicate-command and unsettled-phase rows). Frozen
+whole-file sha256 `759f0d3ad3f8fce2c5608623f058b9f1f5a4af9d6730add5b336722749e1e2d3`.
+
+**D2. Stage-4 result (2026-11-25, node `pc82`, run 1 only).** Results file `results/dfs.datanode.max.locked.memory-addNewPendingCached-pendingCapacity--autonomous.md`
+(at run time `~/writeup-hadoop/out/o23/results.md`).
+- Unit: **Confirmed — caps.** Blocks cached 0/4/8/16, CacheUsed = BytesCached = C at C = 0/16384/32768/65536, NN pending 0,
+  0 reserve refusals, TRACE reject lines in every over-cap row; `/small` control cached whole. With line 745 disabled the
+  NameNode commanded all 32 blocks and the DataNode refused 2000+ reservations (cap held only by the DN reserve).
+- Cluster: **Confirmed — caps.** Real `VmLck` 0/2048/4096/6144 kB at C = 0/2/4/6 MiB and 65536/131072/262144 kB at
+  C = 64/128/256 MiB, equal to CacheUsed/1024; 0 reserve refusals; `/small` control 4096 kB.
+- **Outcome class: true positive.**
+- Prediction misses (no effect on the claim): `NumBlocksFailedToCache` is not 0 — the NameNode re-sends pending blocks each
+  heartbeat until the cache report, and the DataNode counts a repeat as a failure (`FsDatasetCache.java:276-281`); read
+  through A3/A7. The cluster `/small` control logged 2 transient reject lines (B3f said 0): the cached-but-still-pending
+  double-count window of A3's overshoot note (under-assigns, never over-assigns). The mutant re-sends came every ~1 s, not
+  every 30-s retry interval.
+

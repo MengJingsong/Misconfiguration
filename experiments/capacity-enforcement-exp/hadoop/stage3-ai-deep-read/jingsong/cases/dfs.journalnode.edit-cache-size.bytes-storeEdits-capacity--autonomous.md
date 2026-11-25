@@ -73,9 +73,99 @@ The edit log files under `dfs.journalnode.edits.dir` are **disk**, written and f
 
 Sub-claim, expected to show the cap failing: with `capacity = Integer.MAX_VALUE`, the cache does **not** plateau at 2 GiB. It keeps growing past it.
 
+
+**Stage-4 audit amendments (2026-11-25, stage-4 agent working as Jingsong, before any harness run or reading).** Each
+applies to the text it names; the changed places carry "[AMn]". None changes B1, B2f or B3f's numbers; AM8 and AM9 make
+tolerances and verdict wording explicit and add rows for outcomes the tables did not name.
+
+- **AM1 (B2a, B3a, B4: paths and build).** Node `pc72` (Jingsong `environment.md`). Run folder
+  `R=/mydata/jingsong-s4/dfs.journalnode.edit-cache-size.bytes-storeEdits-capacity-run1`. Source: `copy-source.sh R/src`
+  (the repository's `systems/hadoop/source/`, rel/release-3.4.2), not `~/hadoop-3.4.2`; no module `install` (the 3.4.2
+  artifacts are in `~/.m2` from the node's full build), the unit tier runs `mvn -B -pl hadoop-hdfs-project/hadoop-hdfs test …`
+  in `R/src`. Distribution: `cp -a /mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2 R/hadoop`. Every
+  `/mydata/<you>/s4/…` path of B3 becomes `R/cluster/<K>/…` (`data/{jn,nn1,nn2,tmp}`, `logs/<daemon>`, `pid/<daemon>`).
+  `jcmd`/`jstat` are the JDK 8 ones (`/usr/lib/jvm/java-8-openjdk-amd64/bin/`; the node's default `java` is 11).
+- **AM2 (B2d, B2e: unit instruments).** The test prints its readings (lines `CAPU …`) and asserts nothing, so every
+  method reaches its last reading; the conclusion compares the printed values with B2f. The optional histogram is taken
+  in-process (the test runs the JDK 8 `jcmd <own pid> GC.class_histogram` while the cache is held) for U1 at 1 MiB and for
+  U4 (control held, control released, `Integer.MAX_VALUE` held), instead of a `Thread.sleep` pause. U3's "about 1 KB"
+  batch is `createTxnData(start, 22)`. U1 also prints `bMin`, `bMax`, `retrieveEdits(lowestTxnId, 5, …)` and
+  `retrieveEdits(1, 5, …)`. The `-Dtest` filter of B2e step 2 is quoted for the shell.
+- **AM3 (B3a: NameNode edit logging).** Both NameNodes run with `dfs.namenode.edits.asynclogging=false`. Reason (source,
+  not a reading): with the default asynchronous logging, `FSEditLogAsync.run` syncs whenever its queue runs dry, so one
+  30-op `mkdirs` can reach the JN as several small `journal` batches. B3c's arithmetic (one ≈ 100–105 KB batch per path)
+  and K1's prediction (every deep batch > 65 536 B) assume one `logSync` per `mkdirs`, which synchronous logging gives
+  with one client thread. The JN-side path (`Journal.journal` → `storeEdits`) is unchanged.
+- **AM4 (B3a, B3e: configuration and commands).** The JN gets its own configuration directory `conf-jn` (a copy of
+  `conf-nn1` plus the run's knob and its `dfs.ha.tail-edits.in-progress` value), so the knob and K0's
+  `in-progress=false` reach only the JN; both NameNodes keep `in-progress=true`. B3e commands as run:
+  `namenode -format -clusterId s4ce -force -nonInteractive`; `namenode -bootstrapStandby -force -nonInteractive`;
+  `haadmin -transitionToActive nn1` without `--forcemanual` (automatic failover is off, and `--forcemanual` prompts);
+  `dfsadmin -fs hdfs://127.0.0.1:8020 -safemode wait`. Daemons start with `hdfs --config <dir> --daemon start …` and
+  per-daemon `HADOOP_PID_DIR`/`HADOOP_LOG_DIR`.
+- **AM5 (B3c: workload driver).** The rounds run through `org.apache.hadoop.fs.FsShell` (the class behind `hdfs dfs`)
+  via `ToolRunner`, with the same two argument lists per round, from a small driver (`RoundDriver`, harness) that runs 10
+  rounds per JVM. Same client code and RPCs, without two JVM launches per round.
+- **AM6 (B3d: sampling).** After the baseline, a sample (histogram, heap info, `jstat -gc` OU, JMX `Journal-ns1`,
+  `VmRSS`/`VmHWM`, `du -sb jn`) every 10 rounds and a final one 30 s after the last round (harness `sample.py`).
+  `Δ[B` = `[B` bytes − baseline `[B` bytes; `ΔEntry` = `TreeMap$Entry` count − baseline. K-run order: K1, K2, K3, K4,
+  K5, K0, then K6 (control and 2147483647) if the 3-hour cap allows.
+- **AM7 (B3b: scope).** K7 (optional) is not run. K6 (optional) runs only if time allows after K0–K5; if it does not,
+  the overflow sub-claim rests on U4 alone and the cluster row for K6 says `not run`.
+- **AM8 (B3f: tolerances made explicit).** `b` = JMX `BytesWritten / BatchesWritten` (run mean) and `b_max` ≈ 105 KB.
+  K2–K5: the final `Δ[B` and every sample taken after JMX `BytesWritten` ≥ N + 2·`b` lie in **[N − `b_max` − 2 MiB,
+  N + 2 MiB]**; `ΔEntry` within ±10 % of N / `b`. K1: final `Δ[B` ≤ 65 536 + 2 MiB and the "too large" WARN count ≥ 90 %
+  of the deep batches written (120 × 50 = 6 000). K0: final `Δ[B` < 8 MiB (below K2's plateau) and no rising trend across samples.
+- **AM9 (B2g, B3g: verdict wording and missing rows).**
+  - **Unit verdict.** **Confirmed — caps** if the U1 "supports" row, the U2 boundary row and U3 equality all hold.
+    **Refuted — does not cap** if a U1 or U2 "claim wrong" row holds. **Not confirmed** if U1's plateau is far below C,
+    or U3 differs (derived default traced wrongly) while U1/U2 hold.
+  - **Overflow sub-claim (U4, K6).** "Overflow bypass confirmed" → the verdict keeps its row and the Effect field reads
+    `caps only on some paths (bypass)` (the bypass: `capacity` within one batch of `Integer.MAX_VALUE`, which includes the
+    default on a JN heap above about 4 GiB). "Overflow analysis wrong" → the sub-claim is refuted, the main claim is not
+    affected, Effect `caps`. "Not conclusive" → sub-claim undetermined, Effect from the main claim.
+  - **Cluster verdict.** **Confirmed — caps** if the K2–K5 "claim supported" row holds (AM8 bands), K1 shows no growth
+    with the WARN, and K0 stays flat. **Refuted — does not cap** if a K2–K5 row "plateau well above N", "no plateau" or
+    "plateaus equal" holds. **Refuted (single-batch part)** if K1 grows or has no WARN while K2–K5 are supported; Effect
+    `caps`. **Not confirmed** (new rows): JMX `BytesWritten` < N + 2·`b` for any of K2–K5 (limit not reached); a plateau
+    **below** N − `b_max` − 2 MiB in K2–K5 (the cap is not what binds; for example resets — check the JN log for
+    "out of sync" / "Initializing edits cache"); K0 grows like K2–K4 (instrument, as B3g); a JN OOM or a run that stops
+    before its rounds end.
+- **D1 (runbook defect fix, 2026-11-25, run 1, cluster tier; B3e step 6).** Step 6 does not say when the baseline is
+  taken. Taken 5 s after the transition (cluster attempt 1, K1), it held about 7.9 MB of live `byte[]` that were gone
+  by round 10 and never came back (baseline `[B` 10 777 952 B, then 3 728 592, 2 858 376, 2 846 152 B), so a `Δ[B` against
+  it would be offset by about −7.9 MB in every run. Fix: after the transition, take a pre-baseline sample every 30 s
+  (up to 10) and take the baseline once two consecutive pre-samples agree within 1 MiB. B3f, B3g, AM8 and AM9 are
+  unchanged; the cluster tier restarted from K1. This defect was found from a reading; it changes when the reference
+  point is taken, not any prediction or band.
+- **AM10 (B3d, B3f, B3g: "no row fits", 2026-11-25, written after cluster attempt 2's K1–K3 readings and its K3 heap
+  dump; the cluster tier restarts from K1 as attempt 3).** What was seen: K2's `Δ[B` was flat at about 12.9 MiB
+  (1.61 × N) from round 10 to the end, while `ΔEntry` stayed at 81–91 (N / `b` = 82), so B3h's cross-check failed
+  (`Δ[B` / `b` ≈ 133). The K3 heap dump (B3d's optional dump, parsed by the harness `hprof_cache.py` because MAT is not on
+  the node) gave a cache payload of 67 026 460 B ≤ N in 657 entries, equal to `totalSize`, and outside the cache one live
+  5 203 919 B `byte[]` held by a protobuf `ByteString`, the `getJournaledEdits` response copy (`Journal.java:779-785`,
+  A3 e). B3g's "plateau well above N" row reads that as cache heap above N, which the dump contradicts; the "supported"
+  row's band misses because `Δ[B` holds that copy. No row describes the outcome, so per the README ("No §9a row fits")
+  the table is amended and the tier starts again. Changes:
+  - **Primary observable for K2–K5 and K6:** a live heap dump (`jcmd <JN> GC.heap_dump`) after the final sample, parsed
+    for P = Σ length of the `byte[]` values reachable from `JournaledEditsCache.dataMap`, E = entries, `totalSize`, and
+    R = bytes of live `byte[]` outside the cache referenced by `ByteString`. `Δ[B` and `ΔEntry` stay as secondary
+    observables. The dump file is deleted after parsing.
+  - **Predictions:** K2–K5: P ∈ (N − `b_max`, N], P = `totalSize`, E within ±10 % of N / `b`; `Δ[B` (final) in
+    [N − `b_max` − 2 MiB, N + R + 2 MiB]. R is bounded by one response: at most min(N, the bytes of
+    `dfs.ha.tail-edits.qjm.rpc.max-txns` = 5000 transactions). K6 control: P ∈ (1 GiB − `b_max`, 1 GiB]. K6: P > 2³¹ − 1
+    at the end (about 3.7 GB), E still rising, `totalSize` wrapped (≠ P).
+  - **Rows (replace the K2–K5 rows of B3g for the verdict; the other AM9 rows stay):** P in band for K2–K5 and scaling with
+    N, `Δ[B` in its band, K1 with the WARN and no growth, K0 flat → **Confirmed — caps** (the retained response copy is
+    recorded as an overshoot outside the cap). P > N in any of K2–K5 → **Refuted — does not cap**. P in band but `Δ[B`
+    above N + R + 2 MiB → **Not confirmed** (unattributed heap). P < N − 2·`b_max` in any of K2–K5 → **Not confirmed**
+    (the cap is not what binds). K6: P > 2³¹ − 1 with E rising and the control within its band → overflow bypass
+    confirmed on a real JN (Effect `caps only on some paths (bypass)`); K6 P ≤ 2³¹ − 1 at the end → overflow analysis
+    wrong at the cluster tier.
+
 ### B2. Unit tier
 
-**B2a. Environment and build.**
+**B2a. Environment and build.** [AM1]
 
 - JDK 8, Maven 3.3+, on a host with at least 8 GB free RAM for U4.
 - Copy the tree to local disk, outside every shared or repository path: `rsync -a ~/hadoop-3.4.2/ /mydata/<you>/hadoop-u/`, then `cd` into it.
@@ -103,7 +193,7 @@ Sub-claim, expected to show the cap failing: with `capacity = Integer.MAX_VALUE`
   - With the 1 GiB control, 1024 batches fill it exactly. After that each store evicts one batch.
   - With `Integer.MAX_VALUE`: after 2047 batches `totalSize = 2047 × 2^20 = 2 146 435 072`. Batch 2048 gives `totalSize + 2^20 = 2^31`, which wraps to −2^31, so nothing is evicted.
 
-**B2d. Observables and instruments.** After every `storeEdits` call, read by reflection:
+**B2d. Observables and instruments.** [AM2] After every `storeEdits` call, read by reflection:
 
 - `totalSize`;
 - `dataMap.size()`;
@@ -112,7 +202,7 @@ Sub-claim, expected to show the cap failing: with `capacity = Integer.MAX_VALUE`
 
 Keep the maximum `totalSize` seen and the final values. Capture the `:283` WARN with `GenericTestUtils.LogCapturer.captureLogs(Journal.LOG)`. For the actual retained heap, optional for U1 at 1 MiB and U4: pause the test (`Thread.sleep` behind a system property) and run `jcmd <surefire-pid> GC.class_histogram`. Read the bytes in `[B`, the instance count of `java.util.TreeMap$Entry`, and the bytes in `java.lang.Long`. Not observable here: the IPC and protobuf copies, because there is no RPC in this tier.
 
-**B2e. Procedure.**
+**B2e. Procedure.** [AM1, AM2]
 
 1. Write `TestJournaledEditsCacheCap` with four `@Test` methods, `testCumulativeCap`, `testSingleBatchBoundary`, `testDerivedDefault` and `testIntOverflowAtMaxCapacity`, as in B2b and B2c. Print one line per sample at a 1-in-100 stride, plus the final state: `capacity, calls, totalSize, entries, sumLen, maxTotalSize`.
 2. Run U1–U3: `mvn -pl hadoop-hdfs-project/hadoop-hdfs test -Dtest=TestJournaledEditsCacheCap#testCumulativeCap+testSingleBatchBoundary+testDerivedDefault`.
@@ -141,7 +231,7 @@ Keep the maximum `totalSize` seen and the final values. Capture the `:283` WARN 
     - entries == 2600 at the end, and `totalSize` stays negative to the end;
     - `[B` live bytes in the histogram are about 2.54 GiB.
 
-**B2g. Readings.**
+**B2g. Readings.** [AM9: verdict wording]
 
 | Observation | Meaning |
 |---|---|
@@ -164,7 +254,7 @@ Keep the maximum `totalSize` seen and the final values. Capture the `:283` WARN 
 
 ### B3. Cluster tier
 
-**B3a. Environment and build.**
+**B3a. Environment and build.** [AM1, AM3, AM4]
 
 - One Linux host with at least 16 GB RAM (at least 24 GB for the optional K6) and at least 15 GB of free **local** disk under `/mydata/<you>/s4/`.
 - JDK 8, from a local copy of the tag: `mvn package -Pdist -DskipTests -Dtar -Dmaven.javadoc.skip=true`. Unpack `hadoop-dist/target/hadoop-3.4.2` to `/mydata/<you>/s4/hadoop`.
@@ -213,7 +303,7 @@ Keep the maximum `totalSize` seen and the final values. Capture the `:283` WARN 
 - `HADOOP_LOG_DIR=/mydata/<you>/s4/logs/<daemon>`
 - `HADOOP_PID_DIR=/mydata/<you>/s4/pid/<daemon>`, separate per daemon because both NameNodes would otherwise share one pid file.
 
-**B3b. Knobs.** All in the JN's `hdfs-site.xml`, with `-Xmx1g` unless stated. Each knob value needs a **JN restart**. To start clean, also reformat: stop all, wipe `jn`, `nn1` and `nn2`, then format.
+**B3b. Knobs.** [AM7] All in the JN's `hdfs-site.xml`, with `-Xmx1g` unless stated. Each knob value needs a **JN restart**. To start clean, also reformat: stop all, wipe `jn`, `nn1` and `nn2`, then format.
 
 | Run | `dfs.journalnode.edit-cache-size.bytes` | Purpose |
 |---|---|---|
@@ -226,7 +316,7 @@ Keep the maximum `totalSize` seen and the final values. Capture the `:283` WARN 
 | K6 (optional) | 2147483647, JN `-Xmx6g` | Overflow bypass (A3 c). The same as the default on a heap above about 4 GiB. Control: 1073741824 with the same heap and workload. |
 | K7 (optional) | 8388608 with shallow one-transaction batches | Per-entry overhead (A3 a). |
 
-**B3c. Workload.** Everything goes through the normal client path (`hdfs dfs`) against `ns1`.
+**B3c. Workload.** [AM5] Everything goes through the normal client path (`hdfs dfs`) against `ns1`.
 
 Deep-path batches give large, predictable batches. Let `A=$(printf 'a%.0s' {1..250})`, a 250-character component; `max-component-length` is 255. Path `j` is `/w/p$j` followed by 28 levels of `/$A`, about 7 040 characters, below the 8 000 limit (`HdfsServerConstants.java:54`). One `-mkdir -p` of such a path makes one mkdirs RPC that logs about 30 MkdirOps whose paths grow by about 251 characters per level. The arithmetic: Σ (≈ 7 + 251k) for k = 1..28, plus about 50 B of op overhead each, is about **100–105 KB per batch**, all in one `logSync`.
 
@@ -250,7 +340,7 @@ For the shallow-batch run (K7), each round is `hdfs dfs -mkdir /s/d{1..2000}` (2
 
 Expected time is about 3–5 s per round (two JVM launches), so about 10 min for 120 rounds and about 1 h for K6.
 
-**B3d. Observables and instruments.**
+**B3d. Observables and instruments.** [AM6, AM10]
 
 - **Retained cache bytes:**
   - Every 10 rounds, and at the end, run `jcmd <JN pid> GC.class_histogram`. It forces a full GC, so it reports live objects. From it, record:
@@ -269,7 +359,7 @@ Expected time is about 3–5 s per round (two JVM launches), so about 10 min for
 
 Not directly observable: which `byte[]` objects belong to the cache. `Δ[B` is the proxy, and the `TreeMap$Entry` count cross-checks it. To attribute exactly, take an optional `jcmd <pid> GC.heap_dump` at the end of K3 and inspect the retained size of `JournaledEditsCache.dataMap` with Eclipse MAT.
 
-**B3e. Procedure (per run).**
+**B3e. Procedure (per run).** [AM4, AM6, D1]
 
 1. Write both configuration directories as in B3a, with the run's knob in the JN's `hdfs-site.xml`. Remove and recreate `/mydata/<you>/s4/{jn,nn1,nn2,tmp,logs,pid}`.
 2. `hdfs --config conf-nn1 --daemon start journalnode`. Check the JN log for "Enabling the journaled edits cache with a capacity of bytes: N" and record N. K0 has no such line.
@@ -281,7 +371,7 @@ Not directly observable: which `byte[]` objects belong to the cache. `Δ[B` is t
 8. Check correctness: `hdfs --config conf-nn2 haadmin -getServiceState nn2` reports `standby`, and the nn2 web UI shows the last applied txid equal to the JN's `LastWrittenTxId`.
 9. Stop and clean up as in B4. Next run.
 
-**B3f. Predictions, stated before running.**
+**B3f. Predictions, stated before running.** [AM8: tolerances; AM10]
 
 The batch size `b` from JMX is about 100–105 KB.
 
@@ -299,7 +389,7 @@ The batch size `b` from JMX is about 100–105 KB.
 
 For K2–K5, `Δ[B` grows linearly while edits written < N and then stays flat, within ± one batch, for the rest of the run.
 
-**B3g. Readings.**
+**B3g. Readings.** [AM9: verdict wording and added rows; AM10]
 
 | Observation | Meaning |
 |---|---|
@@ -360,4 +450,22 @@ For K2–K5, `Δ[B` grows linearly while edits written < N and then stays flat, 
 
 ## D. Stage-4 feedback
 
-none yet
+**2026-11-25, stage 4 run 1 (node `pc72`; results: `results/dfs.journalnode.edit-cache-size.bytes-storeEdits-capacity--autonomous.md`).**
+Unit **Confirmed — caps**; cluster **Confirmed — caps**; overflow sub-claim **confirmed at both tiers**. Effect:
+`caps only on some paths (bypass)`. Outcome class: **true positive**.
+
+- Unit: `totalSize` ≤ C at every call for C = 4096, 65 536, 1 048 576 (finals within one ~750 B batch below C); the `:283`
+  boundary is strict (`L` = 14 892 stored at `capacity = L`, refused with the WARN and an empty cache at `L − 1`); the
+  derived default equals `(int)(maxMemory × f)`; at `capacity = Integer.MAX_VALUE` `totalSize` wraps to −2³¹ at call 2048
+  and all 2600 × 1 MiB batches stay cached (2.54 GiB), while the 1 GiB control holds 1024.
+- Cluster (attempt 3, after AM10): heap-dump cache payload P = 8 326 392, 67 026 460, 268 417 895 and 477 302 902 B for
+  N = 8, 64, 256 MiB and the derived default 477 364 224 B (each within one ~102 KB batch below N, equal to `totalSize`);
+  K1 (64 KiB) refused all 6000 deep batches with the WARN and held nothing; K0 (cache off) flat. K6: with 2147483647 and
+  a 6 GiB heap the JN kept every batch it was sent (38 269 entries, 3 902 933 573 B, `totalSize` wrapped to
+  −392 033 723); the 1 GiB control held 1 073 671 081 B.
+- Beyond the cap (recorded as overshoots, A3): one `getJournaledEdits` response copy (`Journal.java:779-785`) stays live
+  after the RPC — 5.2–8.5 MB here, bounded by min(N, 5000 transactions) — so live JN `byte[]` sits at P + R; the per-entry
+  `TreeMap$Entry` + `Long` + header is about 10 % at ~780 B batches and 0.08 % at ~102 KB batches.
+- For stage 3: B3f/B3g's `Δ[B` predictions did not allow for the retained response copy, and B3d's attribution needs a
+  heap dump (AM10); async edit logging splits a `mkdirs` into several batches (AM3); the baseline needs a settle period
+  (D1); K5's "470–500 MiB" is 477 MB = 455 MiB.

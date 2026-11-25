@@ -1,0 +1,47 @@
+RULE lister list size
+CLASS org.apache.cassandra.db.Directories$SSTableLister
+METHOD list(boolean)
+AT EXIT
+IF true
+DO traceOpen("d", "/mydata/jingsong-cass-s4/o117/logs/diag-trace.txt"); traceln("d", "O117DIAG lister.list(" + $1 + ") -> " + $!.size() + " " + $!.keySet())
+ENDRULE
+
+RULE verify exception
+CLASS org.apache.cassandra.db.SSTableImporter
+METHOD verifySSTableForImport
+AT EXCEPTION EXIT
+IF true
+DO traceOpen("d", "/mydata/jingsong-cass-s4/o117/logs/diag-trace.txt"); traceln("d", "O117DIAG verify threw for " + $1); traceStack("O117DIAG ", "d")
+ENDRULE
+
+RULE verify enter
+CLASS org.apache.cassandra.db.SSTableImporter
+METHOD verifySSTableForImport
+AT ENTRY
+IF true
+DO traceOpen("d", "/mydata/jingsong-cass-s4/o117/logs/diag-trace.txt"); traceln("d", "O117DIAG verify " + $1)
+ENDRULE
+
+RULE current descriptors
+CLASS org.apache.cassandra.db.SSTableImporter
+METHOD importNewSSTables
+AT INVOKE java.util.HashSet.<init>
+IF true
+DO traceOpen("d", "/mydata/jingsong-cass-s4/o117/logs/diag-trace.txt"); traceln("d", "O117DIAG importNewSSTables HashSet init")
+ENDRULE
+
+RULE filter call
+CLASS org.apache.cassandra.db.Directories$SSTableLister
+METHOD filter
+AT ENTRY
+IF true
+DO traceOpen("d", "/mydata/jingsong-cass-s4/o117/logs/diag-trace.txt"); traceln("d", "O117DIAG filter(" + $1 + ") filtered=" + $0.filtered + " paths=" + java.util.Arrays.toString($0.dataPaths))
+ENDRULE
+
+RULE unreadable
+CLASS org.apache.cassandra.db.DisallowedDirectories
+METHOD isUnreadable
+AT EXIT
+IF true
+DO traceOpen("d", "/mydata/jingsong-cass-s4/o117/logs/diag-trace.txt"); traceln("d", "O117DIAG isUnreadable(" + $1 + ") -> " + $!)
+ENDRULE

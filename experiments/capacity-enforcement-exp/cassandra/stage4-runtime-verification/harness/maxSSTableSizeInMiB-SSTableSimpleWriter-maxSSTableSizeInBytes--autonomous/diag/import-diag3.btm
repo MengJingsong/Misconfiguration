@@ -1,0 +1,7 @@
+RULE fromFile throws
+CLASS org.apache.cassandra.io.sstable.Descriptor
+METHOD fromFileWithComponent(org.apache.cassandra.io.util.File, boolean)
+AT EXCEPTION EXIT
+IF $1.toString().contains("/gen/out/") && $1.toString().endsWith("Data.db")
+DO traceOpen("d", "/mydata/jingsong-cass-s4/o117/logs/diag-trace3.txt"); traceln("d", "O117DIAG threw for " + $1 + " : " + $^); $^.printStackTrace(new java.io.PrintStream(new java.io.FileOutputStream("/mydata/jingsong-cass-s4/o117/logs/diag-trace3.txt.stack", true)))
+ENDRULE

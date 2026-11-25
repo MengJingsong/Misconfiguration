@@ -147,6 +147,13 @@ once, each holding out-of-order (pending) data:
 - Use the surefire JVM options from the module (`-Xmx` as configured by the build). Add
   `-DargLine="-Xmx1g"` if needed.
 
+> **Amendment 2026-11-25 (stage-4 audit, before run 1; B2f/B2g unchanged).** B2a as run on the stage-4 nodes:
+> copy the tree with `experiments/capacity-enforcement-exp/hadoop/stage4-runtime-verification/jingsong/copy-source.sh
+> /mydata/jingsong-s4/nfs.max.open.files-put-maxStreams-run1/src`; no `-am install` (every 3.4.2 module is already in
+> `~/.m2`); run `mvn -B -o test -pl hadoop-hdfs-project/hadoop-hdfs-nfs -Dtest=TestMaxOpenFilesMemory
+> -Dmaven-surefire-plugin.argLine=-Xmx1g`. `-DargLine` has no effect here, because `hadoop-project/pom.xml:2469` sets the
+> surefire `<argLine>` to `${maven-surefire-plugin.argLine}`. Instruments: `harness/nfs.max.open.files-put-maxStreams--autonomous/`.
+
 **B2b. Knobs.** `config.setInt(NfsConfigKeys.DFS_NFS_MAX_OPEN_FILES_KEY, K)` for K ∈ {8, 32, 128},
 set before `new Nfs3(config)`, one test method (fresh MiniDFSCluster) per value. M = 64 files in
 every run:
@@ -156,6 +163,12 @@ every run:
 
 Also set `nfs.dump.dir` to a fresh temp dir under `target/` and keep `nfs.stream.timeout` at its
 600000 ms default, so the idle reaper cannot remove streams during the run.
+
+> **Amendment 2026-11-25 (stage-4 audit, before run 1).** Two arms are added, both with M = 64 and run in the same JVM
+> as further methods (fixed order K = 8, 32, 128, default, 8-null):
+> - **K = default**: the key is left unset, so the Java default 256 applies (A1). The audit requires the default among the
+>   values; 256 > M, so this arm does not bind and is predicted to read like K = 128.
+> - **K = 8, chunk = 1 B**: the B2h null-workload control, made a fixed arm (same writes at offset 1 MiB, 1-byte payload).
 
 **B2c. Workload.**
 1. Get the root handle: `new FileHandle(client.getFileInfo("/").getFileId(), Nfs3Utils.getNamenodeId(config))`.
@@ -194,6 +207,20 @@ The JUKEBOX status is not visible with a `null` channel (`Nfs3Utils.java:140-145
 rejection from (b) instead, and from log lines `Can't add new stream` / `Can't add more stream`
 (count them with a log4j appender or by grepping surefire output).
 
+> **Amendment 2026-11-25 (instruments only).** (g) Each WRITE is sent with a fresh Netty `EmbeddedChannel` instead of a
+> `null` channel, and the reply written to it (record mark, RPC header, then the NFS status) is decoded. This makes the
+> `NFS3_OK` / `NFS3ERR_JUKEBOX` status of every write visible, which is direct evidence of the disallow branch. (h) The
+> `Can't add new stream` / `Can't add more stream` / `Evict stream ctx` / `Maximum open streams is` log lines are counted per
+> method with a log4j appender (the module has no test `log4j.properties`). (e) is also taken before phase 1, so the
+> stream bundles' own heap (phase 1) is reported beside the payload delta (phase 2).
+
+> **Fix 2026-11-25 (runbook defect found in unit run 1, attempt 2; B2f/B2g unchanged, unit tier restarted).** Observable
+> (d) as written cannot see the streams: a `DataStreamer` thread gets the name `DataStreamer for file …` only in
+> `initDataStreaming()` (`DataStreamer.java:663-665`) or `endBlock()` (`:678-680`), that is, once a block pipeline exists.
+> A stream that holds only pending out-of-order data never sets up a pipeline, so its thread keeps the default `Thread-N`
+> name and the prefix count reads 0 at every K. (d) is now: live threads whose class is `org.apache.hadoop.hdfs.DataStreamer`
+> (the named-prefix count is still printed, as `namedPrefix`).
+
 **B2e. Procedure.**
 1. Create the test with three methods `testK8`, `testK32`, `testK128` sharing a helper `run(K)`
    that does B2c and prints `K, maxSize, cachedCount, pendingBytes, streamerThreads, heapDelta,
@@ -213,6 +240,16 @@ rejection from (b) instead, and from log lines `Can't add new stream` / `Can't a
 
 Heap delta should be roughly linear in min(K, M), with a slope of about 1 MiB per held stream, and
 `size()` should never exceed K.
+
+> **Amendment 2026-11-25 (stage-4 audit, before run 1).** Predictions for the added arms:
+>
+> | K | max `size()` | cached after phase 2 | pending bytes | DataStreamer threads | heap delta | dump files | write OK / JUKEBOX |
+> |---|---|---|---|---|---|---|---|
+> | default (256) | 64 | 64 | 62 914 560 | 64 | ≈ 60 MiB (50–75 MiB) | 0 | 64 / 0 |
+> | 8, chunk 1 B | 8 | 8 | 8 | 8 | ≈ 0 (well below the K = 8 delta) | 0 | 8 / 56 |
+>
+> For K = 8 and 32 the WRITE statuses are predicted min(K, M) OK and M − K JUKEBOX; for K = 128, 64 / 0. B2g applies to the
+> default arm as to K = 128 (the "no cap binding" control).
 
 **B2g. Readings.**
 
@@ -283,10 +320,31 @@ Heap delta should be roughly linear in min(K, M), with a slope of about 1 MiB pe
   - Arguments: `M chunkBytes offset`.
   - Prints per-file `create_status write_status`. `NFS3_OK=0`, `NFS3ERR_JUKEBOX=10008`.
 
+> **Amendment 2026-11-25 (stage-4 audit, before run 1; B3f/B3g unchanged).** B3a/B3e as run on the stage-4 nodes:
+> no rebuild; the distribution is a copy of the node's `/mydata/jingsong-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2`
+> (built 2026-11-24 from the same pinned source). `start-dfs.sh` is not used (no ssh to localhost on these nodes):
+> NameNode and DataNode start with `hdfs --daemon start …`. The gateway uses **Option C** (the host's rpcbind is left
+> alone): `HADOOP_CLASSPATH=<classes> HADOOP_CLIENT_OPTS="-Xms1g -Xmx1g" hadoop --config $HADOOP_CONF_DIR NfsLauncher`,
+> whose stdout is the gateway log of that arm; it is stopped with `kill`. Heap after GC (B3d) is read as the sum of the
+> `used` values of `PSYoungGen` and `ParOldGen` in `jcmd <pid> GC.heap_info`, taken right after `GC.class_histogram`
+> (a full GC). `OpenFileCtxCache` is logged at DEBUG so `Evict stream ctx` lines are visible. Script:
+> `harness/…/cluster-run.sh`.
+
+> **Fix 2026-11-25 (runbook defect found in cluster run 1, attempt 1, before any reading; B3f/B3g unchanged, cluster tier
+> restarted).** `hadoop --config <dir> <LauncherClass>` refuses a class in the default package
+> (`hadoop-functions.sh` `hadoop_validate_classname`: "is not COMMAND nor fully qualified CLASSNAME"), so the gateway did not
+> start. The launcher is now `s4.NfsLauncher` (same five lines, in package `s4`).
+
 **B3b. Knobs.** `nfs.max.open.files` K ∈ {8, 32, 128} in `hdfs-site.xml`, with a gateway restart
 for each value (only the gateway; NN and DN stay up). Confirm the value in the gateway log line
 `Maximum open streams is K`. M = 64 files, chunk 983040 B at offset 1048576 in all runs. K = 128 is
 the no-cap control.
+
+> **Amendment 2026-11-25 (stage-4 audit, before run 1).** Two arms are added after K = 128, each with a gateway restart:
+> **K = default** (the key removed from `hdfs-site.xml`; expect `Maximum open streams is 256`), and the step-8
+> **K = 8, chunk = 1 B** control, which is no longer optional. Predictions: default as the K = 128 row of B3f (64 / 64 /
+> 64 / 0 JUKEBOX / 64 / ≈ 60 MiB / 0); 8-null as the K = 8 row except heap delta ≈ 0 (well below the K = 8 delta).
+> B3g applies to the default arm as to K = 128.
 
 **B3c. Workload.**
 1. Run `java -cp "$(hadoop classpath):loadclient.jar" NfsStreamLoad 64 983040 1048576`. Files are
@@ -316,6 +374,11 @@ Each run lasts about 3 min.
 
 The `openFileMap.size()` operand cannot be read directly in the cluster tier. The
 `OpenFileCtx` instance count from the histogram and the DataStreamer thread count stand in for it.
+
+> **Fix 2026-11-25 (same defect, applied before the cluster tier ran; B3f/B3g unchanged).** "Live output streams" is
+> counted as the threads whose `jstack` stack contains `at org.apache.hadoop.hdfs.DataStreamer.run(`, beside the live
+> `org.apache.hadoop.hdfs.DataStreamer` instances in the class histogram; the `"DataStreamer for file` name count is kept as
+> a secondary reading (expected 0 for streams with no pipeline).
 
 **B3e. Procedure.**
 1. Format and start: `hdfs namenode -format -nonInteractive`, `hdfs --daemon start namenode`,
@@ -412,4 +475,22 @@ growth follows the heap delta. Heap delta is close to linear in min(K, 64).
 
 ## D. Stage-4 feedback
 
-none yet
+**2026-11-25, stage 4 run 1 + self-check (Jingsong's share, node `pc75`):** results file
+`results/nfs.max.open.files-put-maxStreams--autonomous.md` (drafted at `~/writeup-hadoop/out/o18/results.md`, not yet
+committed). **Unit: Confirmed — caps. Cluster: Confirmed — caps. Outcome class: true positive.**
+
+- Unit (B2, MiniDFSCluster): max `size()` = cached = DataStreamer threads = 8 / 32 / 64 / 64 for K = 8 / 32 / 128 /
+  default (256); WRITE replies OK/JUKEBOX 8/56, 32/32, 64/0, 64/0; pending bytes exactly min(K, 64) × 983 040; heap delta
+  after GC 9.94 / 30.07 / 60.14 / 60.06 MiB; 1-byte control 0.71 MiB; dump files 0; no eviction.
+- Cluster (B3, real gateway, Option C launcher, 1 GiB fixed heap): `OpenFileCtx` = `WriteCtx` = `DFSOutputStream` =
+  DataStreamer threads = `listOpenFiles` = 8 / 32 / 64 / 64 at every sample; client write status 0/10008 = 8/56, 32/32,
+  64/0, 64/0; `Can't add new stream` = JUKEBOX count, `Can't add more stream` = 64 − min(K, 64); heap-after-GC delta at
+  +45 s 8.73 / 31.23 / 60.42 / 61.16 MiB (`[B` +7.63 / +30.24 / +60.39 / +60.39 MiB); 1-byte control +1.45 MiB; dump 0.
+- Runbook defects fixed (dated fixes above): B2a `-DargLine` has no effect (amendment); B2d/B3d the `DataStreamer for file`
+  thread-name count reads 0, because a stream with no block pipeline keeps the default `Thread-N` name
+  (`DataStreamer.java:663-665,678-680`) — counted by thread class / `DataStreamer.run` frame instead; B3a Option C
+  `hadoop <class>` needs a packaged class name.
+- For stage 3: A2's "Each has a `DataStreamer` thread (`DataStreamer.java:664,680`)" is right about the thread, but those
+  lines are where it is *named*, only once a pipeline exists. The heap ratio K = 128 / K = 8 was 6.1× (unit) and 6.9×
+  (cluster), not "~8×": the payload counter and `[B` are exactly 8×; the heap delta carries a fixed 1–2 MiB offset. The
+  default (256) was never driven to its limit (M = 64).

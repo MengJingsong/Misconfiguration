@@ -454,4 +454,59 @@ Relations predicted:
 
 ## D. Stage-4 feedback
 
-none yet
+**Stage-4 audit amendments (2026-11-25, stage-4 session working as Jingsong, before any reading of run 1).** They change no
+claim, prediction or conclusions row of B1, B2f, B3f; they fix where and how the runbook runs and give the B2g/B3g words a
+number. B2f and B3f were re-derived independently before the run by simulating `calculateNewSize` with the
+`BufferedDataOutputStreamPlus` write paths (stage-4 harness `sim_b2f.py`): every B2f cell agrees exactly.
+
+- **S4-A1 (B2a, B2e, B3a, B3e, B4: where it runs).** Node `pc75` (x86_64, experiment `jason92-326665`), `RUN=/mydata/jingsong-cass-s4/o119`.
+  The Cassandra tree is `cp -a /mydata/s4/cassandra-base $RUN/cassandra` (5.0.9, already built with `ant build-test`, which
+  includes `ant jar`'s classes; `conf/` and the cited sources md5-equal to the repository's `systems/cassandra/source`), so
+  B2a's `rsync` + `ant jar` is replaced by the copy. The B2e class path also lists `$RUN/cassandra/build/lib/jars/*` after
+  `lib/*`. The probe and parser sources are the B2a/B3a listings byte for byte. Before starting the node: `ulimit -n 100000`.
+  The node is stopped by its PID file; the process check is `ps -eo cmd | grep '[C]assandraDaemon'` (stage-4 safety rule),
+  not `pgrep -f`. B2e step 8 (optional `SafeMemoryWriter` variant) is not run. The B3e step 7 control is run for every T, not
+  only unset, 64 and 1024.
+- **S4-A2 (B2g: numbers for its words).** "The table matches exactly" = every growable run's `FINAL capacity` equals its B2f
+  cell to the byte, and the number of `EXPAND` lines equals B2f's # resizes. (ii) is checked on every `EXPAND` line:
+  ratio = 2.0 exactly or `(before+count)/before`, when `before` <= T·2^20; `after` = max(floor(1.5·before), before+count) when
+  `before` > T·2^20. (v): C(200)/C(100) in [1.5, 2.25] inclusive at every T and mode. "Growth stops near T MiB" (row 2) = some
+  T in {16, 64, 128} with FINAL capacity <= 2·T MiB while `written` = S. "Proportional to T" (row 3) = C strictly increasing
+  over T = 0, 16, 64, 128, 1024 **and** C(T)/C(1024) within ±25 % of T/1024 for T = 16, 64, 128. "Repeat identical" (step 6) =
+  the `DOUBLING`, `EXPAND` and `FINAL` lines byte-identical between the two `bytes 200` runs of each T.
+- **S4-A3 (B3g: numbers for its words).** Per query, a *burst* is the run of `JfrDob` lines on one thread between queries
+  (split at gaps > 2 s); capacity = `allocationSize − 16`; C = the largest capacity in the burst (for the fetch-100 control,
+  the largest over the query's internal pages). Row 1 holds when, for every T: all 3 recorded queries returned a 1,048,576-byte
+  value; every query's C >= 209,715,200 bytes; C agrees with B3f within ±1 MiB, or (row 8) the ratio rule holds (each
+  consecutive capacity pair >= 1 MiB: ratio 2.0 ± 0.001 while the previous capacity <= T MiB, 1.5 ± 0.001 above it, or the
+  previous + one write's remainder); the three queries' C agree within 0.1 MiB; C(64) < C(1024) < C(128); and the control's C
+  is <= 0.75 × that T's paging-off C. "At or near T MiB" (row 2) = C <= 2·T MiB for T = 16 or 64 while the query succeeds.
+  "Monotone, roughly in proportion" (row 3) = C strictly increasing over T = 0, 16, 64, 128, 1024 and C(T)/C(1024) within
+  ±25 % of T/1024 for T = 16, 64, 128. "Control does not reduce C" (row 6) = control C > 0.75 × paging-off C at T = unset, 64 or 1024.
+- **S4-D1 (B2e, runbook defect found in run 1, 2026-11-25 06:56 UTC; fix leaves B1, B2f, B2g unchanged; the unit tier
+  restarts from its beginning).** The first probe JVM (`unset`, `bytes 200`) died at the first resize with
+  `ExceptionInInitializerError` in `FileUtils.<clinit>` (`IllegalAccessException` on `jdk.internal.ref.Cleaner.clean`):
+  `DataOutputBuffer.setBuffer` touches `FileUtils`, which needs the JDK 11 module options that Cassandra's scripts pass.
+  B2e step 7's fallback (`DatabaseDescriptor.clientInitialization()`) does not address this. Fix: every probe `java`
+  command of B2e steps 3–6 also takes the non-comment lines of `conf/jvm11-clients.options`
+  (`--add-exports`/`--add-opens` and `-Djdk.attach.allowAttachSelf=true`), as `tools/bin` launchers do. The probe source is unchanged.
+- **S4-A4 (B3c, B3d, B3f GC-log line; 2026-11-25, after the unit tier and before any cluster reading; changes no B3g row).**
+  `conf/jvm11-server.options:66` sets `-XX:G1HeapRegionSize=16m`, so with `MAX_HEAP_SIZE=4G` the region size is 16 MiB and
+  the humongous threshold 8 MiB, not 2 MiB / 1 MiB as B3c/B3f assume. The secondary GC-log prediction becomes: Humongous
+  region growth during a query of at least ceil(C/16 MiB) regions (>= 14 for T=64, >= 19 for T=128). JFR still records
+  every allocation outside a TLAB, so the primary observable is unaffected; capacities below 8 MiB may or may not appear
+  (only the tail is used). The node runs with `ulimit -n 100000` (S4-A1) and is driven by one detached script whose PID is
+  kept in `/mydata/s4/DRIVER-jingsong-o119.pid`.
+
+**Stage-4 result (2026-11-25, run 1 on `pc75`, x86_64; results `~/writeup-ext/out/o119/results.md`).** Unit B2g row 1 / row 5:
+**Confirmed — does not cap.** All 20 growable probe runs (T = 0, 16, 64, 128, 1024 × bytes/rows × 100/200 MiB) gave final
+capacities equal to B2f to the byte, with B2f's number of resizes; every `EXPAND` step followed the x2 / x1.5 rule; C >= S in
+every run; C is not monotone in T (`rows 200`: 291.94 / 273.39 / 216.01 / 288.01 / 256.01 MiB for T = 0 / 16 / 64 / 128 / 1024);
+unset = T 64; halving S scaled C by 1.5–2.25; repeats byte-identical; `DataOutputBufferFixed(1 MiB)` overflowed at 1,048,576.
+Cluster B3g row 1 / row 5: **Confirmed — does not cap.** The JFR-recorded `LocalDataResponse.build` buffer for the 200 x 1 MiB
+page peaked at 216.01 / 291.94 / 273.38 / 216.01 / 288.01 / 256.01 MiB for T = unset / 0 / 16 / 64 / 128 / 1024 (3 identical
+queries each, all within 0.01 MiB of B3f), with the ratio pattern of B3f, while the fetch-100 positive control lowered it to
+144.00 / 129.75 / 121.50 / 144.00 / 128.00 / 128.00 MiB per internal page. Runbook defect S4-D1 (JDK 11 module options for
+the probe JVM) was fixed and the unit tier restarted. Outcome class: **true negative**. No section of the trace is refuted.
+Doc note: `cassandra.DOB_DOUBLING_THRESHOLD_MB` only switches `DataOutputBuffer` growth from x2 to x1.5; it is not a memory
+limit, and raising or lowering it can raise or lower the peak buffer for the same payload by up to about 1.35x.

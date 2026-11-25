@@ -20,8 +20,8 @@
 Select by the `band` column of `bands.csv`; every unit is in exactly one person's share. The
 Cassandra material below this section is unchanged and still applies to the Cassandra work.
 
-- **Progress (2026-11-24):** orders 1–45 written up; 1–5, 19 and 21 closed at stage 4 (and stage 5 done for all
-  seven), the other 38 wait for stage 4 (see the Hadoop log below). Next stage-3 unit: order 46. Stage-4 environment: `pc91`, `pc82`, `pc72`, `pc75`, `pc99`
+- **Progress (2026-11-25):** orders 1–45 written up; orders 1–25 less 6, 14 and 22 closed at stage 4 (22 cases) and
+  stage 5 done for all 22; 6, 14, 22 (blocked by `pc99`'s stale node lock) and 26–45 (23) wait for stage 4 (see the Hadoop log below). Next stage-3 unit: order 46. Stage-4 environment: `pc91`, `pc82`, `pc72`, `pc75`, `pc99`
   ([`environment.md`](experiments/capacity-enforcement-exp/hadoop/stage4-runtime-verification/jingsong/environment.md);
   the 2026-11-06 nodes `pc41`, `pc39`, `pc29` are gone).
   Your folders (do not write to the other person's):
@@ -42,6 +42,55 @@ Cassandra material below this section is unchanged and still applies to the Cass
   counts with unclear per-object size.
 
 ### Hadoop log (newest first)
+
+- **2026-11-25 (deferred stage 4/5 of Hadoop batch 1 of 2026-11-24, orders 6–25; filed 2026-11-25)** — The 18 orders
+  that waited after the API-usage interrupt were re-run (one fresh agent per case, one node per case, node lock
+  `/mydata/s4/NODE-LOCK`), then stage 5 for the finished ones. **Stage 4: 15 finished**, filed: results in
+  `jingsong/results/<stem>.md`, harness in `jingsong/harness/<stem>/` (raw logs stay in `~/writeup-hadoop/out/o<order>/run1/`
+  and in `/mydata/jingsong-s4/<stem>-run1/` on the node), each case file replaced by its amended copy (dated amendments
+  plus section D) with a new `_INDEX.md` §4 sha256 row, `_INDEX.md` §1 and `queue.csv` `stage4` set to the outcome class
+  (the duplicate order-7 row in §1 was removed):
+
+  | Order | Case (stem) | Node | Unit | Cluster | Outcome class |
+  |---|---|---|---|---|---|
+  | 7 | `DEFAULT_MAX_LEN-readFields-maxLength` | `pc82` | Confirmed — caps | Confirmed — caps | true positive |
+  | 8 | `ipc.server.max.response.size-setupResponse-maxRespSize` | `pc91` | Confirmed — does not cap | Confirmed — does not cap | true negative |
+  | 9 | `PriorityQueue_maxSize-insert-maxSize` | `pc75` | Confirmed — does not cap | Confirmed — does not cap | true negative |
+  | 10 | `dfs.data.transfer.max.packet.size-initWritePacketSize-…` | `pc72` | Confirmed — does not cap | Confirmed — does not cap | true negative (**your call**, below) |
+  | 11 | `dfs.client.socketcache.capacity-putInternal-capacity` | `pc82` | Confirmed — does not cap | Confirmed — does not cap | true negative |
+  | 12 | `dfs.client.mmap.cache.size-demoteOldEvictableMmaped-…` | `pc91` | Confirmed — caps | Confirmed — caps | true positive (keeps max(S−1, 0), one fewer than documented) |
+  | 13 | `dfs.client.write.byte-array-manager.count-limit-recycle-maxAllocated` | `pc75` | Confirmed — caps | Not confirmed | weak true positive (frozen `[B` bands missed by 0.5–0.6 MiB; pool exactly L) |
+  | 15 | `DUMP_WRITE_WATER_MARK-waitForDump-…-2` | `pc72` | Confirmed — caps | Confirmed — caps | true positive (dump-failure bypass seen) |
+  | 16 | `DUMP_WRITE_WATER_MARK-run-DUMP_WRITE_WATER_MARK` | `pc91` | Confirmed — caps (bypass U7) | Confirmed — caps per file | true positive |
+  | 17 | `DUMP_WRITE_WATER_MARK-run-…-2` | `pc82` | Confirmed — caps | Confirmed — caps | true positive |
+  | 18 | `nfs.max.open.files-put-maxStreams` | `pc75` | Confirmed — caps | Confirmed — caps | true positive |
+  | 20 | `dfs.journalnode.edit-cache-size.bytes-storeEdits-capacity` | `pc72` | Confirmed — caps (bypass) | Confirmed — caps (bypass) | true positive (int overflow at capacity = Integer.MAX_VALUE keeps every batch: 3.9 GB at -Xmx6g) |
+  | 23 | `dfs.datanode.max.locked.memory-addNewPendingCached-pendingCapacity` | `pc82` | Confirmed — caps | Confirmed — caps | true positive |
+  | 24 | `dfs.namenode.block-placement.min-blocks-for.write-chooseStorage4Block-requiredSize` | `pc91` | Confirmed — caps | Confirmed — caps | true positive |
+  | 25 | `dfs.datanode.du.reserved-chooseStorage4Block-remaining` | `pc75` | Confirmed — caps | Confirmed — caps | true positive |
+
+  **Blocked (3): orders 6, 14, 22** waited 60 min for `pc99`'s node lock, held by `jingsong-o70-stage4` since 2026-11-24
+  21:54 MST (a Cassandra extension session that returned no result); nothing ran. The lock looks stale (no process, no
+  `o70` folder on `pc99`, checked 2026-11-25 09:10 EST); confirm and remove it (`ssh pc99 'rm -rf /mydata/s4/NODE-LOCK'`).
+  Their audits are done and harnesses written, outside the repo in `~/writeup-hadoop/out/o6/`, `o14/`, `o22/` (case files
+  not amended in the repo; 14's audit found two fixes to make as dated amendments: a 40 s hold, shorter than
+  `nfs.stream.timeout`, and freeing the blocked writer with counter 0 + `notifyAll`). CSV/index:
+  `waiting (stage-4 attempt 2026-11-25 blocked: …)`. **Your calls:** order 10 is filed `does not cap` (first packet buffer
+  at the configured size; packets 2..n are clamped); read as "caps only on some paths (bypass)" it becomes a **false
+  negative** (results §8). Order 13's cluster tier could become Confirmed if the band misses are accepted.
+  Environment: `pc91` and `pc82` now also have the native-build packages; order 13's 2026-11-24 run folder is still on
+  `pc99` (`environment.md`). **Stage 5 for the 15** (one autonomous and one guided agent each): 75 candidates
+  `hadoop:OC-24`–`OC-98` (autonomous 36, guided 39; open) in `phase1-oom-candidates.md` (Clue = the agent's holder),
+  full text in `runs/p1-hadoop-2026-11-24.md` (new section "Orders 6–25 … deferred stage 5"), 30 `coverage.csv` lines;
+  orders 24 and 25 (disk-only placement checks) found none. Notable: the NFS gateway charges a WRITE's `count`, not its
+  opaque length, never enforces `nfs.wtmax`, and allocates the client-declared XDR length before any check (orders
+  15–18); a dump failure turns the per-file cap off for good (15–18, seen in stage 4); the IPC server's per-connection
+  `responseQueue` has no bound (order 8) and every connection allocates its claimed 128 MiB frame before auth (7);
+  `Token.readFields` allocates an uncapped vint length in the RM's AM launcher, whose OOM halts the RM (7); the
+  JournaledEditsCache default capacity saturates to Integer.MAX_VALUE on JN heaps above ~4 GiB, i.e. the measured
+  overflow bypass at shipped defaults (20); idle short-circuit mmaps are capped by entries, ~32 GiB of mapped blocks at
+  defaults (12); each DataNode write xceiver may hold a 16 MiB packet buffer, 4096 of them (10). **Next:** clear `pc99`,
+  then stage 4 for 6, 14, 22 and 26–45, then stage 5 for them; stage 3 continues at order 46.
 
 - **2026-11-24 (Hadoop batch 2 of 2026-11-24: stage 3 for orders 26–45, band A; stage 5 for orders 1–5)** —
   **Stage 3 (filed):** 20 autonomous case files in `jingsong/cases/`, `_INDEX.md` §1 and §4 (sha256 at filing),
@@ -676,3 +725,52 @@ argument of `RefCountedMemory.copy` that nothing calls) typed `runtime-queried` 
 
 **Next:** stage 4 for these 20 and the 18 of batch 1 once the nodes are free, then stage 5 for them; band C continues
 after order 239 (273 rows left, orders 240–515 less the existing cases 389, 390, 415).
+
+## Cassandra extension set, batch 1 of 2026-11-24: deferred stage 4/5 (filed 2026-11-25)
+
+**Stage 4.** The 18 waiting cases were re-run from 2026-11-24 evening (one fresh agent per case, one node per case,
+node lock `/mydata/s4/NODE-LOCK`) on the UMass x86 nodes and `ms0625` (`environment.md` §7, 2026-11-25 line). **13
+finished**, filed: results in `results/<stem>.md`, harness in `harness/<stem>/` (raw logs stay in
+`~/writeup-ext/out/o<order>/` and in `/mydata/jingsong-cass-s4/o<order>/` on the node), each case file replaced by its
+amended copy (dated amendments plus section D) with a new `_INDEX.md` §4 sha256 row, `_INDEX.md` §1 and the CSV `stage4`
+set to the outcome class:
+
+| Order | Case (stem) | Node | Unit | Cluster | Outcome class |
+|---|---|---|---|---|---|
+| 72 | `max_log_size-onreleased-bytesinstorefiles` | `ms0625` | Confirmed — caps | Not confirmed | weak true positive (on-disk bound held; length drift over-deletes) |
+| 96 | `codec_cache_maximum_weight-defaultCacheBuilder-cache_weight` | `pc72` | Confirmed — does not cap | Confirmed — does not cap | true negative |
+| 100 | `commitlog_max_outstanding_replay_count-handlemutation-futures_size` | `pc82` | Confirmed — caps | Confirmed — caps | true positive |
+| 114 | `maxSSTableSizeInMiB-withMaxSSTableSizeInMiB-size` | `pc75` | Confirmed — caps (bypass: delete-only) | Confirmed — caps (client process) | true positive |
+| 115 | `default_buffer_size_in_mib_for_unsorted-build-maxsstablesizeinmib` | `pc91` | Confirmed — caps | Not confirmed (C16 peak 37.7 MiB vs band 14–37) | weak true positive |
+| 117 | `maxSSTableSizeInMiB-SSTableSimpleWriter-maxSSTableSizeInBytes` | `pc82` | Confirmed — caps | Confirmed — caps | true positive |
+| 119 | `dob_doubling_threshold_mb-calculatenewsize-capacity` | `pc75` | Confirmed — does not cap | Confirmed — does not cap | true negative |
+| 120 | `max_buffer_size-roundbuffersize-size` | `pc91` | Confirmed — caps | Confirmed — caps | true positive (per reader; total = K x cap) |
+| 124 | `frameencoder_payload_max_size-payload-max_size` | `pc72` | Confirmed — does not cap | Confirmed — does not cap | true negative |
+| 127 | `parent_repair_status_cache_size-ActiveRepairService-repairStatusByCmd` | `pc82` | Confirmed — caps | Confirmed — caps | true positive (~11.5 KB per entry, not 100 B) |
+| 132 | `max_framed_payload_size-flusher-normal_chunk_size` | `ms0625` | Confirmed — does not cap | Confirmed — does not cap | true negative |
+| 133 | `native-write-buffer-water-mark-initializechannel-pendingoutboundbytes` | `pc75` | Not confirmed | Not confirmed | undetermined (each tier missed one frozen control threshold; main readings say does not cap) |
+| 134 | `default_max_capacity-protocolversiontracker-capacity` | `pc72` | Confirmed — caps | Confirmed — caps | true positive |
+
+**Waiting (5).** 116 and 125 waited 60 min for `pc99`'s node lock (held by `jingsong-o70-stage4`, 2026-11-24 21:54 MST,
+apparently stale; see the Hadoop log of 2026-11-25) and did not run; their audits and harnesses are ready in
+`~/writeup-ext/out/o116/` and `o125/` (case files not amended in the repo). 57, 64 and 70 returned no result from the
+deferred run (70's session is the one that left the `pc99` lock; there is no `o70` folder on `pc99`); 57's draft from
+2026-11-24 is still in `~/writeup-ext/out/o57/`. CSV/index `stage4 = waiting (…)` with the reason. **Your calls:** 115's
+cluster tier becomes Confirmed (class true positive) if the 0.7 MiB band miss is accepted; 133 needs a re-specified gate
+allowance and client-reads window before a rerun (its section D). Leftovers: small logs (0.6–24 MB) in
+`/mydata/jingsong-cass-s4/o<order>/` on each node; `ms0625`'s `cassandra-base` has no source tree (`environment.md`).
+
+**Stage 5.** For the 13, one autonomous and one guided agent each: 46 candidates `OC-591`–`OC-636` (autonomous 23, guided
+23; open) in `stage5-oom-clue-find/phase1-oom-candidates.md` (Clue = the agent's holder), full text in
+`runs/p1-cassandra-2026-11-24.md` (new section "Extension batch 1 … deferred stage 5"), 26 `coverage.csv` lines; only
+96's autonomous agent found none. Notable: the `CQLSSTableWriter` unsorted buffer counts serialized bytes while two
+buffers of deserialized objects are live (~10x for small cells, ~2.5–4 GiB at the 128 MiB default), deletes are not
+counted at all, and a sorted writer holds a whole partition (114, 115, 117 — likely one holder, phase 2 may merge); CQL
+v5 response frames are queued with no writability check and inbound multi-frame request buffers are never returned to
+the networking pool (stage 4 saw 64 MiB and 256 MiB stuck; 124, 132, 133); one read page is serialized into a single heap
+`DataOutputBuffer` up to 2 GiB (119); the commit-log replay byte cap counts serialized bytes (100); repair status entries
+are ~11.5 KB, ~1.15 GB at the default 100,000 (127); `chunk_length_in_kb` bypasses the 64 KiB reader-buffer cap (120); the
+FQL/audit BinLog queue weight is released before the record is written (72).
+
+**Next:** clear `pc99`'s lock, then stage 4 for 57, 64, 70, 116, 125 and batch 2's 20, then stage 5 for them; band C
+continues after order 239.

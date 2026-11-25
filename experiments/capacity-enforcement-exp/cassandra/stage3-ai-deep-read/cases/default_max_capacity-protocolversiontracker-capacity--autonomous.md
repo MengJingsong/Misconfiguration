@@ -71,6 +71,11 @@ These dwarf the tracker for live connections; the tracker is the only one that k
 - Test program (new file, only in the local copy): `/local/c509-unit/s3probe/org/apache/cassandra/transport/PvtProbe.java` — same package so it can call the package-private `addConnection`/`getAll`.
 - Compile: `javac -cp "build/classes/main:build/lib/jars/*" -d s3probe/classes s3probe/org/apache/cassandra/transport/PvtProbe.java`
 - Run: `java -Xms2g -Xmx2g -XX:+UseG1GC -cp "s3probe/classes:build/classes/main:build/lib/jars/*" org.apache.cassandra.transport.PvtProbe <capacity> <N>`
+- *Stage-4 amendment S4-A1 (2026-11-25, before any reading; B2f/B2g unchanged):* paths for the extension-set nodes: `/local/` is
+  `/mydata/jingsong-cass-s4/o134/`. The unit copy is `cp -a /mydata/s4/cassandra-base` (already built with `ant build-test`, per
+  `environment.md`) instead of `rsync` + `ant jar`; the classpath above is unchanged.
+- *Stage-4 amendment S4-A2 (2026-11-25, before any reading):* every unit run uses `-Xms4g -Xmx4g` instead of `2g`, the option the
+  note under B2c allows, applied to all arms so the JVM is identical across capacities and the MAX_VALUE second pass runs for every N.
 
 **B2b. Knobs.**
 - `capacity` ∈ {`100` (stock, via the no-arg constructor), `1000`, `Integer.MAX_VALUE` (uncapped positive control)} — the last two through reflection on the private `ProtocolVersionTracker(int)` constructor. 100 is the claim; 1000 checks the bound tracks the value; MAX_VALUE shows what the same workload does with no binding cap.
@@ -162,6 +167,10 @@ public class PvtProbe {
   - `/local/c509-uncapped` — positive control: in `src/java/org/apache/cassandra/transport/ProtocolVersionTracker.java` change line 36 to `private static final int DEFAULT_MAX_CAPACITY = 1_000_000;` (only in this copy).
 - Configuration for each copy, in its `conf/cassandra.yaml`: `cluster_name: s3probe`, `listen_address: 127.0.0.1`, `rpc_address: 127.0.0.1`, `native_transport_port: 9042`, `native_transport_allow_older_protocols: true`, `data_file_directories: [/local/s3data/data]`, `commitlog_directory: /local/s3data/commitlog`, `hints_directory: /local/s3data/hints`, `saved_caches_directory: /local/s3data/saved_caches`, `cdc_raw_directory: /local/s3data/cdc_raw` (local disk; a few hundred MB at most). Authentication stays default (`AllowAllAuthenticator`) so `STARTUP` gets `READY`.
 - JVM: `export MAX_HEAP_SIZE=1G HEAP_NEWSIZE=200M` before `bin/cassandra -f -R` (run in background with `-p /local/s3data/pid`).
+- *Stage-4 amendment S4-A1 (2026-11-25, before any reading; B3f/B3g unchanged):* `/local/` is `/mydata/jingsong-cass-s4/o134/`.
+  Both copies are `cp -a /mydata/s4/cassandra-base`; the uncapped copy then gets the line-36 edit and `ant jar`. Instrument
+  check: `javap -c -p -constants` on the no-arg constructor shows `bipush 100` (stock) and `ldc int 1000000` (uncapped) in both the
+  jar `bin/cassandra` loads and `build/classes/main`.
 - Client: a standalone raw-socket Java program `/local/s3client/StartupFlood.java` (no Cassandra classes needed):
 ```java
 import java.io.*; import java.net.*;
@@ -208,7 +217,13 @@ public class StartupFlood {
 **B3e. Procedure.** For each build (stock, then uncapped), with `C=/local/c509-<build>`:
 1. `rm -rf /local/s3data && mkdir -p /local/s3data`; start: `cd $C && MAX_HEAP_SIZE=1G HEAP_NEWSIZE=200M bin/cassandra -R -p /local/s3data/pid`; wait until `bin/nodetool status` shows `UN` and `bin/nodetool info | grep 'Native Transport active: true'`.
 2. `PID=$(cat /local/s3data/pid)`; `bin/nodetool clientstats --clear-history`; wait 30 s; `jcmd $PID GC.class_histogram > /local/s3data/h0.txt`; record `nodetool clientstats --by-protocol` → `r0.txt`.
-3. For N in 50, 100, 150, 1000, 20000 (cumulative targets on V4, using fresh addresses each step): `java -cp /local/s3client StartupFlood 4 <first> <N - previous>`; wait 10 s; `nodetool clientstats --by-protocol > r-v4-$N.txt`; `jcmd $PID GC.class_histogram > h-v4-$N.txt`.
+3. For N in 50, 100, 150, 1000, 20000 (cumulative targets on V4, using fresh addresses each step)
+   *(Stage-4 amendment S4-A3, 2026-11-25, before any reading: step 1's readiness wait is `nodetool statusbinary` = `running` and `nodetool status`
+   shows `UN` (the `environment.md` §6 rule), with `ulimit -n 100000` and a port check first; nodetool uses `-h 127.0.0.1 -p 7199`; the node
+   is started with `setsid nohup bin/cassandra -R -p …/pid`. Fresh addresses per step means `first` = the previous target (0, 50, 100, 150, 1000).
+   B3d's per-version row count is taken as the lines matching `^[0-9]+/v` grouped by their first field, which is the awk filter's intent
+   without depending on the line number of the header.)*
+   : `java -cp /local/s3client StartupFlood 4 <first> <N - previous>`; wait 10 s; `nodetool clientstats --by-protocol > r-v4-$N.txt`; `jcmd $PID GC.class_histogram > h-v4-$N.txt`.
 4. `java -cp /local/s3client StartupFlood 3 100000 1000`; same for 5 (first 200000) and 6 (first 300000); wait 10 s; record `r-all.txt`, `h-all.txt`.
 5. Repeat the 20 000-step reconnect with the **same** first 20 000 addresses on V4 once more → `r-repeat.txt` (keying by IP: count must not change).
 6. `bin/nodetool clientstats --clear-history`; record `r-clear.txt`, `h-clear.txt`.
@@ -281,4 +296,14 @@ doc/native_protocol_v5.spec (STARTUP stays unframed in v5)
 
 ## D. Stage-4 feedback
 
-none yet
+**2026-11-25, Jingsong (AI session), run on `pc72` (x86_64, UMass, experiment `jason92-326665`). Results: `~/writeup-ext/out/o134/results.md` (outside the repo).**
+- Unit tier (B2): **Confirmed — caps** (B2g row 1). After `cleanUp()`, V4 size = min(N, cap) in all 54 runs (cap 100: 50, 100, 100, 100, 100, 100;
+  cap 1000: 50, 100, 101, 1000, 1000, 1000; MAX_VALUE: = N), identical over 3 reps; per-version ≤ cap, total 400 at cap 100. Heap delta at N = 10^6:
+  cap 100 379 KB (N = 1000: 256 KB), MAX_VALUE 155.0 MB (408×). `ProtocolVersionTrackerTest` 3/3 passed.
+- Cluster tier (B3): **Confirmed — caps** (B3g row 1). Stock: V4 rows 50, 100, 100, 100, 100; 100 per version, total 400; repeat unchanged; clear 0.
+  `PSMS`/`Inet4Address`/`InetAddressHolder`/`Long` each +100 from N = 100 to N = 20 000, +400 after all versions (44.8 KB summed). Uncapped
+  control: rows = N, 23 000 total, the four classes +23 000 each (2.58 MB), back to 0 after clear. Ratio 1/57.5 (B3f: ≤ 1/40). 0 non-READY replies.
+- Finding (B2d informational; B2f's last line partly missed): before `cleanUp()` the cap-100 V4 cache held up to 8 019–8 137 entries at N = 10 000
+  and 15 796–16 906 (cap 1000 included) at N = 10^6 — a transient overshoot of up to ~160× the cap, not "a small amount". It levels off (×100 N gave ×2),
+  so B2g row 5 (grows without bound) does not apply; the bound is eventual, within a window of about 16k entries (≈ 2–2.5 MB) on this 40-core node.
+- Outcome class: **true positive** (estimate positive; both tiers caps).

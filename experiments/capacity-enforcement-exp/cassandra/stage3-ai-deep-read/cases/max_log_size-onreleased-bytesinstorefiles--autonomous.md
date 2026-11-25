@@ -154,6 +154,13 @@ not capped.
   of `/mydata/s4/cassandra-base` (a `copy-source.sh` copy of `cassandra-5.0.9`, already built with
   `build-test`), so the `rsync … && ant jar` line is replaced by that copy; `ant testsome` compiles the
   new test class. The test source is kept in the stage-4 harness folder and copied into `$W/src`.
+- *Stage-4 amendment M9 (2026-11-25, audit of the restarted run, before any reading):* the run of M1/M5 on
+  `ms0611` was interrupted and is discarded; the tier runs on **`ms0625`** (aarch64, 8 cores, 62 GiB, Ubuntu
+  22.04, JDK 11.0.33, Ant 1.10.12, run as `jason92`), same paths. `/mydata/s4/cassandra-base` on `ms0625` holds
+  only build output (no `src/`, `test/` or `.build/`), so it cannot compile the test: the repository's
+  `systems/cassandra/source/` (commit `cd9e1cded`) was copied to the node with `copy-source.sh` into
+  `/mydata/jingsong-cass-s4/o72/build-copy`, built there with `ant build-test` (BUILD SUCCESSFUL, 4 min 32 s),
+  and `$W/src` (and B3's `$RUN/src`) are `cp -a` copies of it. Nothing in B2b-B2h or B3b-B3h changes.
 
 ```java
 package org.apache.cassandra.utils.binlog;
@@ -364,6 +371,16 @@ public class DeletingArchiverBoundTest
   recorded beside the others when `lenNow < lenAtFirstSeen` for any tracked file. A mix that fits no
   row is "Not confirmed (no matching row)".
 
+*Stage-4 runbook defect D2 (2026-11-25, found when the first unit pass was analysed; the tier restarts):*
+M4's *steady* window ("after the first decrease of the operand") can never open. `onReleased` is
+`synchronized` and leaves the operand at or below `M` every time it returns. With equal release lengths, the
+operand goes from `k·F'` to `(k+1)·F'` and back to `k·F'` inside one call, so a 200 ms sampler never sees it
+fall. This follows from A3 alone, not from any reading value. **Fix:** *steady* = the samples from the first
+one whose `tracked` is at least `floor(M/F')`, to the end, provided the run's console log holds at least
+one `Deleted chronicle store file` line (the disallow branch fired; with none, *plateau* fails). B2f, the
+B2g rows and every other M4 rule are unchanged. The tier is re-run from Test A with this rule; the first
+pass is kept as evidence (`attempt1`) but not concluded on.
+
 **B2h. Controls.**
 - **B0 (positive control):** the same workload with an unreachable limit shows that usage grows
   when the cap does not bind.
@@ -402,6 +419,9 @@ public class DeletingArchiverBoundTest
   `ulimit -n 100000` before `bin/cassandra` (soft limit 1024 on the node). The node is started with
   `bin/cassandra -p $RUN/cassandra.pid` and is up when `nodetool status` shows `UN` and
   `nodetool statusbinary` prints `running`.
+- *Stage-4 amendment M9 (2026-11-25, see B2a):* node **`ms0625`**, not `ms0611`; `$RUN/src` is a `cp -a` of
+  `/mydata/jingsong-cass-s4/o72/build-copy` (a `copy-source.sh` copy built with `ant build-test`), with the
+  yaml edits of B3a applied by script. P is not run unless the 3 h cap leaves time (M7).
 
 **B3b. Knobs.** All are set via
 `nodetool enablefullquerylog --path $RUN/fql-<tag> --roll-cycle MINUTELY --blocking true --max-log-size <M>`.
@@ -584,4 +604,24 @@ https://issues.apache.org/jira/browse/CASSANDRA-16526 (cited from BinLogTest; no
 
 ## D. Stage-4 feedback
 
-none yet
+**2026-11-25, run 1 (stage-4 agent as Jingsong, node `ms0625`, aarch64; results
+`results/max_log_size-onreleased-bytesinstorefiles--autonomous.md`, drafted outside the repo at `~/writeup-ext/out/o72/results.md`;
+frozen version sha256 `69e6625a…299cfce9`, after M9 and D2).**
+- **Unit: Confirmed — caps** (B2g row 4; rows 1 and 3 hold). A matched exactly at all three limits, and A4 matched. B0 grew
+  to 40 rolled files with no deletion. B1/B2 plateaued at exactly 2·F' and 5·F' (F' = 80 MiB), with the operand never above M
+  and a B2/B1 ratio of 2.50. Row 7 recorded: Chronicle shrinks released segments from 80 MiB to about 2.4 MB about 10 s after release.
+- **Cluster: Not confirmed** (no matching row). The on-disk upper bound held: rolled bytes reached at most 265.6 MiB under a
+  300 MiB limit (K1) and 516.3 MiB under 660 MiB (K2). C1 and C2 grew to 2.62 GiB. But K1 and K2 did not plateau at
+  `floor(M/F')·F'`. Length drift (A3(d)) is large: segments are counted at their 144 MiB release length and subtracted at a
+  shrunk 121.6 MiB, so 23.47 MB per deletion stays in `bytesInStoreFiles`. K1 retained **no rolled segment** after 8
+  deletions, because each new segment was deleted at its own release. K2 fell from 4 retained segments to 2, and to 0 at the
+  final roll. Row 6 (drift) and row 8 recorded. A literal reading of M8 *bounded* fails on logged operand values above M.
+  These are mid-loop values of one `onReleased` call, followed by a second deletion in the same call. The self-check rejected
+  that trigger, so the tier is Not confirmed rather than row 2.
+- **Outcome class: weak true positive** (estimate positive; unit caps; cluster Not confirmed).
+- **For stage 3:** (1) A3(d) is the normal case on a real node, not a corner case: the cap over-enforces, and FQL can end up
+  retaining nothing (this looks like a variant of the bug described in `BinLogTest.testTruncationReleasesLogSpace`). (2) B3f's
+  "logged `bytes in store files` is always ≤ M" and M8's *bounded* should use the last logged value per release, because
+  intermediate values exceed M whenever one release triggers two deletions. (3) Give drift (plateau well below
+  `floor(M/F')·F'`, upper bound held) its own outcome row. (4) `DeletingArchiver.java:73-74` logs `file.getPath()` (the
+  released segment), not the deleted one. (5) M4's steady window needed D2.

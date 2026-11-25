@@ -228,6 +228,17 @@ case 3.
 > reading. Cases 2 and 3 and the wiring check stay in the surefire JVM (they read no heap). Claim, predictions (A3) and
 > conclusions (A4) are unchanged. The unit tier restarts from its beginning (results §3, defect D2).
 
+> **A10 (stage-4 run-1 defect fix, 2026-11-25, fresh run on `pc75`, unit tier restarted) — B2d: a settling reading
+> before the first recorded one.** The fresh run's first unit attempt (A1–A9 as written) again matched row U5 (**Invalid**),
+> only through the instrument known answer: −609,896 B (managed), −591,504 B (disabled), −607,688 B (mutation), with every
+> case-1 Δ shifted by the same ≈ −0.6 MB (all pool readings, case 2, case 3, the wiring check and the disabled |Δ| ≤ 1 MiB
+> held). A diagnostic child with no allocation between readings (`BamHeapDiag`) showed the cause: the **first** post-warm-up
+> reading carries ≈ 677 KB that the next `System.gc()` ×3 round frees (Tenured 1,955,800 → 1,278,496 → 1,278,544, and
+> 1,278,672 after a 5 s pause; one `byte[65536]` then reads +65,632 B). Fix: each child takes one **unrecorded settling
+> reading** (same routine) after its warm-up and before reading (a). Claim, predictions (A3) and conclusions (A4, including
+> the Invalid conditions) are unchanged; the unit tier restarts from its beginning (results §3, defect D1 of the 2026-11-25
+> run).
+
 **B2e. Procedure.**
 1. Copy tree, build as in B2a.
 2. Write the test class with one `@Test` per case, case 1 looped over L ∈ {1,4,16,64,1024} with a
@@ -449,4 +460,20 @@ https://issues.apache.org/jira/browse/HDFS-7358
 
 ## D. Stage-4 feedback
 
-none yet
+- **2026-11-25, run 1 on `pc75` (fresh run; the 2026-11-24 attempt on `pc99` was interrupted and not used).** Results file:
+  `results/dfs.client.write.byte-array-manager.count-limit-recycle-maxAllocated--autonomous.md` (drafted outside the repository at
+  `~/writeup-hadoop/out/o13/results.md`; not yet committed). Frozen version: this file with A1–A10, sha256
+  `89c0f302189f0aee7bdee54c38a5650d55b4442b7de0e539a6dacba99c2b639b`.
+- **Unit tier: U1 Confirmed — caps** (after defect fix A10). Pool = L after the L managed releases and through the L + 10 extra
+  releases for every L ∈ {1, 4, 16, 64, 1024} in 3 repetitions; retained heap Δ = 4,198,528 B (L = 64) and 67,170,408 B (L = 1024)
+  in every repetition; disabled control returns 0 and |Δ| ≤ 9,368 B; mutation of line 209 gives pool 2L + 10 (Δ = 134,975,992 B at
+  L = 1024); case 2 allocator WAITING then TERMINATED; case 3 pool ≤ 4 throughout with `numAllocated` drifting to 0; wiring check holds.
+- **Cluster tier: C3 Not confirmed** (heap band missed; mechanism exact). Every capped run printed `[1048576: 0/L, free=L]` and the
+  control `free=384`; `[B` bytes rose by 1,049,941 B (L = 8 → 16) and 1,052,718 B (L = 16 → 32) per unit of L (rep 1), but the frozen deltas against the disabled
+  baseline B (median 7,049,384 B of 8,305,008 / 7,049,384 / 4,889,192) fell 0.5–0.6 MiB below every capped band (e.g. L = 8:
+  5,697,048–5,711,856 vs ≥ 6,291,584), and disabled r3 was 2,160,192 B below B. A post-run heap-dump diagnostic showed the cause is
+  outside the pool: a variable number of retained 64 KiB `byte[]` (128 and 73 in two disabled runs, 64 in an L = 8 run; zero
+  retained 1 MiB-class arrays with the manager disabled; exactly 8 × 1 MiB with L = 8). Recommendation for a future design: take the
+  baseline as the capped runs' non-1 MiB `[B` bytes (or count arrays of the managed length from a heap dump) instead of a separate
+  disabled run.
+- Effect on the constraint: unit `caps`, cluster `undetermined`. Outcome class: **weak true positive** (estimate `positive`).

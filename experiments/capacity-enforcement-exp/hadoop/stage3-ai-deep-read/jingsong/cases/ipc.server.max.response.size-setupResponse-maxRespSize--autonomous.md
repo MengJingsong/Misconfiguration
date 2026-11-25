@@ -115,6 +115,12 @@ public class TestMaxRespSizeVerification extends TestRpcBase {
       resp.getSerializedSize(); a1 = alloc(); return resp;   // memoize size before A1
     }
   }
+  // Amended 2026-11-25 (stage-4 audit, before run 1): in ProbeImpl.echo, take A1 only when the
+  // call is NOT a probe (`if (!probe) a1 = alloc();`). As written above, the probe's own echo
+  // overwrites the big call's A1 before D = a2 - a1 is read, so D would measure only the probe.
+  // The Writable server already returns early for probes. B2d/B2f/B2g are unchanged.
+  // RpcMetrics has no sentBytes getter in 3.4.2: read the package-private field
+  // `RpcMetrics.sentBytes` (a MutableCounterLong) by reflection.
   // For each key value K in {1024, 1048576, 67108864} and N in {524288, 4194304, 16777216}:
   //  conf.setInt(CommonConfigurationKeys.IPC_SERVER_RPC_MAX_RESPONSE_SIZE_KEY, K); fresh server, 1 handler;
   //  LogCapturer logs = LogCapturer.captureLogs(Server.LOG);
@@ -249,6 +255,9 @@ export HDFS_NAMENODE_OPTS="-XX:+UseG1GC -Xms1g"
   ```
   P=$(printf 'a%.0s' $(seq 195)); seq -w 0 9999 | sed "s|^|/big/$P|" | xargs -n 1000 hdfs dfs -mkdir -p
   ```
+- *Amended 2026-11-25 (stage-4 audit, before run 1):* `seq -w 0 9999` pads to **4** digits, so the
+  names are 199 characters, not 200 ("5-digit index" above is wrong). The command is what runs; the
+  response-size estimate below is unchanged within its range.
 - Each entry is an `HdfsFileStatusProto` of roughly 250 to 300 bytes (200-byte name plus about 60 to 100 bytes of fields). One `getListing` response is therefore about 2.5 to 3 MB:
   - above K = 1024 and K = 1 MiB, so the WARN fires;
   - below K = 64 MiB, so no WARN;
@@ -362,4 +371,13 @@ https://issues.apache.org/jira/browse/HADOOP-6577 (cited via the in-tree release
 
 ## D. Stage-4 feedback
 
-none yet
+- **2026-11-25, run 1 on `pc91` (stage-4 agent, Jingsong's share): Confirmed — does not cap, both tiers. Outcome class: true negative.**
+  Results: `results/ipc.server.max.response.size-setupResponse-maxRespSize--autonomous.md` (draft at `~/writeup-hadoop/out/o8/results.md`).
+  - Unit (B2g row 1, control row 4): protobuf path R = N, bytes sent and per-call allocation D identical across K = 1 KiB / 1 MiB / 64 MiB
+    (largest spread 11.5 KiB, the WARN string), C = 10240 throughout, WARN exactly when `response.length` > K; Writable path retained
+    buffer 10240 exactly when length > K, N + 31 otherwise (control moved), and D2 ≈ 2N at small K vs ≈ N at large K.
+  - Cluster (B3g row 1): 20 × `hdfs dfs -ls /big` per K, 10001 lines every time; NN `SentBytes` 52003864 / 52003864 / 52003863;
+    JFR 20 × 2600064 B allocations in `setupResponseForProtobuf` at every K; WARN (`Large response size 2600042 … getListing`) 20 / 20 / 0;
+    client `ipc.maximum.response.length=1048576` rejects the same listing (`length of 2600038 exceeds maximum data length`), 4194304 accepts it.
+  - Amendments made by the audit before run 1 (dated in B2a and B3c above): probe overwrote A1 in the B2a outline; 4-digit, not 5-digit, index in B3c.
+  - Recommendations left for stage 3: use `jfr print --json` for exact sizes; the B3f "heap after GC.run ±5 %" column is noisy (one listing may still be referenced at GC time, ≈ 4 MB).
