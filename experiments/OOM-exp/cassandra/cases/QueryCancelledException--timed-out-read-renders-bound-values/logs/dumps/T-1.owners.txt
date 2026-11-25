@@ -1,0 +1,20 @@
+dump T-1.hprof: all objects 3771.8 MiB shallow; arrays >= 1048576 B: 187, 3687.9 MiB (live 2565.2 MiB)
+nearest-owner shares (of the dump total | of live arrays >= min):
+  O_QR     595.1 MiB   15.8% |  23.2%
+  O_QL     854.5 MiB   22.7% |  33.3%
+  O_M      549.3 MiB   14.6% |  21.4%
+  O_L       61.0 MiB    1.6% |   2.4%
+  O_F      489.3 MiB   13.0% |  19.1%
+  O_O       16.0 MiB    0.4% |   0.6%
+  O_unreached      0.0 MiB    0.0% |   0.0%
+  O_unreachable   1122.7 MiB   29.8% |  43.8%
+Q = QR + QL = 1449.6 MiB = 56.5% of live arrays >= min; largest other M 549.3 MiB -> Q-attributed (frozen test): YES
+[QR] byte[] name~2S via frame:ReadStage: 336 MiB; byte[] 16000000 via frame:ReadStage: 198 MiB; byte[] 32000002 via frame:ReadStage: 61 MiB
+[QL] byte[] name~2S via org.apache.cassandra.exceptions.QueryCancelledException: 824 MiB; byte[] 32003639 via frame:AsyncAppender-Worker-ASYNCDEBUGLOG: 31 MiB
+[M] byte[] 16000000 via org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation: 473 MiB; byte[] name~2S via org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation: 31 MiB; byte[] 32000002 via frame:ScheduledTasks: 31 MiB; byte[] 16000000 via frame:ScheduledTasks: 15 MiB
+[L] byte[] name~2S via ch.qos.logback.classic.spi.LoggingEvent: 61 MiB
+[F] byte[] 16000000 via frame:Native-Transport-Requests: 488 MiB; byte[] 1048576 via io.netty.util.internal.InternalThreadLocalMap: 1 MiB
+[O] byte[] 1048576 via other: 16 MiB
+[unreachable] byte[] name~2S via -: 519 MiB; byte[] 32000002 via -: 305 MiB; byte[] 32000000 via -: 214 MiB; byte[] 64000306 via -: 61 MiB; int[] 2097148 via -: 8 MiB; int[] 1048572 via -: 4 MiB; int[] 311132 via -: 1 MiB; int[] 303272 via -: 1 MiB
+live counts: {'ch.qos.logback.classic.spi.LoggingEvent': 135, 'org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation': 45, 'org.apache.cassandra.exceptions.QueryCancelledException': 40} ; LoggingEvents carrying a QCE: 27 (live 27); worker holds one: True
+byte[16,000,000] live: 77; arrays of 2S..2S+400 B live: 44; 4S..4S+400 B live: 0

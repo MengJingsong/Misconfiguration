@@ -1,0 +1,13 @@
+--- a/src/java/org/apache/cassandra/service/reads/ReplicaFilteringProtection.java	2026-11-24 15:31:45.742986318 -0500
++++ b/src/java/org/apache/cassandra/service/reads/ReplicaFilteringProtection.java	2026-11-24 15:31:45.758986268 -0500
+@@ -620,8 +620,8 @@
+             // query the partition specifically for the corresponding cluterings by name. In either case, we do not
+             // provide a limit. (In the unresolved static case, we have no way of knowing how many stale rows we might
+             // read on a silent replica before finding a live one.)
+-            ClusteringIndexFilter filter = unresolvedStatic ? command.clusteringIndexFilter(key)
+-                                                            : new ClusteringIndexNamesFilter(clusterings, command.isReversed());
++            // B29 intervention (diagnostic only): never read the whole partition to complete a static row
++            ClusteringIndexFilter filter = new ClusteringIndexNamesFilter(clusterings, command.isReversed());
+ 
+             SinglePartitionReadCommand cmd = SinglePartitionReadCommand.create(command.metadata(),
+                                                                                command.nowInSec(),

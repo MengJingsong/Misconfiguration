@@ -1,0 +1,61 @@
+[21:49:04] args: name=dP3 type=P V-build=patched N=200000 rate=5200 CL=ONE VX=2G RX=2G sess=16 loadcap=99 fill_small=0 platform=aarch64 client=ms0604
+[21:49:08] stopped V (781909)
+[21:49:11] stopped R1 (none)
+[21:49:14] stopped R2 (none)
+[21:49:23] gen V xmx=2G build=/mydata/r25/run-patched
+[21:49:24] restored V from /mydata/r25/golden-V.tgz (53M data, saved_caches: 0 files)
+[21:49:25] gen R1 xmx=2G build=/mydata/r25/run-orig
+[21:49:25] restored R1 from /mydata/r25/golden-R1.tgz (1.1M data, saved_caches: 0 files)
+[21:49:26] gen R2 xmx=2G build=/mydata/r25/run-orig
+[21:49:26] restored R2 from /mydata/r25/golden-R2.tgz (1.1M data, saved_caches: 0 files)
+[21:49:30] launched V pid=785253 unit=r25-V-1795574967 build=/mydata/r25/run-patched swap.max=0 memory.max=max
+[21:50:42] launched R2 pid=398211 unit=r25-R2-1795575040 build=/mydata/r25/run-orig swap.max=0 memory.max=max
+[21:50:42] launched R1 pid=723586 unit=r25-R1-1795575040 build=/mydata/r25/run-orig swap.max=0 memory.max=max
+[21:51:02] ring UN=3
+V pid 785253 build /mydata/r25/run-patched jar md5 1de8e8c5bb6b
+V resolved: -XX:+UseG1GC -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M 
+V VM.flags: MaxDirectMemorySize=16642998272 MaxHeapSize=2147483648 
+V VM.uptime at 1795575067610: 100.850 s
+V cgroup: /sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/r25-V-1795574967.scope swap.max=0 memory.max=max
+2026-11-25T02:49:41,057 CacheService.java:121 - Initializing key cache with capacity of 100 MiBs.
+2026-11-25T02:49:41,094 CacheService.java:143 - Initializing row cache with capacity of 0 MiBs
+2026-11-25T02:49:41,099 CacheService.java:174 - Initializing counter cache with capacity of 50 MiBs
+V start info:
+Key Cache              : entries 27, size 4.95 KiB, capacity 100 MiB, 104 hits, 130 requests, 0.800 recent hit rate, 14400 save period in seconds
+Counter Cache          : entries 0, size 0 bytes, capacity 50 MiB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds
+[21:51:20] fill: read 1500000 kv
+RANGEOK kept=1000 rejected=1000 candidates=3245
+DONE mode=read table=kv keyBytes=8 first=0 count=1500000 candidates=4500841 ok=1500000 err=0 rows=1500000 secs=102.5 ops/s=14628
+[21:53:10] fill: counter 550000 ctr
+RANGEOK kept=1000 rejected=1000 candidates=3245
+DONE mode=counter table=ctr keyBytes=8 first=0 count=550000 candidates=1649894 ok=550000 err=0 rows=0 secs=52.1 ops/s=10548
+[21:54:25] after fill: key cache 100.00 MiB, counter cache 50.00 MiB
+== pre-burst nodetool info
+Heap Memory (MB)       : 1386.61 / 2048.00
+Off Heap Memory (MB)   : 2.95
+Key Cache              : entries 569878, size 100 MiB, capacity 100 MiB, 111 hits, 1501652 requests, 0.000 recent hit rate, 14400 save period in seconds
+Counter Cache          : entries 242725, size 50 MiB, capacity 50 MiB, 0 hits, 550000 requests, 0.000 recent hit rate, 7200 save period in seconds
+== tablestats
+		Table: t_blob
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Table: ctr
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Table: kv
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+[21:54:39] pre-burst live heap (histogram total): Total       5192951      240638016
+[21:54:49] burst start N=200000 rate=5200 CL=ONE loadcap=99 sess=16
+[21:57:13] client exited: FIRST_SEND epochMs=1795575296219 FINAL sent=199948 ok=195836 err=4112 firstOkMs=1795575296243 lastOkMs=1795575342304 total=200000 stop=false endMs=1795575396595 TransportException: [/10.10.1.4:9042] Connection has been closed 
+[21:57:14] observation: DEAD (1795575434 DEAD)
+V_DEAD
+R1_ALIVE
+R2_ALIVE
+[21:57:27] stopped V (785253)
+[21:57:40] stopped R1 (723586)
+[21:57:55] stopped R2 (398211)
+[21:58:03] dP3 V: type=P N=200000 rate=5200 xmx=2G 0 OOMError lines | pauses=172 max_after_any=2043MiB(99.8%) full_gcs=83 max_after_full=2030MiB(99.1%) ReportJavaOutOfMemory=1 | full>95%: n=74 window=47s pause=46s (98%) service_loss=not met | pauses=172 total_pause=57s max60=85% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=HeapDumper@416.205s,ReportJavaOutOfMemory@427.027s | obs=DEAD | client: FINAL sent=199948 ok=195836 err=4112 firstOkMs=1795575296243 lastOkMs=1795575342304 total=200000 stop=false endMs=1795575396595 TransportException: [/10.10.1.4:9042] Connection has been closed  | hstop: h_stop=- (no TOTAL_REACHED) max_after_any=2043 max_after_full=2030 n_full=82 oom_mark_after_send=88.2 oom_mark_after_stop=- | smooth: SMOOTH | R1: dP3 R1: type=P N=200000 rate=5200 xmx=2G 0 OOMError lines | pauses=26 max_after_any=2048MiB(100.0%) full_gcs=3 max_after_full=483MiB(23.6%) ReportJavaOutOfMemory=0  | R2: dP3 R2: type=P N=200000 rate=5200 xmx=2G 0 OOMError lines | pauses=31 max_after_any=2047MiB(100.0%) full_gcs=3 max_after_full=477MiB(23.3%) ReportJavaOutOfMemory=0 

@@ -1,0 +1,20 @@
+dump C-3.hprof: all objects 3681.4 MiB shallow; arrays >= 1048576 B: 216, 3590.9 MiB (live 3158.3 MiB)
+nearest-owner shares (of the dump total | of live arrays >= min):
+  O_QR     762.9 MiB   20.7% |  24.2%
+  O_QL     976.6 MiB   26.5% |  30.9%
+  O_M     1037.6 MiB   28.2% |  32.9%
+  O_L       61.0 MiB    1.7% |   1.9%
+  O_F      306.2 MiB    8.3% |   9.7%
+  O_O       14.0 MiB    0.4% |   0.4%
+  O_unreached      0.0 MiB    0.0% |   0.0%
+  O_unreachable    432.6 MiB   11.8% |  13.7%
+Q = QR + QL = 1739.5 MiB = 55.1% of live arrays >= min; largest other M 1037.6 MiB -> Q-attributed (frozen test): YES
+[QR] byte[] 16000000 via frame:ReadStage: 366 MiB; char[] 32000000 via frame:ReadStage: 244 MiB; byte[] 32000002 via frame:ReadStage: 61 MiB; byte[] name~2S via frame:ReadStage: 61 MiB; byte[] 32000000 via frame:ReadStage: 31 MiB
+[QL] byte[] name~2S via org.apache.cassandra.exceptions.QueryCancelledException: 946 MiB; byte[] 32001643 via frame:AsyncAppender-Worker-ASYNCDEBUGLOG: 31 MiB
+[M] byte[] 16000000 via org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation: 519 MiB; byte[] 16000000 via org.apache.cassandra.db.monitoring.MonitoringTask$SlowOperation: 443 MiB; byte[] name~2S via org.apache.cassandra.db.monitoring.MonitoringTask$SlowOperation: 31 MiB; byte[] 32000002 via frame:ScheduledTasks: 31 MiB; byte[] 16000000 via frame:ScheduledTasks: 15 MiB
+[L] byte[] name~2S via ch.qos.logback.classic.spi.LoggingEvent: 61 MiB
+[F] byte[] 16000000 via frame:Native-Transport-Requests: 229 MiB; byte[] 16000000 via frame:epollEventLoopGroup-5: 31 MiB; byte[] 16000000 via frame:ReadStage: 31 MiB; byte[] 16000000 via org.apache.cassandra.transport.messages.ExecuteMessage: 15 MiB; byte[] 1048576 via io.netty.util.internal.InternalThreadLocalMap: 1 MiB
+[O] byte[] 1048576 via other: 14 MiB
+[unreachable] byte[] 64000086 via -: 61 MiB; byte[] 16000000 via -: 61 MiB; byte[] 32000002 via -: 61 MiB; byte[] 32000000 via -: 61 MiB; char[] 32000000 via -: 61 MiB; byte[] 32001547 via -: 31 MiB; byte[] name~2S via -: 31 MiB; int[] 2097148 via -: 8 MiB
+live counts: {'ch.qos.logback.classic.spi.LoggingEvent': 66, 'org.apache.cassandra.exceptions.QueryCancelledException': 55, 'org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation': 50, 'org.apache.cassandra.db.monitoring.MonitoringTask$SlowOperation': 30} ; LoggingEvents carrying a QCE: 31 (live 31); worker holds one: True
+byte[16,000,000] live: 108; arrays of 2S..2S+400 B live: 40; 4S..4S+400 B live: 4

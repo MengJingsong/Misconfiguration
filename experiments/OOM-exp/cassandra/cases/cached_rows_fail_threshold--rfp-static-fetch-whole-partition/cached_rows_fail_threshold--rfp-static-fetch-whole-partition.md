@@ -7,12 +7,21 @@
 | Phase-1 case file | [`cached_rows_fail_threshold-queryProtectedPartitions-i--autonomous`](../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/cached_rows_fail_threshold-queryProtectedPartitions-i--autonomous.md) · stage-4 result [`results/…`](../../../../capacity-enforcement-exp/cassandra/stage4-runtime-verification/results/cached_rows_fail_threshold-queryProtectedPartitions-i--autonomous.md) |
 | System / pinned source | Cassandra 5.0.9 (`systems/cassandra/source/`); built copy `pc72:/mydata/s4/cassandra-base` (`build/apache-cassandra-5.0.9-SNAPSHOT.jar`) |
 | Stage 1 (design) | phase-2 OOM agent, stage 1 (Claude Opus 5.5), 2026-11-24 05:40–06:30 EST, owner-approved batch of 2026-11-24; nothing run (pc72, pc82, pc91, pc75, pc99 checked read-only) |
-| Stage 2 (verify) | pending (a fresh session) |
-| Verdict | `pending` |
+| Stage 2 (verify) | phase-2 OOM agent, stage 2 (Claude Opus 5.5, a fresh session), 2026-11-24 20:11–21:45 EST on **pc72** (node lock 20:11–21:36); earlier attempts the same day on pc99 (stopped by the owner ≈ 16:25) and an API usage limit (≈ 18:03) are recorded in §3.4 |
+| Verdict | **true positive** — `verified-OOM · deployment` (bypass · accounting omission × multiplicity; fault F1 external, in setup only) |
 
 ## Summary
 
-- **Conclusion:** pending (stage 2).
+- **Conclusion (stage 2, pc72): true positive, `verified-OOM · deployment`.** On a 2-instance RF 2 layout with every capacity
+  constraint at its default and a 2 GiB heap, 8 concurrent QUORUM `SELECT * … WHERE k = ? AND s = 'x' ALLOW FILTERING` queries
+  coordinated by the stale replica OOM the coordinator **3/3** (Java heap space, 2.9–3.6 s into the first wave, no query completed),
+  while RFP's counter charges **2** per query and logs nothing. Replicas agree: 0/3; the same fetch at Q = 2: 0/3; the fetch
+  reading named rows only (diagnostic build): 0/3 with every query answered. Budget search: OOM at 4 GiB (Q = 16), 8 GiB (Q = 32)
+  and **12 GiB (Q = 48)**; 15,872 MiB at Q = 64 survives because the 5 s read deadline cancels 35 of 96 queries (boundary).
+- **Root cause (verified):** for an unresolved static row, RFP's completion fetch reads the stale replica's whole partition
+  (`DataLimits.NONE`, no row filter, no paging) and serializes it into one heap `DataOutputBuffer` per query on the coordinator
+  (262 MB payload, 324 MiB backing array). These rows never reach `incrementCachedRows`, no byte threshold applies to the command
+  and there is no aggregate bound, so the only limits are the 32 READ permits and the 5 s read deadline.
 - **Hypothesis (stage 1).** A filtering read at CL above ONE goes through replica-filtering protection (RFP). When the
   query has a predicate on a **static column** and one replica is **silent** about the static row (it missed the update),
   RFP marks the static row unresolved and, in its second phase, reads the silent replica's **entire partition** with no row
@@ -366,8 +375,164 @@ T ×3, C-agree ×3, I-names ×3.
 
 ## 3. Runs (stage 2)
 
-pending
+Stage 2 by a fresh session, 2026-11-24 20:11–21:45 EST. Freeze hash checked before any action: sha256 of §1–§2 (from
+`## 1. Candidate` up to, not including, the freeze line) = `f48b617a…cc204f`, **matches**. All counted readings are from **pc72**,
+the design's node; earlier attempts are in §3.4.
+
+### 3.1 Environment (pc72)
+
+- `pc72` (node2.jason92-326665): x86_64, 40 cores, 125 GiB RAM, Ubuntu 22.04, kernel 5.15.0-203, cgroup v2, 8 GiB swap present
+  (`MemorySwapMax=0` on every Cassandra and client scope), OpenJDK 11.0.33. Before the run there was no `CassandraDaemon`, load 0.00
+  and no `NODE-LOCK` (the lock named in §2.3 had been released). Lock held 20:11–21:36 EST and released; driver PID kept in
+  `/mydata/s4/DRIVER-B29.pid` and removed at the end.
+- Build: `/mydata/s4/b29/tree` = copy of `/mydata/s4/cassandra-base`, jar sha256 `570b5249…92192026` (unmodified 5.0.9 build, the
+  same hash as pc99's copy). Arm I: `/mydata/s4/b29/tree-I`, [`harness/I-names.diff`](harness/I-names.diff) applied and only
+  `ReplicaFilteringProtection*.class` recompiled into a copy of the jar (sha256 `bf6b4de6…df64eb8666`; [`harness/setup.sh`](harness/setup.sh)).
+  The peer always runs the shipped build.
+- Resolved budgets (from `ps` every lifetime, [`logs/*/run.meta`](logs/T1/run.meta)): victim `-Xms2G -Xmx2G`,
+  `-XX:MaxDirectMemorySize=15872M` (resolved by `cassandra-env.sh` on this node, as predicted), G1 `G1HeapRegionSize=16m`,
+  `MaxGCPauseMillis=300`, `HeapDumpOnOutOfMemoryError`, `OnOutOfMemoryError=kill -9 %p`, NMT summary. Peer `-Xmx4G`, same direct.
+  No `MemoryMax`; every lifetime's scope `memory.events` shows `oom_kill 0` (a Java heap OOM, not a kernel kill).
+- Config diff (both nodes, [`logs/T1/yaml-n1.diff`](logs/T1/yaml-n1.diff)): directories, `listen_address`/`rpc_address`
+  127.0.0.1 / 127.0.0.2, `cluster_name: 'b29'`, `auto_bootstrap: false`; peer JMX 7299. **No capacity setting changed** in any arm
+  except O-thr (`read_thresholds_enabled: true`, `local_read_size_fail_threshold: 64MiB`, node 1 only, [`logs/O1/yaml-n1.diff`](logs/O1/yaml-n1.diff)).
+  Thresholds read back by JMX at every start: `fail=32000 warn=2000` ([`logs/T1/rfpk.txt`](logs/T1/rfpk.txt)).
+- Harness: [`harness/`](harness/) (from B22's, with attribution in each file): `ctl.sh`, `run-arm.sh`, `drive.sh` (pc72 driver:
+  `setup`, `main`, `search`, `refine` phases), `load-data.sh`, `ta-fix.sh` (pc99 history), `B29Load.java`, `B29Sampler.java`,
+  `RfpJmx.java`, `b29.btm` (DIAG only), `gcwin.py`, `hprofhist.py`, `hprofstacks.py`, `summ.py`; `batch.sh` is the pc99 attempt's driver
+  (history). Per-lifetime excerpts in [`logs/<label>/`](logs/); `summ.py logs/<label>` reproduces the one-line summaries below.
+- Data: templates TA (stale node 1) and TB (replicas agree) **built on pc99 and copied to pc72** (deviation D2, §3.4). Node 1's
+  `b29.t`: one SSTable of 25,294,014,157 B (sha256 `a50a9cbb…ba47af08`, identical on both nodes), 106 partitions, max partition
+  268,650,950 B; node 2: one SSTable of 6.6 MB (96 partition deletions + statics `x`, 10 warm-up partitions). TB adds the deletion and
+  `x` to node 1 in a newer 1.5 KB SSTable (the 25 GB SSTable is the same file, hard-linked). Each lifetime starts from a fresh clone
+  (`*-Data.db` hard-linked, every other file copied).
+
+### 3.2 Readings (pc72, one lifetime at a time, clean start each)
+
+U comes from the GC log (live heap after each collection; Full GCs) and from the hprof at the OOM; K from the JMX histogram
+`ReplicaFilteringProtectionRowsCachedPerQuery` and the RFP warn/error lines; load from the client's per-query log.
+
+| Run (EST) | Arm · template · build | Heap · Q | Outcome | Test queries (96) | K max · RFP fetches · blocking RR | U (independent of K) | Logs |
+|---|---|---|---|---|---|---|---|
+| DIAG 20:43 | calibration · TA · shipped + Byteman | 2 GiB · 1 (k 0–9) + 1 traced | survived | 10/10 + 1 traced, 1 row each, 0.86–0.96 s | 2 · +11 · +11 | per fetch (Byteman, 11/11): `unresolvedStatic=true`, payload **262,196,026–262,200,030 B**, backing array **339,956,352 B (324.2 MiB)**, fetch 717–768 ms, built on ReadStage-1..3; trace: "Requesting 0 rows in partition … for replica filtering protection" | [`DIAG/`](logs/DIAG/) |
+| T1 20:46 | **T** · TA · shipped | 2 GiB · 8 | **heap OOM** 3.4 s into the test step (T2 3.6 s, T3 2.9 s) | 0/96 (8 in flight closed, 88 no host) | ≤ 2 (no query completed) · +8 · +8; RFP warn/error lines 0 | dump 1,561 MiB: 14 `byte[]` ≥ 8 MiB = **1,473 MiB (94 %)** (8 × 96 + 4 × 144 + …); 8 `ReplicaFilteringProtection`, 16 `PartitionBuilder`, 16 `LocalDataResponse`; last Full GC 1,780 → 1,776 MiB | [`T1/`](logs/T1/) |
+| T2 20:48 | **T** | 2 GiB · 8 | **heap OOM** | 0/96 | ≤ 2 · +8 · +8; 0 | dump 1,430 MiB: 10 arrays ≥ 8 MiB = **1,345 MiB (94 %)** (8 × 144 + 2 × 96); 8 RFP; last Full GC 1,588 → 1,584 MiB | [`T2/`](logs/T2/) |
+| T3 20:51 | **T** | 2 GiB · 8 | **heap OOM** | 0/96 | ≤ 2 · +8 · +8; 0 | dump 1,298 MiB: 11 arrays ≥ 8 MiB = **1,201 MiB (92.5 %)** (8 × 96 + 3 × 144); 8 RFP; last Full GC 1,460 → 1,456 MiB | [`T3/`](logs/T3/) |
+| CA1–3 20:53–21:00 | **C-agree** · TB · shipped | 2 GiB · 8 | survived 3/3 | 96/96 ×3, 1 row each, median 1 ms, max 6–7 ms | **0** · **+0** · +0 (digests match: RFP not engaged) | live after GC ≤ 96 MiB, no humongous region after any GC | [`CA1/`](logs/CA1/) [`CA2/`](logs/CA2/) [`CA3/`](logs/CA3/) |
+| CQ1–3 21:01–21:11 | **C-Q2** · TA · shipped | 2 GiB · 2 | survived 3/3 | 96/96 ×3, 1 row each, median 0.97–1.05 s, max 1.16–1.18 s, 0 timeouts | 2 · +96 · +96 ×3 | live after GC up to **1,327 / 1,387 / 1,614 MiB** (CQ3 Full GC 1,209 → 1,205 MiB); ≤ 76 humongous regions after GC; STW ≤ 5 % per 60 s | [`CQ1/`](logs/CQ1/) [`CQ2/`](logs/CQ2/) [`CQ3/`](logs/CQ3/) |
+| I1–3 21:11–21:19 | **I-names** · TA · `tree-I` | 2 GiB · 8 | survived 3/3 | 96/96 ×3, **1 row each** (the same result as T asks for), median 4–5 ms, max 49–69 ms | 2 · **+96** · **+96** ×3 | live after GC ≤ 96 MiB, no humongous region | [`I1/`](logs/I1/) [`I2/`](logs/I2/) [`I3/`](logs/I3/) |
+| S4G 21:19 | search · TA · shipped | **4 GiB** · 16 | **heap OOM** | 0/96 | +16 · +16 | dump 2,673 MiB: 16 arrays ≥ 128 MiB = 2,378 MiB (89 %; ≥ 8 MiB: 2,570 MiB, 96 %); **16 threads with `fetchFromSource` on the stack** | [`S4G/`](logs/S4G/) |
+| S8G 21:21 | search | **8 GiB** · 32 | **heap OOM** | 0/96 | +32 · +32 | dump 6,662 MiB: 34 arrays ≥ 128 MiB = 6,556 MiB (98 %); 32 threads in `fetchFromSource` | [`S8G/`](logs/S8G/) |
+| S15872M 21:25 | search | **15,872 MiB** · 64 | survived (**boundary**) | 61/96, 1 row each; **33 read timeouts + 2 read failures** (`QueryCancelledException` at the 5 s deadline), latency median 4.7 s, max 5.3 s | 2 · +96 · +96 | ReadStage active max 32 (READ permits), NTR 64; live after Full GC up to **11,831 MiB (74 %)**, after-GC max 14,087 MiB; STW ≤ 3 % | [`S15872M/`](logs/S15872M/) |
+| S12G 21:33 | search refinement (added, §3.4 D10) | **12 GiB** · 48 | **heap OOM** | 0/96 | +48 · +48 | dump 9,846 MiB: 35 arrays ≥ 128 MiB = 9,726 MiB (99 %; 15 × 216 + 20 × 324 MiB); 46 threads in `fetchFromSource` | [`S12G/`](logs/S12G/) |
+| O1 21:28 | **O-thr** (optional, diagnostic) · TA · shipped, byte read thresholds on, local fail 64 MiB | 2 GiB · 8 | **heap OOM** (as T) | 0/96 | +8 · +8; no read-size abort line | dump 1,436 MiB: 12 arrays ≥ 8 MiB = 1,345 MiB (94 %); 8 threads in `fetchFromSource` | [`O1/`](logs/O1/) |
+
+**First error (V5).** Every OOM lifetime ends in `java.lang.OutOfMemoryError: Java heap space`, followed by the heap dump and
+`kill -9` ([`T1/oom-excerpt.txt`](logs/T1/oom-excerpt.txt)). The throwing stack, taken from the hprof
+([`T1/oom-stack-from-hprof.txt`](logs/T1/oom-stack-from-hprof.txt)), is:
+`DataOutputBuffer.expandToFit:178` ← `UnfilteredRowIteratorSerializer.serialize` ← `ReadResponse$LocalDataResponse.build:201` ←
+`ReadCommand.createResponse:374` ← `StorageProxy$LocalReadRunnable.runMayThrow:2211` ← `SEPExecutor.maybeExecuteImmediately:229` ←
+`ReplicaFilteringProtection.executeReadCommand:172` ← **`ReplicaFilteringProtection$PartitionBuilder.fetchFromSource:639`** ←
+`protectedPartition:589` ← … ← `SelectStatement.execute` (T1: the fetch ran inline on a Native-Transport-Requests thread). In T2
+and T3 the same `LocalReadRunnable` → `LocalDataResponse.build` → `expandToFit` stack runs on a ReadStage `SEPWorker` (the
+dispatched form of the same fetch). In the search and O-thr dumps, every query's NTR thread is parked inside `fetchFromSource`
+(16 / 32 / 46 / 8 threads). In T the only local read with a response over 1 MiB is the completion fetch: in DIAG all 11 such
+responses pair one-to-one with `fetch-exit`, and node 1's first-phase response is empty because the static filter drops the partition.
+
+**Holder shape.** The OOM comes during the first wave, while all 8 buffers are still growing (96 → 144 → 216 → 324 MiB, old and new
+arrays both live), before any fetch completes. That is earlier than §2.8 predicted ("within the first 3 waves", "≥ 4 `byte[]` ≥ 128 MiB").
+T3 has 3 arrays ≥ 128 MiB plus 8 of 96 MiB. In every dump, though, the ≥ 8 MiB arrays from the 8 fetches are 92–94 % of the dumped heap,
+so attribution holds under §2.10 (serialized-response form dominant). No 64 KiB `byte[]` accumulates (≤ 33 arrays, ≤ 2.1 MiB), so the
+merge-side deserialized form is not the holder.
+
+### 3.3 Arithmetic check against §2.4
+
+Per query: the fetch serializes 4,000 stale rows (262.2 MB, as predicted ± 0 %) into a buffer that ends at 324.2 MiB, not the
+predicted 288 MiB. During the last growth, 216 + 324 = 540 MiB is live. At Q = 8 that is 8 × (216 + 324) ≈ 4.2 GiB transient against
+≈ 1.9 GiB of headroom, so the first wave cannot finish. At Q = 2 the same arithmetic gives ≤ 1.08 GiB plus baseline, matching CQ's
+1.2–1.6 GiB live peaks; the margin is below the declared 30 % (deviation D8). The search follows the 32 READ permits: Q = 16 / 32 / 48
+put 16 / 32 / 32 builds in flight and OOM at 4 / 8 / 12 GiB. At 15,872 MiB, 32 builds plus retained responses peaked at 11.8 GiB live;
+the remaining queries waited past the 5 s deadline and were cancelled, which released their share.
+
+### 3.4 Deviations and interruptions (dated)
+
+- **D1 (2026-11-24, interruptions).** (a) A first stage-2 attempt ran on **pc99** (not the design's pc72) from ≈ 15:29 EST. It
+  built the harness and templates (amendment A1 below), then ran DIAG, T1–T3 (heap OOM 3/3, 25–26 s, the same stack) and CA1–CA3
+  (0/3). It was **stopped by the owner at ≈ 16:25 EST** while CQ1 was starting; CQ1's partial data is discarded. Its small logs are
+  kept as supplementary evidence in [`logs/pc99-attempt1/`](logs/pc99-attempt1/) (including `template-build.txt` and
+  `CQ1-interrupted.txt`) and are **not counted** in V1–V5. (b) A second attempt was cut off by an **API usage limit at ≈ 18:03 EST**.
+  It left no file in the case folder and nothing on pc72 or pc99 (checked 20:11 EST). (c) This session repeated every reading on pc72.
+- **D2 (2026-11-24 20:13–20:43, templates).** A fresh TA load on pc72 was **aborted**. pc72's `/mydata` writes at **31 MB/s**
+  (2 GiB `dd oflag=direct`) against pc99's 245 MB/s on the same disk model. The CL ALL load timed out 930 times in 3 min (8 partitions
+  in 187 s against 35 s on pc99), and an unretried static UPDATE timeout killed the loader before F1. Everything was stopped
+  and removed ([`logs/pc72-setup/loadTA-aborted.txt`](logs/pc72-setup/loadTA-aborted.txt)). The pc99 templates (same jar, same
+  harness, A1 checks passed) were streamed to pc72 with tar (hard links kept). The TA `Data.db` sha256 is identical on both nodes,
+  and the data was `sync`ed (6 min 40 s) before any reading. Environment deviation only: the data bytes are the same, and every
+  lifetime reads them from page cache (the DIAG fetch takes 0.72–0.77 s, as on pc99's 0.62–0.65 s).
+- **D3 (pc99, before any reading, amendment A1).** In the first TA build, F1 mutations that timed out towards the stopped node 1 were
+  hinted after `truncatehints` and replayed when node 1 restarted. Node 1 was killed without a flush, its commit log removed and the
+  hints truncated again; [`harness/ta-fix.sh`](harness/ta-fix.sh) then checked node 1's memtable empty after restart, compacted it and
+  read `s = a` (4,000 rows) on node 1 and `s = x` on node 2 ([`logs/pc99-attempt1/template-build.txt`](logs/pc99-attempt1/template-build.txt)).
+  `load-data.sh` now carries the waits and a hard check (abort if node 1's memtable is non-empty after its restart).
+- **D4 (template load).** 2,587 of 384,000 CL ALL inserts timed out on pc99 (0.67 %). The fetched payload of every test partition is
+  262.2 MB = 4,000 × 65,550 B, so node 1's stale partitions are complete.
+- **D5.** Buffer capacity 324.2 MiB (339,956,352 B), not 288 MiB. The growth steps seen in the dumps are 96 → 144 → 216 → 324 MiB.
+- **D6.** The fetch usually runs on a ReadStage thread (dispatched), and sometimes inline on the NTR thread (T1); §2.1 expected inline.
+- **D7 (C-agree).** With agreeing replicas the digests match, so the coordinator never resolves data and **RFP is not engaged at all**
+  (K 0 and RFP fetches 0, not "K = 2"). The control still matches the query, the template bytes and the budget, but it differs from T
+  in more than the fetch. I-names is the tighter comparison: same RFP path, same divergence, same read repair, only the fetch filter changed.
+- **D8 (C-Q2).** Live peak 1.2–1.6 GiB against the predicted ≤ 1.1 GiB, so the margin is below 30 %. Per §2.10, C-agree stays the V2
+  control; C-Q2 is reported as the dose control (0/3 at Q = 2).
+- **D9.** The `jcmd GC.class_histogram` 10 s into the test step was never taken in T (the victim was dead by then); U comes from the
+  dumps and GC logs.
+- **D10 (21:33 EST, budget search).** After 8 GiB OOM'd and 15,872 MiB survived, one bisect point was added: **12 GiB, Q = 48**
+  (protocol step 4, V7 "search upward"). It is not an amendment to any arm.
+- **Not run:** the pre-declared Q = 12 step (T did not survive at Q = 8).
+- **Cleanup:** every process this session started on pc72 was stopped and checked gone (no `CassandraDaemon`, client, sampler or
+  driver; no b29 scope). Bulk data deleted on pc72 (templates, data dirs, build copies, every hprof) and on pc99 (the first attempt's
+  templates, build copies and the interrupted CQ1 data). Left: `pc72:/mydata/s4/b29/` 118 MB (harness, driver logs, per-run Cassandra
+  and GC logs) and `pc99:/mydata/s4/b29/` 60 MB (the same for the first attempt). The local ssh/tar helpers have all ended.
 
 ## 4. Conclusion (stage 2)
 
-pending
+**Verdict: true positive.** Protocol status: **`verified-OOM · deployment`**, bypass · accounting omission × multiplicity
+(fault F1 external, applied in setup only; no instrumentation in the counted arms).
+
+| Condition (pc72, 5.0.9 shipped, all capacity constraints default) | n/N | Status |
+|---|---|---|
+| T: stale coordinator, 2 GiB heap / 15,872 MiB direct, Q = 8 | **3/3 heap OOM** | verified-OOM · deployment |
+| C-agree (replicas agree) / C-Q2 (Q = 2) / I-names (named-rows fetch) | 0/3 / 0/3 / 0/3 | controls and intervention |
+| Budget search: 4 GiB Q 16 · 8 GiB Q 32 · 12 GiB Q 48 · 15,872 MiB Q 64 | 1/1 · 1/1 · 1/1 · 0/1 (35/96 cancelled at 5 s) | largest failing heap **12 GiB** (n/1) |
+| O-thr (byte read thresholds on, 64 MiB local fail) | 1/1 OOM | the byte threshold does not cover the fetch |
+
+| | Evidence |
+|---|---|
+| V1 Repetition | T1–T3: heap OOM 3/3 from clean starts (pc72); the pc99 attempt's T1–T3 are 3/3 as well (supplementary) |
+| V2 Matched control | CA1–CA3 0/3 (same query, same node-1 SSTable, same budget; no fetch); dose control CQ1–CQ3 0/3 (the same fetch at Q = 2, margin < 30 %) |
+| V3 Measurement | U from the hprof and GC log: 1.2–1.5 GiB in ≥ 8 MiB `byte[]` (92–94 % of the dump) held by 8 completion-fetch buffers; K from JMX: max 2 per query, 0 RFP warn/error lines |
+| V4 Intervention | I1–I3 0/3 at the same Q = 8: 96/96 queries answered with the same 1 row, the same 96 RFP fetches and 96 blocking read repairs, live heap ≤ 96 MiB, median 4–5 ms |
+| V5 Initiating failure | first `OutOfMemoryError` in `DataOutputBuffer.expandToFit` ← `LocalDataResponse.build` ← `LocalReadRunnable` ← `RFP.executeReadCommand:172` ← `fetchFromSource:639` (T1; T2/T3 the same on a ReadStage worker); the dumps show the claimed holder (above) |
+| V6 Default constraints | yaml diff = directories, addresses, cluster name, `auto_bootstrap` only; RFP thresholds read back 32,000 / 2,000; read-size thresholds off |
+| V7 Acceptable budget | heap 2 GiB (ideal), direct 15,872 MiB as resolved (standing rule); search upward: OOM up to **12 GiB**, boundary at 15,872 MiB, where the 5 s deadline caps concurrency |
+
+**Reason.** When a filtering query has a static-column predicate and the coordinating replica missed a partition deletion, RFP
+marks the static row unresolved. It completes it by reading that replica's **entire partition** with `DataLimits.NONE`, no row filter
+and no paging, then serializes it into one heap `LocalDataResponse` per query (262 MB of stale rows into a 324 MiB array) to return a
+single CQL row. None of those rows passes `incrementCachedRows`, so the control charges 2 per query and never warns. The byte read-size
+thresholds do not apply to the fetch command even when enabled (O-thr). Nothing bounds the bytes across queries: 8 concurrent queries
+exhaust a 2 GiB heap in the first wave, and up to 12 GiB fails at proportionally higher concurrency. Restricting the completion fetch
+to the named rows removes the OOM and keeps every answer.
+
+**Limits of attribution.**
+- The omission is shown in rows (4,002 versions materialized per query against K = 2). At this row count the fetch is still under
+  the 32,000-row threshold, so even a correct count would not have rejected these queries. The OOM depends on wide rows (65 KiB)
+  times concurrency, which no count control bounds (B22's lesson). A stale partition of more than 32,000 rows would show the row-count
+  bypass directly; that was not run.
+- C-agree does not engage RFP at all (D7); I-names is the closer causal control.
+- The two instances share one host (environment deviation). The stale replica coordinates because the client whitelists it; with
+  token-aware routing on RF 2 that happens for about half of a stale replica's keys.
+- F1 (a node down past the 3 h hint window, no repair since) is an external fault applied in setup only.
+- At large heaps the 5 s read deadline and the 32 READ permits are what stop the growth. That is a time bound, not a memory bound
+  (15,872 MiB: 74 % live, 36 % of queries failed).
+- **Not done here (not this stage's scope):** new clue pattern or new holder proposals. The holder is the claimed one, and the
+  U4-style "one partition serialized whole" shape already exists (U4, B17, B20).

@@ -7,13 +7,26 @@
 | Phase-1 case file | [`ExecuteMessage_literal_1000-traceQuery-1000--autonomous`](../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/ExecuteMessage_literal_1000-traceQuery-1000--autonomous.md); stage 4: [`results/ExecuteMessage_literal_1000-traceQuery-1000--autonomous.md`](../../../../capacity-enforcement-exp/cassandra/stage4-runtime-verification/results/ExecuteMessage_literal_1000-traceQuery-1000--autonomous.md) |
 | System / pinned source | Cassandra 5.0.9 (`systems/cassandra/source/`, `build.xml` `base.version` 5.0.9; repo HEAD `8f76f2390` at design time), OpenJDK 11.0.33, **x86_64** node `pc72` |
 | Stage 1 (design) | OOM-agent stage-1 session, owner-approved batch of 2026-11-24, 2026-11-24 ≈ 05:00–06:10 America/New_York |
-| Stage 2 (verify) | pending (a fresh session) |
-| Verdict | `pending` |
+| Stage 2 (verify) | fresh OOM-agent stage-2 session, 2026-11-24 ≈ 20:10–21:50 America/New_York (node runs 18:12–19:35 MST) on **`pc82`** (same node class as the design's `pc72`; §3.1). Two earlier attempts the same day were interrupted (§3.5) |
+| Verdict | **`true positive`** — `verified-OOM · deployment` (bypass, accounting omission) |
 
 ## Summary
 
-- **Conclusion:** pending (stage 2).
-- **Hypothesis (root cause to test):** a client-traced unprepared QUERY (frame flag `0x02`, no permission needed) makes the
+- **Conclusion:** **true positive** (`verified-OOM · deployment`). At shipped defaults and a 2 GiB heap, two client connections
+  that send a traced (frame flag `0x02`) unprepared 16,000,000-byte `USE b28 /*…*/` QUERY in a closed loop crash the node with
+  `OutOfMemoryError: Java heap space` **3/3** (79–141 s). The heap dumps put **64–68 %** of the heap (1.10–1.19 GiB, 72–78
+  arrays of 16 MB) in trace mutations queued on the TRACING stage — the largest owner — while the TRACING queue held only
+  152–156 of its 1000 tasks and the native in-flight counter showed ≤ 30.5 MiB. The same frames untraced survive 0/3 OOM, and
+  a 64 MiB byte bound on queued trace work removes the OOM 0/3. With 8 connections it also fails at 4 GiB (3/3) and 8 GiB
+  (3/3; queue 6.1–6.2 GiB, 76–77 % of the dump); 12 GiB survives because the 1000-task cap is reached first (≈ 250 requests,
+  dropped `_TRACE` > 10,000). Largest failing budget: **8 GiB**.
+- **Root cause:** each traced request leaves two uncut copies of its query text (`sessions.parameters['query']` and the
+  `"Parsing <query>"` event) as mutations on the single-thread TRACING stage. The request does not wait for them
+  (`wait_for_tracing_events_timeout_secs` = 0) and the native in-flight charge is released when the response is flushed, so
+  nothing charges those bytes; the only bound is the stage's queue limit of 1000 **tasks**, not bytes (≈ 7.8 GiB of 16 MB
+  tasks). Producers (request threads) outrun the one tracing thread that writes every 16 MB mutation through the commit log
+  and memtable, so the queue grows until the heap is gone. Tracing needs no permission or server setting (CASSANDRA-10444).
+- **Hypothesis (stage 1, kept):** a client-traced unprepared QUERY (frame flag `0x02`, no permission needed) makes the
   request thread build two trace mutations that each carry the whole query text: the `system_traces.sessions` start row
   (`parameters['query']`, uncut, `QueryMessage.java:138`) and the `system_traces.events` row `"Parsing <query>"`
   (`QueryProcessor.java:896`). Both are queued on the single-thread TRACING stage, whose queue is limited to **1000 tasks**
@@ -369,8 +382,178 @@ largest process ≈ 12 GiB heap + < 1 GiB direct + 1 GiB native, client < 1 GiB,
 
 ## 3. Runs (stage 2)
 
-pending
+Freeze hash checked at the start of stage 2: the `awk … | sha256sum` of §1–§2 gives
+`06eb83a2a9aefe1d7a0a5c07a16773df7fa140fff9d09df07ea315bb82d5c568` = the recorded value. No amendment to §1–§2.
+
+### 3.1 Environment
+
+- **Node:** **`pc82`** (`node1.jason92-326665`), not the design's `pc72`: the batch assigned `pc82` (deviation D1). Same class
+  as claimed in §2.3: x86_64, 40 cores (Xeon E5-2660 v2 @ 2.20 GHz), 125 GiB RAM, 8 GiB swap (unused, `MemorySwapMax=0`),
+  Ubuntu 22.04.2, kernel 5.15.0-203-generic, cgroup v2, OpenJDK 11.0.33+9, Python 3.10.12, hard `nofile` 1,048,576;
+  `/mydata` 753 GiB (654 GiB free) on a rotational volume. `/mydata/s4/` held `3b-B23`, `3b-R12`, `b27`, `r24` (not touched)
+  and no Java process; node lock `/mydata/s4/NODE-LOCK` taken 18:11:45 MST, released 19:37 MST. `cassandra-env.sh` resolves
+  heap 31,744 MiB and `MaxDirectMemorySize` 15,872 MiB for this node, as for `pc72`.
+- **Build** (`harness/build.sh`, log `logs/build.log`): `/mydata/s4/cassandra-base` copied twice to `/mydata/s4/b28/`.
+  Base jar md5 `c560848c966e329bbfdbb143497b1b66` (= §2.3), `conf/cassandra.yaml` md5 `714ee9bf58b3bc1710377ac16bcbba03`
+  (= §2.3), `jvm11-server.options` `fbad82a8…`, `cassandra-env.sh` `8be0588e…`, `jvm-server.options` `26a957bf…`, identical in
+  every run (`conf-md5.txt`). Intervention tree: `iv.patch` applied with `git apply --recount` (diff as applied in
+  `logs/build.log`, same hunks as §2.8), `ant jar` rc 0, jar md5 `e7b6b5ba5790bdb586df39df6deaeef9`; `javap … | grep -c
+  B28_QUEUED_BYTES` = 7 in iv, 0 in base. Repo HEAD `fbf13e8c0` at stage 2.
+- **Resolved at each heap** (`resolved.txt` of every run): `MaxHeapSize` 2,147,483,648 / 4 GiB / 8 GiB / 12 GiB;
+  `MaxDirectMemorySize` 16,642,998,272 (15,872 MiB); in-flight global/per-IP 214,748,364 / 53,687,091 B at 2 GiB,
+  858,993,459 / 214,748,364 at 8 GiB, 1,288,490,188 / 322,122,547 at 12 GiB (JMX `StorageService`), as §2.3;
+  `native_transport_max_frame_size` 16 MiB, `native_transport_max_threads` 128, `native_transport_rate_limiting_enabled`
+  false, `commitlog_segment_size` 32 MiB, `write_request_timeout` 2000 ms, `max_mutation_size` / `memtable_heap_space` /
+  `…in_flight…` null (= heap-derived defaults). `I2b-1` only: `-Dcassandra.wait_for_tracing_events_timeout_secs=10`.
+- **Harness** (`harness/`): `run.sh`, `series.sh`, `client.py`, `monitor.sh`, `Jmx.java`, `summarize.py`,
+  `hprof_oome_thread.py`, `owners.py`, `threadcount.py` as written by the first attempt (§3.5) and byte-identical to what ran
+  on `pc75` (md5 checked); changed only for the node: `series.sh` takes its no-start cutoff from `$CUTOFF` (22:15 MST here),
+  `fetch-logs.sh` takes `$NODE`. Run lists: `list-0.txt` (S0, R2), `list-main-pc82.txt`, `list-2-pc82.txt`. Dumps: each
+  failing run's `.hprof` was analysed in place (initiating thread, then owner totals by nearest owner: `owners.py`, 8–9 s each)
+  and deleted (D4). Raw run logs: `pc82:/mydata/s4/b28/runs/<run>/` (19 MB kept, GC logs deleted at cleanup); excerpts per run in
+  `logs/<run>/excerpts.txt`, series log `logs/series.log`.
+
+### 3.2 Reachability and calibration
+
+- **`S0`** (base, 2 GiB, traced, N = 1; 18:13): every request (3 × S = 1,000,000, 3 × S = 16,000,000) answered `RESULT`,
+  TracingStage `CompletedTasks` **+4 per request**; `system_traces.sessions` has 6 rows, `parameters['query']` length
+  1,000,000 / **16,000,000** (head `USE b28 /*aa`, tail `aa*/`), 2 events per session: `Parsing USE b28 /*aaa…` of length
+  **S + 8** (16,000,008) and `Preparing statement`. JMX names resolve; PendingTasks 0, dropped `_TRACE` 0. As predicted.
+- **`R2`** (ramp 1, 2, 4, 8 × 60 s; 18:15): N = 1: 4.70 req/s, PendingTasks flat (slope −0.03/s), consumer 18.9 tasks/s.
+  N = 2: 5.07 req/s, PendingTasks **+2.54/s** (2 → 160), consumer 17.8 tasks/s. Heap OOM at **+120.2 s**, 0.2 s after the
+  N = 4 step began: the two new connections had opened but never had a request outstanding (client: open 4, outstanding 2,
+  no completion after +120.1 s), so the failing load was N = 2. Dump: TRACING queue 78 arrays, 1,190 MiB, **68.7 %**; memtable
+  11.9 %; in-flight 3.5 %; K ≤ 30.5 MiB. **N₂ = 2** by the frozen rule ("if `R2` fails at N ≤ 2, N₂ = that N") (D2).
+- **Consumer rate:** the one tracing thread completed 16–25 tasks/s in every traced base arm (≈ 8–12 big 16 MB writes/s,
+  ≈ 0.13–0.2 GB/s), below the 0.3–0.6 GB/s estimated in §2.4; its sampled frame was `wait-response` (blocked in
+  `responseHandler.get()` on the local apply) in most samples. At N = 2 the producers made 5.07 req/s (20.3 tasks/s) against
+  17.8 tasks/s consumed: net +2.5 tasks/s, the measured slope; at N = 8 they made ≈ 18–22 req/s (≈ 0.6–0.7 GB/s of copies).
+
+### 3.3 Runs
+
+All runs: S = 16,000,000, one victim at a time on `pc82`, preflight passed, daemon up in ≈ 40 s, shipped `conf/`, client on the
+same node (source IPs `127.1.0.x`). "OOM at" = seconds after full N to the `java.lang.OutOfMemoryError: Java heap space` line;
+the shipped `OnOutOfMemoryError="kill -9 %p"` then ended the daemon. U_h = humongous regions (16 MiB) after GC, max during load.
+Q = bytes in 16 MB arrays whose nearest owner is the TRACING executor's `LinkedBlockingQueue$Node` (dump). K = `RequestsSize` max.
+K_q = TracingStage `PendingTasks` max.
+
+| Run | Build / heap / tracing / N | Endpoint | req/s | K_q (of 1000) | dropped `_TRACE` | K | U_h max | Dump owners (share of dump) |
+|---|---|---|---|---|---|---|---|---|
+| `T2-1` | base / 2 GiB / on / 2 | **OOM at 79.1 s** | 5.28 | 156 | 0 | 30.5 MiB | 116 | **Q 1,190 MiB 67.7 %**, memtable 13.5 %, decode 3.5 %, in-flight 1.7 % |
+| `T2-2` | base / 2 GiB / on / 2 | **OOM at 125.3 s** | 5.15 | 152 | 0 | 30.5 MiB | 116 | **Q 1,144 MiB 66.2 %**, memtable 14.6 %, in-flight 3.5 % |
+| `T2-3` | base / 2 GiB / on / 2 | **OOM at 140.8 s** | 5.16 | 152 | 0 | 30.5 MiB | 116 | **Q 1,099 MiB 64.2 %**, memtable 16.5 %, in-flight 1.8 % |
+| `C2-1` | base / 2 GiB / **off** / 2 | hold 150 s | 11.73 | 0 | 0 | 30.5 MiB | 8 | — (Full GC 0, STW 1 %) |
+| `C2-2` | base / 2 GiB / off / 2 | hold 150 s | 9.91 | 0 | 0 | 30.5 MiB | 23 | — (Full GC 0, STW 10 %) |
+| `C2-3` | base / 2 GiB / off / 2 | hold 150 s | 11.91 | 0 | 0 | 30.5 MiB | 8 | — (Full GC 0, STW 1 %) |
+| `I2-1` | **iv** / 2 GiB / on / 2 | hold 150 s | 7.49 | 13 | 663 | 30.5 MiB | 73 (last 13) | — |
+| `I2-2` | iv / 2 GiB / on / 2 | hold 150 s | 7.65 | 19 | 669 | 30.5 MiB | 76 (last 13) | — |
+| `I2-3` | iv / 2 GiB / on / 2 | hold 150 s | 7.90 | 14 | 799 | 30.5 MiB | 81 (last 13) | — |
+| `T4-1` | base / 4 GiB / on / 8 | **OOM at 5.4 s** | 18.99 | 314 | 0 | 122.1 MiB | 245 | **Q 2,609 MiB 66.6 %**, memtable 13.1 %, in-flight 6.6 %, decode 6.2 % |
+| `T4-2` | base / 4 GiB / on / 8 | **OOM at 6.4 s** | 17.43 | 346 | 0 | 122.1 MiB | 249 | **Q 2,731 MiB 70.8 %**, memtable 9.7 %, decode 6.3 %, in-flight 5.5 % |
+| `T4-3` | base / 4 GiB / on / 8 | **OOM at 7.4 s** | 15.32 | 370 | 0 | 122.1 MiB | 249 | **Q 2,869 MiB 71.0 %**, memtable 8.5 %, in-flight 7.2 % |
+| `T8-1` | base / 8 GiB / on / 8 | **OOM at 12.5 s** | 20.67 | 810 | 0 | 106.8 MiB | 505 | **Q 6,226 MiB 77.2 %**, memtable 11.5 %, decode 3.0 % |
+| `T8-2` | base / 8 GiB / on / 8 | **OOM at 11.5 s** | 22.07 | 791 | 0 | 122.1 MiB | 504 | **Q 6,073 MiB 75.5 %**, memtable 12.0 %, in-flight 3.6 % |
+| `T8-3` | base / 8 GiB / on / 8 | **OOM at 14.5 s** | 17.75 | 807 | 0 | 122.1 MiB | 506 | **Q 6,241 MiB 76.8 %**, memtable 11.2 %, in-flight 2.8 % |
+| `C8-1` | base / 8 GiB / off / 8 | hold 150 s | 45.16 | 0 | 0 | 122.1 MiB | 37 | — (Full GC 0, STW 1 %) |
+| `C8-2` | base / 8 GiB / off / 8 | hold 150 s | 45.17 | 0 | 0 | 122.1 MiB | 40 | — |
+| `C8-3` | base / 8 GiB / off / 8 | hold 150 s | 45.05 | 0 | 0 | 106.8 MiB | 37 | — |
+| `I8-1` | iv / 8 GiB / on / 8 | hold 150 s | 28.52 | 149 | 6,876 | 122.1 MiB | 182 | — |
+| `I8-2` | iv / 8 GiB / on / 8 | hold 150 s | 30.57 | 116 | 7,388 | 122.1 MiB | 183 | — |
+| `I8-3` | iv / 8 GiB / on / 8 | hold 150 s | 28.37 | 135 | 6,841 | 122.1 MiB | 188 | — |
+| `T12-1` | base / 12 GiB / on / 8 | hold 240 s (survived) | 15.70 | **1000** from +12 s | **10,172** | 122.1 MiB | 703 (11,248 MiB; last 536) | — (STW 13 %, Full GC 0) |
+| `S0-iv` | iv / 2 GiB / on / 1 (S0 sequence) | hold | — | 0 | 0 | — | 0 | iv still traces single 1 MB and 16 MB sessions in full (6 sessions, `query` 16,000,000, `Parsing` event 16,000,008) |
+| `I2b-1` (optional) | base + `wait_for_tracing_events_timeout_secs=10` / 2 GiB / on / 2 | hold 150 s | 5.12 | 7 | 0 | 30.5 MiB | 75 (last 10) | — |
+
+- **Initiating failure (V5):** in **every** failing run (R2, T2 ×3, T4 ×3, T8 ×3) the OOME-initiating thread is a
+  `Native-Transport-Requests` thread lexing the next request: `String.toCharArray` ← `ANTLRStringStream.<init>` ←
+  `CQLFragmentParser.parseAnyUnhandled` ← `QueryProcessor.parseStatement:927` ← `getStatement:897` ← `parse:347` ←
+  `QueryMessage.execute:116` (an allowed initiator, §2.7: the attribution is by the dump). Every dump's largest owner is the
+  TRACING queue (one `LinkedBlockingQueue` referenced by `SingleThreadExecutorPlus` ← `Stage`), 64–77 % of the dump; the next
+  is the `system_traces` memtable (8.5–16.5 %, `AtomicBTreePartition` cells, a separate capped domain).
+- **Endpoint without the count cap:** at every failing budget the queue held 152–810 tasks (< 1000) and dropped `_TRACE` was
+  0: the count limit never acted. At 12 GiB the queue reached 1000 tasks at +12 s and stayed there (10,172 dropped), and the
+  daemon survived 240 s with U_h ≤ 703 of 768 regions: the count cap binds just below this heap (boundary, outcome row "12 GiB
+  borderline / survive" of §2.4).
+- **Intervention throughput:** every request was answered in every I run (0 errors). I2 7.5–7.9 req/s vs control 9.9–11.9
+  (−31 % vs the control mean) and the test's 5.2 before failure; I8 28.4–30.6 vs C8 45.1 (−35 %) and T8 17.8–22.1. The
+  prediction "within ± 30 % of the control" is missed by 1–5 points: the iv build still writes traces up to 64 MiB queued
+  (16 MB sessions keep being traced when the queue is short, `S0-iv`), and those writes compete with the requests; it stops
+  no useful work (more requests than the test arm, none refused).
+- **Optional `I2b-1`:** coupling each request to its trace writes (10 s wait) also removes the endpoint 0/1 (queue ≤ 7 tasks,
+  5.12 req/s): requests slow to the consumer's pace instead.
+
+### 3.4 Outcome row and V-table
+
+Outcome row **O1** of §2.7 at 2, 4 and 8 GiB. Classification by measurement (§2.2 map): the claimed domain (queued trace
+mutations) has no byte counter; the counter that covered the same bytes while they were a request, K (`RequestsSize`),
+read ≤ 30.5 MiB at 2 GiB and ≤ 122 MiB at 8 GiB, within C = heap/10 (205 / 819 MiB), while U (queue bytes in the dump) was
+1.10–1.19 GiB and 6.07–6.24 GiB: **U > C, K ≤ C → bypass, accounting omission**; the queue's own count limit (1000 tasks) was
+not reached (K_q ≤ 810).
+
+| | Evidence | Met |
+|---|---|---|
+| V1 Repetition | `T2-1..3` OOM **3/3** at 2 GiB (79–141 s); also `T4-1..3` 3/3 and `T8-1..3` 3/3 | yes |
+| V2 Matched control | `C2-1..3` (same frames, N, IPs, heap, build; tracing flag clear) 0/3, U_h ≤ 23 regions, PendingTasks 0; `C8-1..3` 0/3 | yes |
+| V3 Measurement | U from the heap dumps (nearest-owner totals) and the GC log (humongous regions after GC), independent of K (`RequestsSize`) and K_q (`PendingTasks`, JMX) | yes |
+| V4 Intervention | `I2-1..3` (64 MiB byte bound on queued trace work, separate build, diff saved) 0/3 at 2 GiB; `I8-1..3` 0/3 at 8 GiB; requests answered, throughput recorded; the original failure reproduced on the unmodified build (`T2`, `T8`) | yes |
+| V5 Initiating failure | stdout `java.lang.OutOfMemoryError: Java heap space` + `OnOutOfMemoryError` kill; initiating NTR thread stack (above); dump of every failing run: TRACING queue the largest owner, 64–77 % | yes |
+| V6 Default constraints | shipped `conf/` md5-identical in every run, no capacity `-D`; TRACING queue 1000 (hard-coded), wait 0 s, in-flight heap/10 and heap/40, NTR 128, frame 16 MiB, connections and rate limiting off, memtable heap/4, commit log 32 MiB, `max_mutation_size` 16 MiB resolved as §2.3; the patch only in iv, the property only in `I2b-1` | yes |
+| V7 Acceptable budget | heap 2, 4, 8 GiB (≥ 512 MiB, standing rule; 2 GiB ideal), direct auto 15,872 MiB, no container limit; largest failing budget **8 GiB 3/3**, 12 GiB survives 0/1 (boundary set by the count cap) | yes |
+
+Conditions label **`deployment`**: no supporting deviation in the test arm (client-chosen tracing is client behaviour; the JMX
+poller, thread sampler and disk monitor ran identically in all arms; no forced GC or histogram during load).
+
+### 3.5 Deviations (dated)
+
+- **D1 (2026-11-24) node:** `pc82` instead of the design's `pc72` (batch assignment); same class and software (§3.1).
+- **D2 (2026-11-24) N₂ = 2:** the frozen rule applied to `R2` on `pc82` (failure under N = 2 load, 0.2 s after the N = 4 step
+  began, before either new connection had a request outstanding). The 2 GiB set (`T2`, `C2`, `I2`, `I2b-1`) therefore ran at
+  N = 2; the budget search and the 8 GiB set ran at N = 8 as designed. The first attempt (below) read its own `R2` (OOM 0.3–1.3 s
+  into the N = 4 step) as N₂ = 4.
+- **D3 (2026-11-24) interruptions and restart.** *Attempt 1* (≈ 15:00–16:27 America/New_York; node runs 13:04–14:27 MST on
+  **`pc75`**) built the harness, ran one invalid `S0` (`run.sh` unbound-variable error, fixed) and then the whole design
+  (S0, R2, N₂ = 4: T2 3/3 OOM, C2 0/3, I2 0/3, T4 3/3, T8 3/3, T12-1 survived at the count cap, C8 0/3, I8 0/3, S0-iv, I2b-1
+  0/1, T4 repeats), but it was **stopped by the owner at ≈ 16:25** before any write-up. *Attempt 2* (until the **API usage limit
+  at ≈ 18:03**) left no node data or case-file change. This session (attempt 3) reused attempt 1's harness unchanged except for
+  the node/cutoff parameters, and **re-ran every run cleanly on `pc82`** from fresh copies of the base tree (18:12–19:35 MST);
+  every reading in §3.2–§3.4 is from `pc82`. Attempt 1's excerpts are kept as corroboration in `logs/attempt1-pc75/` (same
+  node class, same build md5, same outcome in every arm) and are not counted in the V-table. Its small run logs remain at
+  `pc75:/mydata/s4/b28/` (18 MB, no dumps, no build trees).
+- **D4 (2026-11-24) dumps not kept:** §2.7 planned to keep every 2 GiB dump; each dump was analysed in place (initiating
+  thread + owner totals, `logs/<run>/excerpts.txt`) and deleted, per the batch's rule to delete bulk data.
+- **D5 (2026-11-24) linger:** `loginctl` linger for `jason92` was already enabled on `pc82` before the run; left as found
+  (not enabled/disabled by this session).
+- **Timestamps:** node clock MST (America/Denver), Cassandra logs UTC, controller America/New_York.
+- **Cleanup:** every process this session started stopped (no `CassandraDaemon`, client, monitor or series process; no
+  `b28-*` user scope; ports 7000/7199/9042 free); `cassandra/`, `cassandra-iv/` and the GC logs deleted on `pc82`; left there:
+  `/mydata/s4/b28/{harness,runs,build.log,build-iv-ant.log,TraceStateImpl.java.orig}` (19 MB). Driver PID file removed, node
+  lock released.
 
 ## 4. Conclusion (stage 2)
 
-pending
+**Verdict: `true positive`.** Protocol status: **`verified-OOM · deployment`** (bypass, accounting omission; interpretation:
+suspected design gap). Largest failing budget **8 GiB** (3/3); 12 GiB survives (count cap binds first).
+
+**Reason.** A client may set the tracing flag on any request, and for an unprepared QUERY Cassandra 5.0.9 stores the query
+text uncut twice per request — in the start-session mutation (`parameters['query']`) and in the `"Parsing <query>"` event —
+and queues both on the single-thread TRACING stage without waiting for them. The native in-flight limit charges the request
+only until its response is flushed, and the TRACING queue counts tasks (1000), not bytes, so the copies are charged by
+nothing. With 16 MB query texts the one tracing thread (≈ 16–25 tasks/s, each 16 MB write through the commit log and
+memtable) falls behind two request connections, and the heap fills with queued 16 MB arrays: OOM 3/3 at 2 GiB, 4 GiB and 8
+GiB, with the TRACING queue the largest owner (64–77 % of every dump) while its own count read 152–810 and the in-flight
+counter ≤ 122 MiB. The same frames untraced survive (0/3 at 2 and 8 GiB), and adding the missing 64 MiB byte bound on
+queued trace work removes the OOM (0/3 at 2 and 8 GiB) while every request is still answered, so the queued trace copies
+cause the failure. All capacity constraints are at their shipped defaults and the budgets meet V7. The count cap does
+bound the queue at ≈ 250 such requests (≈ 7.8 GiB), so a 12 GiB heap survives this payload: the boundary lies between
+8 and 12 GiB, which includes the 2 GiB ideal budget and common deployment heaps but not this node's auto-resolved
+31,744 MiB.
+
+**Limits of attribution.** The initiating allocation is the next request's lexer copy (`ANTLRStringStream`), not a trace
+task; the attribution rests on the dumps and on the control/intervention pair. Client and server shared one node
+(`127.0.0.1`); the client is light (Python, ≤ 8 connections). The memtable copies of trace rows (8.5–16.5 % of the dumps)
+are a separate, capped domain (`memtable_heap_space` heap/4) and are not claimed. Only the 16 MB `USE` + comment payload
+was tested; a shorter query text needs proportionally more requests per byte and meets the count cap sooner.
+
+**Write-back for the filer:** candidate row OC-453 → `true positive (B28)`; no retry row; no new holder to propose; no new
+clue pattern (the shape is covered by CP-2 item count not bytes, CP-3 counter released before the memory is freed, and CP-5
+accepting queue with a slow consumer).

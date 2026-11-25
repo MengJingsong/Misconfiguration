@@ -1,0 +1,19 @@
+dump T-3.hprof: all objects 3704.3 MiB shallow; arrays >= 1048576 B: 170, 3627.9 MiB (live 3265.1 MiB)
+nearest-owner shares (of the dump total | of live arrays >= min):
+  O_QR    1586.9 MiB   42.8% |  48.6%
+  O_QL     946.1 MiB   25.5% |  29.0%
+  O_M      518.8 MiB   14.0% |  15.9%
+  O_L        0.0 MiB    0.0% |   0.0%
+  O_F      199.4 MiB    5.4% |   6.1%
+  O_O       14.0 MiB    0.4% |   0.4%
+  O_unreached      0.0 MiB    0.0% |   0.0%
+  O_unreachable    362.8 MiB    9.8% |  11.1%
+Q = QR + QL = 2533.0 MiB = 77.6% of live arrays >= min; largest other M 518.8 MiB -> Q-attributed (frozen test): YES
+[QR] char[] 32000000 via frame:ReadStage: 549 MiB; byte[] 16000000 via frame:ReadStage: 412 MiB; byte[] 32000000 via frame:ReadStage: 244 MiB; byte[] name~2S via frame:ReadStage: 183 MiB; byte[] 16000000 via frame:Native-Transport-Requests: 76 MiB; byte[] 32000000 via frame:Native-Transport-Requests: 61 MiB; char[] 32000000 via frame:Native-Transport-Requests: 61 MiB
+[QL] byte[] name~2S via org.apache.cassandra.exceptions.QueryCancelledException: 916 MiB; byte[] 32003751 via frame:AsyncAppender-Worker-ASYNCDEBUGLOG: 31 MiB
+[M] byte[] 16000000 via org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation: 473 MiB; byte[] name~2S via frame:ScheduledTasks: 31 MiB; byte[] 16000000 via frame:ScheduledTasks: 15 MiB
+[F] byte[] 16000000 via frame:Native-Transport-Requests: 122 MiB; byte[] 16000000 via frame:epollEventLoopGroup-5: 76 MiB; byte[] 1048576 via io.netty.util.internal.InternalThreadLocalMap: 1 MiB
+[O] byte[] 1048576 via other: 14 MiB
+[unreachable] byte[] 32000002 via -: 214 MiB; char[] 32000000 via -: 122 MiB; int[] 2097148 via -: 8 MiB; int[] 1048572 via -: 4 MiB; int[] 711360 via -: 3 MiB; int[] 711340 via -: 3 MiB; int[] 432452 via -: 2 MiB; int[] 430586 via -: 2 MiB
+live counts: {'ch.qos.logback.classic.spi.LoggingEvent': 160, 'org.apache.cassandra.exceptions.QueryCancelledException': 62, 'org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation': 51} ; LoggingEvents carrying a QCE: 30 (live 30); worker holds one: True
+byte[16,000,000] live: 77; arrays of 2S..2S+400 B live: 47; 4S..4S+400 B live: 10

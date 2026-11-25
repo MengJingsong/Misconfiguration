@@ -1,0 +1,25 @@
+[2026-11-24 12:12:49 EST] ARM T-2G-2 arm=A heap=2G shape=S16 tables=t1 c=4 session=[profileload b26 t1] ret= ntheap=default
+[2026-11-24 12:12:50 EST] started T-2G-2 pid 590444 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b26-T-2G-2-1795540369.scope
+[2026-11-24 12:12:56 EST] ready T-2G-2
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/b26/runs/T-2G-2/cassandra-1795540369-pid590444.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-24 12:13:01 EST] GC.run T-2G-2
+[2026-11-24 12:13:06 EST] warm-up 20 s
+SUMMARY shape=S16 tables=t1 c=4 secs=20 ok=2419 err=0 reads_s=121.0 p50=31 p99=58 max=129 errs={} lastErr=
+[2026-11-24 12:13:42 EST] client pid 591184
+[2026-11-24 12:13:56 EST] session start: nodetool profileload b26 t1
+/mydata/s4/b26/harness/victim-ctl.sh: line 42: 590444 Killed                  env CASSANDRA_CONF=$R/conf CASSANDRA_LOG_DIR=$R/logs $HE CASSANDRA_HEAPDUMP_DIR=$R JVM_EXTRA_OPTS="-XX:NativeMemoryTracking=summary -Xlog:gc*=info,gc+heap=info,safepoint=info:file=$R/gc.log:time,uptime,level,tags:filecount=20,filesize=50m" setsid nohup systemd-run --user --scope --unit="b26-$L-$(date +%s)" -p MemorySwapMax=0 "$BUILD/bin/cassandra" -f < /dev/null > "$R/stdout.log" 2>&1
+[2026-11-24 12:14:10 EST] VICTIM DEAD at session+14s
+[2026-11-24 12:14:14 EST] OOM/GC check
+INFO  [Service Thread] 2026-11-24T17:14:04,776 GCInspector.java:286 - G1 Old Generation GC in 324ms.  G1 Old Gen: 2020993032 -> 1978250704; 
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /mydata/s4/b26/runs/T-2G-2/cassandra-1795540369-pid590444.hprof ...
+Heap dump file created [2031093288 bytes in 2.291 secs]
+#
+# java.lang.OutOfMemoryError: Java heap space
+# -XX:OnOutOfMemoryError="kill -9 %p"
+#   Executing /bin/sh -c "kill -9 590444"...
+-rw-------  1 jason92 misconfiguration 2031093288 Nov 24 10:14 cassandra-1795540369-pid590444.hprof
+pauses=238 full_gcs=45 total_pause=5s max60=9% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=HeapDumper@76.512s,ReportJavaOutOfMemory@78.803s
+[2026-11-24 12:14:16 EST] stopped T-2G-2
+OOM type="java.lang.OutOfMemoryError: Java heap space" at session+14s slow=0 cancelled=0 lastS=[S 27,4,1748,NoHostAvailableException:36|TransportException:4,0,-1,-1,-1,NoHostAvailableException: All host(s) tried for query failed (no host was tried)]
+[2026-11-24 12:14:16 EST] END T-2G-2 OOM type="java.lang.OutOfMemoryError: Java heap space" at session+14s slow=0 cancelled=0 lastS=[S 27,4,1748,NoHostAvailableException:36|TransportException:4,0,-1,-1,-1,NoHostAvailableException: All host(s) tried for query failed (no host was tried)]

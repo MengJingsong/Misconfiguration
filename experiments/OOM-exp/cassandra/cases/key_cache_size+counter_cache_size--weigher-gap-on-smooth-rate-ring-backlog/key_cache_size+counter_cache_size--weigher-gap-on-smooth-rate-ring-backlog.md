@@ -7,12 +7,19 @@
 | Phase-1 case file | [`key_cache_size-create-size--autonomous`](../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/key_cache_size-create-size--autonomous.md), [`counter_cache_size-putcachedcounter-capacity--autonomous`](../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/counter_cache_size-putcachedcounter-capacity--autonomous.md) (phase-1 row OC-2) |
 | System / pinned source | Cassandra 5.0.9 (`systems/cassandra/source/`; on the nodes `ms0611:/mydata/s4/cassandra-base`, jar md5 `1becab414e5f…`, the build R11 and R19 ran) |
 | Stage 1 (design) | phase-2 OOM agent, stage 1 (Claude Opus 5.5, fresh subagent), 2026-11-24 05:40–06:40 EST |
-| Stage 2 (verify) | pending (a fresh agent); ring V `ms0611`, R1 `ms0625`, R2 `ms0617`, client `ms0604` |
-| Verdict | `pending` |
+| Stage 2 (verify) | phase-2 OOM agent, stage 2 (Claude Opus 5.5, fresh session), attempt 3, 2026-11-24 18:01 – 2026-11-25 ≈ 00:00 EST (paused 18:10–20:10 by the API usage limit); ring V `ms0611`, R1 **`ms0640`** (for `ms0625`, dated deviation), R2 `ms0617`, client `ms0604` |
+| Verdict | **retry** (`candidate`; frozen §2.6 A stop: no rate SMOOTH → `retry (inflow)`) |
 
 ## Summary
 
-- **Conclusion:** pending (stage 2). Design: the same three arm types as R19 (T shipped weigher, P weigher that charges
+- **Conclusion:** **retry** (stage 2, 2026-11-24). The frozen rate calibration ended the design: at 6,000, 5,600 and 5,200
+  writes/s the E arm survived N = 200 k but was `NOT_SMOOTH` every time, because V's own GC pauses under the backlog
+  fill all 4,096 in-flight slots (t_sat 9–15 s) — so §2.6 A stops with `retry (inflow)` before any counted arm.
+  Uncounted diagnostics declared before their readings, at r = 5,200 and N = 200 k (5 T, 5 P, 3 E): **heap OOM T 4/5
+  (3/5 if the late OOM of dT1 is counted as unresolved), P 1/5, E 0/3**; pre-burst live T 392, P 230, E 120 MiB; OOM
+  dumps 46.8–47.1 k queued `Mutation` in T, 55.2 k in P. The shape the design predicted, but not counted, and the
+  surviving arms all failed the smoothness rule while the dead ones passed it.
+- **Design (stage 1):** the same three arm types as R19 (T shipped weigher, P weigher that charges
   the per-entry overhead, E caches invalidated) on the same aarch64 RF=3 ring at 2 GiB heaps and shipped defaults, but
   the inflow rate is set from smooth CL=ONE E arms (6,000 → 5,600 → 5,200 writes/s, 16 × 256 in flight, a zero-burst
   pacer), and the fixed total N is then placed by ≥ 3 E arms per N level.
@@ -339,8 +346,154 @@ histogram is on the controller (≤ 10 GB of 30 GiB free). R1/R2 ≤ 3.5 GB per 
 
 ## 3. Runs (stage 2)
 
-pending
+Attempts 1 and 2 are kept below as history. **Attempt 3 is the stage-2 result.**
+
+**Stage-2 attempt 1, 2026-11-24 09:15 EST (fresh OOM agent, Claude Opus 5.5): not run, blocked on node allocation.**
+- Freeze hash re-computed (lines `## 1. Candidate` … the line before the hash line): `c914f2f8…afab`, **matches**.
+- The dispatch assigned this agent one node (`ms0625`) and a 5 h wall-clock cap. The frozen design needs **four**
+  m400s under four locks (§2.3: V `ms0611`, R1 `ms0625`, R2 `ms0617`, client `ms0604`; only `ms0640` may substitute,
+  never for V) and a T0 + 6:15 node plan (§2.9). Read-only check at 09:16 EST: all four had no `NODE-LOCK` and no
+  `CassandraDaemon`, but the other three were not allocated to this agent (the batch dispatch gives one node per case),
+  so taking them could collide with sibling cases. Collapsing the ring onto `ms0625` would change the frozen topology
+  (V's apply rate would share 8 cores with R1, R2 and the 16 × 256 client), which is not a valid amendment.
+- Nothing was started or written on any node; no lock was taken on `ms0625` (nothing to release).
+
+**Stage-2 attempt 2, 2026-11-24 15:37 – ≈ 16:25 EST: stopped by the owner (history; its readings are not used).**
+Built the harness (now in `harness/`), the builds and the golden state (`golden.sh full` 15:40–15:44 EST: one `kv`
+sstable on V, 1,614,344 partitions, 53,321,174 B), then shake (SMOOTH) and the three rate arms: rcal6000 / rcal5600 /
+rcal5200, all E survived, all `NOT_SMOOTH` (t_sat 9 / 9 / 10 s), so the frozen §2.6 A rule ended at `retry (inflow)`.
+It then started six declared diagnostics (`logs/attempt2/diag-plan.txt`); dT5200a (T, 5,200/s, 200 k) ended in heap
+OOM after 191,344 sent, dP5200a and dE5200b were cut by the owner's stop (partial). Small excerpts:
+`logs/attempt2/`; its controller records: `/mydata/r25-evidence/attempt2/`. All of its runs are discarded; attempt 3
+restarted every run from a clean start.
+
+### Stage-2 attempt 3, 2026-11-24 18:01 – 23:10 EST (fresh OOM agent, Claude Opus 5.5)
+
+**Environment and checks.**
+- Freeze hash re-computed at 18:02 EST: `c914f2f8…afab`, **matches**. No amendment to §1–§2.
+- Nodes (all aarch64 m400, OpenJDK 11, cgroup v2): **V `ms0611`** (10.10.1.4), **R1 `ms0640`** (10.10.1.2), **R2
+  `ms0617`** (10.10.1.5), **client `ms0604`** (10.10.1.3). At 18:02 EST none held a `NODE-LOCK` and none ran a
+  `CassandraDaemon` or harness process; the four locks were taken at 18:02:22 EST (`OOM-exp R25 stage2 …`) and released
+  at 23:07 EST. Controller: the local node (`/mydata/r25-evidence/`).
+- Builds (attempt 2's, re-verified): run-orig jar md5 `1becab414e5f` on all four nodes; run-patched (V only) jar md5
+  `1de8e8c5bb6b`, `CaffeineCache.class` contains `b7.entry_overhead`. Harness identical on the controller, the four
+  nodes and `harness/` (file md5s compared).
+- **Golden state reused** (owner's instruction, after checks): `golden-V/R1/R2.tgz` unchanged since 15:44 EST
+  (`gzip -t` OK; V's tar holds one `s2c/kv` sstable `nb-7` with Data 27,075,840 B, Index 23,939,597 B; attempt 2's
+  `golden.sh full` log: 1,614,344 partitions, 53.3 MB = R19's state); it was built with R1 on `ms0640`, the R1 of
+  this attempt. Every arm restored all three tars; every T/P arm's fill met the validity keys (key 100 MiB, counter
+  50 MiB) and its pre-burst `PSMW` / `KeyCacheKey` / `CounterCacheKey` counts equal R11's (1,778,842 / 1,310,720 /
+  468,114 for T, 812,611 / 569,878 / 242,725 for P).
+- Resolved budget on V (every arm): `-Xms2G -Xmx2G`, G1, `MaxDirectMemorySize=15872M` (cassandra-env.sh), scope
+  `swap.max=0`, `memory.max=max`. Constraints at shipped defaults (§2.3); `V-yaml.diff` per arm in `logs/<arm>/`.
+
+**Deviations (dated 2026-11-24).**
+1. **R1 = `ms0640`** in place of `ms0625` (§2.3 allows `ms0640` for any non-V node; the substitution was made by
+   attempt 2 before its `golden.sh`, and the golden state reused here was built with it).
+2. **Stop and restart.** Attempt 2 was stopped by the owner at ≈ 16:25 EST; its partial and diagnostic runs (dT5200a,
+   dP5200a, dE5200b) and its calibration were discarded; its 2.3 GB dump `dT5200a-V.hprof` was deleted unparsed by
+   this attempt. Attempt 3 re-ran shake and every arm from clean starts. The golden state was reused (checked above).
+3. **Pause and T0.** The locks were taken at 18:02 EST; the session paused 18:10–20:10 EST (API usage limit, no
+   process running on any node). §2.9's clock was restarted at **T0 = 20:10 EST** (last-arm limit 02:10 EST, written
+   into `batch.sh`); the driver wrote `DRIVER.pid` and checked `/mydata/r25-evidence/STOP` between arms.
+4. **Uncounted diagnostics after the frozen stop** (below): declared in `logs/diag-plan.txt` at 20:34 EST, during
+   rcal5200 and before its reading. They do not change the verdict.
+
+**Shakedown** (`RATE=6000 FILL_SMALL=1`, T, N = 30 k): ring UN = 3, `RANGEOK`, `TOTAL_REACHED` at 5.08 s, sends 5,750–6,012/s
+from the first second (no stored-permit burst), **SMOOTH**, drained, all tools produced rows.
+
+**A. Rate arms (E, N = 200,000, CL=ONE, 16 × 256; uncounted calibration).**
+
+| Arm | V outcome | time to STOP, achieved rate | per-second sends before t_sat | t_sat (inflightMax ≥ 3,686) | max pending (200 ms), f | max after any GC / after Full GC (MiB) | smooth.py |
+|---|---|---|---|---|---|---|---|
+| `rcal6000` | survive (drained) | 38.2 s, 5,238/s | 1,474–6,005 (89 % ≥ 0.9 r) | 9 s | 47,766, 0.24 | 2,009 / 1,696 | NOT_SMOOTH (89 % ≥ 0.9 r; saturated; achieved < 0.95 r) |
+| `rcal5600` | survive (drained) | 39.7 s, 5,039/s | 5,032–5,850 (89 %) | 9 s | 47,718, 0.24 | 2,008 / 1,692 | NOT_SMOOTH (89 %; saturated; achieved < 0.95 r) |
+| `rcal5200` | survive (drained) | 39.8 s, 5,022/s | 4,927–5,204 (100 %) | 15 s | 38,430, 0.19 | 2,008 / 1,282 | NOT_SMOOTH (saturated before STOP only) |
+
+The saturation is V's own GC: in rcal6000 the second with 1,474 sends and 4,096 in flight is the young pause (157 ms)
+followed by a Full GC (306 ms) at the first heap-full point of the burst (V gc.log 361.1–361.5 s uptime, ≈ 9 s after
+the burst started); further young + Full pairs follow every 4–6 s while the backlog drains. With 4,096 slots, a 0.7–0.8 s stall of V's acks fills every slot
+at 5.2–6 k/s. **§2.6 A outcome:** no rate eligible; `rcal5200` is not smooth → **stop: verdict `retry (inflow)`**.
+No ladder, T-chk or counted arm was run; no "r and N\* fixed" amendment exists.
+
+**Diagnostics (uncounted, declared before their readings; r = 5,200, N = 200,000, the §2.7 order; then dE4800).**
+Columns as `table.py` (full rows in `/mydata/r25-evidence/batch.log`; excerpts `logs/<arm>/`):
+
+| Arm | V outcome | STOP, achieved | sent / ok / err | max pending | pre-burst live MiB | h_stop | max after any / Full GC (n Full) | OOM mark after first send (s) | dump `Mutation` / `StorageProxy$4` | smooth.py |
+|---|---|---|---|---|---|---|---|---|---|---|
+| dT1 | **heap OOM** (late: V alive but not draining at the end of the extended window, died during collection; HeapDumper, ReportJavaOutOfMemory) | — | 178,456 / 174,342 / 4,114 | 46,742 | 392 | — | 2,038 / 2,028 (998) | 690 | 46,788 / 46,787 | SMOOTH (dead arm) |
+| dP1 | survive | 43.5 s, 4,597/s | 200,000 / 200,000 / 0 | 51,986 | 229 | 1,378 | 2,005 / 1,952 (14) | — | — | NOT_SMOOTH (t_sat 15) |
+| dE1 | survive | 39.4 s, 5,071/s | 200,000 / 200,000 / 0 | 34,771 | 120 | 712 | 1,991 / 1,217 (7) | — | — | NOT_SMOOTH (t_sat 10) |
+| dT2 | **heap OOM** before STOP · slow inflow | 80.4 s | 200,000 / 190,601 / 9,399 | 47,720 | 392 | censored | 2,045 / 2,029 (34) | 62.5 | 46,957 / 46,957 | SMOOTH |
+| dP2 | survive | 40.8 s, 4,907/s | 200,000 / 200,000 / 0 | 44,293 | 230 | 1,983 | 1,994 / 1,708 (11) | — | — | NOT_SMOOTH (t_sat 15) |
+| dT3 | **heap OOM** (first error `OutOfMemoryError: Java heap space` on `Native-Transport-Requests-55`) | — | 160,338 / 156,237 / 4,101 | 50,079 | 392 | — | 2,045 / 2,030 (104) | 118 | 47,078 / 47,078 | SMOOTH (dead arm) |
+| dP3 | **heap OOM** | — | 199,948 / 195,836 / 4,112 | 55,076 | 229 | — | 2,043 / 2,030 (82) | 88 | 55,174 / 55,174 | SMOOTH (dead arm) |
+| dE2 | survive | 38.9 s, 5,142/s | 200,000 / 200,000 / 0 | 43,624 | 120 | 1,294 | 2,007 / 1,639 (9) | — | — | NOT_SMOOTH (t_sat 10) |
+| dT4 | **heap OOM** before STOP · slow inflow | 83.4 s | 200,000 / 189,731 / 10,269 | 49,396 | 391 | censored | 2,039 / 2,027 (37) | 66.5 | 46,866 / 46,866 | SMOOTH |
+| dP4 | survive | 41.4 s, 4,835/s | 200,000 / 200,000 / 0 | 44,121 | 229 | 1,510 | 1,991 / 1,721 (10) | — | — | NOT_SMOOTH (t_sat 10) |
+| dE3 | survive | 43.2 s, 4,633/s | 200,000 / 200,000 / 0 | 59,878 | 121 | 2,037 | 2,038 / 2,006 (27) | — | — | NOT_SMOOTH (t_sat 16) |
+| dT5 | survive | 45.2 s, 4,427/s | 200,000 / 200,000 / 0 | 36,812 | 392 | 1,967 | 1,992 / 1,618 (12) | — | — | NOT_SMOOTH (t_sat 10) |
+| dP5 | survive | 40.7 s, 4,916/s | 200,000 / 200,000 / 0 | 45,379 | 232 | 1,458 | 1,992 / 1,728 (10) | — | — | NOT_SMOOTH (t_sat 15) |
+| dE4800 (E, r 4,800, N 250 k) | **heap OOM** before STOP · slow inflow | 80.9 s | 250,000 / 215,838 / 34,162 | 58,563 | 121 | censored | 2,038 / 2,029 (54) | 64.3 | 58,759 / 58,733 | SMOOTH (4,646–4,804/s until death) |
+
+Dump histograms (`hprofhist.py`, `logs/<arm>/dump-hist.txt`): T OOMs `byte[]` 1,600–1,605 MiB in 2.50 M objects, `PSMW`
+1,778,839, `KeyCacheKey` 1.31 M, `CounterCacheKey` 468,114; P OOM `byte[]` 1,748 MiB, `PSMW` 812,608; E OOM (dE4800)
+`byte[]` 1,802 MiB. Every OOM dump is dominated by the queued local writes (`Mutation` = `StorageProxy$4`). All dumps
+were parsed on the controller and deleted.
+
+**Diagnostic reading (not counted).**
+- Counts at (5,200, 200 k): **T 4/5** heap OOM (3/5 if dT1, which was still alive but not draining at the end of the
+  extended window, is counted as `UNRESOLVED` = not OOM, as §2.7 says), **P 1/5**, **E 0/3**. Fisher one-sided 4/5 vs
+  1/5: 0.10.
+- Pre-burst live (forced-GC histogram): T 391–392, P 229–232, E 120–121 MiB → T − P 162, T − E 271 MiB (predicted 164 /
+  272).
+- h_stop median (OOM-censored = 2,048): T 2,048, P 1,510, E 1,294 → T − P 538 MiB (≥ 100). Max after Full GC median:
+  T 2,028, P 1,728, E 1,639. Queued writes at OOM (dumps): T 46.8–47.1 k, P 55.2 k (+8.2 k ≈ 220 MiB at ≈ 28 KiB each).
+- The matched control is close to its own edge: dE3 survived at 2,006 MiB after Full GC (98 %) and dE4800 (a lower
+  rate but 250 k) OOMed. dP3 OOMed with 52 writes left to send.
+- Smoothness: every surviving arm (T, P and E alike) saturated its 4,096 slots during V's first Full GCs (t_sat
+  10–16 s); every dead arm passed `smooth.py`, because its series ends at V's death and the saturation test applies only
+  to survivors. Counting only `SMOOTH` arms (§2.7's > 3 `NOT_SMOOTH` clause) leaves T 3/3, P 1/1, E none — the frozen
+  rule could not give a true positive here even if the arms had been counted.
+
+**Cleanup (23:00–23:08 EST).** Every arm stopped its three `CassandraDaemon`s, samplers, gate logger and client
+(`stopall`); after the batch no `java` process of this user runs on the four nodes, and no driver, arm or dump parser
+runs on the controller (`DRIVER.pid` removed by the driver; no `STOP` file). `/mydata/r25` (builds, golden tars,
+instance data, node run copies, attempt 2's runs) deleted on all four nodes; the controller keeps the per-arm logs
+(`/mydata/r25-evidence/runs/`, 222 MB, gc/system logs, polls) and attempt 2's (`attempt2/`, 55 MB); its build relay
+copy deleted. `loginctl disable-linger` on `ms0611` (now `no`); `ms0640` was `Linger=yes` when this attempt started
+(set by attempt 2 or earlier; its earlier value is not recorded) and was left `yes`; `ms0617` `yes` as at design time;
+`ms0604` `no`. The four `NODE-LOCK`s released 23:07 EST.
 
 ## 4. Conclusion (stage 2)
 
-pending
+**Verdict: retry** · protocol status **`candidate`** (V1–V5 not met for a counted set; no counted arm ran) ·
+mixed direction as designed (S2 unprotected accumulation + B7 accounting gap).
+
+**Reason.** The frozen design fixes the inflow rate before any counted arm: a rate is eligible only when its E arm
+survives `SMOOTH`, and if even 5,200/s is not smooth, §2.6 A stops with `retry (inflow)`. All three rate arms survived
+N = 200 k (max after Full GC 1,282–1,696 MiB) with per-second sends close to r (5,200: 100 % of seconds within ±10 %,
+achieved 5,022/s), but each one filled its 4,096 in-flight slots once V's heap first filled and V paused for a young +
+Full GC pair (t_sat 9–15 s). That stall is the mechanism itself (V's GC under the queued local writes), not a client
+fault, so the "no saturation before STOP" term cannot be met by a surviving arm near the edge at any of the frozen
+rates. In attempt 2 the same three arms gave the same outcome. Uncounted diagnostics at (5,200/s, 200 k), declared
+before their readings, show the predicted shape: heap OOM T 4/5 (3/5 strict), P 1/5, E 0/3; the pre-burst gap
+T − P 162 MiB as predicted; T OOM dumps hold ≈ 47 k queued `Mutation`, the P dump 55 k; h_stop median shift T − P
+538 MiB. These readings are not counted, the T/P split is small for n = 5 (Fisher 0.10), and the E control is itself
+near the edge (dE3 98 % after Full GC). No OOM was reached with any constraint changed (all at defaults; 2 GiB heap).
+`false positive` is not reachable (§2.7): the backlog alone OOMs V on this ring (S2), and here E at 4,800/s, 250 k.
+
+**What a better design should change.**
+1. **Fix the point from these diagnostics** instead of calibrating: r = 5,200/s, N = 200,000 (or N = 195,000 to give
+   E and P a little more room: dE3 98 %, dP3 died 52 writes before STOP), 16 × 256, same ring, golden state, fill,
+   patched P build and decision rule.
+2. **Replace the smoothness rule** before readings: judge every arm (dead or alive) on per-second sends up to STOP or
+   death (≥ 90 % within ±10 % of r, none > 1.10 r) and on pacer lateness (`late` events, total delay), and **drop the
+   in-flight saturation term** (it measures V's GC stalls, which are the mechanism, and applies only to survivors);
+   report t_sat and achieved rate as covariates.
+3. **Fix the late-OOM rule** before readings: a V that is alive but not draining at the end of the extended window
+   and then dies with OOM marks (dT1: HeapDumper 690 s after the first send) is either OOM or `UNRESOLVED`; say which.
+4. **More power:** 8 T + 8 P + 4 E counted from the start (the 5 + 5 set gives at best p = 0.10 at 4/5 vs 1/5), with
+   the queued writes at OOM (dump `Mutation`) and max after Full GC as the continuous readings (h_stop after the first
+   post-STOP pause is noisy: P 1,378–1,983 MiB).
+5. Keep: the zero-burst pacer, 16 × 256 slots, `golden.sh` state, hstop/smooth/table tools; R1 = `ms0640` is fine.

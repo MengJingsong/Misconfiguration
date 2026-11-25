@@ -1,0 +1,87 @@
+##### summary.txt
+endpoint: hold
+run: run C2-2 build=base heap=2G tracing=untraced flags=0 spec=4 hold=150 extra=''
+stdout: INFO  [main] 2026-11-24T20:24:30,209 CassandraDaemon.java:619 - JVM Arguments: [-ea, -da:net.openhft..., -XX:+UseThreadPriorities, -XX:+HeapDumpOnOutOfMemoryError, -Xss256k, -XX:+AlwaysPreTouch, -XX:+
+driver: 2026-11-24T13:25:23.095-0700 load start N=4 hold 150s
+driver: 2026-11-24T13:27:55.939-0700 client ended; daemon alive (hold end)
+resolved: /mydata/s4/b28/runs/C2-2/vm-cmdline.txt:MaxDirectMemorySize=15872M ; /mydata/s4/b28/runs/C2-2/vm-flags.txt:MaxDirectMemorySize=16642998272 ; /mydata/s4/b28/runs/C2-2/vm-flags.txt:MaxHeapSize=2147483648 ; org.apache.cassandra.db:type=StorageService|NativeTransportMaxConcurrentRequestsInBytes|214748364 ; org.apache.cassandra.db:type=StorageService|NativeTransportMaxConcurrentRequestsInBytesPerIp|53687091 ; commitlog_segment_size=32MiB; ; max_mutation_size=null; ; memtable_heap_space=null; ; native_transport_max_frame_size=16MiB; ; native_transport_max_request_data_in_flight=null; ; native_transport_max_request_data_in_flight_per_ip=null; ; native_transport_max_threads=128; ; native_transport_rate_limiting_enabled=false; ;  write_request_timeout=2000ms; ; 
+load: t0 13:25:23; full N at +0 s; end hold at +152.2 s (152.2 s after full N)
+responses ok 3580, errors 0; requests/s overall 23.52; latency median 163 ms p90 189 ms max 275 ms
+jmx samples 346 (500 ms)
+dropped _TRACE max 0
+MutationStage pending max 0
+K RequestsSize max 64000028 B (61.0 MiB)
+heap used (JMX) max 1429 MiB
+PendingTasks max per 10 s: 
+memtable system_traces on-heap max: sessions 0 MiB, events 0 MiB
+GCs 465; heap after GC max 420 MiB median 356 MiB; last 8 after-GC: 359 361 293 357 407 245 357 411
+Full GCs 0
+STW share over last 60 s of GC log: 1%
+U_h humongous regions after GC (16 MiB each): max 17 (272 MiB), median during load 11, last 8: 14 17 10 10 11 11 14 11; before load max 0
+to-space exhausted 0
+RssAnon max 2797 MiB
+scope memory.current max 2830 MiB
+threads samples 17: max NTR 5, runnable 4, lexer 4, TraceKeyspace 0, formatter 0; TracingStage top: none none none none none none none none none none none none none none none none none
+df last: 1795552078 714035 1 1 1 3.98 3.35 2.22
+du at end: 1	/mydata/s4/b28/cassandra/data/commitlog ; 1	/mydata/s4/b28/cassandra/data/hints ; 1	/mydata/s4/b28/cassandra/data/data/system_traces ; 
+dumps: none
+##### driver.txt
+2026-11-24T13:24:26.706-0700 run C2-2 build=base heap=2G tracing=untraced flags=0 spec=4 hold=150 extra=''
+2026-11-24T13:24:26.758-0700 free 698G
+2026-11-24T13:25:06.902-0700 daemon pid 546745 up
+ddl ok
+2026-11-24T13:25:23.095-0700 load start N=4 hold 150s
+2026-11-24T13:27:55.939-0700 client ended; daemon alive (hold end)
+2026-11-24T13:28:01.231-0700 daemon stopped
+2026-11-24T13:28:04.246-0700 END hold
+2026-11-24T13:28:08.499-0700 done
+##### resolved.txt
+/mydata/s4/b28/runs/C2-2/vm-cmdline.txt:MaxDirectMemorySize=15872M
+/mydata/s4/b28/runs/C2-2/vm-flags.txt:MaxDirectMemorySize=16642998272
+/mydata/s4/b28/runs/C2-2/vm-flags.txt:MaxHeapSize=2147483648
+org.apache.cassandra.db:type=StorageService|NativeTransportMaxConcurrentRequestsInBytes|214748364
+org.apache.cassandra.db:type=StorageService|NativeTransportMaxConcurrentRequestsInBytesPerIp|53687091
+commitlog_segment_size=32MiB;
+max_mutation_size=null;
+memtable_heap_space=null;
+native_transport_max_frame_size=16MiB;
+native_transport_max_request_data_in_flight=null;
+native_transport_max_request_data_in_flight_per_ip=null;
+native_transport_max_threads=128;
+native_transport_rate_limiting_enabled=false;
+ write_request_timeout=2000ms;
+##### conf-md5.txt
+714ee9bf58b3bc1710377ac16bcbba03  /mydata/s4/b28/cassandra/conf/cassandra.yaml
+fbad82a853f1b85aea0fa5ea34b6d1bf  /mydata/s4/b28/cassandra/conf/jvm11-server.options
+8be0588e87c594a03360751b1dbf4fbf  /mydata/s4/b28/cassandra/conf/cassandra-env.sh
+26a957bf004efa3b3d91285fb0975750  /mydata/s4/b28/cassandra/conf/jvm-server.options
+c560848c966e329bbfdbb143497b1b66  /mydata/s4/b28/cassandra/build/apache-cassandra-5.0.9-SNAPSHOT.jar
+##### du-end.txt
+1	/mydata/s4/b28/cassandra/data/commitlog
+1	/mydata/s4/b28/cassandra/data/hints
+1	/mydata/s4/b28/cassandra/data/data/system_traces
+##### threads.txt
+1795551908 1 0 0 0 0 none
+1795551918 0 0 0 0 0 none
+1795551928 4 3 3 0 0 none
+1795551938 4 3 3 0 0 none
+1795551949 4 2 2 0 0 none
+1795551959 4 2 2 0 0 none
+1795551969 4 3 3 0 0 none
+1795551980 4 4 4 0 0 none
+1795551990 4 1 1 0 0 none
+1795552000 4 2 2 0 0 none
+1795552010 4 3 3 0 0 none
+1795552021 5 2 2 0 0 none
+1795552031 5 1 1 0 0 none
+1795552041 5 2 2 0 0 none
+1795552052 5 2 2 0 0 none
+1795552062 5 0 0 0 0 none
+1795552072 5 2 2 0 0 none
+##### client (header and step lines)
+# start 2026-11-24T13:25:23-0700 mode=fixed n=4 len=16000000 body=16000007 frame=16000016 flags=0x00 pid=547516 t0=1795551923704 end=1795552073704
+# end 1795552073827 done=3576 err=0
+##### stdout (OOM lines)
+CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V
+INFO  [main] 2026-11-24T20:24:30,209 CassandraDaemon.java:619 - JVM Arguments: [-ea, -da:net.openhft..., -XX:+UseThreadPriorities, -XX:+HeapDumpOnOutOfMemoryError, -Xss256k, -XX:+AlwaysPreTouch, -XX:+UseTLAB, -XX:+ResizeTLAB, -XX:+UseNUMA, -XX:+PerfDisableSharedMem, -Djava.net.preferIPv4Stack=true, -Dchronicle.analytics.disable=true, -XX:-UseBiasedLocking, -XX:+UseG1GC, -XX:+ParallelRefProcEnabled, -XX:MaxTenuringThreshold=2, -XX:G1HeapRegionSize=16m, -XX:+UnlockExperimentalVMOptions, -XX:G1NewSizePercent=50, -XX:G1RSetUpdatingPauseTimePercent=5, -XX:MaxGCPauseMillis=300, -XX:InitiatingHeapOccupancyPercent=70, -Djdk.attach.allowAttachSelf=true, --add-exports=java.base/jdk.internal.misc=ALL-UNNAMED, --add-exports=java.base/jdk.internal.ref=ALL-UNNAMED, --add-exports=java.base/jdk.internal.util=ALL-UNNAMED, --add-exports=java.base/sun.nio.ch=ALL-UNNAMED, --add-exports=java.management.rmi/com.sun.jmx.remote.internal.rmi=ALL-UNNAMED, --add-exports=java.rmi/sun.rmi.registry=ALL-UNNAMED, --add-exports=java.rmi/sun.rmi.server=ALL-UNNAMED, --add-exports=java.sql/java.sql=ALL-UNNAMED, --add-opens=java.base/java.lang.module=ALL-UNNAMED, --add-opens=java.base/jdk.internal.loader=ALL-UNNAMED, --add-opens=java.base/jdk.internal.ref=ALL-UNNAMED, --add-opens=java.base/jdk.internal.reflect=ALL-UNNAMED, --add-opens=java.base/jdk.internal.math=ALL-UNNAMED, --add-opens=java.base/jdk.internal.module=ALL-UNNAMED, --add-opens=java.base/jdk.internal.util.jar=ALL-UNNAMED, --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED, -Dio.netty.tryReflectionSetAccessible=true, -Dio.netty.allocator.useCacheForAllThreads=true, -Dio.netty.allocator.maxOrder=11, -Xlog:gc=info,heap*=trace,age*=debug,safepoint=info,promotion*=trace:file=/mydata/s4/b28/cassandra/bin/../logs/gc.log:time,uptime,pid,tid,level:filecount=10,filesize=10485760, -Xms2G, -Xmx2G, -XX:MaxDirectMemorySize=15872M, -XX:ParallelGCThreads=40, -XX:ConcGCThreads=40, -XX:CompileCommandFile=/mydata/s4/b28/cassandra/bin/../conf/hotspot_compiler, -javaagent:/mydata/s4/b28/cassandra/bin/../lib/jamm-0.4.0.jar, -XX:HeapDumpPath=/mydata/s4/b28/runs/C2-2/cassandra-1795551866-pid546745.hprof, -Dcassandra.jmx.local.port=7199, -Dcom.sun.management.jmxremote.authenticate=false, -Dcom.sun.management.jmxremote.password.file=/etc/cassandra/jmxremote.password, -Djava.library.path=/mydata/s4/b28/cassandra/bin/../lib/sigar-bin, -XX:OnOutOfMemoryError=kill -9 %p, -Dlogback.configurationFile=logback.xml, -Dcassandra.logdir=/mydata/s4/b28/cassandra/bin/../logs, -Dcassandra.storagedir=/mydata/s4/b28/cassandra/bin/../data, -Dcassandra-foreground=yes]
+INFO  [main] 2026-11-24T20:25:05,029 PipelineConfigurator.java:148 - Starting listening for CQL clients on localhost/127.0.0.1:9042 (unencrypted)...

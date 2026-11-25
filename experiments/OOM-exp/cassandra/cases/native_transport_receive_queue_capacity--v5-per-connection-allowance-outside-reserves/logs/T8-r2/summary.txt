@@ -1,0 +1,80 @@
+run T8-r2 arm=T8 heap=8G direct=4G N=14000 W=7 value=125000 M=125074 R=200000 throw=False seconds=240 per_jvm=500 connect_threads=64 calib=False extra=''
+TIME-WAIT check: 1 + N 14000 = 14001 (limit 26000) ok
+harness md5: 2f18ec53c4d427ffdbc72d30b6a11dbd  /mydata/s4/b27/harness/Jmx.java; f9b6fe45096002effb3a36268fc6ddec  /mydata/s4/b27/harness/NativeFlood.java; 2395bec5c620c3dad22d9a38e5bd1246  /mydata/s4/b27/harness/b27-run.py; 4f91920358c0ca96f3851dab31e5fe14  /mydata/s4/b27/harness/flood-logback.xml; 4e99f029b0d7c8372ea9154e3fae6d30  /mydata/s4/b27/harness/hprof-histo.py; 75b756fdcbf24ec0c6d2bffeb1b10f92  /mydata/s4/b27/harness/make-node-yaml.sh; 20be0e589f96f46ec211e2accab1b07f  /mydata/s4/b27/harness/run-2g-set.sh; a7e65c114add6e96a18e33cfac2ef418  /mydata/s4/b27/harness/run-pc91.sh; b14c5b0256551c284b5c977ac7faa3c1  /mydata/s4/b27/harness/run-search-redo.sh; fddd31e15ad5018dbc4067e7efd58919  /mydata/s4/b27/harness/run-search-set.sh; 
+yaml check: yaml ok: harness adds no §2.3 key; shipped read_request_timeout=5000ms, concurrent_reads=32, slow_query_log_timeout=500ms (defaults)
+node pid 843616 scope /sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/oom-b27-T8-r2.scope memory.max 32212254720 (want 32212254720) memory.swap.max 0
+jvm readback: -XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -Xms8G -Xmx8G -XX:MaxDirectMemorySize=4G -javaagent:/mydata/s4/b27/cassandra/bin/../lib/jamm-0.4.0.jar -XX:HeapDumpPath=/mydata/s4/b27/logs/T8-r2/cassandra-1795573074-pid843616.hprof -XX:OnOutOfMemoryError=kill -9 %p
+resolved native_transport_max_message_size: null
+resolved native_transport_max_request_data_in_flight: null
+resolved native_transport_max_request_data_in_flight_per_ip: null
+resolved native_transport_receive_queue_capacity: 1MiB
+resolved native_transport_timeout: 12s
+resolved read_request_timeout: 5000ms
+resolved native_transport_throw_on_overload: false
+resolved native_transport_max_threads: 128
+resolved native_transport_queue_max_item_age_threshold: 1.7976931348623157E308
+resolved native_transport_max_concurrent_connections: -1
+resolved native_transport_max_concurrent_connections_per_ip: -1
+resolved native_transport_idle_timeout: 0ms
+resolved native_transport_rate_limiting_enabled: false
+resolved concurrent_reads: 32
+resolved allow_filtering_enabled: true
+t0 = 1795573125241
+NODE GONE at t=64.2 s
+after stop, CassandraDaemon processes on node0: none
+NativeFlood left: none
+run_id: T8-r2
+arm: T8
+heap_gib: 8
+direct_gib: 4
+N: 14000
+W: 7
+M: 125074
+R: 200000
+throw: False
+extra: 
+t0: 1795573125241
+endpoint: OOM
+oom_line: java.lang.OutOfMemoryError: Java heap space
+endpoint_t_s: 64.211
+dump: /mydata/s4/b27/logs/T8-r2/cassandra-1795573074-pid843616.hprof
+syslog_oom: None
+first_error: None
+histos: [{'t': 20.636, 'qm': 66091, 'bb': 8368519696, 'sc': 14000, 'top': [('[B', 8368519696), ('[Ljava.lang.Object;', 22003416), ('java.nio.DirectByteBuffer', 18040704), ('[I', 15496024)], 'dur_ms': 5055}, {'t': 50.276, 'qm': 0, 'bb': 0, 'sc': 12994, 'top': [], 'dur_ms': 13817}]
+qm_idle: 0
+bb_idle: 27556560
+qm_max: 66091
+U_D1: 8266265734
+bb_max_minus_idle: 8340963136
+qm_per_server_conn: [4.721, 0.0]
+qm_per_conn_max: 4.721
+K_max_global_in_use: 264.0
+G: 858993459
+E: 214748364
+breached_lines: 0
+exceeded_conn_limit_lines: 0
+server_conns_max: 14000
+native_clients_max: 14000.0
+ntr_pending_max: 63256.0
+read_pending_max: 96.0
+heap_used_max: 8252193168.0
+direct_used_max: 1610087866.0
+pool_used_max: 1328418569.0
+discarded_max: 0.0
+timedout_before_max: 3774.0
+paused_max: 0.0
+client: {'sent': 101778, 'ok': 152, 'warned': 0, 'ovl_bytes': 0, 'ovl_other': 2966, 'err': 660, 'outstanding': 98000, 'refused': 0, 'connected': 14000}
+ok_per_s: 2.367195651835355
+load_s: 64.211
+gc_pause_frac_last60: 0.24373505000000012
+gc_pauses_n: 136
+gc_last5: ['-0700][112.368s][843616][843741][info ] GC(145) Pause Full (G1 Evacuation Pause) 8148M->8132M(8192M) 232.402ms', '-0700][112.620s][843616][843741][info ] GC(146) Pause Full (G1 Evacuation Pause) 8132M->8132M(8192M) 251.558ms', '43616][843741][info ] GC(147) Pause Young (Concurrent Start) (G1 Evacuation Pause) 8132M->8132M(8192M) 6.206ms', '-0700][112.859s][843616][843741][info ] GC(148) Pause Full (G1 Evacuation Pause) 8132M->8132M(8192M) 228.553ms', '-0700][113.094s][843616][843741][info ] GC(150) Pause Full (G1 Evacuation Pause) 8132M->8132M(8192M) 234.774ms']
+post_gc_last5_MB: [8131, 8131, 8131, 8131, 8147]
+scope_mem_max: 26098450432
+scope_events: {'low': '0', 'high': '0', 'max': '0', 'oom': '0', 'oom_kill': '0'}
+dump_bytes: 8624808080
+EXPECTED P1: K=0 (max RequestsSize 264.0 <= M 125074); breached lines 0 (0); warned 0 (0); ovl_bytes 0 (0); discarded +0 (0.0); refused 0 (0)
+EXPECTED P2: QM/server conn <= 8 at every histogram (4.721; [4.721, 0.0])
+EXPECTED P10: OOM if QM >= 66280 (66091; endpoint OOM)
+EXPECTED P11: direct max <= N*136KiB+0.1GB and < 0.5 U (1610087866.0 vs 2049696000, 4133132867)
+DONE

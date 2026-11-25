@@ -1,0 +1,19 @@
+dump C8-2.hprof: all objects 7135.7 MiB shallow; arrays >= 1048576 B: 328, 7053.5 MiB (live 4274.2 MiB)
+nearest-owner shares (of the dump total | of live arrays >= min):
+  O_QR    1022.3 MiB   14.3% |  23.9%
+  O_QL    1129.2 MiB   15.8% |  26.4%
+  O_M     1617.4 MiB   22.7% |  37.8%
+  O_L        0.0 MiB    0.0% |   0.0%
+  O_F      489.3 MiB    6.9% |  11.4%
+  O_O       16.0 MiB    0.2% |   0.4%
+  O_unreached      0.0 MiB    0.0% |   0.0%
+  O_unreachable   2779.3 MiB   38.9% |  65.0%
+Q = QR + QL = 2151.5 MiB = 50.3% of live arrays >= min; largest other M 1617.4 MiB -> Q-attributed (frozen test): YES
+[QR] byte[] name~2S via frame:ReadStage: 458 MiB; byte[] 64000086 via frame:ReadStage: 305 MiB; byte[] 16000000 via frame:ReadStage: 259 MiB
+[QL] byte[] name~2S via org.apache.cassandra.exceptions.QueryCancelledException: 1099 MiB; byte[] 32001643 via frame:AsyncAppender-Worker-ASYNCDEBUGLOG: 31 MiB
+[M] byte[] 16000000 via org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation: 763 MiB; byte[] 16000000 via org.apache.cassandra.db.monitoring.MonitoringTask$SlowOperation: 748 MiB; char[] 32000000 via frame:ScheduledTasks: 61 MiB; byte[] name~2S via org.apache.cassandra.db.monitoring.MonitoringTask$SlowOperation: 31 MiB; byte[] 16000000 via frame:ScheduledTasks: 15 MiB
+[F] byte[] 16000000 via frame:Native-Transport-Requests: 488 MiB; byte[] 1048576 via io.netty.util.internal.InternalThreadLocalMap: 1 MiB
+[O] byte[] 1048576 via other: 16 MiB
+[unreachable] byte[] name~2S via -: 1953 MiB; byte[] 64000086 via -: 549 MiB; byte[] 16000000 via -: 107 MiB; byte[] 32000002 via -: 92 MiB; byte[] 32001547 via -: 31 MiB; int[] 2097148 via -: 8 MiB; int[] 1048572 via -: 4 MiB; int[] 697948 via -: 3 MiB
+live counts: {'org.apache.cassandra.db.monitoring.MonitoringTask$SlowOperation': 50, 'ch.qos.logback.classic.spi.LoggingEvent': 59, 'org.apache.cassandra.exceptions.QueryCancelledException': 53, 'org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation': 50} ; LoggingEvents carrying a QCE: 36 (live 36); worker holds one: True
+byte[16,000,000] live: 149; arrays of 2S..2S+400 B live: 52; 4S..4S+400 B live: 6

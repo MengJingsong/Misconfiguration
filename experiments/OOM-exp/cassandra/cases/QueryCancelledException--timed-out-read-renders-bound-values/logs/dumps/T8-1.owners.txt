@@ -1,0 +1,19 @@
+dump T8-1.hprof: all objects 7423.2 MiB shallow; arrays >= 1048576 B: 299, 7311.4 MiB (live 5937.4 MiB)
+nearest-owner shares (of the dump total | of live arrays >= min):
+  O_QR     442.5 MiB    6.0% |   7.5%
+  O_QL    4150.4 MiB   55.9% |  69.9%
+  O_M      839.2 MiB   11.3% |  14.1%
+  O_L        0.0 MiB    0.0% |   0.0%
+  O_F      489.3 MiB    6.6% |   8.2%
+  O_O       16.0 MiB    0.2% |   0.3%
+  O_unreached      0.0 MiB    0.0% |   0.0%
+  O_unreachable   1373.9 MiB   18.5% |  23.1%
+Q = QR + QL = 4592.9 MiB = 77.4% of live arrays >= min; largest other M 839.2 MiB -> Q-attributed (frozen test): YES
+[QR] byte[] name~2S via frame:ReadStage: 214 MiB; byte[] 16000000 via frame:ReadStage: 137 MiB; char[] 32000000 via frame:ReadStage: 61 MiB; byte[] 32000002 via frame:ReadStage: 31 MiB
+[QL] byte[] name~2S via org.apache.cassandra.exceptions.QueryCancelledException: 4120 MiB; byte[] 32001643 via frame:AsyncAppender-Worker-ASYNCDEBUGLOG: 31 MiB
+[M] byte[] 16000000 via org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation: 763 MiB; byte[] name~2S via org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation: 31 MiB; byte[] name~2S via frame:ScheduledTasks: 31 MiB; byte[] 16000000 via frame:ScheduledTasks: 15 MiB
+[F] byte[] 16000000 via frame:Native-Transport-Requests: 458 MiB; byte[] 16000000 via frame:ReadStage: 15 MiB; byte[] 16000000 via frame:epollEventLoopGroup-5: 15 MiB; byte[] 1048576 via io.netty.util.internal.InternalThreadLocalMap: 1 MiB
+[O] byte[] 1048576 via other: 16 MiB
+[unreachable] byte[] name~2S via -: 458 MiB; byte[] 64000086 via -: 427 MiB; byte[] 32000002 via -: 183 MiB; byte[] 32000000 via -: 122 MiB; byte[] 16000000 via -: 76 MiB; byte[] 64000306 via -: 61 MiB; byte[] 32001547 via -: 31 MiB; int[] 2097148 via -: 8 MiB
+live counts: {'org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation': 52, 'ch.qos.logback.classic.spi.LoggingEvent': 279, 'org.apache.cassandra.exceptions.QueryCancelledException': 144, 'org.apache.cassandra.db.monitoring.MonitoringTask$SlowOperation': 1} ; LoggingEvents carrying a QCE: 135 (live 135); worker holds one: True
+byte[16,000,000] live: 92; arrays of 2S..2S+400 B live: 145; 4S..4S+400 B live: 1

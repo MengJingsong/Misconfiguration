@@ -1,0 +1,18 @@
+dump C-2.hprof: all objects 3698.6 MiB shallow; arrays >= 1048576 B: 176, 3551.8 MiB (live 2959.9 MiB)
+nearest-owner shares (of the dump total | of live arrays >= min):
+  O_QR    1648.0 MiB   44.6% |  55.7%
+  O_QL       0.0 MiB    0.0% |   0.0%
+  O_M      793.5 MiB   21.5% |  26.8%
+  O_L        0.0 MiB    0.0% |   0.0%
+  O_F      504.5 MiB   13.6% |  17.0%
+  O_O       14.0 MiB    0.4% |   0.5%
+  O_unreached      0.0 MiB    0.0% |   0.0%
+  O_unreachable    591.8 MiB   16.0% |  20.0%
+Q = QR + QL = 1648.0 MiB = 55.7% of live arrays >= min; largest other M 793.5 MiB -> Q-attributed (frozen test): YES
+[QR] byte[] name~2S via frame:ReadStage: 610 MiB; byte[] 16000000 via frame:ReadStage: 443 MiB; byte[] 64000086 via frame:ReadStage: 305 MiB; char[] 32000000 via frame:ReadStage: 244 MiB; byte[] name~2S via frame:Native-Transport-Requests: 31 MiB; byte[] 16000000 via frame:Native-Transport-Requests: 15 MiB
+[M] byte[] 16000000 via org.apache.cassandra.db.monitoring.MonitoringTask$SlowOperation: 748 MiB; byte[] name~2S via frame:ScheduledTasks: 31 MiB; byte[] 16000000 via frame:ScheduledTasks: 15 MiB
+[F] byte[] 16000000 via frame:Native-Transport-Requests: 443 MiB; byte[] name~2S via frame:Native-Transport-Requests: 61 MiB; byte[] 1048576 via io.netty.util.internal.InternalThreadLocalMap: 1 MiB
+[O] byte[] 1048576 via other: 14 MiB
+[unreachable] byte[] name~2S via -: 458 MiB; byte[] 64000086 via -: 122 MiB; int[] 2097148 via -: 8 MiB; int[] 1048572 via -: 4 MiB
+live counts: {'org.apache.cassandra.exceptions.QueryCancelledException': 31, 'org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation': 31, 'ch.qos.logback.classic.spi.LoggingEvent': 1, 'org.apache.cassandra.db.monitoring.MonitoringTask$SlowOperation': 50} ; LoggingEvents carrying a QCE: 0 (live 0); worker holds one: False
+byte[16,000,000] live: 109; arrays of 2S..2S+400 B live: 24; 4S..4S+400 B live: 9

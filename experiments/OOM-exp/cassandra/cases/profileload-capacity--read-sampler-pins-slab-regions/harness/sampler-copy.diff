@@ -1,0 +1,17 @@
+--- /tmp/b25-Sampler.orig.java	2026-11-24 07:18:42.134490167 -0700
++++ src/java/org/apache/cassandra/metrics/Sampler.java	2026-11-24 07:18:42.150490528 -0700
+@@ -109,7 +109,13 @@
+     public void addSample(final T item, final int value)
+     {
+         if (isEnabled())
+-            samplerExecutor.submit(() -> insert(item, value));
++        {
++            @SuppressWarnings("unchecked")
++            final T retained = item instanceof java.nio.ByteBuffer
++                               ? (T) org.apache.cassandra.utils.ByteBufferUtil.minimalBufferFor((java.nio.ByteBuffer) item)
++                               : item;
++            samplerExecutor.submit(() -> insert(retained, value));
++        }
+     }
+ 
+     protected abstract void insert(T item, long value);

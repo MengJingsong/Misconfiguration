@@ -1,0 +1,7 @@
+H0=4G (CAL-c OOM at 2 GiB); k_sel=4; k_c=2
+2026-11-24T07:41:26 C-1 OOM at H0=4G -> frozen rule: raise H0 once to 8G for T, C, I; budget search starts at 15872M. C-2, C-3, I-1..3 at 4G continue as recorded extra readings.
+2026-11-24T07:43:20 C-2 OOM at 4G too (reads at k=2 cross the 5 s deadline under load, then abort renders, R_Q 31). Amendment A-2: add control C1 at k=1 (CAL-b1 f=0, ok median 1125 ms >= 600 ms, the next k meeting the frozen k_c criteria; 4.4x below the deadline) at H0=8G x3 and, if time allows, at 4G x3; the k=2 control stays reported.
+2026-11-24T08:42:00 C1x8 1/3 OOM (mixed) -> frozen rule: two repeats C1x8-4, -5 queued after T16-1.
+2026-11-24T08:55:51 T16-1 OOM at 182.5 s -> T31-1 queued.
+2026-11-24T08:56:22 C8 (k=2) 3/3 OOM after the H0 raise = frozen row O4 (retry). Amendment A-3 (supplementary, before its readings): run the O4 remedy control now: base, 8 GiB, k=2, N=8, 150 s x3 (CN8-1..3), after T31-1; it does not change the frozen outcome mapping.
+2026-11-24T09:23:14 CN8 0/3 (A-3 supplementary). T31-1 OOM at 242.8 s: no surviving budget step -> RN not applicable. Repeats at the largest failing heap (31744M) as the stopping budget allows: T31-2, T31-3.

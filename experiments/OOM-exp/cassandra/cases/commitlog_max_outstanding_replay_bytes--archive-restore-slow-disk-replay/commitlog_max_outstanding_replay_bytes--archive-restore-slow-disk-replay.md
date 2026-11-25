@@ -7,8 +7,8 @@
 | Phase-1 case file | [`commitlog_max_outstanding_replay_bytes-handlemutation-pendingmutationbytes--autonomous`](../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/commitlog_max_outstanding_replay_bytes-handlemutation-pendingmutationbytes--autonomous.md) |
 | System / pinned source | Cassandra 5.0.9 (`systems/cassandra/source/`, `build.xml` `base.version` 5.0.9, last source commit `afcc4348`; repo HEAD `8f76f239` at design time); on `pc91` the built tree `/mydata/s4/cassandra-base` (jar sha256 prefix `570b5249d9b9a43f`, the same on all five x86 nodes, checked 2026-11-24 05:47 EST) |
 | Stage 1 (design) | phase-2 OOM agent, stage 1 (Claude Opus 5.5, workflow subagent), owner-approved batch of 2026-11-24, ≈ 05:30–06:15 America/New_York |
-| Stage 2 (verify) | pending (a fresh agent session) |
-| Verdict | `pending` |
+| Stage 2 (verify) | phase-2 OOM agent, stage 2 (Claude Opus 5.5, fresh workflow subagent), 2026-11-24 09:16–10:30 America/New_York on `pc91` (lock held 09:16:32–10:03:47) |
+| Verdict | **true positive** — `verified-OOM · deployment` (proposed; pending the researcher's review of the archive restore as a deployment event and the 100 ms dm-delay data volume as an external fault, else `diagnostic`) |
 
 IDs used here: **R23** = this case; **B8** = bypass case 8 (same replay bound; `verified-OOM · diagnostic` with restore
 emulation by deleting sstables (X) and a Byteman flush stall (S)); **B15** = bypass case 15 (same bound; `verified-OOM ·
@@ -20,8 +20,19 @@ keeps (`Mutation.java:493`); **P64** = the B8 payload, one `map<int,int>` of 5,9
 
 ## Summary
 
-- **Conclusion:** pending (stage 2).
-- **Root cause:** pending (stage 2). Hypothesis: the replay queue's bound (1,024 mutations / 64 MiB) counts serialized
+- **Conclusion:** **true positive.** A documented point-in-time restore from the commit-log archive (snapshot put back,
+  archived segments restored and replayed) onto a node of the **same** 1 GiB heap whose data volume has a constant
+  100 ms write latency dies with a **Java heap OOM in start-up replay 3/3** (x86 `pc91`, every constraint at its shipped
+  default, no Byteman, no sstable deletion outside the restore, no heap change). Matched control (same archive, PIT just
+  after B1) started 3/3; intervention (replay count bound 64) started 3/3 and replayed all 2,420 mutations; the same
+  restore on the undelayed volume started (N1). Upward search: 1,280 MiB OOM 1/1; 1,536 MiB started at 94 % live;
+  2,048 MiB started. Status `verified-OOM · deployment` (proposed, pending review of the slow volume as an external fault).
+- **Root cause:** the replay queue's bound (1,024 mutations / 64 MiB) counts serialized bytes; each queued P64 mutation
+  holds ≈ 0.88 MiB of heap (14× its 63.7 KiB count). With the data volume slow, all 32 appliers park on the full memtable
+  pool within 1–2 s of replay start while `main` keeps deserializing; at 1 GiB the queue holds ≈ 620–640 MiB at 700–731
+  mutations (K ≈ 44–46 MiB, under both limits) beside the 256 MiB pool, and the heap is exhausted before the bound blocks
+  the reader. The restore volume itself is unbounded relative to the replaying JVM (2,420 post-snapshot mutations ≈ 8.8 pools).
+  Stage-1 hypothesis (confirmed): the replay queue's bound (1,024 mutations / 64 MiB) counts serialized
   bytes, so for tiny-cell mutations it admits ≈ 0.9 MiB of heap per counted 63.7 KiB (≈ 14–15×, B8 / B15 ledgers).
   A documented point-in-time restore replays every archived segment written after the restored snapshot — many
   memtable pools' worth on a node of the **same** heap — and when the data volume is slow, the appliers park on a
@@ -360,8 +371,194 @@ and `archive/`; keep `runs/`, `harness/`, the kept dump; leave nothing running.
 
 ## 3. Runs (stage 2)
 
-pending
+*Stage 2, 2026-11-24, fresh session. Times are America/New_York unless marked (node clock is MST = EST − 2 h; Cassandra logs
+UTC). Freeze hash checked before any action: `0348c9d4…ecca7` — **match**.*
+
+### 3.1 Environment and setup (S0)
+
+- **Node:** `pc91` (the design's node; no node deviation). x86_64, 32 threads, 125 GiB RAM, Ubuntu 22.04, kernel
+  5.15.0-203, cgroup v2, OpenJDK 11.0.33. Before the lock: no `CassandraDaemon`, no loop/extra dm device, load 0.00,
+  `/mydata/s4/NODE-LOCK` absent (the phase-1 lock seen at design time was gone). Lock taken 09:16:32 (`OOM-exp R23 stage-2`),
+  released 10:03:47. Series clock: S0 09:20 → last arm 10:02 (≈ 0.7 h of the 5 h budget).
+- **Build:** `/mydata/s4/cassandra-base` copied to `/mydata/s4/r23/cassandra`; jar sha256 `570b5249d9b9a43f6809eb3da562737492192026f974b2edbd20e94bea90176e`
+  (matches the design's prefix). `conf/` identical to the repo's `systems/cassandra/source/conf/` file by file (sha256;
+  only `hotspot_compiler` excluded); nothing copied, no patch, no Byteman, `cassandra.yaml` unchanged in every arm.
+- **Resolved values** (writer and every restore): `-XX:+UseG1GC`, `-Xms=-Xmx` = arm heap, `-XX:MaxDirectMemorySize=15872M`
+  (from RAM), `Global memtable on-heap threshold is enabled at 256MiB` at 1 GiB (heap/4; 320/384/512 MiB at 1,280/1,536/2,048 by
+  the same rule), `concurrent_writes=32`, `memtable_flush_writers=0` in the config dump (auto; dumps show 2
+  `MemtableFlushWriter` + 2 `PerDiskMemtableFlushWriter_0` threads), `memtable_cleanup_threshold=null` (default 1/3: flushes
+  enqueued at 85–88 MiB = 33–34 %), `commitlog_total_space=null` (auto; not printed), replay bounds not set (1,024 / 64 MiB
+  defaults) except in the I arms. Guard scope `MemoryMax` = heap + 4,096 MiB, swap 0; `memory.events oom_kill 0` in every arm.
+- **Harness** ([`harness/`](harness/)): `B8Load.java`, `load.sh`, `logback-load.xml`, `gcsum.py`, `hprofhist.py` from B15;
+  `common.sh` and `slowdisk.sh` from B15 with paths `/mydata/s4/r23` and dm name `r23slow`; new `setup.sh`, `calib.sh`,
+  `mkimg.sh`, `restore.sh`, `g2.py` (G2 reader), `summ.py` (R23 layout), `series.sh`, `rerun.sh`, `ucalc.py` (U/K from class
+  histograms), `archiving-writer.properties`, `archiving-restore.properties.in`, `repo-conf.sha256`. Excerpts in [`logs/`](logs/).
+- **Disk calibration** (S0.3, uncounted; [`logs/calib.txt`](logs/calib.txt)):
+
+| Write delay D | 64 MiB `dd conv=fsync` | 4 KiB `dd conv=fsync` × 10 (mean / max) |
+|---|---|---|
+| 0 ms | 1.44 s (44 MiB/s) | 5 / 14 ms |
+| 100 ms | 1.04 s (62 MiB/s) | 416 / 417 ms |
+| 300 ms | 1.69 s (38 MiB/s) | 1,272 / 1,299 ms |
+| 1,000 ms | 4.27 s (15 MiB/s) | 4,079 / 4,082 ms |
+
+  At D\* = 100 ms the volume keeps its sequential throughput (deep queue) but every synchronous small write (fsync,
+  journal commit, file create) takes ≈ 0.4 s: a volume with ≈ 100 ms write latency, as a network block volume at its
+  IOPS cap or a degraded array would show.
+
+### 3.2 Writer images (G0)
+
+| Image | W0 acked | Snapshot `r23base` (UTC) | B1 acked | `PIT_C` (UTC) | B2 acked | `PIT_T` (UTC) | errors | archive | G0 |
+|---|---|---|---|---|---|---|---|---|---|
+| A1 | 310 | 14:22:29.831 | 160 | 14:22:36.472 | 2,260 | 14:23:25.100 | 0 / 2,730 | 6 segments, 170 MiB | pass |
+| A2 | 310 | 14:36:05.848 | 160 | 14:36:12.487 | 2,260 | 14:37:01.107 | 0 / 2,730 | 6 segments, 170 MiB | pass |
+| A3 | 310 | 14:44:50.051 | 160 | 14:44:56.696 | 2,260 | 14:45:45.320 | 0 / 2,730 | 6 segments, 170 MiB | pass |
+
+After `nodetool drain` the commit-log directory held 1 file and the archive the 6 segments of the run (hard links made by
+`archive_command`); every restore's `Replaying` list had 7 files (6 restored by `restore_command` + the live one). Writer
+GC: no Full GC, ≤ 1 % pause time. Snapshot restore: the table directory's live sstables replaced by the 4 snapshot sstables
+(14 MiB `Data.db`). `Global replay position` was `segmentId=-1, position=0` (some system tables have no sstables), so the
+reader deserializes every archived segment, including the snapshot-covered W0 entries (filtered in the apply task).
+
+### 3.3 Amendments after the freeze (dated, with reason)
+
+- **A1 (2026-11-24 09:35 EST, after K100's readings).** K100 died with a heap OOM ≈ 5 s after T_r, before the first
+  scheduled thread dump (T_r + 8 s); every `jcmd` call failed (`AttachListener::init` itself hit the OOM), so G2 could not be
+  read. Instrument change only: `jcmd VM.uptime` pre-attach at JVM start (the Attach Listener then exists before the heap
+  fills), extra thread dumps at T_r + 1…6 s and extra class histograms at T_r + 2 / 3 s; all design times kept. The ladder
+  step was repeated as **K100b** (same condition, uncounted) and its G2 reading decided D\*. Rule, thresholds and condition
+  unchanged.
+- **A2 (2026-11-24 09:55 EST).** A1's pre-attach sent SIGQUIT before the JVM had installed its signal handlers when heap
+  pre-touch was slow (`-XX:+AlwaysPreTouch`), killing the JVM within 1 s with no `system.log`: first attempts of **T3, I3,
+  U1536, U2048a** were killed by the instrument (outcome `died after 0–1 s`, `jcmd … IOException: No such process`, no GC
+  pause) — **invalid, not counted** (excerpts in `logs/*-invalidA1/`). Fix: pre-attach only after `system.log` shows
+  `JVM Arguments`. The four arms were re-run from clean starts with `rerun.sh` (T3, I3, then the 2.7 search). Because the
+  series driver read the invalid U1536/U2048a as `died`, it ran **U2048b (A3, 2,048 MiB) out of the design order**; it is a
+  valid arm and is counted as the 2,048 MiB point; `rerun.sh` then followed 2.7 from U1536.
+- **U2048b post-processing by hand (agent error, 09:51 EST).** `restore.sh` was rewritten on disk (the A2 fix) while
+  U2048b's copy was running; bash re-read the changed file after the outcome loop and exited, its EXIT trap stopping the JVM
+  63 s after `Starting listening for CQL clients`. Outcome (`started`), `Log replay complete` and GC summary were taken from
+  the arm's `system.log` / `gc.log` and the post-processing lines appended by hand (marked `[manual]` in its `arm.log`).
+  All its dumps and histograms were taken by the script before that point.
+- **Interpretation (no change):** "MemtableFlushWriter in flush I/O" (G2) counts 5.0's `PerDiskMemtableFlushWriter_*`
+  threads (which do the sstable writes) as well as `MemtableFlushWriter:*`; I/O frames counted: `FileChannelImpl.force`,
+  `FileDispatcherImpl.force/write/pwrite`, `fsync`, `open0`, `SyncUtil.force` (`g2.py`).
+- **Not run:** N2, N3 (only if N1 OOMed; it started), U3072 (only if both 2,048 arms OOMed). No other arm dropped.
+
+### 3.4 D\* ladder
+
+| Arm | D | Outcome | G2 dumps (flush writers in I/O; MutationStage in `SubAllocator.allocate`) | D\* decision |
+|---|---|---|---|---|
+| K100 | 100 ms | heap OOM (died 38 s after T_r incl. dump) | none readable (attach failed, see A1) | undecidable |
+| K100b | 100 ms | heap OOM (live 919 → 980 MiB at T_r + 2 → 5 s; Mutation 636 → 700) | T_r + 1 / 2 / 3 s: 2 flush writers in I/O, **32/32** appliers parked → **G2 met** | **D\* = 100 ms** |
+
+K300 and K1000 were not needed.
+
+### 3.5 Counted arms
+
+All at 1,024 MiB unless stated; D = 100 ms except N1 (0); PIT `T` = `PIT_T`, `C` = `PIT_C`. T_r = first `Replaying` line,
+10–11 s after JVM start in every arm. "Live" = `GC.class_histogram` total (after its forced Full GC). U and K from
+[`logs/ucalc.txt`](logs/ucalc.txt) (method of 2.6: `ArrayCell` + one 16 B `SingleItemCellPath` + one 48 B `HeapByteBuffer`
+per `ArrayCell` + `byte[]` beyond the memtable share, scaled from C's `byte[]` per `BufferCell`; K = live `Mutation` × 63.7 KiB).
+
+| Run | Img | Outcome | Live (T_r+2 / +5 s) | Mutation (+2 / +5) | U / K at +5 s | G2 | Replayed / t_map flush charge | GC (Full; max after Full; worst 60 s) |
+|---|---|---|---|---|---|---|---|---|
+| **T1** | A1 | **heap OOM**; JVM gone 45 s after T_r | 829 / 982 MiB | 544 / 706 | 622 / 43.9 MiB | yes (+2…+5, +8; 32/32 parked) | — (died) | 64; 994 M; 51 % |
+| **T2** | A2 | **heap OOM** (dump start ≈ T_r + 17 s); gone 47 s after T_r | 857 / 985 | 567 / 702 | 625 / 43.7 | yes (+2, +3) | — | 67; 993 M; 54 % |
+| **T3** (re-run) | A3 | **heap OOM** (dump start ≈ T_r + 27 s); gone 60 s after T_r | 919 / 979 (+15 s: 990) | 639 / 703 (718) | 620 / 43.7 (+15: 633 / 44.7) | yes (+1…+3, +6, +8) | — | 93; 993 M; 75 % |
+| C1 | A1 | started 39 s | 207 / 210 | 0 / 0 | ≈ 0 | G2C yes (flush writer in I/O, 9/9 dumps) | 160 / 149 MiB | 4; 209 M; 1 % |
+| C2 | A2 | started 38 s | 207 / 210 | 0 / 0 (1 at +3) | ≈ 0 | G2C yes | 160 / 149 MiB | 4; 209 M; 1 % |
+| C3 | A3 | started 38 s | 207 / 210 | 0 / 0 | ≈ 0 | G2C yes | 160 / 149 MiB | 4; 209 M; 1 % |
+| I1 | A1 | started 124 s | 403 / 403 (+15: 406) | 65 / 65 | 61 / 4.0 (+15: 63) | yes (+2…+90) | **2,420** in 98 s / 2,247 MiB | 13; 405 M; 4 % |
+| I2 | A2 | started 126 s | 394 / 394 (+15: 415) | 65 / 65 | 52 / 4.0 (+15: 72) | yes | **2,420** in 100 s / 2,247 MiB | 11; 414 M; 4 % |
+| I3 (re-run) | A3 | started 131 s | 392 / 393 (+15: 411) | 65 / 65 | 50 / 4.0 (+15: 68) | yes | **2,420** in 103 s / 2,247 MiB | 14; 410 M; 4 % |
+| N1 | A1 (D = 0) | started 18 s | 205 / 176 | 16 / 13 | 29 / 0.8 | no (appliers mostly running; flush writers not in I/O) | **2,420** in 7.5 s / 2,247 MiB | 7; 269 M; 2 % |
+
+- **Gates.** G1 (T): each image's I arm replayed 2,420 t_map mutations (≥ 2,250) with 2,247 MiB flush charge (≥ 1.7 GiB);
+  N1 the same; every `Replaying` list had the 7 restored files. G2: met in every T and I arm and in K100b; C met the
+  C form (flush writer in I/O) in every dump. G3: C replayed 160 (≤ 400), t_map flush charge 149 MiB (≤ 200 MiB). All gates pass.
+- **Endpoint (V5).** Each T arm's `stdout.txt`: `java.lang.OutOfMemoryError: Java heap space` → `Dumping heap … Heap dump file
+  created [≈ 1.43 GB …]` → `-XX:OnOutOfMemoryError="kill -9 %p"` (T2 also `OutOfMemoryError thrown from the
+  UncaughtExceptionHandler in thread "AsyncAppender-Worker-ASYNCDEBUGLOG"`, a secondary). The JVM prints no thread for the first
+  OOM (as in B8/B15). The thread dumps before death show `main` inside `CommitLogReader.readMutation` →
+  `Mutation$MutationSerializer.deserialize` → `UnfilteredSerializer.readComplexColumn` / `ByteArrayObjectFactory.cell`
+  (`CommitLogReplayer.replayFiles`), all 32 `MutationStage` threads in `MemtableAllocator$SubAllocator.allocate`, and the
+  `PerDiskMemtableFlushWriter_0` threads in file writes/force on the slow volume. Only two t_map flushes ever started
+  (`Writing Memtable-t_map … 88–105 MiB on-heap`) before death. **Kept dump** (T1, first OOM of the T series, analysed with
+  `hprofhist.py`, [`logs/T1/hprofhist.txt`](logs/T1/hprofhist.txt)): 1,149 MiB shallow; `HeapByteBuffer` 7.58 M, `byte[]`
+  8.40 M, `ArrayCell` **4.16 M** (replay-only), `SingleItemCellPath` 5.87 M, `BufferCell` 1.71 M (pool full),
+  `Mutation` **731** = `PartitionUpdate` 731 → K = 45.5 MiB < 64 MiB and 731 < 1,024; U ≈ 731 × 0.88 ≈ 640 MiB. The dump was
+  deleted after analysis (bulk data; batch rule).
+- **Ledger at 1 GiB (T, T_r + 5 s):** pool (D2) at its cap (1.71 M `BufferCell`, flushes at 85–88 MiB × 3 memtables) +
+  queue U ≈ 620–625 MiB at 702–706 queued mutations (0.88 MiB each; **U/K = 14.2**) + baseline ≈ 100 MiB ≈ 980 MiB live of
+  1,024: no headroom; the reader keeps adding ≈ 0.9 MiB per mutation and the bound (1,024 / 64 MiB) is never reached.
+- **Intervention throughput.** I replays all 2,420 mutations (rejects nothing) in 98–103 s vs 7.5 s on the plain volume
+  (N1); start-up 124–131 s vs C's 38 s. The I queue holds 63–65 mutations, U 50–72 MiB (design predicted ≤ 70 MiB; I2 at
+  +15 s read 72 MiB, within the ± few-MiB error of the `byte[]` share), max live after Full GC 405–414 MiB (≤ 40 %).
+- **Matched control.** C deserializes the same 7 segments (`main` reads all of them; replay complete in 11.6–11.8 s with the
+  post-PIT tasks returning at once), applies 160 mutations (≈ 0.6 pool), never fills the pool and never parks an applier;
+  no live `Mutation` in any histogram; ≤ 20 % live.
+
+### 3.6 Upward budget search (2.7; D\* = 100 ms, PIT_T)
+
+| Run | Img | Heap | Pool (heap/4) | Outcome | Peak queue (Mutation; U / K) | Max after Full GC | GC worst 60 s |
+|---|---|---|---|---|---|---|---|
+| U1536 (re-run) | A1 | 1,536 | 384 MiB | **started** 106 s (2,420 replayed in 78 s) | **1,025** at +5 s (bound reached); U 903 / K 63.8 MiB | 1,439 M (**94 %**) | 16 % |
+| U1280 | A2 | 1,280 | 320 MiB | **heap OOM** (dump start ≈ T_r + 33 s) | 937 at +15 s; U 819 / K 58.3 MiB | 1,253 M (98 %) | 71 % |
+| U2048b (out of order, see 3.3) | A3 | 2,048 | 512 MiB | **started** 88 s (2,420 in 61 s) | **1,025** at +5 s; U 884 / K 63.8 MiB | 1,537 M (75 %) | 6 % |
+
+Per 2.7: 1,536 did not OOM → 1,280 on A2 → OOM. **Largest failing heap 1,280 MiB (1/1)**; 1,536 MiB is the boundary
+(started 1/1, but at 94 % live with the queue held at its count bound, U ≈ 0.9 GiB for K = 63.8 MiB); 2,048 MiB started
+(75 % live, as predicted in 2.4).
+
+### 3.7 Clean-up and what is left
+
+Every JVM and client stopped (checked: no `java`, `B8Load`, script or `hprofhist` process), D = 0, `slowdisk.sh teardown`
+(`r23slow` removed, `/dev/loop0` detached, image file deleted; `dmsetup ls` shows only `emulab-node0--bs`, `losetup -a`
+empty), `img/`, `archive/`, `vol/`, `dumps-keep/` (T1 dump, after analysis), the `cassandra/` copy and `loadcls/` deleted.
+Left on `pc91`: `/mydata/s4/r23/{harness,runs,series.log,*.nohup,ucalc.py}` = 85 MiB of small logs (GC logs, histograms,
+thread dumps). `/mydata/s4/cassandra-base` and other folders untouched. Lock released 10:03:47.
 
 ## 4. Conclusion (stage 2)
 
-pending
+**Verdict: true positive.** Status `verified-OOM · deployment` (**proposed**, pending the researcher's review of (a) the
+commit-log archive point-in-time restore and its snapshot-restore procedure as deployment events and (b) the persistent
+100 ms-write-latency data volume (dm-delay, fsync ≈ 0.4 s, sequential throughput unchanged) as an external fault; if either
+is not accepted, `verified-OOM · diagnostic`). Direction: **bypass · accounting mismatch** (U > C, K ≤ C) on D1, reached
+through the unprotected restore volume (D3).
+
+A node restored with Cassandra's own commit-log archiving (snapshot + archived segments + `restore_point_in_time`) onto the
+same 1 GiB heap the writer ran, with its data directory on a slow volume, died of a Java heap OOM during start-up replay in
+3/3 runs (T1–T3, three independent images), 17–27 s after replay began. The replay queue was under both of its limits at
+death (700–731 queued mutations, K ≈ 44–46 MiB vs 1,024 / 64 MiB) while it held ≈ 620–640 MiB of heap (14×), beside a full
+256 MiB memtable pool: the bound counts serialized bytes, and the restore offers ≈ 8.8 pools of post-snapshot writes that
+nothing ties to the replaying heap. The matched control (same archive, same segments deserialized, PIT just after B1)
+started 3/3; the intervention (count bound 64) started 3/3 and replayed every mutation; the identical restore on the
+undelayed volume (N1) started in 18 s — the slow volume is necessary on this x86 node (appliers keep up otherwise). Every
+capacity constraint was at its shipped default in the test arms; the only constraint change is in the intervention arm.
+
+| | Requirement | Evidence |
+|---|---|---|
+| V1 | ≥ 3 runs reach the endpoint | T1, T2, T3: heap OOM 3/3 (images A1–A3) |
+| V2 | matched control ≥ 3, no endpoint | C1–C3 started 3/3, ≤ 20 % live, no queued `Mutation`; N1 (no delay) started |
+| V3 | U independent of K | class histograms at T_r + 2/3/5 s (U 474–625 MiB vs K 34–44 MiB) and the T1 OOM dump (4.16 M `ArrayCell`, 731 `Mutation`) |
+| V4 | intervention removes the endpoint ≥ 3 | I1–I3 started 3/3, 2,420/2,420 replayed, U ≤ 72 MiB; start-up 124–131 s |
+| V5 | initiating failure | `java.lang.OutOfMemoryError: Java heap space` + `HeapDumpOnOutOfMemoryError` dump in each T arm; thread dumps before death (`main` in `CommitLogReader.readMutation`, 32/32 appliers in `SubAllocator.allocate`); T1 dump histogram |
+| V6 | default constraints | replay bounds, `memtable_heap_space` (heap/4), cleanup threshold, flush writers, `concurrent_writes`, segment size, all unset (shipped defaults, resolved per heap); conf identical to the repo |
+| V7 | acceptable budget | 1,024 MiB (≥ 512 MiB standing rule); largest failing heap **1,280 MiB (1/1)**; 1,536 MiB started at 94 % live (queue at its bound); 2,048 MiB (ideal) started at 75 % live |
+
+**Limits of attribution and conditions.**
+- The endpoint needs the slow data volume (N1 started); D\* = 100 ms was the first ladder rung and met G2 at once. Whether
+  a milder latency (e.g. 20–50 ms) suffices was not tested (the ladder only goes up). The fault is persistent for the whole
+  restart and not timed to replay (unlike B15), but it is still an injected device-mapper delay.
+- The OOM is reached only at heaps ≤ 1,280 MiB here; at 1,536 MiB the count bound (1,024) caps U at ≈ 0.9 GiB and the node
+  starts at 94 % live; at 2 GiB it starts comfortably. The case is therefore a small-to-mid-heap result for this payload
+  (P64: 5,900-entry `map<int,int>`, the densest tiny-cell shape B8 used); denser or larger payloads were not tried (no
+  escalation after an OOM).
+- The heap dump does not record the throwing thread; the queue holder is attributed by the dump/histograms and the thread
+  dumps, as in B8/B15.
+- Invalid first attempts (instrument-killed) and one hand-finished arm are disclosed in 3.3; no counted reading comes from
+  an invalid arm.
+- JIRA (stage 1): restore shape `new`; the under-count itself is CASSANDRA-8639 (`known-fixed (incomplete)`), for stage 3-a.
+- No new holder was revealed (the dump is the predicted D1 + D2 split); the shape is covered by the existing clue patterns
+  for B8/B15 (CP-1, CP-2, CP-10), so no new pattern is proposed.

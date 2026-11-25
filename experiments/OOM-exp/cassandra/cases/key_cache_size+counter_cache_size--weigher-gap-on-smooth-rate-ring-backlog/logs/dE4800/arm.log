@@ -1,0 +1,62 @@
+[22:48:45] args: name=dE4800 type=E V-build=orig N=250000 rate=4800 CL=ONE VX=2G RX=2G sess=16 loadcap=113 fill_small=0 platform=aarch64 client=ms0604
+[22:48:49] stopped V (none)
+[22:48:52] stopped R1 (none)
+[22:48:55] stopped R2 (none)
+[22:49:04] gen V xmx=2G build=/mydata/r25/run-orig
+[22:49:05] restored V from /mydata/r25/golden-V.tgz (53M data, saved_caches: 0 files)
+[22:49:06] gen R1 xmx=2G build=/mydata/r25/run-orig
+[22:49:06] restored R1 from /mydata/r25/golden-R1.tgz (1.1M data, saved_caches: 0 files)
+[22:49:07] gen R2 xmx=2G build=/mydata/r25/run-orig
+[22:49:07] restored R2 from /mydata/r25/golden-R2.tgz (1.1M data, saved_caches: 0 files)
+[22:49:11] launched V pid=810171 unit=r25-V-1795578548 build=/mydata/r25/run-orig swap.max=0 memory.max=max
+[22:50:21] launched R2 pid=403565 unit=r25-R2-1795578618 build=/mydata/r25/run-orig swap.max=0 memory.max=max
+[22:50:21] launched R1 pid=728879 unit=r25-R1-1795578618 build=/mydata/r25/run-orig swap.max=0 memory.max=max
+[22:50:40] ring UN=3
+V pid 810171 build /mydata/r25/run-orig jar md5 1becab414e5f
+V resolved: -XX:+UseG1GC -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M 
+V VM.flags: MaxDirectMemorySize=16642998272 MaxHeapSize=2147483648 
+V VM.uptime at 1795578645827: 98.035 s
+V cgroup: /sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/r25-V-1795578548.scope swap.max=0 memory.max=max
+2026-11-25T03:49:21,875 CacheService.java:121 - Initializing key cache with capacity of 100 MiBs.
+2026-11-25T03:49:21,913 CacheService.java:143 - Initializing row cache with capacity of 0 MiBs
+2026-11-25T03:49:21,919 CacheService.java:174 - Initializing counter cache with capacity of 50 MiBs
+V start info:
+Key Cache              : entries 27, size 2.2 KiB, capacity 100 MiB, 104 hits, 130 requests, 0.800 recent hit rate, 14400 save period in seconds
+Counter Cache          : entries 0, size 0 bytes, capacity 50 MiB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds
+[22:50:58] fill: read 1500000 kv
+RANGEOK kept=1000 rejected=1000 candidates=3245
+DONE mode=read table=kv keyBytes=8 first=0 count=1500000 candidates=4500841 ok=1500000 err=0 rows=1500000 secs=101.1 ops/s=14841
+[22:52:47] fill: counter 550000 ctr
+RANGEOK kept=1000 rejected=1000 candidates=3245
+DONE mode=counter table=ctr keyBytes=8 first=0 count=550000 candidates=1649894 ok=550000 err=0 rows=0 secs=47.4 ops/s=11602
+[22:53:57] after fill: key cache 100.00 MiB, counter cache 50.00 MiB
+[22:54:18] invalidated: key 0.00 MiB, counter 0.00 MiB
+== pre-burst nodetool info
+Heap Memory (MB)       : 1672.68 / 2048.00
+Off Heap Memory (MB)   : 2.95
+Key Cache              : entries 1, size 80 bytes, capacity 100 MiB, 112 hits, 1501501 requests, 0.000 recent hit rate, 14400 save period in seconds
+Counter Cache          : entries 0, size 0 bytes, capacity 50 MiB, 0 hits, 550000 requests, 0.000 recent hit rate, 7200 save period in seconds
+== tablestats
+		Table: t_blob
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Table: ctr
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Table: kv
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+[22:54:31] pre-burst live heap (histogram total): Total        885031      127125776
+[22:54:41] burst start N=250000 rate=4800 CL=ONE loadcap=113 sess=16
+[22:56:46] client exited: TOTAL_REACHED t=80861 sent=250000 ok=215838 epochMs=1795578968727 FIRST_SEND epochMs=1795578887866 FINAL sent=250000 ok=215838 err=34162 firstOkMs=1795578887895 lastOkMs=1795578938401 total=250000 stop=false endMs=1795578968728 NoHostAvailableException: All host(s) tried for query failed (no host was tried) 
+[22:56:47] observation: DEAD (1795579007 DEAD)
+V_DEAD
+R1_ALIVE
+R2_ALIVE
+[22:56:59] stopped V (810171)
+[22:57:14] stopped R1 (728879)
+[22:57:29] stopped R2 (403565)
+[22:57:37] dE4800 V: type=E N=250000 rate=4800 xmx=2G 27 OOMError lines | pauses=130 max_after_any=2038MiB(99.5%) full_gcs=55 max_after_full=2029MiB(99.1%) ReportJavaOutOfMemory=1 | full>95%: n=41 window=27s pause=19s (70%) service_loss=not met | pauses=130 total_pause=31s max60=45% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=HeapDumper@402.918s,ReportJavaOutOfMemory@412.300s | obs=DEAD | client: TOTAL_REACHED t=80861 sent=250000 ok=215838 epochMs=1795578968727 FINAL sent=250000 ok=215838 err=34162 firstOkMs=1795578887895 lastOkMs=1795578938401 total=250000 stop=false endMs=1795578968728 NoHostAvailableException: All host(s) tried for query failed (no host was tried)  | hstop: h_stop=censored (OOM mark before STOP) stop_s=80.9 max_after_any=2038 max_after_full=2029 n_full=54 oom_mark_after_send=64.3 oom_mark_after_stop=-16.5 | smooth: SMOOTH | R1: dE4800 R1: type=E N=250000 rate=4800 xmx=2G 0 OOMError lines | pauses=24 max_after_any=2048MiB(100.0%) full_gcs=3 max_after_full=471MiB(23.0%) ReportJavaOutOfMemory=0  | R2: dE4800 R2: type=E N=250000 rate=4800 xmx=2G 0 OOMError lines | pauses=28 max_after_any=2048MiB(100.0%) full_gcs=3 max_after_full=485MiB(23.7%) ReportJavaOutOfMemory=0 

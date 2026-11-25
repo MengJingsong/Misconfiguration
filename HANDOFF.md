@@ -211,12 +211,67 @@ GC service loss with recovery, not OOM (0/3); U14 OOM 1 of 2 runs. C10 drops to 
 ≈ 220 sstables. New privilege level `login role, no grants` (R13, R20). Every node left with no processes and only small
 logs under `/mydata/s4/3b-<ID>/`. Open: repetition across nodes, B21 fan-out, B20/U14 cluster-wide reach.
 
+**Wave 7 (2026-11-24 ≈ 09:15 EST → 2026-11-25 ≈ 00:00; filed 2026-11-25): 10 phase-2 cases (owner-approved batch) + 16
+stage 3-b confirm runs.** One fresh design and one fresh verify agent per case, then 3-a, 3-b and (where worthwhile) a 3-b
+confirm per true positive. Candidates from the list: OC-585/588, 587/590, 269 (+11 cluster rows), 453, 470/480, 578, 579;
+from the retry list: B8 → R23, B22 → R24, R19 → R25.
+
+| Case | From | Node | Verdict | JIRA (3-a) | Client (3-b) |
+|---|---|---|---|---|---|
+| R23 | retry of B8 (OC-5) | `pc91` | **true positive** (`deployment` proposed: archive point-in-time restore + 100 ms dm-delay data volume as an external fault; owner to review) — 1 GiB OOM in replay 3/3, 1,280 MiB 1/1 | known-fixed (incomplete), exact CASSANDRA-8639 | given PITR restore + slow volume + heap ≤ 1,280 MiB · data role (no confirm) |
+| R24 | retry of B22 (OC-479, +39, 469) | `pc82` | **true positive** — 2 GiB OOM 3/3; 4 / 8 GiB survive (5 s deadline) | known-fixed (incomplete), partial CASSANDRA-15907 | given an otherwise idle coordinator · data role (**partly confirmed**, pc72) |
+| R25 | retry of R19 (OC-2) | ring `ms0611`/`ms0640`/`ms0617` + client `ms0604` | retry (inflow: no rate SMOOTH; new retry row) | — | — |
+| U16 | OC-578 | `pc72` | retry (frozen control not abort-free, V2 unmet; new retry row) | — | — |
+| U17 | OC-579 | `pc75` | **true positive** — 2 GiB OOM 3/3, 8 GiB 3/3 | new | alone · login role, no grants (confirmed, pc75) |
+| B25 | OC-585 (+588) | `pc99` | **true positive** — 2 GiB OOM 3/3 after 7–8 tables, up to 15,872 MiB | new | given operator profileload · DDL role (no confirm) |
+| B26 | OC-587 (+590) | `pc91` | **true positive** — 2 GiB OOM 3/3; all-tables session OOM at 31,744 MiB | new | given operator profileload session · data role (confirm recommended, not run) |
+| B27 | OC-269 (+11) | `pc91` | **true positive** — 2 GiB OOM 3/3, 4 GiB and 8 GiB 3/3 | new | alone · data role (SELECT) (confirmed, pc99) |
+| B28 | OC-453 | `pc82` | **true positive** — 2 GiB OOM 3/3, 8 GiB 3/3, 12 GiB survives at the 1000-task cap | new | alone · login role, no grants (confirmed 2/2, ms0625) |
+| B29 | OC-470 (+480) | `pc72` | **true positive** — 2 GiB OOM 3/3, up to 12 GiB | new (docs partly) | given a replica that missed the attacker's writes · data role (confirmed 4/4, pc82) |
+
+- **Confirm runs (owner-approved, 16, auth on, least-privilege attacker + victim role):** 11 of the 15 cases analysed on
+  2026-11-24 — B9 (pc75), B10 (ms0640), B12 (ms0604), B13 (ms0611), C4 (pc99), C6 (ms0617), C8 (ms0625), U2 (pc72), U3
+  (ms0625), U4 (pc91), R15-B (pc82) — and R24, U17, B27, B28, B29 of wave 7: **15 confirmed, 1 partly (R24)**. Labels moved:
+  B9 to alone · pre-auth (no credentials, direct 1,280 MiB; a half-sent variant also at the auto 15,872 MiB), B13 to
+  pre-auth, B12 to login role, no grants; R24 needs an otherwise idle coordinator (0/3 with a victim at 20 ops/s on it, 4/4
+  without). U4 reached OOM only at the pre-declared c = 4 (c = 3 0/2 on pc91). B28 needed 4 connections on aarch64 (2 survived).
+  New findings: B27 — 3,480 never-authenticated connections supply ≥ 99 % of the backlog once 20 logged-in ones keep the
+  request threads busy; R24 and B29 — with system_auth at RF 2 and the shipped LOCAL_QUORUM auth reads, one node's death or
+  outage refuses every login that needs it; B28 — any login role can read every `system_traces` row (no role column).
+  Totals now: 3-a 53 checked (known 23, fixed upstream 1, documented 5, new 24); 3-b 53 checked (alone 36, conditional
+  16, admin 1), confirm runs 39 (35 confirmed, 4 partly).
+- **Filed (2026-11-25):** 10 `_INDEX.md` rows (R23 after B8, R25 after R19, R24 after B22, the rest at the end) with JIRA and
+  Client cells; Client cells of the 11 confirmed earlier cases; candidate-list statuses (OC-5 `true positive (B8; R23)`, 22
+  picked rows → true positive, OC-479 → true positive (R24), OC-578 → retry (U16)); retry list (B8 and B22 closed as true
+  positive, R19 closed as retry (R25), new open rows U16 and R25); both stage-3 READMEs; FLOWCHART §5.
+- **Interruptions of the day:** ≈ 02:30 EST an API usage limit stopped the phase-1 stage-4 runs (stale locks cleared by the
+  owner at 09:15). The first stage-2 sessions of B25, B26 and U16 ended before write-up or cleanup (stale locks of a stop at
+  ≈ 15:00 were cleared then); fresh sessions finished them from the node logs, B26 also fixing a nodetool-glob error and
+  re-running two arms. R25's first
+  attempt was blocked (one node given, four needed); its second, and the first attempts of B27 (pc82), B28 (pc75) and B29
+  (pc99), were stopped by the owner at ≈ 16:25 EST; the next attempts of B27, B28 and B29 were cut off by the API usage
+  limit at ≈ 18:03 and left nothing; the third runs finished (R25 paused 18:10–20:10 for the same limit). R15-B's first
+  confirm attempt left nothing; B10, B12, B13 and C6 confirms were re-checked, not re-run, after their sessions ended
+  without a result. The B9, C4 and R24 confirm agents first wrote into the shared scratch folder `scratchpad/h/`
+  and overwrote same-named files of other sessions (B9 restored B13's `victim.py`/`nmt.py` from `logs/B13/harness/`).
+- **Open owner items:** R23's proposed `deployment` (external-fault reading); U16's retry (freeze an abort-free control, or
+  rule that the intervention arm serves as the matched control); R25's retry design; 3-a flags R24 (`new` if 15907 is
+  related), B27 (known-open via 21091), B28 (known-open via 13157), B29 (by design via 19018, or known-fixed (incomplete) via
+  15907); B26's confirm run (recommended); R24's victim effect not separated. Earlier items (B19, B21, U13, U15, B15
+  rulings; B10, C7, C8 3-a flags) stand.
+- **Node data left** (no process, no lock anywhere): pc82 `/mydata/s4/b27` ≈ 49 GB incl. 10 hprofs (B27 attempt 1,
+  not used as evidence; **deletable**), pc91 `/mydata/s4/b26` 1.3 GB, pc75 `/mydata/s4/u17` ≈ 1.1 GB, pc82 `/mydata/s4/r24`
+  ≈ 0.9 GB, pc72 `/mydata/s4/3b-R24` 693 MB, pc91 `/mydata/s4/b27` 508 MB, pc72 `/mydata/s4/u16` 272 MB (one gzipped dump),
+  pc72 `/mydata/s4/b29` 118 MB, pc91 `/mydata/s4/r23` 85 MiB, pc99 `/mydata/s4/b29` 60 MB, pc99 `/mydata/s4/b25` 22 MB,
+  pc82 `/mydata/s4/b28` 19 MB, pc75 `/mydata/s4/b28` 18 MB; 3-b logs (2–44 MB each) under `/mydata/s4/3b-<ID>` on pc75 (B9,
+  U17), pc99 (C4, B27), ms0625 (C8, U3, B28), pc91 (U4), pc82 (R15-B, B29), pc72 (U2), ms0640 (B10), ms0604 (B12), ms0611
+  (B13), ms0617 (C6). Delete on the owner's word.
+
 **Other open work:**
 - 342 candidate rows are `open` (2026-11-23, after wave 6 and OC-579). All of OC-63…577 are now triaged (2026-11-18 and 2026-11-20 files); the 11-18
   triage's §2 "not reachable at shipped defaults" and §3 "too slow / too much disk" lists were **not** closed (owner
   closed only the already-covered list), and the 11-20 triage's "covered" list is not closed either.
-- Retry list: 3 rows `open` (R19, with its proposed change; B22 from wave 6; B8, a true positive re-opened on
-  2026-11-23 for a deployment-level OOM).
+- Retry list: 2 rows `open` after wave 7 (U16, R25, both 2026-11-24); R19, B22 and B8 were re-tried in wave 7 and closed.
 - Candidate list: OC-579 (vector literal write path, follow-up of U8) added 2026-11-23, `open`.
 - Hadoop: JIRA OOM report built; stage 5 runs with Yang's and Jingsong's batches (`hadoop/PROCEDURE.md` 5b);
   no Hadoop phase 2 yet. Jingsong's Hadoop stage-4 nodes `pc41`, `pc39`, `pc29` failed SSH host-key checks on

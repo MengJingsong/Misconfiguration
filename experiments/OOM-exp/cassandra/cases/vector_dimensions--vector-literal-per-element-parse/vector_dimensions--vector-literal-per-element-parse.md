@@ -7,13 +7,24 @@
 | Phase-1 case file | [`no_constraint-isallzero-vectorelement--autonomous`](../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/no_constraint-isallzero-vectorelement--autonomous.md) (the same as U8's) |
 | System / pinned source | Cassandra 5.0.9 (`systems/cassandra/source/`, `build.xml` `base.version` 5.0.9); ANTLR runtime 3.5.2; built copy `pc91:/mydata/s4/cassandra-base` (`build/apache-cassandra-5.0.9-SNAPSHOT.jar`, sha256 `570b5249…0bea90176e`) |
 | Stage 1 (design) | OOM-agent stage-1 session (workflow, owner-approved batch of 2026-11-24), 2026-11-24 05:00–06:10 America/New_York; nothing run (nodes checked read-only over ssh) |
-| Stage 2 (verify) | pending (a fresh session) |
-| Verdict | `pending` |
+| Stage 2 (verify) | fresh OOM-agent stage-2 session (workflow, owner-approved batch of 2026-11-24), 2026-11-24 09:16–11:26 America/New_York on **pc75** (x86_64; dated deviation, §2 A1); freeze hash checked (match) |
+| Verdict | **true positive** — `verified-OOM · deployment` (unprotected accumulation + unprotected configuration) |
 
 ## Summary
 
-- **Conclusion:** pending (stage 2).
-- **Root cause:** pending (stage 2).
+- **Conclusion:** **true positive.** Two concurrent unprepared `INSERT … VALUES (0, [0,0,…,0])` of a
+  `vector<tinyint, 6,500,000>` (13.0 MB each, under the 16 MiB frame and the 16 MiB mutation limit) kill a 2 GiB
+  node with a Java heap OOM in **3/3** runs, every capacity at its shipped default. The same bytes as one blob literal
+  (0/3), one such INSERT alone (0/3) and a one-at-a-time patch on large unprepared QUERYs (0/3) do not. The same holds
+  with only 8,192-dimension vectors (the documented limit) in one single-partition batch (3/3 vs 0/3, 0/3). Budget
+  search: OOM 3/3 at 8 GiB (N = 9), 3/5 at 12 GiB (N = 13); at 16 GiB and 31,744 MiB GC service loss, no OOM in 600 s.
+- **Root cause:** the CQL parser and `Vectors.Literal.prepare` materialize every element of a vector literal as
+  heap objects (two ANTLR `CommonToken`s, a `String` and a `Constants.Literal` per element, then a `Constants.Value`
+  and a one-byte `HeapByteBuffer`): **≈ 168 B of heap per element** (measured) on the request thread, while every
+  check on the request counts **2 B per element** (frame, in-flight bytes, mutation size). Nothing bounds the element
+  count (`vector_dimensions_fail_threshold` ships −1; the documented 8K dimension limit is not enforced) and nothing
+  bounds the number of concurrent parses but the 128 native threads. Every such INSERT also ends in a write timeout
+  (the ≈ 5 s parse exceeds the 2 s write deadline), so the memory is spent for a write that is never applied.
 - **Hypothesis under test (stage 1):** an unprepared `INSERT … VALUES (0, [0,0,…,0])` into a `vector<tinyint, D>`
   column is charged as its wire bytes (≈ 2 B per element: 12.0 MB for D = 6,000,000, inside the 16 MiB frame and
   the 16 MiB mutation limit), but the coordinator's request thread holds ≈ 190 B of heap per element while it parses
@@ -370,10 +381,181 @@ every hprof; leave `/mydata/s4/u17/runs/` (logs only) and `/mydata/s4/u17/tree` 
 
 `sha256 of §1–§2 at freeze: 68711681fc650d7cd4d801730cdbc65aea6898e238c2c7be3fbb804f5a6452d4` · computed over the lines from `## 1. Candidate` through the line before this one (`sed -n '/^## 1\. Candidate/,/^`sha256 of §1–§2 at freeze/p' <file> | sed '$d' | sha256sum`) · amendments after the freeze: dated, with reason, below this line.
 
+**Amendment A1 (2026-11-24 09:29 EST, stage 2, before any T reading; pre-declared dial rule "D\* from D1").** D1
+(8 GiB, 3 sequential VEC requests at D = 6,000,000, 20 back-to-back histograms) measured b = max ΣΔbytes(claimed
+classes) / D = 1,009.1 MB / 6,000,000 = **168.2 B** (prepare-phase sample s19; the best parse-phase sample s18 was at
+10.9 M of 12 M tokens, 990 MB). The rule gives D\* = min(8,000,000, max(3,000,000, ⌊1.15 × 10⁹ / 168.2 / 500,000⌋ ×
+500,000)) = **6,500,000**. Every later arm therefore uses **D\* = 6,500,000**: VEC text 13,000,039 characters, body
+13,000,046 B (< 16,777,216 frame), cell 13,000,000 B (< 16,777,216 mutation); HEX text 13,000,040; WB M =
+⌊6,500,000 / 8,192⌋ = **793** (6,496,256 elements, ≈ 13.03 M characters, body checked < 16,777,207 by the client).
+U_req = b·D\* = 1.093 GB, so N(H) = ceil((H − 0.3 GB) / 1.093 GB) + 1 = **5 at 4 GiB, 9 at 8 GiB, 17 at 16 GiB,
+32 at 31,744 MiB** (31 in the frozen table); per-IP in-flight check N × 13.0 MB vs heap/40: 65 vs 107, 117 vs 215,
+221 vs 429, 416 vs 832 MB (no pause); at 2 GiB the dial maximum N = 4 is 52.0 MB vs 53.7 MB (no pause).
+**Deviation D-node (2026-11-24, coordinator):** the case runs on **pc75** (node3.jason92-326665, x86_64, Intel Xeon
+E5-2660 v2, 40 hardware threads, 125 GiB, same kernel/JDK/build jar sha256 `570b5249…0bea90176e`) instead of pc91,
+an equivalent x86 node named in §2; recorded here and in §3.
+
+**Amendment A2 (2026-11-24 11:06 EST, stage 2, before the readings it adds).** B gave 4 GiB OOM, 8 GiB OOM, 16 GiB and
+31,744 MiB GC service loss without OOM in 600 s; the dial step between (12 GiB, N = 13) OOMed, and its two repeats
+gave 1 OOM and 1 service loss (12 GiB: 2/3). Under the protocol's "expand repetitions if timing produces mixed
+outcomes", two more runs at 12 GiB (B12-4, B12-5, same N) and two repeats at 8 GiB (B8-2, B8-3, N = 9, so the next
+lower budget has its own n/3) are added. Readings unchanged in kind; no new arm. Also added: C3 (frozen as "only if
+time") ran once with a client mode `--payload PREP` (PREPARE + EXECUTE of the 13,000,000-byte serialized vector).
+
 ## 3. Runs (stage 2)
 
-pending
+**Session.** Fresh OOM-agent stage-2 session (workflow, owner-approved batch of 2026-11-24), T0 = 2026-11-24 09:16 EST
+(node lock `/mydata/s4/NODE-LOCK` on pc75 taken 09:16:31, released 11:25:54 EST); last run ended 11:25 EST (T0 + 2 h 09 min,
+inside the 4 h 30 min budget). Freeze hash recomputed before any run: `68711681…6452d4`, **match** (rechecked after A1/A2).
+
+**Environment (as run).** **pc75** = node3.jason92-326665 (CloudLab UMass), x86_64, Intel Xeon E5-2660 v2 @ 2.20 GHz,
+**40** hardware threads (design: pc91, 32 threads; deviation D-node in §2 A1), 125 GiB (`MemTotal` 131,943,324 kB),
+8 GiB swap (unused; `MemorySwapMax=0` on the victim scope), cgroup v2 (`memory pids` delegated to the user service),
+kernel 5.15.0-203-generic, OpenJDK 11.0.33, Python 3.10. Node idle at start (load 0.00, no Java); `/mydata` 703 G free.
+Untouched: `/mydata/s4/cassandra-base`, `3b-B17`, `3b-B20`, `b23`. Build: `/mydata/s4/cassandra-base` copied to
+`/mydata/s4/u17/tree`, jar sha256 `570b5249d9b9a43f6809eb3da562737492192026f974b2edbd20e94bea90176e` (= the design's),
+`antlr-runtime-3.5.2.jar` sha256 `ce3fc8ec…89c8734`; shipped `conf/cassandra.yaml` identical to the pinned source's
+(non-comment lines). Patched class for I/WI: `QueryMessage.class` sha256 `fc8fb364…70077c43`, `QueryMessage$1.class`
+`7304de35…8f32eb` (diff `harness/querymessage-intervention.diff`, exactly the §2 change). Resolved JVM (every run, from
+`ps`): `-Xms/-Xmx` = the arm's heap, `-XX:MaxDirectMemorySize=15872M` (auto), G1 with `G1HeapRegionSize=16m`,
+`G1NewSizePercent=50`, `MaxGCPauseMillis=300`, `InitiatingHeapOccupancyPercent=70`, `AlwaysPreTouch`,
+`HeapDumpOnOutOfMemoryError` (2 GiB; `-XX:-HeapDumpOnOutOfMemoryError` above 2 GiB), `OnOutOfMemoryError=kill -9 %p`.
+`yaml.diff` of every run: only `data_file_directories`, `commitlog_directory`, `hints_directory`,
+`saved_caches_directory`, `cdc_raw_directory` (→ `/mydata/s4/u17/node/`); V6 audit as §2 (vector thresholds −1,
+frame 16 MiB, `commitlog_segment_size` 32 MiB, `heap_buffers`, `AllowAllAuthenticator`, timeouts not raised).
+Container scope `MemoryMax` = heap + 15,872 MiB + 8 GiB: `memory.events` `oom_kill 0` in **every** run.
+
+**Harness** (`harness/`): `u17client.py` (raw v4, payloads VEC/HEX/WB, `--ddl`, `--sizes`, `--readback`; `PREP` added
+for C3, A2), `victim-ctl.sh`, `run-arm.sh` (watch rule as §2), `batch.sh` + `list-*.txt` (the run order), `s0.sh`,
+`setup.sh`, `C2Sampler.java`, `gcwin.py` (from U8), `hprof-histo.py` (U6's, U17 want-list), `hprof_oome_thread.py`,
+`hprofstacks.py`, `QueryMessage.java` + diff. Small per-run excerpts in `logs/<label>/` (outcome, client CSV, readings,
+threads, GC summary, OOM excerpt, dump outputs, `yaml.diff`, `run.meta`, `memory.events`); one line per run in
+`logs/summary.txt`. Raw logs (GC, system, stdout, D1 histograms) on pc75 `/mydata/s4/u17/runs/` (≈ 0.7 GB).
+
+**Payload sizes** (`--sizes`): at D\* = 6,500,000: VEC text 13,000,039, body **13,000,046 B** (K), frame 13,000,055;
+HEX text 13,000,040, body 13,000,047; WB M = 793, 6,496,256 elements, text 13,032,084, body 13,032,091 B
+(< 16,777,207, client check passed). At 6,000,000 (D1): VEC body 12,000,046 B. No run logged
+`Request is too big`; no in-flight pause was needed (N × 13 MB below heap/40 in every arm).
+
+**Instrument faults (recorded, not readings).** D1 try 1 (09:22, `logs/D1-try1-badhsum/`): the histogram summary used
+an awk regex that `mawk` rejects, so the samples were lost; same lifetime outcome as D1 (3 × write timeout). Fixed to
+a string match and D1 re-run in a fresh lifetime. The JMX sampler stops answering once the heap is full (heap-used
+column frozen in `samples.csv` from the first seconds of each 2 GiB T/W run and of each thrash run); GC logs and
+`jcmd Thread.print` counts are the readings there.
+
+### Runs
+
+| Label | Arm | Heap | Load | Outcome (n) | Readings |
+|---|---|---|---|---|---|
+| S0 | S0 | 2 GiB | D_s = 500,000: VEC, HEX, WB, N = 1, 2 sequential each | `RESULT Void` 6/6 | VEC 0.88 / 0.33 s, HEX 0.10 / 0.01 s, WB 0.45 / 0.33 s; readback cell 1,000,000 B (VEC), 500,000 B (HEX), 61 rows (WB); `QueryMessage` from the jar |
+| S0-I | S0 (I build) | 2 GiB | VEC D_s, N = 1, 2 seq | `RESULT Void` 2/2 | 0.81 / 0.31 s; readback 1,000,000 B; `QueryMessage source: …/runs/S0-I/conf/` (patched class shadows the jar) |
+| D1 | D1 | 8 GiB | VEC D = 6,000,000, N = 1, 3 sequential, histograms back to back | 3 × write timeout `0x1100` (8.2–8.4 s each, with histograms); alive | 20 in-request samples; see "D1" below; **b = 168.2 B/element** → D\* = 6,500,000 (A1) |
+| T1 | T | 2 GiB | VEC, N = 2, R = 5 | **Java heap OOM** (death detected +74 s incl. 33 s dump) | round 1, 0 completed; 64 Full GCs, live after Full ≤ 2,012 MiB; NTR in parse/prepare 2 (every Thread.print); dump: see V5 |
+| T2 | T | 2 GiB | same | **Java heap OOM** (+29 s) | round 1; 4 Full GCs; OOME thread = NTR in `BufferedTokenStream.fetch` |
+| T3 | T | 2 GiB | same | **Java heap OOM** (+50 s) | round 1; 47 Full GCs, live after Full ≤ 2,012 MiB; 2 NTR in parse |
+| C1-1/2/3 | C1 | 2 GiB | HEX, N = 2, R = 5 | **survived 3/3**; 10/10 `RESULT Void` each | latency 0.14–0.28 s; 0 Full GCs; heap after GC ≤ 83 MiB; in-parse count 0 |
+| C2-1/2/3 | C2 | 2 GiB | VEC, N = 1, R = 5 | **no OOM 3/3**; 5/5 answered each, all write timeout `0x1100` | latency 5.12–5.40 s; 9–10 Full GCs, live after Full ≤ 884 / 1,290 / 886 MiB; max STW 60 s window 12 % |
+| I1/2/3 | I (patched) | 2 GiB | VEC, N = 2, R = 5 | **no OOM 3/3**; 10/10 answered each, all `0x1100` (C2's class) | first request of a round 5.10–5.65 s, second 10.1–11.8 s (≈ one C2 latency later); NTR threads 2, in parse/prepare **1** (every sample); live after Full ≤ 1,338 MiB; max60 24–26 % |
+| B4 | B | 4 GiB | VEC, N = 5, R = 3 | **Java heap OOM** (+18 s) 1/1 | at-85 % histogram: 30.7 M `CommonToken` (1.48 GB), 15.4 M `Constants$Literal`; 5/5 NTR in parse |
+| B8, B8-2, B8-3 | B | 8 GiB | VEC, N = 9, R = 3 | **Java heap OOM 3/3** (+14, +51, +22 s) | 9/9 NTR in parse; live after Full ≤ 7,666–8,006 MiB |
+| B12, -2, -3, -4, -5 | B (+A2) | 12 GiB | VEC, N = 13, R = 3 | **Java heap OOM 3/5** (+83, +34, +35 s); B12-3, B12-5: no OOM in 600 s, **GC service loss** (≥ 90 % STW over 889 / 834 s), 0 of 13 answered | 13/13 NTR in parse in every answered `Thread.print` (a few timed out during thrash) |
+| B16 | B | 16 GiB | VEC, N = 17, R = 3 | no OOM in 600 s; **GC service loss** (≥ 90 % STW over 891 s, 414 Full GCs); 0 of 17 answered (85 client 120-s timeouts) | at-85 % histogram 15.0 GB, 148.6 M `CommonToken` (7.13 GB) + 74.3 M `Constants$Literal` + 74.4 M `String`; 17/17 NTR in parse |
+| B31 | B | 31,744 MiB | VEC, N = 32, R = 3 | no OOM in 600 s; **GC service loss** (≥ 90 % STW over 813 s, 211 Full GCs); 0 of 32 answered | at-85 %: 255.8 M `CommonToken` (12.3 GB); 32/32 NTR in parse |
+| W1, W2, W3 | W | 2 GiB | WB (793 × 8,192-dim vectors, single-partition unlogged batch), N = 2, R = 5 | **Java heap OOM 3/3** (+43, +136, +47 s) | round 1, 0 completed; W2 after ≈ 120 s of thrash (≥ 90 % STW over 116 s); 2 NTR in parse; dumps below |
+| WC2-1/2/3 | WC2 | 2 GiB | WB, N = 1, R = 5 | **no OOM 3/3**; 5/5 answered each, all `0x1100` | 4.9–5.5 s; live after Full ≤ 843 / 897 / 1,292 MiB |
+| WI1/2/3 | WI (patched) | 2 GiB | WB, N = 2, R = 5 | **no OOM 3/3**; 10/10 answered each, all `0x1100` | second request of a round 10.3–10.6 s; in parse/prepare 1; live after Full ≤ 1,352 MiB |
+| C3-1 | C3 (supporting) | 2 GiB | PREPARE once + EXECUTE of the bound 13,000,000-byte vector, N = 2, R = 5 | survived; **10/10 `RESULT Void`** | 0.2–0.3 s; 0 Full GCs; heap after GC ≤ 82 MiB |
+
+**D1 (U of the holder, independent of K).** Baseline histogram, then 20 samples while the 3 requests ran (≈ 1–1.5 s
+apart; `logs/D1/histsum.csv`). Δ over baseline of the eight claimed classes (bytes, jcmd shallow):
+
+| Sample (phase) | ΔCommonToken (n) | Constants$Literal (n) | HeapByteBuffer / Constants$Value (Δn) | ΣΔ claimed | ΔTotal heap |
+|---|---|---|---|---|---|
+| s4 (req 1, parse, 85 % of tokens) | 10,216,736 | 5,108,358 | 0 / 0 | 918 MB | 999 MB |
+| s5 (req 1, prepare) | 0 | 6,000,001 | 1,532,417 / 1,532,416 | 603 MB | 656 MB |
+| s11 (req 2, parse) | 10,199,834 | 5,099,907 | 0 / 0 | 930 MB | 1,015 MB |
+| s18 (req 3, parse, 91 % of tokens) | 10,911,502 | 5,455,741 | 0 / 0 | 990 MB | 1,075 MB |
+| **s19 (req 3, prepare peak)** | 0 | 6,000,001 | **6,000,003 / 6,000,000** | **1,009 MB** | 1,091 MB |
+
+Per-element objects as claimed: 2 `CommonToken` per element (48 B each), a `String` + `byte[1]` + `Constants.Literal`
+per element in the parse, then per element a `Constants.Value` and a one-byte `HeapByteBuffer`, all on the request
+thread. **U_req ≥ 1.01 GB** (claimed classes; 1.09 GB whole-heap Δ) for one request whose counted size is K =
+12,000,046 B: **U/K ≈ 84** (b = 168.2 B per element against 2 B counted). The parse samples catch at most 91 % of the
+12 M tokens, so the true parse peak is ≈ 1.09 GB (s18 / 0.91). The prediction (b 170–210 B) held within 2 %.
+
+**Response class.** Every VEC and WB request at D\* (and at 6 M in D1) answered `0x1100 Operation timed out - received
+only 0 responses` (write timeout): parse + prepare alone take ≈ 5 s, past the 2 s `write_request_timeout` counted from
+the start of processing, so the mutation is never applied. S0 (≤ 0.9 s) and C3 (bound value, 0.2 s) were applied.
+This was predicted as possible and does not bound the holder (protection map row "Write deadline").
+
+**V5 (initiating failure, 2 GiB).** `stdout.log` of every OOM run: `java.lang.OutOfMemoryError: Java heap space`,
+`Dumping heap …`, `Executing /bin/sh -c "kill -9 <pid>"`; no other error first. OOME-initiating thread
+(`logs/<T|W>n/dump-oome-thread.txt`): **T2** — a Native-Transport-Requests thread in `ArrayList.grow` ←
+`BufferedTokenStream.fetch` (the token list); **W2** — an NTR thread in `Lexer.emit` (new `CommonToken`); **T1, T3** —
+the logback `AsyncAppenderBase$Worker` (a bystander that allocated first while the heap was full), with both NTR
+threads in `Lexer.emit` / `BufferedTokenStream.fetch` ← `Cql_Parser.listLiteral` ← `collectionLiteral` ← `value` in the
+T1 dump; **W1, W3** — no trace with a leading `OutOfMemoryError.<init>` frame in the dump (initiating thread not
+resolved); W1's `GCInspector` logged `G1 Old Gen: 2,126,801,696 -> 2,108,877,560` just before, and the dump shows one NTR
+thread in the parse (`DFA.predict` ← `BufferedTokenStream.fetch`). **T1 dump histogram** (`logs/T1/dump-histo.txt`,
+2.97 GB file, shallow estimate 2,569 MB): `CommonToken` 19,964,142 (1,198 MB), `Constants$Literal` 9,982,051 (399 MB),
+`Object[]` 311 MB (4 arrays ≥ 1 M elements = the token and literal lists, 302 MB), `String` 10,073,139 (292 MB),
+`byte[]` 10,075,818 of which **9,982,393 of length 1** (211 MB), `char[]` 104 MB (4 arrays ≥ 1 M elements: the two
+parses' char streams and query copies); `ErrorCollector` 2 (= two parses in progress). The claimed classes are **2,515 MB = 98 %** of the dump. **W1
+dump**: `CommonToken` 10,201,222, `Constants$Literal` 5,092,212, `byte[1]` 5,092,565: the same holder, from 8,192-element
+lists. Dumps deleted after parsing.
+
+**V7 / budget search (largest failing budget).** 4 GiB 1/1, **8 GiB 3/3**, 12 GiB 3/5 (2/5 GC service loss for the
+whole 600 s), 16 GiB 0/1 OOM + service loss, 31,744 MiB (the node's own resolved heap) 0/1 OOM + service loss. Above
+≈ 12 GiB G1 thrashes (hundreds of Full GCs each reclaiming little) instead of throwing within the 600 s stopping budget;
+no request is answered there either.
+
+**Deviations from the design.** (1) Node pc75 instead of pc91 (A1, coordinator). (2) D\* = 6,500,000 by the
+pre-declared D1 rule (A1); N(H) at 31,744 MiB = 32 (frozen table: 31). (3) A2: two extra repetitions at 8 GiB and at
+12 GiB (mixed outcome), C3 run with an added client mode. (4) D1 histogram summary fixed after try 1 (instrument). (5)
+The JMX sampler cannot read a full heap (instrument limit; GC logs used). Nothing else changed; no constraint changed in
+any T, W or B run.
+
+**Cleanup (11:25 EST).** Every Cassandra, client, sampler and `jcmd` process started by stage 2 stopped (checked: no
+`java`/client/batch process left, no `u17-*` scope); every hprof deleted after parsing; `/mydata/s4/u17/node` deleted.
+Left on pc75: `/mydata/s4/u17/tree` (419 M), `conf-pristine`, `cls`, `patch`, `harness`, `runs/` (logs only,
+≈ 0.7 G), `out/` (the excerpts copied to `logs/`). Lock released.
 
 ## 4. Conclusion (stage 2)
 
-pending
+**Verdict: true positive.** Protocol status **`verified-OOM · deployment`**; direction **unprotected** — unprotected
+accumulation (no control covers the per-element objects of a literal's parse and prepare; the only bound is the
+implicit 128 native threads × request size) together with unprotected configuration (`vector_dimensions_warn/
+fail_threshold: -1`, and the documented 8K dimension limit is not enforced by `VectorType`). Interpretation: a
+validation/sizing gap plus a parser design that materializes every token; not documented as by design.
+
+**Reason.** At every shipped default and a 2 GiB heap, two concurrent unprepared INSERTs of a 6.5 M-element
+`vector<tinyint>` literal (13.0 MB each, accepted by the 16 MiB frame, in-flight and mutation checks) exhaust the heap
+in 3/3 runs, in round 1, on the parse of the literal. D1 measured the holder independently of every counter: ≈ 168 B of
+heap per element (two ANTLR tokens, a `String`, a `Constants.Literal`, then a `Constants.Value` and a one-byte
+`HeapByteBuffer`) against the 2 B per element that the frame, in-flight and mutation checks count (U/K ≈ 84; ≈ 1.09 GB
+per request). The matched-path control with the same QUERY path, wire bytes, K and concurrency (a 13 MB hex blob
+literal: one token) survived 3/3 with < 0.1 GiB live, one VEC INSERT alone survived 3/3, and admitting only one large
+unprepared QUERY at a time (one patched class) removed the OOM 3/3 at the same load, with the same response class and
+the second request answered one parse later. The T1 dump attributes 98 % of the heap to the claimed classes with two
+parses in progress. The documented-limit form (793 × 8,192-dimension vectors in one single-partition batch, which no
+batch-size check applies to) behaves the same (W 3/3 vs WC2 0/3, WI 0/3), so the result does not depend on the
+unenforced 8K limit. The bound-value form of the same cell (C3) is cheap (10/10 written, < 0.1 GiB live).
+
+| | Evidence | Runs |
+|---|---|---|
+| V1 Repetition | Java heap OOM 3/3 at 2 GiB, N = 2 | T1–T3 (W1–W3 for the documented-limit form) |
+| V2 Matched control | HEX literal, same path/K/N: 0/3, 10/10 written; VEC N = 1: 0/3, 5/5 answered | C1-1..3, C2-1..3 (WC2-1..3) |
+| V3 Measurement | b = 168.2 B/element, U_req ≥ 1.01 GB vs K = 12.0 MB (histograms, independent of K); T1 dump 98 % in the claimed classes | D1, T1 dump, B at-85 % histograms |
+| V4 Intervention | one large unprepared QUERY at a time: 0/3, 10/10 answered (C2's class), second request one parse later | I1–I3 (WI1–WI3) vs T1–T3 on the unmodified jar |
+| V5 Initiating failure | first error `OutOfMemoryError: Java heap space`; OOME thread an NTR thread in `BufferedTokenStream.fetch` / `Lexer.emit` (T2, W2), a bystander logback thread with both NTR threads in `listLiteral` (T1, T3); T1 dump histogram | T1–T3, W1–W3 |
+| V6 Default constraints | every capacity at its shipped default; `yaml.diff` = directories only; the only patch is in I/WI | all |
+| V7 Acceptable budget | 2 GiB (≥ 512 MiB standing rule, ideal); largest failing budget **8 GiB 3/3**, 12 GiB 3/5; 16 GiB and 31,744 MiB GC service loss (≥ 90 % STW over ≥ 13 min) without OOM in 600 s | B4, B8 ×3, B12 ×5, B16, B31 |
+
+**Limits.** (1) Above ≈ 12 GiB the endpoint within 600 s is GC service loss, not OOM (the request multiplicity scaled
+with N(H) was not raised further; the node answers nothing during it). (2) Every VEC/WB request at this size ends in a
+write timeout, so the attack spends memory for writes that never apply; a request just under 2 s of parse (≈ 2 M
+elements) would be applied but would need ≈ 3× the concurrency for the same heap (estimate, not run). (3) The `boolean` element type of the
+OC-579 row was not run (by design choice, §1; ≈ 0.3–0.4× the elements per frame, and `BooleanType` shares its two
+buffers). (4) Single node, client on the same node (loopback, one client IP), x86_64 only. (5) The OOME-initiating
+thread of W1 and W3 was not resolved from their dumps. No new holder outside the claimed one appeared in any dump or
+histogram; OC-579 already names CP-1, CP-12 and CP-8, so no new clue pattern is proposed.

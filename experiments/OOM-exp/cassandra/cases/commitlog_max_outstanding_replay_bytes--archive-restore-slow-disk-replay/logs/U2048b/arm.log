@@ -1,0 +1,34 @@
+[07:49:02] == restore U2048b img=A3 heap=2048M D=100ms PIT=T opts='' arch=x86_64; /mydata free  702G
+[07:49:02] r23slow write delay = 0 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 0
+[07:49:04] refilled from img/A3: data 139 MiB; commitlog 1 files; archive 6 files 170 MiB
+[07:49:04] table restored from snapshot: 4 sstables (14 MiB Data.db)
+[07:49:04] commitlog_archiving.properties: archive_command=/bin/ln %path /mydata/s4/r23/archive/%name restore_command=/bin/cp -f %from %to restore_directories=/mydata/s4/r23/archive restore_point_in_time=2026:11:24 14:45:45.320 snapshot_commitlog_position= precision=MICROSECONDS 
+[07:49:06] r23slow write delay = 100 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 100
+[07:49:13] start: pid=555688 cg=/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/r23-U2048b-1795531746.scope max=6442450944 swap.max=0 heap=2048M opts=''
+[07:49:13] jvm: -XX:+UseG1GC -Xms2048M -Xmx2048M -XX:MaxDirectMemorySize=15872M 
+[07:49:13] pre-attach ok after 1 tries
+[07:49:23] Replaying seen (T_r) at +10s after JVM start
+[07:49:26] histogram +2s: total 1000 MiB live; Mutation n=460 ArrayCell n=2612189 BufferCell n=3305524 byte[]=186 MiB
+[07:49:27] histogram +3s: total 1020 MiB live; Mutation n=481 ArrayCell n=2731714 BufferCell n=3305524 byte[]=193 MiB
+[07:49:30] histogram +5s: total 1525 MiB live; Mutation n=1025 ArrayCell n=5888221 BufferCell n=3305524 byte[]=370 MiB
+[07:49:39] histogram +15s: total 1538 MiB live; Mutation n=1013 ArrayCell n=5764328 BufferCell n=3420772 byte[]=379 MiB
+[07:50:09] histogram +45s: total 784 MiB live; Mutation n=196 ArrayCell n=1103307 BufferCell n=3420774 byte[]=109 MiB
+[07:51:44] r23slow write delay = 0 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 0
+[manual 07:52:15] post-processing done by hand: restore.sh exited right after the outcome loop because the script file was replaced on disk while it ran (agent error, 07:51); the JVM was stopped by the EXIT trap at 07:51:44 (after CQL started). Outcome reconstructed from system.log:
+outcome=started after 88s from JVM start (78s from T_r) [reconstructed: Starting listening for CQL clients 14:50:41.780 UTC; JVM start 07:49:13]
+INFO  [main] 2026-11-24T14:50:24,743 CommitLog.java:210 - Log replay complete, 2420 replayed mutations in 61132 ms
+restore gc: pauses=22 full=9 pause_total=3.8s span=88s (4%) worst60s=6% at 4.616s; max_after_full=1537M max_after_any=1937M cap=2048M last_at=93s
+mem.current max: 3428024320 B
+threads +1s: flushwriters=0 flushwriters_in_io=0 mutstage=17 mutstage_in_suballoc=2 main=org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.write G2=no
+threads +2s: flushwriters=2 flushwriters_in_io=2 mutstage=32 mutstage_in_suballoc=32 main=org.apache.cassandra.schema.ColumnMetadata.validateCell G2=yes
+threads +3s: flushwriters=2 flushwriters_in_io=2 mutstage=32 mutstage_in_suballoc=32 main=org.apache.cassandra.io.util.RebufferingInputStream.read G2=yes
+threads +4s: flushwriters=2 flushwriters_in_io=2 mutstage=32 mutstage_in_suballoc=32 main=org.apache.cassandra.utils.btree.BTree$Builder.resolve G2=yes
+threads +5s: flushwriters=4 flushwriters_in_io=2 mutstage=32 mutstage_in_suballoc=32 main=org.apache.cassandra.utils.concurrent.WaitQueue$Standard$AbstractSignal.await G2=yes
+threads +6s: flushwriters=4 flushwriters_in_io=2 mutstage=32 mutstage_in_suballoc=32 main=org.apache.cassandra.utils.concurrent.WaitQueue$Standard$AbstractSignal.await G2=yes
+threads +8s: flushwriters=4 flushwriters_in_io=2 mutstage=32 mutstage_in_suballoc=32 main=org.apache.cassandra.utils.concurrent.WaitQueue$Standard$AbstractSignal.await G2=yes
+threads +12s: flushwriters=4 flushwriters_in_io=1 mutstage=32 mutstage_in_suballoc=5 main=org.apache.cassandra.utils.FastByteOperations$UnsafeOperations.compareTo G2C=yes
+threads +20s: flushwriters=4 flushwriters_in_io=2 mutstage=32 mutstage_in_suballoc=32 main=org.apache.cassandra.utils.concurrent.WaitQueue$Standard$AbstractSignal.await G2=yes
+threads +30s: flushwriters=4 flushwriters_in_io=2 mutstage=32 mutstage_in_suballoc=32 main=org.apache.cassandra.utils.concurrent.WaitQueue$Standard$AbstractSignal.await G2=yes
+threads +60s: flushwriters=4 flushwriters_in_io=2 mutstage=32 mutstage_in_suballoc=0 main=org.apache.cassandra.utils.concurrent.WaitQueue$Standard$AbstractSignal.await G2C=yes
+U2048b: outcome=started t=88s heapOOM=False oom_thread=- guard_oom_kill=0 replayed=('2420', '61132') t_map_flushes=12 t_map_ser=381MiB t_map_charge=2247MiB histos=[('2', '1000', '460'), ('3', '1020', '481'), ('5', '1525', '1025'), ('15', '1538', '1013'), ('45', '784', '196')]
+== RESULT U2048b img=A3 heap=2048 D=100 PIT=T opts= outcome=started (reconstructed)

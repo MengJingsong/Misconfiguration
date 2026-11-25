@@ -7,12 +7,14 @@
 | Phase-1 case file | [`profileload-capacity-beginsampling-capacity--autonomous`](../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/profileload-capacity-beginsampling-capacity--autonomous.md) (shared by OC-585 … OC-588) |
 | System / pinned source | Cassandra 5.0.9 (`systems/cassandra/source/`, `build.xml` `base.version` 5.0.9); on pc82 `/mydata/s4/cassandra-base`, `build/apache-cassandra-5.0.9-SNAPSHOT.jar` sha256 `570b5249d9b9a43f6809eb3da562737492192026f974b2edbd20e94bea90176e`; OpenJDK 11.0.33 |
 | Stage 1 (design) | fresh OOM-agent stage-1 session, 2026-11-24 05:40–06:40 America/New_York; nothing run (read-only check of the five x86 nodes, read-only source reads in the repository and on GitHub raw, read-only JIRA REST searches) |
-| Stage 2 (verify) | pending (a fresh session) |
-| Verdict | `pending` |
+| Stage 2 (verify) | fresh OOM-agent stage-2 session, 2026-11-24 09:15–12:41 America/New_York (all runs), on **pc99** instead of pc82 (dated deviation, §3.1); the write-up, excerpts and node cleanup were finished 15:00–15:10 by a second stage-2 session started after the first ended (no new lifetime: the 14:17 cut-off had passed). Freeze hash checked by both: `895b55b0…7beb7` matches. 19 lifetimes + Step A (3 shakedowns, reach check); no amendment |
+| Verdict | **true positive**: `verified-OOM · deployment`, **bypass (accounting omission)**, outcome row 1 |
 
 ## Summary
 
-- **Conclusion:** pending (stage 2). Design: on one node at a 2 GiB heap with every capacity constraint at its default, an
+- **Conclusion:** **true positive** (`verified-OOM · deployment`, bypass, accounting omission). At a 2 GiB heap with every default, the T arm
+  OOMs 3/3 after 7–8 profiled tables, with 1,625–1,667 slab regions (79–81 % of the heap) reachable only through sampler entries;
+  the write-side-samplers control C and the key-copy build P each survive 3/3 with no pinned regions. OOM 3/3 also at 15,872 MiB (§3–§4). Design: on one node at a 2 GiB heap with every capacity constraint at its default, an
   operator runs **`nodetool profileload b25 t<k>` with all default options** (10 s, `-s 256`, `-k 10`, all eight samplers) on one
   table after another while a client writes ≈ 1 MiB partitions into that table and reads each one back. Predicted: heap OOM 3/3
   within 4–10 sessions; the write-side-samplers control and a build whose `Sampler.addSample` copies the key both survive 16 sessions.
@@ -348,8 +350,207 @@ lifetime starts after 5 h from Step A's start (cut-off written into `plan.sh` wi
 
 ## 3. Runs (stage 2)
 
-pending
+Fresh OOM-agent stage-2 session, 2026-11-24 09:15–12:41 America/New_York (all lifetimes; the write-up, excerpt copy and cleanup were finished 15:00–15:10 by a second
+stage-2 session after the first ended, which re-checked the freeze hash, started no lifetime and read the readings from the node logs) (node clock is America/Denver; every time
+below is New York). Freeze hash checked before anything ran: `895b55b0…7beb7` = the value in §2 (match). Harness:
+[`harness/`](harness/) (`run.py` lifetime runner, `RawGen.java` client, `client.py` admin, `Jmx.java` poller (R21's),
+`hprof_scan.py` (R21's, unchanged), `hprof_reach.py` (R21's with the cut `sampler`), `ReachCheck.java` + `reach-check.sh`
+(known-answer check), `analyze.py`, `table.py`, `sampler-copy.diff`). Raw logs on pc99 `/mydata/s4/b25/logs/<label>/`; small
+excerpts (summary.json, reach JSONs, one nodetool output, OOM stdout tails, yaml diff, memory.events) in [`logs/`](logs/).
+
+### 3.1 Environment, deviations, Step A
+
+- **Node (dated deviation, 2026-11-24):** **pc99** (node4.jason92-326665, UMass) instead of pc82, as assigned by the batch
+  coordinator; same class: x86_64, **32 cores** (pc82: 40), 125 GiB, Ubuntu 22.04, kernel 5.15, cgroup v2, 8 GiB swap present
+  (scope `MemorySwapMax=0`), `/mydata` 753 GiB on a rotational disk (`sda` ROTA 1, 695 GiB free), OpenJDK 11.0.33. At 09:17 EST the
+  node was idle (load 0.00, no Java process, no `NODE-LOCK`); lock taken 09:17:52 EST as `B25-stage2`. `/mydata/s4/` also holds
+  `3b-C9`, `3b-U9`, `u14` (other cases' stopped folders, not touched). Base jar sha256 = `570b5249…0176e` (as planned).
+- **Budget resolved on pc99:** `MaxDirectMemorySize=15872M` (cassandra-env, as expected); heap per arm via `MAX_HEAP_SIZE`
+  (`-Xms = -Xmx`); node scope `memory.max = max`, `memory.swap.max = 0` in every lifetime; JVM flags as shipped (G1,
+  `G1HeapRegionSize=16m`, `HeapDumpOnOutOfMemoryError`, `OnOutOfMemoryError=kill -9 %p`; full command line in each
+  `jvm-cmdline.txt`).
+- **Settings read-back (every lifetime, `system_views.settings`):** `memtable_allocation_type heap_buffers` (I2 arm:
+  `unslabbed_heap_buffers`), `memtable_heap_space`/`memtable_offheap_space` = heap/4 (512 / 1024 / 2048 / 3968 MiB),
+  `memtable_cleanup_threshold 0.33333334`, `memtable_flush_writers 2`, `commitlog_segment_size 32MiB`, `max_mutation_size 16384KiB`,
+  `commitlog_total_space 8192MiB`, `concurrent_reads/writes 32`, `native_transport_max_request_data_in_flight 214748364B` /
+  `_per_ip 53687091B` (at 2 GiB), `native_transport_max_message_size 16777216B`, `key_cache_size 100MiB`, `row_cache_size 0MiB`,
+  `tables_warn/fail_threshold -1`, `read_thresholds_enabled false`, `memtable` null (default skiplist). All as §2.3. The yaml
+  diff of every lifetime changes only `cluster_name`, `listen_address`, `rpc_address`, seeds and the run directories
+  ([`logs/T1/yaml.diff`](logs/T1/yaml.diff)).
+- **Step A (1) builds:** U = `cp -a cassandra-base`, sha256 `570b5249…0176e`. P = `cp -a cassandra-base` + the §2.3 diff
+  ([`harness/sampler-copy.diff`](harness/sampler-copy.diff)), `javac -source 11 -target 11` of `Sampler.java` (it wrote
+  `Sampler.class`, `Sampler$Sample.class`, `Sampler$SamplerType.class`), `jar uf` with exactly those three; P jar sha256
+  **`43823304885fa0e2cd90a92fedc957873fcd861046b3817c1fee98814da9e9ce`**; `javap -c -p` of `addSample`: P has
+  `invokestatic …ByteBufferUtil.minimalBufferFor`, U has none; class major version 55; `unzip -l` member lists equal (5,956).
+  `bin/cassandra.in.sh` puts the single `build/apache-cassandra-*.jar` on the classpath (not `build/classes/main`). The
+  runner re-checks hash and `javap` at every lifetime start.
+- **Step A (3) reach known-answer check** ([`logs/reach-check-summary.txt`](logs/reach-check-summary.txt)): real `MaxSampler` /
+  `FrequencySampler` instances (anonymous subclasses, U jar) in a test JVM. First attempt read 18 / R_s 6: the **test program**
+  inserted all-zero 12-byte slices, and `StreamSummary` keys by `ByteBuffer.equals` (content), so the five FrequencySampler-only
+  slices collapsed into one `Counter` and four arrays were collected (the tool's count was right for the heap it saw). Fixed in
+  the test program (distinct content per slice, as distinct partition keys have); second attempt: **reachable 22, R_s 10**, 2 cut
+  field references, 8 `Sampler$Sample` + 7 `Counter`, 0.47 s. Not a reading.
+- **Step A (4) shakedowns (not readings):** the first U attempt stopped at the settings read-back before any load because the
+  harness expected `16MiB` where `system_views` prints `16777216B` (same value; expectation corrected). `shk-U2` (U, 2 GiB,
+  3 sessions): node up, 1,432 inserts and 1,432 reads all returning 1 row, **n_k 313 / 305 / 282**, every nodetool rc 0 and its
+  `Frequency of reads by partition` table lists `b25.t<k> k<k>-…` keys ([`logs/shk-U2/nt-s1.txt`](logs/shk-U2/nt-s1.txt)),
+  `ERROR` lines 0, cycle (insert + read) p50 7–22 ms. `shk-P` (P, 1 session): n_k 313, nodetool ok, no `ERROR`. **F1 not
+  needed** (one writer reaches n_k ≥ 256). Harness fixes during Step A (before readings): `pgrep` patterns that matched their own
+  shell (`[R]awGen`).
+- **Analysis gaps (recorded):** (a) the shipped `-Xlog:gc…heap*=trace` with `filecount=10,filesize=10M` rotates over the
+  earliest phases at 8,192 / 15,872 MiB, so the gc.log old-gen floor exists only for the last sessions there; the 500 ms JMX
+  sampler (`sampler.csv`: old-gen used after collection) covers the whole run. (b) With `-XX:OnOutOfMemoryError=kill -9 %p` the
+  JVM prints the OOM without a thread name and `system.log` has no line for it (as R21); V5 rests on the stdout sequence and
+  the dump.
+
+### 3.2 Readings at 2 GiB (T, C, I; build, arm, sessions as §2.5; K_max 16)
+
+Per-session reads n_k (reads of t<k> between nodetool start and return; every read returned 1 row), old-gen floor
+(minimum heap-after-GC in the phase, gc.log), dump readings by `hprof_reach.py` / `hprof_scan.py`. K_pool = dump
+`SubPool.allocated` (JMX `AllMemtablesOnHeapDataSize` max per phase ≤ 171 MiB in every 2 GiB lifetime). K_s = reachable
+`Sampler$Sample` + stream-lib `Counter` instances.
+
+| Lifetime | Build / arm | Endpoint | Sessions done (OOM in) | n_k median (≥ 256) | Old-gen floor per phase (MiB) | Dump | R_s regions | live regions | K_pool (MiB) | K_s |
+|---|---|---|---|---|---|---|---|---|---|---|
+| T1 | U / T | **heap OOM** at 124 s | 8 (k = 7) | 301 (6/7) | 202, 677, 809, 1027, 1268, 1531, 1764, 1894 | OOM | **1,625** | 1,831 | 184.9 (+ 81.3 reclaiming) | 4,678 + 3,288 |
+| T2 | U / T | **heap OOM** at 117 s | 7 (k = 6) | 298 (6/6) | 199, 680, 818, 1038, 1277, 1543, 1770 | OOM | **1,655** | 1,837 | 163.8 | 4,690 + 3,296 |
+| T3 | U / T | **heap OOM** at 123 s | 8 (k = 7) | 292 (6/7) | 186, 669, 803, 1017, 1248, 1535, 1766, 1898 | OOM | **1,667** | 1,839 | 154.3 | 4,695 + 3,298 |
+| C1 | U / C | survives 16 + tail | 16 | 303 (16/16) | 200 … max 777 (slope 8.4 / session) | end | **0** | 181 | 159.5 | 7,782 + 4,083 |
+| C2 | U / C | survives 16 + tail | 16 | 295 (16/16) | 233 … max 747 (slope 11.5) | end | **0** | 132 | 116.2 | 7,794 + 4,089 |
+| C3 | U / C | survives 16 + tail | 16 | 298 (16/16) | 198 … max 815 (slope 0.0) | end | **0** | 179 | 159.5 | 7,786 + 4,085 |
+| I1 | P / I | survives 16 + tail | 16 | 288 (16/16) | 182 … max 672 (slope 5.1) | end | **0** | 61 | 49.7 | 11,670 + 8,164 |
+| I2 | P / I | survives 16 + tail | 16 | 291 (16/16) | 184 … max 637 (slope −5.3) | end | **0** | 62 | 50.7 | 11,621 + 8,133 |
+| I3 | P / I | survives 16 + tail | 16 | 296 (15/16) | 184 … max 797 (slope 7.3) | end | **0** | 157 | 137.3 | 11,642 + 8,146 |
+
+- **T, every OOM:** `stdout.txt` reads `java.lang.OutOfMemoryError: Java heap space` → `Dumping heap to …` → `Heap dump file
+  created [2,025–2,039 MB]` → `kill -9 <pid>` → `Killed` ([`logs/T1/stdout-tail.txt`](logs/T1/stdout-tail.txt)); scope
+  `memory.events` `oom 0`, `oom_kill 0` (no kernel kill); no `ERROR` in `system.log`; the last GCs before the OOM are back-to-back
+  Full GCs at 1,899 → 1,899 MiB of 2,048. The session before the OOM is already GC-bound (n_k 139–163, 185 GCs in T1's phase 6).
+  The client saw only transport errors (node gone).
+- **Uncounted:** at every T dump, live regions − Σ `regionCount` of non-discarded allocators = **R_s exactly** (1,625 / 1,655 /
+  1,667): every region held only by a sampler belongs to a memtable the pool no longer counts, and 89–91 % of all live regions
+  are such regions. R_s = 1.59–1.63 GiB = 79–81 % of the heap, held by 7.97–7.99 k sampler entries whose contract is
+  ≈ 116 B each (≈ 0.9 MB in total).
+- **Per-session step:** the T floor rises 475–483 MiB from phase 0 to 1 (the first table's pinned regions plus the pool filling),
+  then 132–138, 214–220, 231–241, 263–287, 227–233 MiB; least-squares slope **245 / 250 / 247 MiB per session**. C and I floors
+  saw-tooth (young/mixed collections) with no trend.
+- **n_k:** T medians 301 / 298 / 292; C 303 / 295 / 298 (within ± 3 % of T); I 288 / 291 / 296 (0.97–0.99 × T). Every nodetool call
+  in a completed session returned 0 and listed `t<k>` keys.
+
+### 3.3 Arm D — retention and release (2 GiB; §2.6)
+
+| Lifetime | Sessions n_k | After `nodetool flush` + 30 s: **D1** | after `profileload b25 t0` with no client: **D2** | after 300 s idle: **D3** |
+|---|---|---|---|---|
+| DU (build U) | 286, 303, 290 | **R_s 816** of 819 live regions; K_pool 3,839 B (allocators all LIVE, 3 regions); K_s 2,196 + 1,536 | **R_s 540** (−276); K_s 1,464 + 1,024 (t0's 732 + 512 entries replaced by empty samplers) | **R_s 540**; K_s unchanged |
+| DP (build P) | 314, 302, 286 | R_s **0** (0 live regions); K_pool 0; K_s 2,196 + 1,536 | R_s 0; K_s 1,464 + 1,024 | R_s 0 (2 live regions, a new system memtable) |
+
+Histograms agree: DU `[B` 869 MB at D1 → 580 MB at D2 → 582 MB at D3 with `AllMemtablesOnHeapDataSize` 3,839 B; the same
+`Sampler$Sample` / `Counter` counts on U and P. So after every memtable is flushed and discarded, **≈ 816 MiB stays reachable
+only through the samplers of three tables**, uncounted by the pool, until a new `beginSampling` on the same table; a new
+session on t0 frees t0's share and nothing else; idle time frees nothing. The copy in `addSample` removes all of it at the
+same entry counts.
+
+### 3.4 Budget search (V7; build U, T command, all defaults; ascending)
+
+| Lifetime | Heap (pool) | K_max | Endpoint | OOM in session | n_k median | OOM dump: R_s / live regions | K_pool | K_s |
+|---|---|---|---|---|---|---|---|---|
+| L4 | 4,096 MiB (1,024 MiB) | 32 | **heap OOM** at 240 s | k = 14 (pred. ≈ 12) | 289 | 3,449 / 3,756 (3.37 GiB) | 280 MiB | 9,406 + 6,607 |
+| L8 | 8,192 MiB (2,048 MiB) | 64 | **heap OOM** at 490 s | k = 29 (pred. ≈ 24) | 303 | 6,987 / 7,595 (6.82 GiB) | 564 MiB | 19,942 + 13,981 |
+| L16 | 15,872 MiB (3,968 MiB) | 124 | **heap OOM** at 920 s | k = 54 (pred. ≈ 48) | 300 | 13,403 / 14,794 (13.1 GiB) | 1,299 MiB | 37,953 + 26,586 |
+| L16b | 15,872 MiB (3,968 MiB) | 124 | **heap OOM** at 878 s | k = 53 | 300 | 13,435 / 14,776 (13.1 GiB) | 1,254 MiB | 37,986 + 26,598 |
+| L16c | 15,872 MiB (3,968 MiB) | 124 | **heap OOM** at 894 s | k = 53 | 298 | 13,461 / 14,795 (13.1 GiB) | 1,247 MiB | 37,920 + 26,554 |
+| LC16 | 15,872 MiB, **C** (write-side samplers) | 124 | **survives** 124 sessions + tail (2,072 s) | — | 304 (124/124 ≥ 256) | end: **0** / 641 | 599 MiB | 60,512 + 31,744 |
+
+Heap dumps at 15,872 MiB were 15.66–15.68 GB. The repeats L16b/L16c and LC16 ran because time allowed (§2.7: "repeat it to 3 runs
+and run C once there"). At this heap the old-gen floor per phase does not show liveness: G1 (IHOP 70 %) runs no mixed cycle inside
+most 16 s phases, so LC16's floor goes up and down between 762 and 13,528 MiB, falls back to 1,176–1,508 MiB after each mixed cycle,
+and has no trend (slope −6.5 MiB/session). Its end dump (641 live regions, R_s 0) is the liveness reading. gc.log rotated over the
+early phases, as recorded in §3.1 gap (a).
+
+Every step failed (15,872 MiB: 3/3); 15,872 MiB is what `cassandra-env.sh` resolves for a node with ≥ 32 GiB RAM (the largest heap it picks), so
+the **largest failing budget is the top of the ladder** (no surviving boundary within acceptable budgets). The OOM session
+scales with the heap (≈ 3.5 tables per GiB). Every OOM: same stdout sequence, `oom_kill 0`, no `ERROR`; uncounted regions =
+R_s in each dump.
+
+### 3.5 Optional arms (P5; not verdict conditions)
+
+| Lifetime | Build / arm | Endpoint | n_k median | Old-gen floor (MiB) | End dump: R_s / live regions | K_pool | K_s |
+|---|---|---|---|---|---|---|---|
+| X1 (the design's optional arm "I2"; renamed so it does not clash with lifetime I2) | U / T command with `memtable_allocation_type: unslabbed_heap_buffers` (read back) | **survives** 16 + tail | 296 (16/16) | 113 … max 897 (slope −18.6) | **0 / 0** (no slab regions exist under this allocator) | (no `SubPool` reading; JMX max 170 MiB) | 11,707 + 8,188 |
+| C0a | U / C0 (no profileload) | **survives** 16 + tail | (411 reads per matching window) | 197 … max 758 (slope −0.1) | 0 / 159 | 139 MiB | 0 + 0 |
+
+P5 met: when the allocator does not slice slab regions, the same command with the same sampler counts pins nothing. Without any
+profileload, the workload's floor is flat. `ERROR` lines 0 and `oom_kill` 0 in both. Excerpts: [`logs/X1/`](logs/X1/), [`logs/C0a/`](logs/C0a/),
+[`logs/LC16/`](logs/LC16/).
+
+### 3.6 Predictions against readings
+
+| Prediction | Reading | Met? |
+|---|---|---|
+| P1: T OOM 3/3 at k* ∈ [4, 10] (point 6–7) | OOM 3/3 at k* = 7, 6, 7 | yes |
+| P1: floor rises 200–300 MiB per session for k ≥ 1 | slope 245–250 MiB/session; individual steps 132–287 (the k = 1 → 2 step 132–138 below the band, the first step 475–483 above) | yes as a trend; one step per lifetime below the band |
+| P1: R_s ≥ 800 and ≥ 0.5 × live regions | 1,625–1,667; 0.89–0.91 × live | yes |
+| P1: K_pool ≤ 600 MiB; K_s ≤ 8 × 256 × (k* + 1) | 154–185 MiB; 7,966–7,993 ≤ 14,336–16,384 | yes |
+| P2: C survives 16 + tail 3/3; floor ≤ 1,100, slope ≤ 20; R_s ≤ 8; n_k ± 15 % | 3/3; max 747–815, slope 0.0–11.5; R_s 0; ± 3 % | yes |
+| P3: I survives 3/3; floor ≤ 1,100, slope ≤ 20; R_s ≤ 8; K_s ≥ 6,400; n_k ≥ 0.85 × T | 3/3; max 637–797, slope −5.3–7.3; R_s 0; 19.8 k; 0.97–0.99 × T | yes |
+| P4 (DU): D1 K_pool ≤ 16 MiB, R_s ≥ 0.85 × Σ(min(n_k, 512) − 12) = 717 | 3,839 B; 816 | yes |
+| P4 (DU): D2 R_s falls by ≥ 200; D3 ≥ 0.95 × D2 | −276; 540 = 540 | yes |
+| P4 (DP): R_s ≤ 8 at D1–D3 | 0, 0, 0 | yes |
+| Ladder predicted k ≈ 12 / 24 / 48 | 14 / 29 / 54, 53, 53 | OOM at every step (15,872 MiB 3/3; C survives there); ≈ 15 % later than predicted (P per session ≈ 245 MiB, not 275) |
+| Validity: settings, hash/javap, n_k ≥ 256 in ≥ 80 % of sessions, nodetool rc 0 with `t<k>` keys, `oom_kill` 0, no `ERROR` | all lifetimes (T: 0.86 / 1.0 / 0.86 of completed sessions; the GC-bound session before each OOM is the one below 256) | yes |
+
+### 3.7 Cleanup
+
+- Every lifetime's runner stopped its node, client and poller. The runner deleted each OOM and end heap dump after
+  `hprof_reach.py`/`hprof_scan.py` had read it (`/mydata/s4/b25/dumps/` and the run directories were empty or gone at 15:01 EST).
+- 2026-11-24 15:02 EST (second session, under the node lock): deleted `/mydata/s4/b25/cassandra-u` and `cassandra-p` (838 MB), the
+  rotated gc logs (585 MB), `debug.log`, `rawgen.csv.reads` and class histograms. Left on pc99: `/mydata/s4/b25/` (22 MB: harness,
+  compiled client/P classes, chain scripts, and per-lifetime `summary.json`, `system.log`, `stdout.txt`, `session.log`, CSVs,
+  `nt-s*.txt`, reach/scan JSONs). `pgrep` found no Cassandra, RawGen, Jmx or nodetool process. `/mydata/s4/cassandra-base` and other
+  cases' folders (`3b-C9`, `3b-U9`, `u14`) were not touched. `NODE-LOCK` released 15:02 EST.
 
 ## 4. Conclusion (stage 2)
 
-pending
+**Verdict: true positive.** Status **`verified-OOM · deployment`** (V1–V7 met for T on build U at 2 GiB, all defaults);
+direction **bypass — accounting omission** (U > C, K ≤ C); interpretation **suspected implementation defect**.
+
+Operator-run `nodetool profileload <ks> <table>` with every default option, on one table after another while that table takes
+read-after-write traffic, ends in a heap `OutOfMemoryError` 3/3 at a 2 GiB heap after 7–8 tables, and at every budget up to
+15,872 MiB (4,096 / 8,192 MiB: after 15 / 30 tables; 15,872 MiB 3/3 after 54–55 tables, where the C control survives 124 tables). The dumps show the claimed holder: 1,625–1,667 slab regions
+(1.6 GiB, 79–81 % of the heap) are reachable only through `MaxSampler.queue` / `FrequencySampler.summary`, held by ≈ 8 k
+sampler entries whose count is within the capacity contract (256 per sampler per table) but each of which keeps a whole 1 MiB
+`byte[]` through its partition-key slice; the memtable pool counts none of them (live regions − regions of non-discarded
+allocators = R_s exactly). Arm D shows the retention directly: after a flush, ≈ 816 MiB stays reachable only through three
+tables' samplers with the pool at 3,839 B; a new `beginSampling` on one table releases that table's share only, and idle time
+releases nothing. The protected path (write-side samplers, whose keys are the decoded request's own copy) survives 3/3 with
+R_s 0, and the intervention (`Sampler.addSample` copies a `ByteBuffer` key with `ByteBufferUtil.minimalBufferFor`, the
+`retainable()` idea `TopPartitionTracker` already uses) removes the endpoint 3/3 and every pinned region at the same sample
+counts and 0.97–0.99 × T's reads.
+
+**Classification.** The OOM is reached by the D1-pin domain alone stacking over profiled tables (R_s ≈ 80 % of heap at each
+OOM; the pool stays at 154–185 MiB, under ⅓ of its contract), so it is labelled bypass, not mixed: the multiplicity is that
+of the uncounted holder itself (per table), and no other domain has to exceed its contract. One table pins ≈ 245–280 MiB, so
+a 2 GiB node needs ≈ 7 profiled tables; the number scales with the heap (≈ 3.5 tables per GiB).
+
+**Deployment conditions.** Capacities all at their defaults and read back (V6); budgets 2,048 → 15,872 MiB heap with the
+resolved 15,872 MiB direct limit, no container limit (V7). Non-capacity choices as designed: single node, RF 1, a
+read-after-write client with ≈ 1.06 MiB partitions (each key in its own slab region; smaller partitions share regions, so fewer
+regions per retained key), and an operator who profiles hot tables one after another with the default command. `nodetool`
+is an operator tool (JMX), so stage 3-b should expect `not client-triggerable` unless a client path to sampling exists.
+
+| | Evidence |
+|---|---|
+| V1 Repetition | T OOM **3/3** (T1–T3); also L4, L8 (1/1 each) and 15,872 MiB **3/3** (L16, L16b, L16c); C at 15,872 MiB (LC16) survives 124 sessions |
+| V2 Matched control | C (write-side samplers, same build, budget, schema, client, schedule) **0/3** OOM, R_s 0 |
+| V3 Measurement | U (R_s, live regions by `hprof_reach.py`; old-gen floor from gc.log; histograms) measured independently of K (sampler entry counts; pool `SubPool.allocated`, JMX `AllMemtablesOnHeapDataSize`) |
+| V4 Intervention | build P (copy in `addSample`) **0/3** OOM at matched load (n_k 0.97–0.99 × T), R_s 0; DP R_s 0 at D1–D3 |
+| V5 Initiating failure | `OutOfMemoryError: Java heap space` → heap dump → `kill -9 %p` in each T stdout, `oom_kill 0`; each OOM dump shows the holder (R_s 1,625–1,667) |
+| V6 Default constraints | every capacity setting at its shipped default, read back each lifetime (§3.1); profileload at its defaults (`-s 256`, `-k 10`, all samplers, 10 s) |
+| V7 Acceptable budget | 2 GiB (ideal) and every ladder step up to 15,872 MiB; direct 15,872 MiB as resolved; no container limit |
+
+**Limits of attribution.** The OOM needs an operator to run `profileload` (or `toppartitions` for the read samplers) on
+several distinct tables that take reads served from memtables, with no later session on the same table; the amount per table
+is bounded by min(reads in the window, 512) distinct regions, so tables whose partitions share regions pin less per entry.
+Off-heap allocators (`offheap_buffers` / `offheap_objects`) were not tested (not defaults). The ≈ 15 % later OOM session than
+predicted comes from P ≈ 245 MiB per table (READS and READ_ROW_COUNT overlap more than the design assumed), not from any
+release.

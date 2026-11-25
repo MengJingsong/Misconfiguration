@@ -1,0 +1,11 @@
+--- a/src/java/org/apache/cassandra/service/reads/ReplicaFilteringProtection.java
++++ b/src/java/org/apache/cassandra/service/reads/ReplicaFilteringProtection.java
+@@ -140,7 +140,7 @@
+     {
+         this.keyspace = keyspace;
+         this.command = command;
+-        this.consumeEntirePartitions = command.limits().isUnlimited() || !command.isLimitedToOnePartition() || command.rowFilter().hasStaticExpression();
++        this.consumeEntirePartitions = command.limits().isUnlimited() || command.rowFilter().hasStaticExpression();
+         this.consistency = consistency;
+         this.requestTime = requestTime;
+         this.sources = sources;

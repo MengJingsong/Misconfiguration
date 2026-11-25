@@ -7,12 +7,24 @@
 | Phase-1 case file | [`cached_rows_fail_threshold-queryProtectedPartitions-i--autonomous`](../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/cached_rows_fail_threshold-queryProtectedPartitions-i--autonomous.md) · stage-4 result [`results/…`](../../../../capacity-enforcement-exp/cassandra/stage4-runtime-verification/results/cached_rows_fail_threshold-queryProtectedPartitions-i--autonomous.md) |
 | System / pinned source | Cassandra 5.0.9 (`systems/cassandra/source/`); built copy `pc72:/mydata/s4/cassandra-base` (`build/apache-cassandra-5.0.9-SNAPSHOT.jar`, sha256 `570b5249…0176e`, the same jar as B22) |
 | Stage 1 (design) | phase-2 OOM agent, stage 1 (Claude Opus 5.5), 2026-11-24 (owner-approved batch of 2026-11-24); nothing run (pc72, pc75, pc82, pc91, pc99 checked read-only) |
-| Stage 2 (verify) | pending (a fresh session) |
-| Verdict | `pending` |
+| Stage 2 (verify) | phase-2 OOM agent, stage 2 (fresh session, Claude Opus 5.5), 2026-11-24 09:16–10:50 EST on **pc82** (dated deviation: the design named pc72, with pc82 as an equivalent fallback) |
+| Verdict | **true positive** — `verified-OOM · deployment` (bypass · accounting omission × multiplicity) |
 
 ## Summary
 
-- **Conclusion:** pending (stage 2).
+- **Conclusion (stage 2, 2026-11-24):** **true positive**, `verified-OOM · deployment`. On pc82 (two instances, RF 2, every
+  constraint at its default, coordinator heap 2 GiB, direct 15,872M), 7 concurrent filtering range reads (`… WHERE v = 'x' ALLOW
+  FILTERING`, CL QUORUM, fetch size 128) of one 2,048-row partition with 64 KiB values ran the coordinator out of heap **3/3**
+  (`Java heap space`, about 20–40 s after the 7 queries started), with RFP's counter at ≤ 4,096 of 32,000 per query and no fail-threshold
+  line. Dumps: 64 KiB row values held by 14 RFP `PartitionBuilder`s = **70.7–71.8 %** of the dumped heap. Same Q with CL ONE, with
+  2 KiB rows, or with a build where RFP consumes only the page on range reads: **0/3 each**, pages served at 53–102 per second.
+- **Root cause:** replica-filtering protection drains the **whole partition** from every replica for a range read
+  (`consumeEntirePartitions` is true whenever the read is not limited to one partition) and keeps every row version on the
+  coordinator heap until the partition closes. Its only bound, `cached_rows_fail_threshold`, counts **rows** (32,000), not bytes, and
+  nothing sums concurrent queries. A 2,048-row partition of 64 KiB rows is 4,096 versions = 257 MiB per query (65,824 B per version,
+  measured), whatever the client's page size; 7 such queries exceed a 2 GiB heap. The 5-s short-read deadline frees a query's hold
+  only after it has already grown, so at 4 GiB (Q = 14) and 8 GiB (Q = 28) the queries timed out and the heap survived (live heap
+  after full GC up to 3,931 / 4,913 MiB): the largest failing heap is 2 GiB.
 - **Hypothesis (stage 1).** A filtering range read (`… WHERE v = 'x' ALLOW FILTERING`, no partition key) at CL QUORUM on
   RF 2 goes through replica-filtering protection (RFP). RFP reads the **whole partition** from every replica before it returns
   the first page: for range reads it always consumes entire partitions (`ReplicaFilteringProtection.java:143`), and short-read
@@ -368,8 +380,141 @@ C-small to 1 run (C-ONE then serves as the V2 control). Never dropped: DIAG-A's 
 
 ## 3. Runs (stage 2)
 
-pending
+**Calibration record (written 2026-11-24 09:35 EST, before any readings arm; the full §3 follows below when the runs are done).**
+DIAG-A (8 GiB): N\* = **2,048 (`w2k`)**: its 5 queries all completed with K bucket 4,768 (⊇ 2N = 4,096), 32 short-read fetches per
+query, median 1.60 s. `w4k` completed with K bucket 8,239 but median 3.12 s (> 2.0 s); `w8k`/`w12k` timed out 5/5 each. DIAG-C
+(2 GiB / 15,872M, `w2k`, Q = 1 then Q = 7 from the provisional Q_T = 14 at B = 110 MiB; measured B = 112 MiB gives the same
+Q_T = 14): Q = 1 completed 14/14; at Q = 7, 21/21 queries timed out at the 5-s fetch deadline (rule ii) and the victim died of
+`Java heap space` at +69 s (rule iii); drops 4–6 of 492–616 large messages (< 5 %, rule iv not met). **Amendment A1 (2026-11-24,
+before readings):** rule (ii) asks to step N\* down one rung, but `w2k` is the lowest rung of the frozen ladder, so it cannot apply;
+rule (iii) applies: **Q_T := ceil(14/2) = 7**. No new rung is added (that would change the design; §2.10 already treats a T OOM
+with most queries timed out as standing, with the completion rate recorded). F stays 128. Readings arms therefore run on `w2k` /
+`s2k` at **Q = 7** (Q step to 11 if T survives its first two runs).
+
+
+### 3.1 Environment (stage 2)
+
+- **Node `pc82`** (node1.jason92-326665; x86_64, 40 cores, 125 GiB RAM, kernel 5.15.0-203, cgroup v2, swap 8 GiB present, OpenJDK
+  11.0.33). **Dated deviation (2026-11-24):** the design named `pc72` (fallback `pc75`/`pc82`); the coordinator assigned pc82, same
+  node class. Freeze hash re-checked at the start: `7bd8ed5f…dc02` matches. Node lock `/mydata/s4/NODE-LOCK` taken 07:16:36 MST
+  (09:16 EST, start S) and released 08:45 MST after cleanup; the node was idle before (no Java process, no lock).
+- **Build:** `/mydata/s4/cassandra-base` copied to `/mydata/s4/r24/tree`, jar sha256 `570b5249…0176e` (the design's). **I-patch build**
+  `/mydata/s4/r24/tree-patched`: [`harness/i-patch.diff`](harness/i-patch.diff) applied, `ant -Doffline=true jar` (1 file recompiled,
+  15 s), jar sha256 `1731159c670fb0b3537db19a1928656bb1f18723a5a456768860ff606f74607c`; `javap` confirms the constructor no longer calls
+  `isLimitedToOnePartition` ([`logs/build-patched.out`](logs/build-patched.out)). Both nodes of an I-patch lifetime ran the patched build.
+- **Topology and config** as §2.3: node 1 (victim/coordinator) 127.0.0.1 JMX 7199, node 2 (peer) 127.0.0.2 JMX 7299 heap 16 GiB;
+  yaml diffs only cluster name, directories, addresses and `auto_bootstrap: false` (`logs/<run>/yaml-n1.diff`, `env-n2.diff`). Thresholds
+  read back by JMX in every lifetime: `fail=32000 warn=2000` (`rfpk.txt`); never set. Victim flags from `ps` in every `run.meta`
+  (`-Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M`, G1, region 16m, `HeapDumpOnOutOfMemoryError`, `OnOutOfMemoryError=kill -9 %p`),
+  each JVM in a `systemd-run --user --scope -p MemorySwapMax=0` scope.
+- **Harness:** [`harness/`](harness/), adapted from B22's with attribution: `R24Load.java` (fetch size, page check `c = 0..F−1`,
+  per-query log), `R24Sampler.java` (adds `ShortReadProtectionRequests`), `RfpJmx.java`, `ctl.sh`, `run-arm.sh`, `batch.sh`,
+  `load-data.sh`, `diag-a.sh`, `diag-b.sh`, `netpoll.sh`, `gcwin.py`, `gcpost.py` (heap after each GC pause from the GC log),
+  `hprofhist.py`, `hprofstacks.py`, `qsum.py`, `steps.py`, `bk.py` (decodes K histogram buckets).
+- **Data (LOAD, 09:20–09:25 EST):** 8 tables written at CL ALL, 0 errors; flush + compact: one SSTable per table per node, `w2k`
+  134,984,930 B live per node … `w12k` 809,899,457 B. CL ALL `count(*)` read-back matched for 7 tables; for `w2k` it failed on node 2
+  with `OversizedMessageException` (134,250,530 B > 128 MiB, a whole-partition count response). **Deviation (read-back only):** `w2k`'s
+  content is confirmed instead by DIAG-A (K bucket 4,768 ⊇ 4,096, 32 short-read fetches per query = 2 × 2,048/128) and DIAG-B (2 builders
+  × 2,048 rows). Hints empty; templates 1.7 GiB per node, `cp -a` per lifetime ([`logs/LOAD-load.out`](logs/LOAD-load.out)).
+
+### 3.2 Calibration
+
+| Lifetime | Setting | Readings |
+|---|---|---|
+| DIAG-A ([`logs/DIAG-A/`](logs/DIAG-A/)) | victim 8 GiB, Q = 1, QUORUM, F = 128 | `w2k` 5/5 OK, 1.17–1.79 s (median 1.60), K bucket 4,768 × 5, SRP fetches 160 (32/query); `w4k` 5/5 OK, 2.35–3.53 s (median 3.12 > 2.0), K 8,239 × 5, 64/query; `w8k` 0/5 (5-s read timeouts), K 14,237 × 2 / 17,084 × 3; `w12k` 0/5, same K buckets. `w2k` at F = 1,024: 3/3, 1.5–1.7 s, K 4,768, 4 fetches/query (page-independent). `w4k` at CL ONE: 3/3, 66–89 ms, K 149 (≈ 128), 0 fetches. `w2k` with `LIMIT 10`: 3/3, 1.9–2.2 s, K 4,768, 408 fetches/query |
+| DIAG-C ([`logs/DIAG-C/`](logs/DIAG-C/)) | 2 GiB / 15,872M, `w2k`, `1:20,7:60` | baseline after GC 112 MiB; Q = 1: 14/14 OK (1.2–2.0 s); Q = 7: 0 completed, 21 read timeouts at the 5-s fetch deadline; **heap OOM at +69 s** (not counted). Dump: `byte[65,536]` 23,039 = 1,440 MiB of 2,015 MiB, 7 RFP, 14 builders. Large messages node 2 → 1: 6 dropped of 616 |
+| DIAG-B ([`logs/DIAG-B/`](logs/DIAG-B/), optional, run in the slack after the readings) | victim 8 GiB + Byteman `rfp.btm`, `w2k` QUORUM × 3 | 3/3 OK; `PEAK populate`: current 4,096, non-null held 4,096, per builder 2,048/2,048, **269,615,152 B = 65,824 B per version** (as predicted from B22's 288 B overhead); initial responses 2 × 8,390,832 B |
+
+N\* = 2,048, Q_T = 7 (amendment A1 above), F = 128.
+
+### 3.3 Readings arms (all: 2 GiB / 15,872M victim, `1:20,7:160`, clean start, F = 128; [`logs/batch.outcomes`](logs/batch.outcomes))
+
+| Run | Arm | Outcome | Pages completed at Q (rate) | Timeouts | K bucket (max) / SRP fetches | Live heap after full GC, max (GC log) | Dump: `byte[65,536]` / dumped heap; 8 MiB arrays | Drops (n2 large msgs) |
+|---|---|---|---|---|---|---|---|---|
+| [T-1](logs/T-1/) | `w2k` QUORUM | **heap OOM** at +48 s (≈ 25 s into Q = 7) | 0 (0/s) | 0 (died first) | 4,768 / 32 per completed query | **2,013 MiB** (111 full GCs) | 22,790 = 1,424 MiB / 2,015 MiB (**70.7 %**); 31 × 8 MiB = 248 MiB | 1 / 302 |
+| [T-2](logs/T-2/) | `w2k` QUORUM | **heap OOM** at +63 s (≈ 40 s into Q) | 1 (0.04/s) | 28 | 4,768 | **2,021 MiB** (215) | 23,017 = 1,439 MiB / 2,025 MiB (**71.0 %**); 31 × 8 MiB | 4 / 674 |
+| [T-3](logs/T-3/) | `w2k` QUORUM | **heap OOM** at +43 s (≈ 20 s into Q) | 1 (0.10/s) | 7 | 4,768 | **2,013 MiB** (71) | 23,244 = 1,453 MiB / 2,024 MiB (**71.8 %**); 29 × 8 MiB (+1 × 4 MiB) | 2 / 423 |
+| [C1-1](logs/C1-1/) | `w2k` **ONE** | survived 160 s | 16,635 (102/s), 100 % | 0 | 149 / 0 | 173 MiB | — | 0 |
+| [C1-2](logs/C1-2/) | `w2k` ONE | survived | 15,768 (97/s), 100 % | 0 | 149 / 0 | 213 MiB | — | 0 |
+| [C1-3](logs/C1-3/) | `w2k` ONE | survived | 15,864 (97/s), 100 % | 0 | 149 / 0 | 201 MiB | — | 0 |
+| [I-1](logs/I-1/) | `w2k` QUORUM, **I-patch** | survived | 8,890 (54/s), 100 % | 0 | 258 / 0 | 272 MiB | — | 0 |
+| [I-2](logs/I-2/) | I-patch | survived | 8,699 (53/s), 100 % | 0 | 258 / 0 | 262 MiB | — | 0 |
+| [I-3](logs/I-3/) | I-patch | survived | 8,652 (53/s), 100 % | 0 | 258 / 0 | 242 MiB | — | 0 |
+| [CS-1](logs/CS-1/) | **`s2k`** QUORUM | survived | 14,339 (88/s), 100 % | 0 | 4,768 / 32.0 per query | 121 MiB (after young ≤ 220) | — | 0 |
+| [CS-2](logs/CS-2/) | `s2k` QUORUM | survived | 14,746 (91/s), 100 % | 0 | 4,768 / 32.0 | 111 MiB | — | 0 |
+| [CS-3](logs/CS-3/) | `s2k` QUORUM | survived | 14,375 (89/s), 100 % | 0 | 4,768 / 32.0 | 113 MiB | — | 0 |
+
+Every completed page in every arm had 128 rows with `c = 0..127` (bad pages 0). No arm logged a fail-threshold (`ERROR … cached over
+32000`) line; T, DIAG and C-small logged the 2,000-row warning. `ReplicaFilteringProtectionRequests` (second phase) stayed 0 in every arm.
+No service loss in any arm (max STW per 60 s: T 16–47 %, controls ≤ 17 %). The pre-declared Q step was not triggered (T failed in its
+first two runs) and T was not mixed, so T ran 3 times.
+
+**T dumps (V5, `hprofhist.txt`, `hprofstacks.txt` per run):** 7 `ReplicaFilteringProtection` and **14 `PartitionBuilder`s** (7 queries × 2
+replicas), 24,397 / 24,622 / 24,848 `BTreeRow`s (85–87 % of 7 × 4,096); `Object[]` backing arrays of the builders' `ArrayDeque`s at
+**1,782 slots × 14** (T-1, T-2) and **2,673 × 10 + 1,782 × 2** (T-3): JDK 11's `ArrayDeque` grows 16 → … → 1,188 → 1,782 → 2,673, so each
+of these builders held more than 1,188 rows. Thread stacks: 7 Native-Transport-Requests threads inside RFP's first phase, 6–7 of them in
+`ShortReadRowsProtection.moreContents` → `ShortReadPartitionsProtection.executeReadCommand` → `ReadCallback.awaitResults`; one messaging
+thread deserializing a large `ReadResponse` (`ByteBufferUtil.readWithVIntLength`, a 64 KiB value of a short-read chunk). The throwing
+thread itself is not recorded: `OnOutOfMemoryError=kill -9` ends the JVM right after the dump, and HotSpot does not mark the thread in
+the dump (as in B22 and C10); system.log shows `G1 Old Gen 2,114,916,640 → 2,024,225,176` just before the `OutOfMemoryError` line.
+
+### 3.4 Budget search (§2.9; one run each)
+
+| Run | Heap / Q | Outcome | Pages at Q | Timeouts | Live heap after full GC, max | STW max per 60 s | Drops |
+|---|---|---|---|---|---|---|---|
+| [B4G-1](logs/B4G-1/) | 4 GiB / 14 | survived 160 s | 1 (3 % of 448 queries) | 434 | **3,931 MiB (96 %)** | 51 % | 252 / 5,933 (4 %) |
+| [B8G-1](logs/B8G-1/) | 8 GiB / 28 | survived 160 s | 176 (22 % of 862), latency p50 4.87 s | 672 | 4,913 MiB (60 %) | 23 % | 550 / 9,248 (6 %) |
+
+Largest failing heap: **2 GiB (3/3)**. At 4 GiB and 8 GiB the queries hit the 5-s short-read deadline before their partitions were
+drained, released their versions and started again, so the aggregate hold levelled off below the heap (at 4 GiB only just). By §2.9
+this is the boundary set by D3 (the deadline) and per-query throughput, not a negative.
+
+### 3.5 Deviations and notes (dated 2026-11-24)
+
+1. Node pc82 instead of pc72 (above). 2. Amendment A1 (Q_T = 7; no lower rung), recorded before the readings. 3. `w2k` CL ALL count
+read-back failed on the internode message cap; content confirmed by DIAG-A/B. 4. After DIAG-C and before the readings, the client was
+changed to stop flooding `NoHostAvailableException` after the victim's death (2.37 M instant failures in DIAG-C; `queries.csv` trimmed
+to 100 lines); no effect while the victim is alive. 5. `gcpost.py`'s regex missed `G1` in pause names; fixed after T-3 and re-run on
+every lifetime (no reading changed; the JMX `old_postgc` column was not used for U). 6. hprof parsing ran at nice 19 during C1-1/C1-2.
+7. Builder deque sizes come from `Object[]` length classes, not from field parsing. 8. DIAG-B ran in the slack after the readings (it
+does not feed any rule). 9. All hprof dumps (≈ 2.1 GB each) were deleted at cleanup per the stage-2 task (the design had said keep
+one); their histograms and stack extracts are in `logs/<run>/`. 10. The budget-search 8 GiB run dropped 6 % of large messages (the
+> 5 % validity rule applies to T only; T dropped ≤ 0.6 %).
+
+**Cleanup:** every process started by this stage was stopped (no Java, sampler, client or netpoll process left on pc82); data
+directories, templates, both build trees and dumps deleted; `/mydata/s4/r24/` keeps the harness copy, compiled helpers and run logs
+(≈ 0.9 GB of GC/system logs). Node lock released.
 
 ## 4. Conclusion (stage 2)
 
-pending
+**Verdict: true positive.** Protocol status **`verified-OOM · deployment`**, direction **bypass · accounting omission** (count, not
+bytes; whole partition, not page) **× multiplicity** Q = 7, at defaults and a 2 GiB coordinator heap.
+
+A filtering range read at CL QUORUM makes replica-filtering protection drain the entire partition from both replicas before it returns
+the first page, holding every row version on the coordinator heap; the only bound is `cached_rows_fail_threshold`, which counts rows
+(≤ 4,096 per query here, against 32,000) and never bytes, and nothing bounds the sum across concurrent queries. With 64 KiB rows one
+query holds 4,096 × 65,824 B = 257 MiB regardless of the client's fetch size (128 rows), and 7 concurrent queries drove a 2 GiB heap to
+a Java heap OOM in 3/3 runs, with RFP's held 64 KiB values 71–72 % of every dump and 14 builders each holding over 1,188 rows. The
+matched controls kept everything else equal and survived 0/3 each: 2 KiB rows (same K, same 32 short-read fetches per query, live heap
+≤ 121 MiB), CL ONE (one source, no short-read fetches, K ≈ 128) and the intervention build that lets RFP consume only page-sized
+chunks on range reads (K ≈ 256, 0 fetches, the same pages served at 53 per second against T's ≈ 0). Most of T's queries at Q = 7 timed out
+at the 5-s short-read deadline before the OOM (completed pages at Q: 0–1 per run); by §2.10 the endpoint stands, since the held memory is
+RFP's within its count. The time bound limits the failure to small heaps: the largest failing heap was 2 GiB; 4 GiB at Q = 14 stood at
+96 % live heap without OOM and 8 GiB at Q = 28 survived.
+
+| | Evidence |
+|---|---|
+| V1 Repetition | T-1, T-2, T-3: heap OOM **3/3** from clean starts |
+| V2 Matched control | C-small (`s2k`, same K and fetch count) 0/3; C-ONE (same rows and Q) 0/3 — same build, budget and Q |
+| V3 Measurement | U from the GC log (live heap after full GC 2,013–2,021 MiB in T vs 111–213 MiB in the controls) and hprof `byte[65,536]` (1,424–1,453 MiB), independent of K (JMX histogram bucket 4,768 ⊇ 4,096; DIAG-B: 4,096 held = 269.6 MB) |
+| V4 Intervention | I-patch (page-sized RFP consumption on range reads; diff and jar hash saved) 0/3 with 100 % completion and 53–54 pages/s |
+| V5 Initiating failure | `java.lang.OutOfMemoryError: Java heap space` in each T `stdout.log`/system.log, hprof at failure: D1 70.7–71.8 % of heap, 14 builders, NTR threads in RFP/short-read frames (throwing thread not recorded: kill -9 on OOM) |
+| V6 Default constraints | every capacity setting at its shipped default (yaml diffs: directories, addresses, cluster name, `auto_bootstrap` only); thresholds read back `fail=32000 warn=2000`; timeouts default |
+| V7 Acceptable budget | heap 2 GiB (standing rule's ideal), direct 15,872M as `cassandra-env.sh` resolves on the node; no container limit |
+
+**Limits of attribution and scope.** The fetch size (128) and the 64 KiB rows are client and schema choices; the shape needs a partition of
+a few thousand large rows and a filtering range read at a consistency level with ≥ 2 replicas. Replicas agreed, so the second RFP phase
+never ran (0 requests); a disagreeing replica set was not tried. The OOM is bounded to small heaps by the 5-s deadline and per-query fetch
+throughput on this node: 2 GiB fails, 4 GiB does not at Q = 14. The I-patch is a diagnostic build only (no correctness claim beyond
+the same first pages for agreeing replicas). The new evidence over B22 is the partition-sized hold: no send-queue drops of note (≤ 0.6 %
+in T) and the endpoint reached at the frozen 2 GiB budget, which B22 could not.

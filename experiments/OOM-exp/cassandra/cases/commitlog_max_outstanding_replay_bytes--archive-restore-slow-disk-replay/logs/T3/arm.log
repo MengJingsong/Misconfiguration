@@ -1,0 +1,44 @@
+[07:52:22] == restore T3 img=A3 heap=1024M D=100ms PIT=T opts='' arch=x86_64; /mydata free  702G
+[07:52:22] r23slow write delay = 0 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 0
+[07:52:24] refilled from img/A3: data 139 MiB; commitlog 1 files; archive 6 files 170 MiB
+[07:52:25] table restored from snapshot: 4 sstables (14 MiB Data.db)
+[07:52:25] commitlog_archiving.properties: archive_command=/bin/ln %path /mydata/s4/r23/archive/%name restore_command=/bin/cp -f %from %to restore_directories=/mydata/s4/r23/archive restore_point_in_time=2026:11:24 14:45:45.320 snapshot_commitlog_position= precision=MICROSECONDS 
+[07:52:26] r23slow write delay = 100 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 100
+[07:52:37] start: pid=560710 cg=/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/r23-T3-1795531946.scope max=5368709120 swap.max=0 heap=1024M opts=''
+[07:52:37] jvm: -XX:+UseG1GC -Xms1024M -Xmx1024M -XX:MaxDirectMemorySize=15872M 
+[07:52:43] pre-attach ok after 1 tries
+[07:52:47] Replaying seen (T_r) at +10s after JVM start
+[07:52:51] histogram +2s: total 919 MiB live; Mutation n=639 ArrayCell n=3669814 BufferCell n=1709283 byte[]=233 MiB
+[07:52:51] histogram +3s: total 934 MiB live; Mutation n=656 ArrayCell n=3764214 BufferCell n=1709283 byte[]=239 MiB
+[07:52:54] histogram +5s: total 979 MiB live; Mutation n=703 ArrayCell n=4046601 BufferCell n=1709283 byte[]=255 MiB
+[07:53:14] histogram +15s: total 990 MiB live; Mutation n=718 ArrayCell n=4134289 BufferCell n=1709283 byte[]=259 MiB
+[07:53:47] histogram +45s: total  live; Mutation n= ArrayCell n= BufferCell n= byte[]=
+[07:53:47] outcome=died after 70s from JVM start (60s from T_r)
+INFO  [main] 2026-11-24T14:52:47,059 CommitLog.java:206 - Replaying /mydata/s4/r23/cassandra/bin/../data/commitlog/CommitLog-7-1795531443002.log, /mydata/s4/r23/cassandra/bin/../data/commitlog/CommitLog-7-1795531443003.log, /mydata/s4/r23/cassandra/bin/../data/commitlog/CommitLog-7-1795531443004.log
+INFO  [main] 2026-11-24T14:52:47,059 CommitLog.java:206 - Replaying /mydata/s4/r23/cassandra/bin/../data/commitlog/CommitLog-7-1795531443002.log, /mydata/s4/r23/cassandra/bin/../data/commitlog/CommitLog-7-1795531443003.log, /mydata/s4/r23/cassandra/bin/../data/commitlog/CommitLog-7-1795531443004.log
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /mydata/s4/r23/runs/T3/dumps/cassandra-1795531947-pid560710.hprof ...
+Heap dump file created [1435214095 bytes in 28.047 secs]
+# java.lang.OutOfMemoryError: Java heap space
+# -XX:OnOutOfMemoryError="kill -9 %p"
+memory.events (last sample): low 0 high 0 max 0 oom 0 oom_kill 0 
+[07:53:50] r23slow write delay = 0 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 0
+[07:53:50] restore gc: pauses=150 full=93 pause_total=45.3s span=66s (68%) worst60s=75% at 10.642s; max_after_full=993M max_after_any=1004M cap=1024M last_at=71s
+[07:53:50] mem.current max: 3731316736 B
+[07:53:50] segments in Replaying list: 7
+[07:53:50] threads +1s: flushwriters=2 flushwriters_in_io=2 mutstage=32 mutstage_in_suballoc=32 main=org.apache.cassandra.io.util.DataOutputBuffer.toByteArray G2=yes
+[07:53:50] threads +2s: flushwriters=2 flushwriters_in_io=2 mutstage=32 mutstage_in_suballoc=32 main=org.apache.cassandra.io.util.RebufferingInputStream.readByte G2=yes
+[07:53:50] threads +3s: flushwriters=3 flushwriters_in_io=2 mutstage=32 mutstage_in_suballoc=32 main=org.apache.cassandra.utils.FastByteOperations$UnsafeOperations.compareTo G2=yes
+[07:53:50] threads +4s: flushwriters=4 flushwriters_in_io=0 mutstage=32 mutstage_in_suballoc=32 main=org.apache.cassandra.utils.FastByteOperations$UnsafeOperations.compareTo G2=no
+[07:53:51] threads +5s: flushwriters=4 flushwriters_in_io=0 mutstage=32 mutstage_in_suballoc=32 main=org.apache.cassandra.io.util.RebufferingInputStream.read G2=no
+[07:53:51] threads +6s: flushwriters=4 flushwriters_in_io=1 mutstage=32 mutstage_in_suballoc=32 main=org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.write G2=yes
+[07:53:51] threads +8s: flushwriters=4 flushwriters_in_io=1 mutstage=32 mutstage_in_suballoc=32 main=org.apache.cassandra.db.marshal.ByteArrayObjectFactory.cell G2=yes
+[07:53:51] threads +12s: flushwriters=4 flushwriters_in_io=0 mutstage=32 mutstage_in_suballoc=32 main=org.apache.cassandra.db.marshal.ByteArrayObjectFactory.cell G2=no
+[07:53:51] threads +20s: flushwriters=4 flushwriters_in_io=0 mutstage=32 mutstage_in_suballoc=32 main=org.apache.cassandra.db.marshal.ByteArrayObjectFactory.cell G2=no
+[07:53:51] threads +30s: flushwriters=4 flushwriters_in_io=0 mutstage=32 mutstage_in_suballoc=32 main=org.apache.cassandra.db.marshal.ByteArrayObjectFactory.cell G2=no
+[07:53:51] threads +60s: flushwriters=0 flushwriters_in_io=0 mutstage=0 mutstage_in_suballoc=0 main=- G2=no
+[07:53:51] dump 1369 MiB deleted unread
+T3: outcome=died t=70s heapOOM=True oom_thread=- guard_oom_kill=0 replayed=- t_map_flushes=2 t_map_ser=30MiB t_map_charge=175MiB histos=[('2', '919', '639'), ('3', '934', '656'), ('5', '979', '703'), ('15', '990', '718')]
+[07:53:51] left: daemon=0 client=0
+[07:53:51] == RESULT T3 img=A3 heap=1024 D=100 PIT=T opts='' outcome=died
+[07:53:51] r23slow write delay = 0 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 0

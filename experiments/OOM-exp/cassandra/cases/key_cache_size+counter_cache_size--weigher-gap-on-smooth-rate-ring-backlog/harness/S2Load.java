@@ -1,0 +1,150 @@
+// R25 (2026-11-24, case file §2.5): R19 S2Load with (1) a zero-burst pacer in place of Guava's RateLimiter: one shared
+// slot clock next = max(next, now) + 1/r; a sender takes a semaphore slot, then slot(), parks until its slot time, then
+// sends; a sender that was blocked does not catch up (no stored permits); created after all sessions are connected;
+// (2) the progress line adds inflightMax (max in flight sampled every 10 ms in that second) and late (sends in that
+// second whose slot time was > 50 ms in the past when the semaphore was granted, i.e. the pacer was behind: the slots
+// bound). TOTAL_REACHED and FIRST_SEND unchanged.
+// R19 (2026-11-21): R11 S2Load; rate cap (8th arg, one Guava RateLimiter shared by all sessions) and -Dtotal=N are
+// the dial; prints "TOTAL_REACHED t=<ms since first send> sent=<n> epochMs=<ms>" when the N-th write is sent (STOP),
+// and a progress line every 1 s: "[time] epochMs= t= sent= ok= err= inflight= rate1s=" (sent rate over the last 1 s).
+// R11 (2026-11-20): R8 S2Load plus -Dgate=host:port: connects to R11Gate on V before the first send (fail -> print
+// GATEFAIL, exit 3); a reader thread sets a volatile stop on the line "STOP"; send loop runs while !stop && now < end;
+// prints "STOP_RECEIVED t=<ms since first send> sent=<n> epochMs=<ms>" and "FIRST_SEND epochMs=". Keyspace b6 = NTS {c:3}
+// (S2 G1), s2c = NTS {c:1}. The -Dtotal option of R8 is kept but unused.
+// R8 (2026-11-17): S2 run-1 S2Load with (1) -Dtotal=N; (2) schema also creates keyspace s2c with tables kv and ctr;
+// (3) FINAL line adds the first and last ok timestamps (epoch ms).
+//   java S2Load schema <host>
+//   java S2Load run <map|blob> <size> <inflightPerHost> <seconds> <pk0> <host1,host2,...> [ratePerSecondTotal]
+// The blob value is serialized ONCE and bound with setBytesUnsafe (no per-insert encoding).
+import com.datastax.driver.core.*;
+import com.datastax.driver.core.policies.*;
+import com.google.common.util.concurrent.*;
+import java.io.*;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
+
+public class S2Load {
+    static volatile boolean stop = false;
+    // R19 shakedown fix: the limiter is created just before the send threads start (it was created before the 8 sessions
+    // connected and stored 1 s of permits, so the first second ran at 2 r).
+    static volatile Pacer pacer = null;
+    static final AtomicLong lateCnt = new AtomicLong();
+    static final class Pacer {
+        final double step; double next;
+        Pacer(double r) { step = 1e9 / r; next = System.nanoTime(); }
+        synchronized long slot() {
+            long now = System.nanoTime();
+            if (next < now - 50_000_000L) lateCnt.incrementAndGet();
+            if (next < now) next = now;
+            long t = (long) next; next += step; return t;
+        }
+    }
+    static Cluster cluster(String host) {
+        return Cluster.builder().addContactPoint(host).withProtocolVersion(ProtocolVersion.V4)
+            .withLoadBalancingPolicy(new WhiteListPolicy(new RoundRobinPolicy(),
+                Collections.singletonList(new java.net.InetSocketAddress(host, 9042))))
+            .withSocketOptions(new SocketOptions().setReadTimeoutMillis(120000))
+            .withPoolingOptions(new PoolingOptions().setMaxRequestsPerConnection(HostDistance.LOCAL, 2048))
+            .withoutJMXReporting().build();
+    }
+
+    public static void main(String[] a) throws Exception {
+        if (a[0].equals("schema")) {
+            try (Cluster c = cluster(a[1]); Session s = c.connect()) {
+                s.execute("CREATE KEYSPACE IF NOT EXISTS b6 WITH replication = {'class':'NetworkTopologyStrategy','c':3}");
+                s.execute("CREATE TABLE IF NOT EXISTS b6.t_blob (pk int PRIMARY KEY, b blob)");
+                s.execute("CREATE KEYSPACE IF NOT EXISTS s2c WITH replication = {'class':'NetworkTopologyStrategy','c':1}");
+                s.execute("CREATE TABLE IF NOT EXISTS s2c.kv (k blob PRIMARY KEY, v int)");
+                s.execute("CREATE TABLE IF NOT EXISTS s2c.ctr (k blob PRIMARY KEY, c counter)");
+                System.out.println("schema ok");
+            }
+            return;
+        }
+        String kind = a[1]; int size = Integer.parseInt(a[2]); int inflight = Integer.parseInt(a[3]);
+        long secs = Long.parseLong(a[4]); int pk0 = Integer.parseInt(a[5]); String[] hosts = a[6].split(",");
+        byte[] bb = new byte[size]; new Random(1).nextBytes(bb); ByteBuffer val = ByteBuffer.wrap(bb);
+        AtomicLong ok = new AtomicLong(), err = new AtomicLong(), sent = new AtomicLong();
+        final long total = Long.getLong("total", Long.MAX_VALUE); final AtomicLong tickets = new AtomicLong();
+        final AtomicLong firstOk = new AtomicLong(0), lastOk = new AtomicLong(0), firstSend = new AtomicLong(0);
+        AtomicReference<String> lastErr = new AtomicReference<>("");
+        // gate connection (before any send)
+        String gate = System.getProperty("gate", "");
+        if (!gate.isEmpty()) {
+            Socket gs;
+            try {
+                gs = new Socket(); gs.connect(new InetSocketAddress(gate.split(":")[0], Integer.parseInt(gate.split(":")[1])), 5000);
+            } catch (IOException e) { System.out.println("GATEFAIL " + e); System.exit(3); return; }
+            System.out.println("GATE_CONNECTED " + gate);
+            Thread gr = new Thread(() -> {
+                try (BufferedReader r = new BufferedReader(new InputStreamReader(gs.getInputStream()))) {
+                    String l;
+                    while ((l = r.readLine()) != null) {
+                        if (l.trim().equals("STOP") && !stop) {
+                            stop = true; long now = System.currentTimeMillis();
+                            System.out.printf("STOP_RECEIVED t=%d sent=%d ok=%d epochMs=%d%n", now - firstSend.get(), sent.get(), ok.get(), now);
+                        }
+                    }
+                } catch (IOException e) { System.out.println("gate reader: " + e); }
+            });
+            gr.setDaemon(true); gr.start();
+        }
+        List<Thread> ts = new ArrayList<>(); List<Cluster> cs = new ArrayList<>();
+        final long[] endHolder = new long[1];
+        for (int h = 0; h < hosts.length; h++) {
+            Cluster c = cluster(hosts[h]); cs.add(c); Session s = c.connect();
+            PreparedStatement ps = s.prepare("INSERT INTO b6.t_blob (pk, b) VALUES (?, ?)");
+            ps.setConsistencyLevel(ConsistencyLevel.valueOf(System.getProperty("cl", "ONE")));
+            final int base = pk0 + h * 100_000_000;
+            Thread t = new Thread(() -> {
+                Semaphore sem = new Semaphore(inflight); int pk = base;
+                while (!stop && System.nanoTime() < endHolder[0] && tickets.getAndIncrement() < total) {
+                    sem.acquireUninterruptibly();
+                    if (pacer != null) { long slotT = pacer.slot(), dd; while ((dd = slotT - System.nanoTime()) > 0) java.util.concurrent.locks.LockSupport.parkNanos(dd); }
+                    if (stop) { sem.release(); break; }
+                    BoundStatement bs = ps.bind().setInt(0, pk++).setBytesUnsafe(1, val.duplicate());
+                    firstSend.compareAndSet(0, System.currentTimeMillis());
+                    ResultSetFuture f = s.executeAsync(bs); long sn = sent.incrementAndGet();
+                    if (sn == total) { long now = System.currentTimeMillis();
+                        System.out.printf("TOTAL_REACHED t=%d sent=%d ok=%d epochMs=%d%n", now - firstSend.get(), sn, ok.get(), now); }
+                    Futures.addCallback(f, new FutureCallback<ResultSet>() {
+                        public void onSuccess(ResultSet r) { long now = System.currentTimeMillis(); firstOk.compareAndSet(0, now); lastOk.set(now); ok.incrementAndGet(); sem.release(); }
+                        public void onFailure(Throwable e) { err.incrementAndGet(); lastErr.set(e.getClass().getSimpleName() + ": " + String.valueOf(e.getMessage())); sem.release(); }
+                    }, MoreExecutors.directExecutor());
+                }
+                sem.acquireUninterruptibly(inflight);
+            });
+            ts.add(t);
+        }
+        if (a.length > 7 && !a[7].isEmpty()) pacer = new Pacer(Double.parseDouble(a[7]));
+        final AtomicLong inflMax = new AtomicLong();
+        Thread smp = new Thread(() -> {
+            while (true) {
+                try { Thread.sleep(10); } catch (InterruptedException e) { return; }
+                long inf = sent.get() - ok.get() - err.get(); inflMax.accumulateAndGet(inf, Math::max);
+            }
+        });
+        smp.setDaemon(true); smp.start();
+        long t0 = System.nanoTime(); endHolder[0] = t0 + secs * 1_000_000_000L;
+        for (Thread t : ts) t.start();
+        Thread rep = new Thread(() -> {
+            long lastS = 0, lastLate = 0;
+            while (true) {
+                try { Thread.sleep(1000); } catch (InterruptedException e) { return; }
+                long sn = sent.get(), o = ok.get(), e = err.get();
+                long im = inflMax.getAndSet(0), lt = lateCnt.get();
+                System.out.printf("[%tT] epochMs=%d t=%.1f sent=%d ok=%d err=%d inflight=%d rate1s=%d inflightMax=%d late=%d stop=%b %s%n", new Date(), System.currentTimeMillis(),
+                    (System.nanoTime() - t0) / 1e9, sn, o, e, sn - o - e, sn - lastS, im, lt - lastLate, stop, lastErr.get()); lastS = sn; lastLate = lt;
+            }
+        });
+        rep.setDaemon(true); rep.start();
+        for (Thread t : ts) t.join();
+        System.out.printf("FIRST_SEND epochMs=%d%n", firstSend.get());
+        System.out.printf("FINAL sent=%d ok=%d err=%d firstOkMs=%d lastOkMs=%d total=%d stop=%b endMs=%d %s%n", sent.get(), ok.get(), err.get(), firstOk.get(), lastOk.get(), total, stop, System.currentTimeMillis(), lastErr.get());
+        for (Cluster c : cs) c.close();
+        System.exit(0);
+    }
+}

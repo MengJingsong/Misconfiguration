@@ -1,0 +1,37 @@
+# B29 DIAG lifetime only (stage 2, 2026-11-24): observe-only rules on the coordinator (node 1); output via Byteman's
+# built-in trace to the file named by -Db29.out. Nothing is changed in the code path.
+RULE b29 fetchFromSource entry
+CLASS org.apache.cassandra.service.reads.ReplicaFilteringProtection$PartitionBuilder
+METHOD fetchFromSource
+AT ENTRY
+IF true
+DO traceOpen("b29", System.getProperty("b29.out"));
+   traceln("b29", "fetch-entry ms=" + System.currentTimeMillis() + " thread=" + Thread.currentThread().getName() + " unresolvedStatic=" + $0.unresolvedStatic + " key=" + $0.key + " source=" + $0.source)
+ENDRULE
+
+RULE b29 executeReadCommand entry
+CLASS org.apache.cassandra.service.reads.ReplicaFilteringProtection
+METHOD executeReadCommand
+AT ENTRY
+IF true
+DO link("b29t", Thread.currentThread(), Long.valueOf(System.nanoTime()))
+ENDRULE
+
+RULE b29 executeReadCommand exit
+CLASS org.apache.cassandra.service.reads.ReplicaFilteringProtection
+METHOD executeReadCommand
+AT EXIT
+BIND t0:Long = unlink("b29t", Thread.currentThread())
+IF t0 != null
+DO traceOpen("b29", System.getProperty("b29.out"));
+   traceln("b29", "fetch-exit ms=" + System.currentTimeMillis() + " thread=" + Thread.currentThread().getName() + " elapsedMs=" + ((System.nanoTime() - t0.longValue()) / 1000000) + " cmd=" + $1.toCQLString())
+ENDRULE
+
+RULE b29 local data response size
+CLASS org.apache.cassandra.db.ReadResponse$LocalDataResponse
+METHOD build
+AT EXIT
+IF $!.remaining() > 1048576
+DO traceOpen("b29", System.getProperty("b29.out"));
+   traceln("b29", "local-response ms=" + System.currentTimeMillis() + " thread=" + Thread.currentThread().getName() + " limitB=" + $!.remaining() + " backingCapacityB=" + $!.capacity())
+ENDRULE

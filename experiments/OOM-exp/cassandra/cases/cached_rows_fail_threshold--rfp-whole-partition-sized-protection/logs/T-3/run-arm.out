@@ -1,0 +1,27 @@
+[2026-11-24 09:40:17 EST] ARM T-3 table=w2k CL=QUORUM Q=7 heap=2G direct=auto steps=1:20,7:160 build=unmod fetch=128
+1.7G	/mydata/s4/r24/n1 1.7G	/mydata/s4/r24/n2 
+[2026-11-24 09:40:23 EST] started T-3 n1 pid 673462 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/r24-T-3-n1-1795531222.scope
+[2026-11-24 09:41:07 EST] ready T-3 n1
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M -javaagent:/mydata/s4/r24/tree/bin/../lib/jamm-0.4.0.jar -XX:HeapDumpPath=/mydata/s4/r24/runs/T-3/n1/cassandra-1795531222-pid673462.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-24 09:41:08 EST] started T-3 n2 pid 674731 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/r24-T-3-n2-1795531267.scope
+[2026-11-24 09:41:26 EST] ready T-3 n2
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms16G -Xmx16G -XX:MaxDirectMemorySize=15872M -javaagent:/mydata/s4/r24/tree/bin/../lib/jamm-0.4.0.jar -XX:HeapDumpPath=/mydata/s4/r24/runs/T-3/n2/cassandra-1795531267-pid674731.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-24 09:41:28 EST] ring: 2 UN in node 1's view
+[2026-11-24 09:41:35 EST] GC.run T-3 n1
+1795531298,base,nmtOtherKB=89948,nmtTotalKB=2636116,rssAnonKB=2688384,scopeCurB=2782846976,scopeOomKill=0,1795531297927,117798720,84244288,84244288,0,0,0,-1,-1,75317416,0,117,71,0,0,0,0,0,0,0,0
+[2026-11-24 09:41:41 EST] client pid 675902
+1795531311,t+10,nmtOtherKB=335807,nmtTotalKB=2886181,rssAnonKB=2748396,scopeCurB=2846728192,scopeOomKill=0,1795531310931,159022152,159022152,142244936,1,0,25,1,0,92193647,3,245,237,4768,7,0,0,0,0,226,0
+1795531310927,1,1,7,0,1,8.0,1785.8,1785.8,128,0,0,0,
+1795531322,t+20,nmtOtherKB=352288,nmtTotalKB=2915274,rssAnonKB=2778916,scopeCurB=2888945664,scopeOomKill=0,1795531321932,1987622464,1970845248,1959593104,7,0,32,1,0,109069957,3,637,1216,4768,14,0,0,0,0,579,0
+1795531321944,7,7,13,0,0,0.0,-1.0,-1.0,128,0,0,0,
+/mydata/s4/r24/harness/ctl.sh: line 60: 673462 Killed                  CASSANDRA_CONF=$R/n$i/conf CASSANDRA_LOG_DIR=$R/n$i/logs MAX_HEAP_SIZE=$HEAP MAX_DIRECT_MEMORY_SIZE=$DENV CASSANDRA_HEAPDUMP_DIR=$R/n$i JVM_EXTRA_OPTS="$EXTRA" setsid nohup systemd-run --user --scope --unit="r24-$L-n$i-$(date +%s)" -p MemorySwapMax=0 "$BUILD/bin/cassandra" -f < /dev/null > "$R/n$i/stdout.log" 2>&1
+1795531334,t+31,nmtOtherKB=NA,nmtTotalKB=NA,rssAnonKB=NA,scopeCurB=NA,scopeOomKill=NA,1795531334850,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
+1795531333957,7,7,14,7,0,0.0,-1.0,-1.0,128,0,7,0,
+[2026-11-24 09:42:24 EST] VICTIM DEAD at +43s
+14:42:21 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 8000 milliseconds
+14:42:29 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 16000 milliseconds
+14:42:45 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 32000 milliseconds
+[2026-11-24 09:43:12 EST] stopped T-3 n1
+[2026-11-24 09:43:22 EST] stopped T-3 n2
+OOM type="java.lang.OutOfMemoryError: Java heap space" at+43s peer=ALIVE
+[2026-11-24 09:43:23 EST] END T-3 OOM type="java.lang.OutOfMemoryError: Java heap space" at+43s peer=ALIVE

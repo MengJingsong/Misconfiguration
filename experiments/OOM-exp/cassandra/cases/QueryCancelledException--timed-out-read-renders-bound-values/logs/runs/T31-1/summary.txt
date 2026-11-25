@@ -1,0 +1,36 @@
+endpoint: daemon-exit oom:# java.lang.OutOfMemoryError: Java heap space
+stdout: # java.lang.OutOfMemoryError: Java heap space
+stdout: #   Executing /bin/sh -c "kill -9 523511"...
+client # t0 epoch 1795536126.213
+client # start 2026-11-24T09:02:06-0700 tracing=off distinct=False k=4 steps=[32] S=16000000
+client # step 0 N=32 established=32 at 247 ms
+client # all connections ended at 243103 ms
+client # end 243103 ms done=0 err=1497
+daemon gone 242.8 s after full N (last step N=32)
+step N=32 (from 247 ms, 242.4 s of completions): {'rt': 1431, 'rf': 34, 'io_error': 32}; f=0.023; rate ok 0.00/s rf 0.14/s rt 5.90/s; median latency ok - rf 6215 rt 5136 ms
+CAL window t=10-60 s after full N: {'rt': 311, 'rf': 9} f=0.028
+server-logged aborts t=10-60 s after full N: 320 of 320 completions -> f_abort=1.000 (logged events total 747)
+server-logged aborts t=0-end s after full N: 747 of 1465 completions -> f_abort=0.510 (logged events total 747)
+  other x32: io_error:[Errno
+threads samples 97: max ReadStage 32, max R_Q 13 (hex 6, fmt 2, concat 11), max put-blocked 1, max NTR 33
+  R_Q series: 0 0 0 0 6 0 1 0 0 0 7 0 12 0 7 0 2 0 13 0 7 0 8 0 10 0 10 0 8 0 6 1 7 4 8 4 3 10 4 7 1 12 1 7 3 5 4 8 4 7 3 8 0 7 2 5 2 4 4 4 8 4 7 3 6 5 5 3 7 2 5 3 7 4 6 3 6 5 4 4 3 4 3 4 3 6 4 3 4 3 3 5 2 5 6 10 0
+  put-blocked series: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  ScheduledTasks phases: {'idle': 5, 'pop-fmt': 15, 'pop-hex': 21, 'pop': 56}  AsyncAppender-Worker: {'idle': 4, 'write': 22, 'thr-layout': 30, 'layout': 31, 'encode': 10}
+  AW series: idle idle idle write write thr-layout thr-layout write write write layout layout layout write layout encode write write layout write encode write layout thr-layout thr-layout thr-layout thr-layout write thr-layout thr-layout layout thr-layout encode layout write layout thr-layout layout layout layout thr-layout write write layout encode thr-layout thr-layout layout write thr-layout encode layout thr-layout write layout layout thr-layout write thr-layout thr-layout encode write layout write write encode layout layout thr-layout layout layout layout encode thr-layout layout thr-layout thr-layout thr-layout write encode layout thr-layout layout thr-layout layout thr-layout thr-layout encode thr-layout thr-layout layout layout write layout layout thr-layout idle
+K_server RequestsSize max 512000864 (samples 13); paused max 0
+READ dropped max 1368; ReadStage active/pending max 32/8
+RssAnon max 34376 MiB
+heap_info used max 30732 MiB
+wchar total 23773 MiB = 778.9 events; w max (10 s window) 5.75 events/s; E(t) estimate max 675, last 675
+  E series (every 5th): 0 18 16 42 52 83 121 157 203 243 287 330 366 416 454 499 541 581 628 670
+GCs 141; humongous after GC: max 1893 regions (30288 MiB), median 1663; before GC max 1893
+old+humongous after GC: max 1966 regions, median 1735
+pauses 375; STW share over last 60 s of GC log: 8%; Pause Full count 0; to-space exhausted 0
+debug.log* bytes max 1772 MiB
+/mydata avail min 626.5 GiB
+debug counts: logged_qc_events 747; logged_qc_messages 747; squashed_bytes 1591190; 
+client total rf 34 (logged events vs rf above)
+drains: TOTAL slow drains 0 (queue full=queued>=50: 0; dropped>0: 0; max names 0; max queued 0); failed drains 0 (max queued 0)
+monitor task line: none
+dump: none
+MaxHeapSize=33285996544  MaxDirectMemorySize=16642998272  G1HeapRegionSize=16777216  

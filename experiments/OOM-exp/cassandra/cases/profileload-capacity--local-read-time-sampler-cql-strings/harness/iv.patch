@@ -1,0 +1,11 @@
+--- a/src/java/org/apache/cassandra/db/ReadExecutionController.java
++++ b/src/java/org/apache/cassandra/db/ReadExecutionController.java
+@@ -236,6 +236,8 @@
+     private void addSample()
+     {
+         String cql = command.toCQLString();
++        if (cql.length() > 1024)
++            cql = cql.substring(0, 1024); // B26 intervention: bound the kept sample; the render itself is unchanged
+         int timeMicros = (int) Math.min(TimeUnit.NANOSECONDS.toMicros(clock.now() - createdAtNanos), Integer.MAX_VALUE);
+         ColumnFamilyStore cfs = ColumnFamilyStore.getIfExists(baseMetadata.id);
+         if (cfs != null)

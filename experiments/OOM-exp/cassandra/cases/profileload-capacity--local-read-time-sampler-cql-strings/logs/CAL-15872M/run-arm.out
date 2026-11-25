@@ -1,0 +1,25 @@
+[2026-11-24 15:05:12 EST] ARM CAL-15872M arm=A heap=15872M shape=S30 tables=t1,t2 c=8 session=[profileload b26 * 60000] ret= ntheap=default
+[2026-11-24 15:05:13 EST] started CAL-15872M pid 629606 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b26-CAL-15872M-1795550712.scope
+[2026-11-24 15:05:19 EST] ready CAL-15872M
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms15872M -Xmx15872M -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/b26/runs/CAL-15872M/cassandra-1795550712-pid629606.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-24 15:05:24 EST] GC.run CAL-15872M
+[2026-11-24 15:05:28 EST] warm-up 20 s
+SUMMARY shape=S30 tables=t1+t2 c=8 secs=20 ok=2224 err=0 reads_s=111.2 p50=68 p99=135 max=233 errs={} lastErr=
+[2026-11-24 15:06:05 EST] client pid 630382
+[2026-11-24 15:06:19 EST] session start: nodetool profileload b26 * 60000
+/mydata/s4/b26/harness/victim-ctl.sh: line 42: 629606 Killed                  env CASSANDRA_CONF=$R/conf CASSANDRA_LOG_DIR=$R/logs $HE CASSANDRA_HEAPDUMP_DIR=$R JVM_EXTRA_OPTS="-XX:NativeMemoryTracking=summary -Xlog:gc*=info,gc+heap=info,safepoint=info:file=$R/gc.log:time,uptime,level,tags:filecount=20,filesize=50m" setsid nohup systemd-run --user --scope --unit="b26-$L-$(date +%s)" -p MemorySwapMax=0 "$BUILD/bin/cassandra" -f < /dev/null > "$R/stdout.log" 2>&1
+[2026-11-24 15:07:02 EST] VICTIM DEAD at session+43s
+[2026-11-24 15:07:06 EST] OOM/GC check
+INFO  [Native-Transport-Requests-2] 2026-11-24T20:05:30,133 QueryProcessor.java:700 - Fully upgraded to at least 5.0.9-SNAPSHOT
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /mydata/s4/b26/runs/CAL-15872M/cassandra-1795550712-pid629606.hprof ...
+Heap dump file created [13983507669 bytes in 20.809 secs]
+#
+# java.lang.OutOfMemoryError: Java heap space
+# -XX:OnOutOfMemoryError="kill -9 %p"
+#   Executing /bin/sh -c "kill -9 629606"...
+-rw-------  1 jason92 misconfiguration 13983507669 Nov 24 13:07 cassandra-1795550712-pid629606.hprof
+pauses=329 full_gcs=14 total_pause=4s max60=7% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=HeapDumper@87.029s,ReportJavaOutOfMemory@107.838s
+[2026-11-24 15:07:08 EST] stopped CAL-15872M
+OOM type="java.lang.OutOfMemoryError: Java heap space" at session+43s slow=0 cancelled=0 lastS=[S 56,8,1708,NoHostAvailableException:56|TransportException:8,0,-1,-1,-1,NoHostAvailableException: All host(s) tried for query failed (no host was tried)]
+[2026-11-24 15:07:08 EST] END CAL-15872M OOM type="java.lang.OutOfMemoryError: Java heap space" at session+43s slow=0 cancelled=0 lastS=[S 56,8,1708,NoHostAvailableException:56|TransportException:8,0,-1,-1,-1,NoHostAvailableException: All host(s) tried for query failed (no host was tried)]

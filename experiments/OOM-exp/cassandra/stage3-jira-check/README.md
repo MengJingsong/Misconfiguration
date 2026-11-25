@@ -1,9 +1,13 @@
-# Cassandra — stage 3-a JIRA check (snapshot 2026-11-24)
+# Cassandra — stage 3-a JIRA check (snapshot 2026-11-24; wave 7 added 2026-11-25)
 
 > **Scope (2026-11-24).** The 2026-11-23 check covered **30 of the 44** Cassandra true positives. The 14 wave 1–3 true
 > positives it missed (B9, B10, B12, B13, B15, C4, C5, C6, C7, C8, U2, U3, U4, R7; their verdicts are written without bold
 > in `_INDEX.md`) and R15's condition B were checked on 2026-11-24 under the same rules. All **45** are now checked
 > (44 true positives + R15-B).
+>
+> **Wave 7 (2026-11-24, filed 2026-11-25).** The 8 true positives of wave 7 (R23, R24, U17, B25, B26, B27, B28, B29) were
+> checked under the same rules (one fresh agent per case, requests ≥ 3.5 s apart, each query logged in the case's file).
+> All **53** are now checked (52 true positives + R15-B).
 
 Rules: [`../../oom-agent-playbook.md`](../../oom-agent-playbook.md#stage-3-a--jira-check) (added 2026-11-23). Every Cassandra
 **true positive** of stage 2 then known (30 cases; false positives and retries excluded by the owner) was checked read-only against
@@ -17,22 +21,22 @@ each query logged in the case's file; fix commits tested in the same blobless cl
 
 ## Counts
 
-*Updated 2026-11-23 with the owner's rulings (B8, R13, R21; see below); 2026-11-24 with the 15 missed cases.*
+*Updated 2026-11-23 with the owner's rulings (B8, R13, R21; see below); 2026-11-24 with the 15 missed cases; 2026-11-25 with the 8 of wave 7.*
 
 | | Cases |
 |---|---|
-| True positives checked | **45** (44 + R15-B) |
-| **Mentioned in JIRA** (exact or partial match) | **21 / 45 (47 %)** — exact 10, partial 11 |
+| True positives checked | **53** (52 + R15-B) |
+| **Mentioned in JIRA** (exact or partial match) | **23 / 53 (43 %)** — exact 11, partial 12 |
 | · still open | 12 (exact: C2, B19, U9, B23, B13, C6; partial: S1, S2, R22, U15, U14, R7) |
 | · fixed upstream, fix not in 5.0.9 | 4 — exact: U4 (CASSANDRA-11745, opt-in, 6.0-alpha3; owner ruling 2026-11-24: an opt-in fix counts); partial: U10 and B20 (CASSANDRA-11745, 6.0-alpha3), U2 (CASSANDRA-21755, 5.0.10 / 6.0-alpha3) |
-| · fixed in 5.0.9 but the fix does not cover it (`known-fixed (incomplete)`) | 5 — exact: B8 (CASSANDRA-8639 bounds serialized bytes, not heap), R14 (CASSANDRA-17187's opt-in guardrail checks after the product is built; owner ruling 2026-11-24), C7 (CASSANDRA-19336's bound ships off); partial: B10 (CASSANDRA-20052 covers multi-frame messages only), B15 (CASSANDRA-8639, as B8) |
+| · fixed in 5.0.9 but the fix does not cover it (`known-fixed (incomplete)`) | 7 — exact: B8 (CASSANDRA-8639 bounds serialized bytes, not heap), R14 (CASSANDRA-17187's opt-in guardrail checks after the product is built; owner ruling 2026-11-24), C7 (CASSANDRA-19336's bound ships off), R23 (CASSANDRA-8639, as B8); partial: B10 (CASSANDRA-20052 covers multi-frame messages only), B15 (CASSANDRA-8639, as B8), R24 (CASSANDRA-15907 bounds RFP rows, not bytes or concurrent queries) |
 | Not mentioned, but fixed incidentally in a newer version | 1 (R21: CASSANDRA-20780, 6.0/trunk) |
 | Not mentioned, but the shipped docs warn (`documented only`) | 5 (R1-V, R18, U12, C4, U3) |
-| **New** (no exact/partial issue, no fix, no doc warning) | **18 / 45** — B6, C1, C9, R12, R13, R20, U7, U8, B16, B17, B21, U13, C10, B9, B12, C5, C8, R15-B |
-| Docs warn at all (with or without an issue), source labelled in each file | 7 fully (R1-V, R18, U12, R14, C4, C7, U3), 2 partly (U9, B16) |
+| **New** (no exact/partial issue, no fix, no doc warning) | **24 / 53** — B6, C1, C9, R12, R13, R20, U7, U8, B16, B17, B21, U13, C10, B9, B12, C5, C8, R15-B; U17, B25, B26, B27, B28, B29 |
+| Docs warn at all (with or without an issue), source labelled in each file | 7 fully (R1-V, R18, U12, R14, C4, C7, U3), 4 partly (U9, B16, R24, B29) |
 
-Label totals: known-open 12, known-fixed (not in 5.0.9) 5 (U10, B20, R21, U2, U4), known-fixed (incomplete) 5 (B8, R14, B10, B15,
-C7), documented only 5, new 18.
+Label totals: known-open 12, known-fixed (not in 5.0.9) 5 (U10, B20, R21, U2, U4), known-fixed (incomplete) 7 (B8, R14, B10, B15,
+C7, R23, R24), documented only 5, new 24.
 
 ## Per case
 
@@ -83,6 +87,14 @@ C7), documented only 5, new 18.
 | [U4](U4.md) | known-fixed (not in 5.0.9) | exact | CASSANDRA-11528 (Open, exact); CASSANDRA-6492 (Open, partial); 11745 (Fixed 6.0-alpha3, not in 5.0.9, exact in a 2025 comment, but its fix is opt-in byte paging, so not counted as known-fixed; **for the owner**); 9413 (Won't Fix, partial); related 4304, 16896/16850, 17189 | no (cassandra.yaml:2013-2025 read thresholds off; NEWS.txt:442-448) |
 | [R7](R7.md) | known-open | partial | CASSANDRA-21656 (In Progress, partial: same DOB holder as S1, reported as per-write over-allocation); related 16471 (Fixed 5.0, in 5.0.9), 11838, 8670, 10971, 12783 (Open), 8639 | no (cassandra.yaml:652-657, :716-724; only CHANGES.txt:601 names the scratch buffer) |
 | [R15-B](R15-B.md) | new | related | none exact/partial; related CASSANDRA-5598 (Fixed 1.2.13, the after-parse marker check), 18813 (6.0), 12618/12769, 17655 (Open), 2475, 20052 | no (marker limit not in cassandra.yaml, NEWS.txt or doc/) |
+| [R23](R23.md) | known-fixed (incomplete) | exact | CASSANDRA-8639 (Fixed 3.2, exact; fix 1c41a9ac2c in 5.0.9 bounds serialized bytes; R23 holds ≈ 14×); related 7533, 6087/885/609, 6974, 19448, 7232, 10971, 9195/6904/10593/15117, 16363; no issue on archive or point-in-time restore | no (NEWS.txt:1292-1293, CHANGES.txt:3241, conf/commitlog_archiving.properties:39-49 announce the bound or describe the restore point, no memory warning) |
+| [R24](R24.md) | known-fixed (incomplete) | partial | CASSANDRA-15907 (Fixed 3.0.22/3.11.8/4.0, in 5.0.9, partial: same holder, bounded by rows, not bytes or concurrent queries); 20639 (Fixed 5.0.5, related, borderline partial: single-partition reads only); related 21781, 11745, 21623, 17192, 20843, 8272, 20243, 16896/16850, 11528. **For the owner:** `new` if 15907 is rated related | partly (not counted): conf/cassandra.yaml:1817-1825 RFP "materializes replica results by partition on-heap at the coordinator", thresholds count rows; :1832-1833 blames page/fetch size, wrong for range reads |
+| [U17](U17.md) | new | related | none exact/partial; related CASSANDRA-18730 (Fixed, guardrail `7482d88f48` in 5.0.9, ships -1), 19959 (untriaged list of unbounded collections), 12618/11846/12769, 21139 (7.0, excludes INSERT), 18813, 18504, 20052, 8254, 20141 | no (conf/cassandra.yaml:2183-2186 names the guardrail, no memory warning; vector-data-type.adoc:15 8K limit not enforced) |
+| [B25](B25.md) | new | related | none exact/partial; related CASSANDRA-6077 (Fixed 2.0.2) and 11026 (Fixed 3.0.3): same slab-slice pattern on sstable metadata; 16310 (Fixed 4.1, `retainable()` for TopPartitionTracker only); 18022, 14436, 7974, 17821, 17254 | no (ProfileLoad.java:46 calls it "Low footprint profiling"; NEWS.txt:214-215 only the recurring flag) |
+| [B26](B26.md) | new | related | none exact/partial; related CASSANDRA-14436 (Fixed 4.0, added the code; javadoc memory trade-off note only), 18022, 17821; not on point 16896, 16850, 15907, 7392, 14641, 15625, 13463, 17254, 17798, 19991, 15241, 12270 | no (ProfileLoad.java:46, :52; NEWS.txt:214 only the recurring flag) |
+| [B27](B27.md) | new | related | none exact/partial; related CASSANDRA-21091 (Patch Available: names the accounting cause as a gauge reading 0, no memory consequence), 15013, 15299 (created the v5 allowance), 4265 (Won't Fix, Thrift HSHA), 8086 (connection limit off by design), 20052, 19534, 21884, 21491. **For the owner:** `known-open (partial: CASSANDRA-21091)` if 21091 is rated partial | no (cassandra.yaml:1046-1052 connections "unlimited"; receive_queue_capacity and the reserves undocumented at 5.0.9) |
+| [B28](B28.md) | new | related | none exact/partial; related CASSANDRA-13157 (Open, tracing overhead), 10444/8303 (Open, no server-side tracing switch), 12750 (Open), 1123 (count-capped stage), 4672, 12754 (wait default 0), 12755 (Open), 11719 (cuts bound values, not query text), 5658. **For the owner:** `known-open (partial: CASSANDRA-13157)` if 13157 is rated partial | no (conf/cassandra.yaml:1750-1754 trace TTLs only; NEWS.txt:2350-2351, cqlsh.adoc:291-294, native_protocol_v4.spec:132-137 no cost warning) |
+| [B29](B29.md) | new | related | none exact/partial; related CASSANDRA-19018 (Fixed 5.0-rc1, `f7984627e7`, introduced the whole-partition fetch; 2024-02-16 comment notes static predicates can pull whole partitions through RFP, no memory content), 20323 (Fixed 5.0.4, removed the fetch's one-row limit), 20243, 15907, 8272, 21332, 21118 (Open), 21354/21285 (6.0). **For the owner:** `known-wontfix / by design (partial: CASSANDRA-19018)` or `known-fixed (incomplete) (partial: CASSANDRA-15907)` | partly (not counted, as R24): conf/cassandra.yaml:1817-1825; dml.adoc:224-227 warns on performance only |
 
 ## Owner rulings (2026-11-23)
 
@@ -98,6 +110,9 @@ Not ruled, as filed: **C9** (CASSANDRA-15452's review OOM attributed to retentio
 only` (verified failures use heaps below hardware.adoc's 2 GB minimum). Flagged for the owner on 2026-11-24, as filed:
 **B10** (`new` if CASSANDRA-20052 is rated related), **C7** (by design, or known-open via 16909/21377), **C8**
 (CASSANDRA-20752 borderline partial). **U4** ruled 2026-11-24: an opt-in fix counts, so `known-fixed (not in 5.0.9)`.
+Flagged for the owner from wave 7 (2026-11-25), as filed: **R24** (`new` if CASSANDRA-15907 is rated related), **B27**
+(`known-open` if CASSANDRA-21091 is rated partial), **B28** (`known-open` if CASSANDRA-13157 is rated partial), **B29**
+(`known-wontfix / by design` via CASSANDRA-19018, or `known-fixed (incomplete)` via 15907, if either is rated partial).
 
 Changes from stage 1's "JIRA prior art" in the case files: B23, U9 (exact), U15, R22 (partial) were `new` and are now
 known; U10 and B20 are fixed upstream in 6.0-alpha3; R18 is now `documented only`. 2026-11-24: U2 was `known-open`

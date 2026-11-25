@@ -1,0 +1,34 @@
+24K	/mydata/s4/b29/n1 24K	/mydata/s4/b29/n2 
+[2026-11-24 20:13:06 EST] started LOAD-TA n1 pid 653791 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b29-LOAD-TA-n1-1795569185.scope
+[2026-11-24 20:13:46 EST] ready LOAD-TA n1
+[2026-11-24 20:13:47 EST] started LOAD-TA n2 pid 654227 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b29-LOAD-TA-n2-1795569226.scope
+[2026-11-24 20:14:23 EST] ready LOAD-TA n2
+[2026-11-24 20:14:25 EST] ring: 2 UN in node 1's view
+01:14:26 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency level
+schema ok, agreement=true
+[2026-11-24 20:14:31 EST] load test partitions
+loaded k<=7 t=187s errors=264
+Exception in thread "main" com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ALL (2 replica were required but only 0 acknowledged the write)
+Caused by: com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ALL (2 replica were required but only 0 acknowledged the write)
+Caused by: com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ALL (2 replica were required but only 0 acknowledged the write)
+	... 26 more
+[2026-11-24 20:23:28 EST] load warm-up partitions
+loaded k<=1007 t=0s errors=0
+load ok k=1000..1009 rows=10 size=65536 s=x CL=ALL errors=0 secs=0
+== n1
+		SSTable count: 6
+		Old SSTable count: 0
+		Space used (live): 3697342847
+		Number of partitions (estimate): 25
+		Compacted partition maximum bytes: 268650950
+		Compacted partition mean bytes: 130139777
+== n2
+		SSTable count: 6
+		Old SSTable count: 0
+		Space used (live): 3662100087
+		Number of partitions (estimate): 26
+		Compacted partition maximum bytes: 268650950
+		Compacted partition mean bytes: 113542140
+[2026-11-24 20:25:40 EST] F1: node 1 down
+[2026-11-24 20:26:14 EST] stopped LOAD-TA n1
+f1 ok k=0..95 CL=ONE

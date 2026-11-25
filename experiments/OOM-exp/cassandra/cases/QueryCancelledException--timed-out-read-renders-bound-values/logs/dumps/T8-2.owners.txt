@@ -1,0 +1,19 @@
+dump T8-2.hprof: all objects 7581.8 MiB shallow; arrays >= 1048576 B: 316, 7501.6 MiB (live 5418.6 MiB)
+nearest-owner shares (of the dump total | of live arrays >= min):
+  O_QR      45.8 MiB    0.6% |   0.8%
+  O_QL    4028.3 MiB   53.1% |  74.3%
+  O_M      839.2 MiB   11.1% |  15.5%
+  O_L        0.0 MiB    0.0% |   0.0%
+  O_F      489.3 MiB    6.5% |   9.0%
+  O_O       16.0 MiB    0.2% |   0.3%
+  O_unreached      0.0 MiB    0.0% |   0.0%
+  O_unreachable   2083.0 MiB   27.5% |  38.4%
+Q = QR + QL = 4074.1 MiB = 75.2% of live arrays >= min; largest other M 839.2 MiB -> Q-attributed (frozen test): YES
+[QR] byte[] name~2S via frame:ReadStage: 31 MiB; byte[] 16000000 via frame:ReadStage: 15 MiB
+[QL] byte[] name~2S via org.apache.cassandra.exceptions.QueryCancelledException: 3479 MiB; byte[] name~2S via ch.qos.logback.classic.spi.ThrowableProxy: 458 MiB; byte[] name~2S via frame:AsyncAppender-Worker-ASYNCDEBUGLOG: 61 MiB; byte[] 32001643 via frame:AsyncAppender-Worker-ASYNCDEBUGLOG: 31 MiB
+[M] byte[] 16000000 via org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation: 763 MiB; byte[] name~2S via org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation: 31 MiB; byte[] name~2S via frame:ScheduledTasks: 31 MiB; byte[] 16000000 via frame:ScheduledTasks: 15 MiB
+[F] byte[] 16000000 via frame:Native-Transport-Requests: 488 MiB; byte[] 1048576 via io.netty.util.internal.InternalThreadLocalMap: 1 MiB
+[O] byte[] 1048576 via other: 16 MiB
+[unreachable] byte[] name~2S via -: 916 MiB; byte[] 64000086 via -: 671 MiB; byte[] 32000002 via -: 183 MiB; byte[] 16000000 via -: 137 MiB; byte[] 64000306 via -: 61 MiB; byte[] 32001547 via -: 31 MiB; byte[] 32000000 via -: 31 MiB; int[] 2097148 via -: 8 MiB
+live counts: {'ch.qos.logback.classic.spi.LoggingEvent': 427, 'org.apache.cassandra.exceptions.QueryCancelledException': 130, 'org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation': 51} ; LoggingEvents carrying a QCE: 129 (live 129); worker holds one: True
+byte[16,000,000] live: 84; arrays of 2S..2S+400 B live: 134; 4S..4S+400 B live: 0

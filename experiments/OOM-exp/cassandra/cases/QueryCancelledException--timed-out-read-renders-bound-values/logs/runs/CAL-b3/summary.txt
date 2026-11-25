@@ -1,0 +1,33 @@
+endpoint: hold
+client # t0 epoch 1795530584.688
+client # start 2026-11-24T07:29:44-0700 tracing=off distinct=False k=3 steps=[32] S=16000000
+client # step 0 N=32 established=32 at 247 ms
+client # end 60336 ms done=48 err=314
+step N=32 (from 247 ms, 61.2 s of completions): {'rt': 309, 'rf': 27, 'ok': 48}; f=0.070; rate ok 0.78/s rf 0.44/s rt 5.05/s; median latency ok 4747 rf 5198 rt 5055 ms
+CAL window t=10-60 s after full N: {'ok': 40, 'rt': 273, 'rf': 8} f=0.025
+server-logged aborts t=10-60 s after full N: 281 of 321 completions -> f_abort=0.875 (logged events total 346)
+server-logged aborts t=0-end s after full N: 346 of 384 completions -> f_abort=0.901 (logged events total 346)
+threads samples 32: max ReadStage 32, max R_Q 0 (hex 0, fmt 0, concat 0), max put-blocked 0, max NTR 32
+  R_Q series: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  put-blocked series: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  ScheduledTasks phases: {'idle': 5, 'pop': 14, 'pop-hex': 11, 'pop-fmt': 2}  AsyncAppender-Worker: {'idle': 32}
+  AW series: idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle idle
+K_server RequestsSize max 512000864 (samples 5); paused max 32
+READ dropped max 336; ReadStage active/pending max 32/0
+RssAnon max 5837 MiB
+heap_info used max 3924 MiB
+wchar total 174 MiB = 5.7 events; w max (10 s window) 0.26 events/s; E(t) estimate max 307, last 306
+  E series (every 5th): 0 42 89 171 236 307 306
+GCs 442; humongous after GC: max 166 regions (2656 MiB), median 102; before GC max 212
+old+humongous after GC: max 207 regions, median 120
+pauses 994; STW share over last 60 s of GC log: 8%; Pause Full count 0; to-space exhausted 12
+debug.log* bytes max 62 MiB
+/mydata avail min 705.2 GiB
+debug counts: logged_qc_events 346; logged_qc_messages 346; squashed_bytes 875973; 
+client total rf 26 (logged events vs rf above)
+drains: TOTAL slow drains 1 (queue full=queued>=50: 0; dropped>0: 0; max names 2; max queued 31); failed drains 1 (max queued 203)
+  2026-11-24T14:30:03,149 were_slow  n=2 interval_ms=5001 names=2 queued=31 dropped=0 multi=30
+  2026-11-24T14:31:01,693 timed_out  n=144 interval_ms=5001 names=1 queued=203 dropped=143 multi=203
+monitor task line: 1-24T14:29:50,080 MonitoringTask.java:95 - Scheduling monitoring task with report interval of 5000 ms, max operations 50
+dump: none
+MaxHeapSize=4294967296  MaxDirectMemorySize=16642998272  G1HeapRegionSize=16777216  

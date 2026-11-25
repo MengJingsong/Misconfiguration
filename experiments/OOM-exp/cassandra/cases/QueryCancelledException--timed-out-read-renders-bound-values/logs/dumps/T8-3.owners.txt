@@ -1,0 +1,19 @@
+dump T8-3.hprof: all objects 7747.5 MiB shallow; arrays >= 1048576 B: 308, 7662.7 MiB (live 4518.4 MiB)
+nearest-owner shares (of the dump total | of live arrays >= min):
+  O_QR    1159.7 MiB   15.0% |  25.7%
+  O_QL    2258.3 MiB   29.1% |  50.0%
+  O_M      579.8 MiB    7.5% |  12.8%
+  O_L        0.0 MiB    0.0% |   0.0%
+  O_F      504.5 MiB    6.5% |  11.2%
+  O_O       16.0 MiB    0.2% |   0.4%
+  O_unreached      0.0 MiB    0.0% |   0.0%
+  O_unreachable   3144.4 MiB   40.6% |  69.6%
+Q = QR + QL = 3418.0 MiB = 75.6% of live arrays >= min; largest other M 579.8 MiB -> Q-attributed (frozen test): YES
+[QR] byte[] name~2S via frame:ReadStage: 671 MiB; byte[] 16000000 via frame:ReadStage: 366 MiB; byte[] 64000086 via frame:ReadStage: 122 MiB
+[QL] byte[] name~2S via org.apache.cassandra.exceptions.QueryCancelledException: 2167 MiB; byte[] name~2S via frame:AsyncAppender-Worker-ASYNCDEBUGLOG: 61 MiB; byte[] 32003639 via frame:AsyncAppender-Worker-ASYNCDEBUGLOG: 31 MiB
+[M] byte[] 16000000 via org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation: 504 MiB; byte[] name~2S via org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation: 31 MiB; byte[] name~2S via frame:ScheduledTasks: 31 MiB; byte[] 16000000 via frame:ScheduledTasks: 15 MiB
+[F] byte[] 16000000 via frame:Native-Transport-Requests: 488 MiB; byte[] 16000000 via frame:ReadStage: 15 MiB; byte[] 1048576 via io.netty.util.internal.InternalThreadLocalMap: 1 MiB
+[O] byte[] 1048576 via other: 16 MiB
+[unreachable] byte[] name~2S via -: 2075 MiB; byte[] 64000086 via -: 732 MiB; byte[] 32000002 via -: 214 MiB; byte[] 64000306 via -: 61 MiB; byte[] 16000000 via -: 31 MiB; int[] 2097148 via -: 8 MiB; int[] 1048572 via -: 4 MiB; int[] 668424 via -: 3 MiB
+live counts: {'ch.qos.logback.classic.spi.LoggingEvent': 247, 'org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation': 52, 'org.apache.cassandra.exceptions.QueryCancelledException': 95, 'org.apache.cassandra.db.monitoring.MonitoringTask$SlowOperation': 1} ; LoggingEvents carrying a QCE: 71 (live 71); worker holds one: True
+byte[16,000,000] live: 91; arrays of 2S..2S+400 B live: 97; 4S..4S+400 B live: 2

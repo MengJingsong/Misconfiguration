@@ -1,0 +1,32 @@
+[2026-11-24 09:29:17 EST] ARM DIAG-C table=w2k CL=QUORUM Q=7 heap=2G direct=auto steps=1:20,7:60 build=unmod fetch=128
+1.7G	/mydata/s4/r24/n1 1.7G	/mydata/s4/r24/n2 
+[2026-11-24 09:29:22 EST] started DIAG-C n1 pid 656964 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/r24-DIAG-C-n1-1795530561.scope
+[2026-11-24 09:30:02 EST] ready DIAG-C n1
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M -javaagent:/mydata/s4/r24/tree/bin/../lib/jamm-0.4.0.jar -XX:HeapDumpPath=/mydata/s4/r24/runs/DIAG-C/n1/cassandra-1795530561-pid656964.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-24 09:30:03 EST] started DIAG-C n2 pid 658154 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/r24-DIAG-C-n2-1795530602.scope
+[2026-11-24 09:30:21 EST] ready DIAG-C n2
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms16G -Xmx16G -XX:MaxDirectMemorySize=15872M -javaagent:/mydata/s4/r24/tree/bin/../lib/jamm-0.4.0.jar -XX:HeapDumpPath=/mydata/s4/r24/runs/DIAG-C/n2/cassandra-1795530602-pid658154.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-24 09:30:23 EST] ring: 2 UN in node 1's view
+[2026-11-24 09:30:30 EST] GC.run DIAG-C n1
+1795530633,base,nmtOtherKB=89948,nmtTotalKB=2626134,rssAnonKB=2718692,scopeCurB=2812850176,scopeOomKill=0,1795530633064,117788288,84233856,84233856,0,0,0,-1,-1,75316749,0,108,89,0,0,0,0,0,0,0,0
+[2026-11-24 09:30:36 EST] client pid 659309
+1795530646,t+10,nmtOtherKB=319423,nmtTotalKB=2871104,rssAnonKB=2767188,scopeCurB=2866315264,scopeOomKill=0,1795530646068,927366520,642153848,356941176,1,0,25,1,0,92193594,3,233,273,4768,7,0,0,0,0,233,0
+1795530646135,1,1,7,0,1,8.0,1953.4,1953.4,128,0,0,0,
+1795530657,t+20,nmtOtherKB=335903,nmtTotalKB=2908208,rssAnonKB=2785300,scopeCurB=2893410304,scopeOomKill=0,1795530657073,1835617992,1835617992,1818840776,7,0,32,2,0,109069684,3,588,806,4768,14,0,0,0,0,593,0
+1795530657150,7,7,14,0,1,8.0,1997.5,1997.5,128,0,0,0,
+1795530667,t+31,nmtOtherKB=352331,nmtTotalKB=2951321,rssAnonKB=2796936,scopeCurB=2919641088,scopeOomKill=0,1795530667074,1352517360,1318962928,1302185712,7,0,47,1,0,109122536,3,1573,6993,4768,28,0,0,0,0,914,0
+1795530667160,7,7,14,14,0,0.0,-1.0,-1.0,128,0,14,0,ReadTimeoutException: Cassandra timeout during read query at consistency ONE (1 responses were required but only 0 replica responded). In case this was generated during 
+1795530684,t+41,nmtOtherKB=352331,nmtTotalKB=2908093,rssAnonKB=2798072,scopeCurB=2937368576,scopeOomKill=0,1795530675075,2059951504,2059951504,2059951504,7,0,54,2,0,109122536,3,2372,11989,4768,35,0,0,0,0,1190,0
+1795530684176,7,7,14,21,0,0.0,-1.0,-1.0,128,0,21,0,
+1795530695,t+58,nmtOtherKB=352331,nmtTotalKB=2907120,rssAnonKB=2799512,scopeCurB=5144821760,scopeOomKill=0,1795530675075,2059951504,2059951504,2059951504,7,0,54,2,0,109122536,3,2372,11989,4768,35,0,0,0,0,1190,0
+1795530695188,7,7,14,21,0,0.0,-1.0,-1.0,128,0,21,0,
+/mydata/s4/r24/harness/ctl.sh: line 60: 656964 Killed                  CASSANDRA_CONF=$R/n$i/conf CASSANDRA_LOG_DIR=$R/n$i/logs MAX_HEAP_SIZE=$HEAP MAX_DIRECT_MEMORY_SIZE=$DENV CASSANDRA_HEAPDUMP_DIR=$R/n$i JVM_EXTRA_OPTS="$EXTRA" setsid nohup systemd-run --user --scope --unit="r24-$L-n$i-$(date +%s)" -p MemorySwapMax=0 "$BUILD/bin/cassandra" -f < /dev/null > "$R/n$i/stdout.log" 2>&1
+[2026-11-24 09:31:45 EST] VICTIM DEAD at +69s
+SUMMARY secs=82 ok=14 err=2368067 overloaded=0 timeouts=21 badpages=0 bytesMB=112 inflight_left=0
+14:31:38 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 4000 milliseconds
+14:31:42 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 8000 milliseconds
+14:31:50 ERROR c.d.d.c.ControlConnection - [Control connection] Cannot connect to any host, scheduling retry in 16000 milliseconds
+[2026-11-24 09:32:00 EST] stopped DIAG-C n1
+[2026-11-24 09:32:10 EST] stopped DIAG-C n2
+OOM type="java.lang.OutOfMemoryError: Java heap space" at+69s peer=ALIVE
+[2026-11-24 09:32:22 EST] END DIAG-C OOM type="java.lang.OutOfMemoryError: Java heap space" at+69s peer=ALIVE

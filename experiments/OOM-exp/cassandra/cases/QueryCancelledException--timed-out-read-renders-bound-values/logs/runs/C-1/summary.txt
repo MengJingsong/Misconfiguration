@@ -1,0 +1,39 @@
+endpoint: daemon-exit oom:java.lang.OutOfMemoryError: Java heap space
+stdout: java.lang.OutOfMemoryError: Java heap space
+stdout: Dumping heap to /mydata/s4/u16/runs/C-1/cassandra-1795531115-pid397359.hprof ...
+stdout: Heap dump file created [3623246280 bytes in 5.398 secs]
+stdout: # java.lang.OutOfMemoryError: Java heap space
+stdout: #   Executing /bin/sh -c "kill -9 397359"...
+client # t0 epoch 1795531194.655
+client # start 2026-11-24T07:39:54-0700 tracing=off distinct=False k=2 steps=[32] S=16000000
+client # step 0 N=32 established=32 at 250 ms
+client # all connections ended at 29291 ms
+client # end 29291 ms done=0 err=116
+daemon gone 28.8 s after full N (last step N=32)
+step N=32 (from 250 ms, 28.8 s of completions): {'rt': 75, 'rf': 9, 'io_error': 32}; f=0.107; rate ok 0.00/s rf 0.31/s rt 2.61/s; median latency ok - rf 13378 rt 8053 ms
+CAL window t=10-60 s after full N: {'rt': 53, 'rf': 6, 'io_error': 32} f=0.102
+server-logged aborts t=10-60 s after full N: 0 of 59 completions -> f_abort=0.000 (logged events total 6)
+server-logged aborts t=0-end s after full N: 6 of 84 completions -> f_abort=0.071 (logged events total 6)
+  other x32: io_error:[Errno
+threads samples 7: max ReadStage 30, max R_Q 22 (hex 0, fmt 0, concat 20), max put-blocked 0, max NTR 32
+  R_Q series: 0 0 22 19 0 0 0
+  put-blocked series: 0 0 0 0 0 0 0
+  ScheduledTasks phases: {'idle': 5, 'pop-hex': 1, 'pop': 1}  AsyncAppender-Worker: {'idle': 4, 'thr-layout': 3}
+  AW series: idle idle idle thr-layout thr-layout thr-layout idle
+K_server RequestsSize max 432000729 (samples 1); paused max 1
+READ dropped max 54; ReadStage active/pending max 32/0
+RssAnon max 5899 MiB
+heap_info used max 3740 MiB
+wchar total 1027 MiB = 33.7 events; w max (10 s window) 1.52 events/s; E(t) estimate max 50, last 50
+  E series (every 5th): 0 47
+GCs 98; humongous after GC: max 245 regions (3920 MiB), median 204; before GC max 245
+old+humongous after GC: max 256 regions, median 222
+pauses 132; STW share over last 60 s of GC log: 12%; Pause Full count 16; to-space exhausted 8
+debug.log* bytes max 183 MiB
+/mydata avail min 691.2 GiB
+debug counts: logged_qc_events 6; logged_qc_messages 6; squashed_bytes 203428; 
+client total rf 9 (logged events vs rf above)
+drains: TOTAL slow drains 0 (queue full=queued>=50: 0; dropped>0: 0; max names 0; max queued 0); failed drains 0 (max queued 0)
+monitor task line: 1-24T14:40:00,060 MonitoringTask.java:95 - Scheduling monitoring task with report interval of 5000 ms, max operations 50
+dump: /mydata/s4/u16/dumps/C-1.hprof (3455 MiB)
+MaxHeapSize=4294967296  MaxDirectMemorySize=16642998272  G1HeapRegionSize=16777216  

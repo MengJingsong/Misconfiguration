@@ -1,0 +1,49 @@
+2026-11-24T18:12:36-0700 copy cassandra
+2026-11-24T18:12:38-0700 copy cassandra-iv
+patch applied
+2026-11-24T18:12:39-0700 ant jar (iv)
+2026-11-24T18:12:54-0700 ant rc=0
+
+BUILD SUCCESSFUL
+Total time: 14 seconds
+B28_QUEUED_BYTES in base: 0
+B28_QUEUED_BYTES in iv:   7
+c560848c966e329bbfdbb143497b1b66  /mydata/s4/b28/cassandra/build/apache-cassandra-5.0.9-SNAPSHOT.jar
+e7b6b5ba5790bdb586df39df6deaeef9  build/apache-cassandra-5.0.9-SNAPSHOT.jar
+714ee9bf58b3bc1710377ac16bcbba03  /mydata/s4/b28/cassandra/conf/cassandra.yaml
+e7b6b5ba5790bdb586df39df6deaeef9  build/apache-cassandra-5.0.9-SNAPSHOT.jar
+714ee9bf58b3bc1710377ac16bcbba03  conf/cassandra.yaml
+2026-11-24T18:12:55-0700 BUILD-DONE
+
+--- /mydata/s4/b28/TraceStateImpl.java.orig	2026-11-24 18:12:39.624858289 -0700
++++ src/java/org/apache/cassandra/tracing/TraceStateImpl.java	2026-11-24 18:12:39.628858358 -0700
+@@ -53,6 +53,10 @@
+     @VisibleForTesting
+     public static int WAIT_FOR_PENDING_EVENTS_TIMEOUT_SECS = CassandraRelevantProperties.WAIT_FOR_TRACING_EVENTS_TIMEOUT_SECS.getInt();
+ 
++    // B28 intervention (diagnostic build only): a byte bound on trace mutations queued on the TRACING stage
++    private static final java.util.concurrent.atomic.AtomicLong B28_QUEUED_BYTES = new java.util.concurrent.atomic.AtomicLong();
++    private static final long B28_QUEUED_BYTES_LIMIT = 64L << 20;
++
+     private final Set<Future<?>> pendingFutures = ConcurrentHashMap.newKeySet();
+ 
+     public TraceStateImpl(InetAddressAndPort coordinator, TimeUUID sessionId, Tracing.TraceType traceType)
+@@ -103,7 +107,17 @@
+ 
+     void executeMutation(final Mutation mutation)
+     {
+-        Future<Void> fut = Stage.TRACING.executor().submit(() -> mutateWithCatch(mutation), null);
++        final long size = mutation.serializedSize(org.apache.cassandra.net.MessagingService.current_version);
++        if (B28_QUEUED_BYTES.addAndGet(size) > B28_QUEUED_BYTES_LIMIT)
++        {
++            B28_QUEUED_BYTES.addAndGet(-size);
++            org.apache.cassandra.net.MessagingService.instance().metrics.recordSelfDroppedMessage(org.apache.cassandra.net.Verb._TRACE);
++            return;
++        }
++        Future<Void> fut = Stage.TRACING.executor().submit(() -> {
++            try { mutateWithCatch(mutation); }
++            finally { B28_QUEUED_BYTES.addAndGet(-size); }
++        }, null);
+         boolean ret = pendingFutures.add(fut);
+         if (!ret)
+             logger.warn("Failed to insert pending future, tracing synchronization may not work");

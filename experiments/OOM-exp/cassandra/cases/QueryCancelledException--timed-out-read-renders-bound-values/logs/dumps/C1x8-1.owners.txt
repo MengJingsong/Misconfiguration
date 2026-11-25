@@ -1,0 +1,19 @@
+dump C1x8-1.hprof: all objects 7522.4 MiB shallow; arrays >= 1048576 B: 348, 7429.5 MiB (live 3511.3 MiB)
+nearest-owner shares (of the dump total | of live arrays >= min):
+  O_QR    1403.8 MiB   18.7% |  40.0%
+  O_QL      30.5 MiB    0.4% |   0.9%
+  O_M     1556.4 MiB   20.7% |  44.3%
+  O_L        0.0 MiB    0.0% |   0.0%
+  O_F      504.5 MiB    6.7% |  14.4%
+  O_O       16.0 MiB    0.2% |   0.5%
+  O_unreached      0.0 MiB    0.0% |   0.0%
+  O_unreachable   3918.3 MiB   52.1% | 111.6%
+Q = QR + QL = 1434.3 MiB = 40.8% of live arrays >= min; largest other M 1556.4 MiB -> Q-attributed (frozen test): NO
+[QR] byte[] name~2S via frame:ReadStage: 916 MiB; byte[] 16000000 via frame:ReadStage: 443 MiB; byte[] name~2S via frame:Native-Transport-Requests: 31 MiB; byte[] 16000000 via frame:Native-Transport-Requests: 15 MiB
+[QL] byte[] name~2S via frame:AsyncAppender-Worker-ASYNCDEBUGLOG: 31 MiB
+[M] byte[] 16000000 via org.apache.cassandra.db.monitoring.MonitoringTask$SlowOperation: 763 MiB; byte[] 16000000 via org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation: 717 MiB; byte[] name~2S via org.apache.cassandra.db.monitoring.MonitoringTask$SlowOperation: 31 MiB; byte[] name~2S via frame:ScheduledTasks: 31 MiB; byte[] 16000000 via frame:ScheduledTasks: 15 MiB
+[F] byte[] 16000000 via frame:Native-Transport-Requests: 397 MiB; byte[] 16000000 via org.apache.cassandra.transport.messages.ExecuteMessage: 76 MiB; byte[] name~2S via frame:Native-Transport-Requests: 31 MiB; byte[] 1048576 via io.netty.util.internal.InternalThreadLocalMap: 1 MiB
+[O] byte[] 1048576 via other: 16 MiB
+[unreachable] byte[] name~2S via -: 2472 MiB; byte[] 32000002 via -: 885 MiB; byte[] 16000000 via -: 244 MiB; byte[] 32000000 via -: 244 MiB; byte[] 64000086 via -: 61 MiB; int[] 2097148 via -: 8 MiB; int[] 1048572 via -: 4 MiB
+live counts: {'org.apache.cassandra.db.monitoring.MonitoringTask$SlowOperation': 51, 'org.apache.cassandra.db.monitoring.MonitoringTask$FailedOperation': 50, 'org.apache.cassandra.exceptions.QueryCancelledException': 32, 'ch.qos.logback.classic.spi.LoggingEvent': 1} ; LoggingEvents carrying a QCE: 1 (live 1); worker holds one: True
+byte[16,000,000] live: 159; arrays of 2S..2S+400 B live: 35; 4S..4S+400 B live: 0

@@ -1,0 +1,66 @@
+[22:40:32] args: name=dP5 type=P V-build=patched N=200000 rate=5200 CL=ONE VX=2G RX=2G sess=16 loadcap=99 fill_small=0 platform=aarch64 client=ms0604
+[22:40:37] stopped V (none)
+[22:40:40] stopped R1 (none)
+[22:40:42] stopped R2 (none)
+[22:40:52] gen V xmx=2G build=/mydata/r25/run-patched
+[22:40:53] restored V from /mydata/r25/golden-V.tgz (53M data, saved_caches: 0 files)
+[22:40:54] gen R1 xmx=2G build=/mydata/r25/run-orig
+[22:40:54] restored R1 from /mydata/r25/golden-R1.tgz (1.1M data, saved_caches: 0 files)
+[22:40:55] gen R2 xmx=2G build=/mydata/r25/run-orig
+[22:40:55] restored R2 from /mydata/r25/golden-R2.tgz (1.1M data, saved_caches: 0 files)
+[22:40:59] launched V pid=806761 unit=r25-V-1795578056 build=/mydata/r25/run-patched swap.max=0 memory.max=max
+[22:42:08] launched R1 pid=728135 unit=r25-R1-1795578126 build=/mydata/r25/run-orig swap.max=0 memory.max=max
+[22:42:08] launched R2 pid=402807 unit=r25-R2-1795578126 build=/mydata/r25/run-orig swap.max=0 memory.max=max
+[22:42:28] ring UN=3
+V pid 806761 build /mydata/r25/run-patched jar md5 1de8e8c5bb6b
+V resolved: -XX:+UseG1GC -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M 
+V VM.flags: MaxDirectMemorySize=16642998272 MaxHeapSize=2147483648 
+V VM.uptime at 1795578153630: 98.075 s
+V cgroup: /sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/r25-V-1795578056.scope swap.max=0 memory.max=max
+2026-11-25T03:41:09,512 CacheService.java:121 - Initializing key cache with capacity of 100 MiBs.
+2026-11-25T03:41:09,548 CacheService.java:143 - Initializing row cache with capacity of 0 MiBs
+2026-11-25T03:41:09,553 CacheService.java:174 - Initializing counter cache with capacity of 50 MiBs
+V start info:
+Key Cache              : entries 27, size 4.95 KiB, capacity 100 MiB, 104 hits, 130 requests, 0.800 recent hit rate, 14400 save period in seconds
+Counter Cache          : entries 0, size 0 bytes, capacity 50 MiB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds
+[22:42:46] fill: read 1500000 kv
+RANGEOK kept=1000 rejected=1000 candidates=3245
+DONE mode=read table=kv keyBytes=8 first=0 count=1500000 candidates=4500841 ok=1500000 err=0 rows=1500000 secs=100.4 ops/s=14946
+[22:44:34] fill: counter 550000 ctr
+RANGEOK kept=1000 rejected=1000 candidates=3245
+DONE mode=counter table=ctr keyBytes=8 first=0 count=550000 candidates=1649894 ok=550000 err=0 rows=0 secs=51.6 ops/s=10667
+[22:45:48] after fill: key cache 100.00 MiB, counter cache 50.00 MiB
+== pre-burst nodetool info
+Heap Memory (MB)       : 1285.92 / 2048.00
+Off Heap Memory (MB)   : 2.95
+Key Cache              : entries 569878, size 100 MiB, capacity 100 MiB, 111 hits, 1501666 requests, 0.000 recent hit rate, 14400 save period in seconds
+Counter Cache          : entries 242725, size 50 MiB, capacity 50 MiB, 0 hits, 550000 requests, 0.000 recent hit rate, 7200 save period in seconds
+== tablestats
+		Table: t_blob
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Table: ctr
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Table: kv
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+[22:46:02] pre-burst live heap (histogram total): Total       5187808      243667824
+[22:46:12] burst start N=200000 rate=5200 CL=ONE loadcap=99 sess=16
+[22:47:38] client exited: TOTAL_REACHED t=40687 sent=200000 ok=196128 epochMs=1795578419867 FIRST_SEND epochMs=1795578379180 FINAL sent=200000 ok=200000 err=0 firstOkMs=1795578379203 lastOkMs=1795578420263 total=200000 stop=false endMs=1795578420264  
+[22:47:39] observation: DRAINED (1795578459 ALIVE last=0 max30=0 n30=149)
+V_ALIVE
+VmSwap:	       0 kB
+Heap Memory (MB)       : 812.17 / 2048.00
+Off Heap Memory (MB)   : 4.17
+Key Cache              : entries 569878, size 100 MiB, capacity 100 MiB, 144 hits, 1501827 requests, 0.000 recent hit rate, 14400 save period in seconds
+Counter Cache          : entries 242725, size 50 MiB, capacity 50 MiB, 0 hits, 550000 requests, 0.000 recent hit rate, 7200 save period in seconds
+R1_ALIVE
+R2_ALIVE
+[22:48:05] stopped V (806761)
+[22:48:19] stopped R1 (728135)
+[22:48:35] stopped R2 (402807)
+[22:48:42] dP5 V: type=P N=200000 rate=5200 xmx=2G 0 OOMError lines | pauses=69 max_after_any=2019MiB(98.6%) full_gcs=12 max_after_full=1728MiB(84.4%) ReportJavaOutOfMemory=0 | full>95%: n=0 window=0s pause=0s (0%) service_loss=not met | pauses=69 total_pause=11s max60=14% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=none | obs=DRAINED | client: TOTAL_REACHED t=40687 sent=200000 ok=196128 epochMs=1795578419867 FINAL sent=200000 ok=200000 err=0 firstOkMs=1795578379203 lastOkMs=1795578420263 total=200000 stop=false endMs=1795578420264   | hstop: h_stop=1458 (pause +2.3 s from STOP) stop_s=40.7 max_after_any=1992 max_after_full=1728 n_full=10 oom_mark_after_send=- oom_mark_after_stop=- | smooth: NOT_SMOOTH (saturated before STOP (t_sat 15 s); achieved 4,916 < 0.95 r) | R1: dP5 R1: type=P N=200000 rate=5200 xmx=2G 0 OOMError lines | pauses=25 max_after_any=2048MiB(100.0%) full_gcs=3 max_after_full=524MiB(25.6%) ReportJavaOutOfMemory=0  | R2: dP5 R2: type=P N=200000 rate=5200 xmx=2G 0 OOMError lines | pauses=23 max_after_any=2048MiB(100.0%) full_gcs=2 max_after_full=425MiB(20.8%) ReportJavaOutOfMemory=0 

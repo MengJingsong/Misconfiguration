@@ -1,0 +1,147 @@
+=== runs-loadTA.log
+24K	/mydata/s4/b29/n1 24K	/mydata/s4/b29/n2 
+[2026-11-24 15:33:10 EST] started LOAD-TA n1 pid 1987743 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b29-LOAD-TA-n1-1795552389.scope
+[2026-11-24 15:33:46 EST] ready LOAD-TA n1
+[2026-11-24 15:33:47 EST] started LOAD-TA n2 pid 1988136 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b29-LOAD-TA-n2-1795552426.scope
+[2026-11-24 15:34:23 EST] ready LOAD-TA n2
+[2026-11-24 15:34:24 EST] ring: 2 UN in node 1's view
+20:34:25 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: t
+schema ok, agreement=true
+[2026-11-24 15:34:30 EST] load test partitions
+loaded k<=7 t=35s errors=78
+loaded k<=15 t=70s errors=151
+loaded k<=23 t=162s errors=449
+loaded k<=31 t=211s errors=593
+loaded k<=39 t=294s errors=864
+loaded k<=47 t=346s errors=1024
+loaded k<=55 t=429s errors=1270
+loaded k<=63 t=484s errors=1431
+loaded k<=71 t=574s errors=1735
+loaded k<=79 t=625s errors=1887
+loaded k<=87 t=791s errors=2439
+loaded k<=95 t=858s errors=2587
+load ok k=0..95 rows=4000 size=65536 s=a CL=ALL errors=2587 secs=858
+[2026-11-24 15:48:55 EST] load warm-up partitions
+loaded k<=1007 t=0s errors=0
+load ok k=1000..1009 rows=10 size=65536 s=x CL=ALL errors=0 secs=0
+== n1
+		SSTable count: 16
+		Old SSTable count: 0
+		Space used (live): 25314569870
+		Number of partitions (estimate): 106
+		Compacted partition maximum bytes: 268650950
+		Compacted partition mean bytes: 215409823
+== n2
+		SSTable count: 15
+		Old SSTable count: 0
+		Space used (live): 25330624012
+		Number of partitions (estimate): 106
+		Compacted partition maximum bytes: 268650950
+		Compacted partition mean bytes: 191955024
+[2026-11-24 15:49:44 EST] F1: node 1 down
+[2026-11-24 15:50:17 EST] stopped LOAD-TA n1
+f1 ok k=0..95 CL=ONE
+pending hints: This node does not have any pending hints 
+n2 hints files: 0
+[2026-11-24 15:50:25 EST] compact n2
+[2026-11-24 15:56:39 EST] compact n2 done
+[2026-11-24 15:56:40 EST] started LOAD-TA n1 pid 1991467 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b29-LOAD-TA-n1-1795553799.scope
+[2026-11-24 15:56:54 EST] ready LOAD-TA n1
+[2026-11-24 15:56:55 EST] ring: 2 UN in node 1's view
+n1 hints files: 0 n2: 2
+[2026-11-24 15:56:55 EST] compact n1
+Cassandra has shutdown.
+-- StackTrace --
+java.io.EOFException
+
+=== runs-tafix.log
+n2 hints files before restart: 0
+[2026-11-24 16:02:11 EST] started LOAD-TA n1 pid 1992810 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b29-LOAD-TA-n1-1795554130.scope
+[2026-11-24 16:02:27 EST] ready LOAD-TA n1
+[2026-11-24 16:02:28 EST] ring: 2 UN in node 1's view
+n1 memtable after restart: 		Memtable cell count: 0
+n2 hints files: 0; hint lines in n2 log since restart: 1
+[2026-11-24 16:02:49 EST] compact n1
+[2026-11-24 16:09:13 EST] compact n1 done
+concurrent compactors            2          
+pending tasks                    0          
+compactions completed            2          
+== n1
+		SSTable count: 1
+		Old SSTable count: 0
+		Space used (live): 25314764641
+		Number of partitions (estimate): 106
+		Memtable cell count: 0
+		Compacted partition maximum bytes: 268650950
+== n2
+		SSTable count: 1
+		Old SSTable count: 0
+		Space used (live): 6599956
+		Number of partitions (estimate): 106
+		Memtable cell count: 0
+		Compacted partition maximum bytes: 785939
+127.0.0.2
+127.0.0.1
+stat k=0 CL=ONE via 127.0.0.1 rows=1 s=x ms=25 warnings=[]
+  trace /127.0.0.1 +4325us [Native-Transport-Requests-1] reading data from /127.0.0.2:7000
+  trace /127.0.0.2 +3413us [ReadStage-1] Executing single-partition query on t
+  trace /127.0.0.2 +3557us [ReadStage-1] Acquiring sstable references
+  trace /127.0.0.2 +5606us [ReadStage-1] Merged data from memtables and 1 sstables
+  trace /127.0.0.2 +5818us [ReadStage-1] Read 1 live rows and 0 tombstone cells
+stat k=0 CL=ONE via 127.0.0.2 rows=4000 s=a ... (4000 values) ms=174 warnings=[]
+  trace /127.0.0.2 +3533us [Native-Transport-Requests-1] reading data from /127.0.0.1:7000
+  trace /127.0.0.1 +482us [ReadStage-1] Executing single-partition query on t
+stat k=95 CL=ONE via 127.0.0.1 rows=1 s=x ms=8 warnings=[]
+  trace /127.0.0.1 +956us [Native-Transport-Requests-1] reading data from /127.0.0.2:7000
+  trace /127.0.0.2 +425us [ReadStage-1] Executing single-partition query on t
+  trace /127.0.0.2 +541us [ReadStage-1] Acquiring sstable references
+  trace /127.0.0.2 +1654us [ReadStage-1] Merged data from memtables and 1 sstables
+  trace /127.0.0.2 +1771us [ReadStage-1] Read 1 live rows and 0 tombstone cells
+stat k=95 CL=ONE via 127.0.0.2 rows=1 s=x ms=4 warnings=[]
+  trace /127.0.0.2 +587us [ReadStage-1] Executing single-partition query on t
+[2026-11-24 16:09:44 EST] stopped LOAD-TA n1
+[2026-11-24 16:09:54 EST] stopped LOAD-TA n2
+24G	/mydata/s4/b29/template-TA-n1
+7.6M	/mydata/s4/b29/template-TA-n2
+[2026-11-24 16:09:54 EST] END ta-fix
+=== runs-loadTB.log
+24G	/mydata/s4/b29/n1 7.6M	/mydata/s4/b29/n2 
+[2026-11-24 16:10:04 EST] started LOAD-TB n1 pid 1995734 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b29-LOAD-TB-n1-1795554603.scope
+[2026-11-24 16:10:42 EST] ready LOAD-TB n1
+[2026-11-24 16:10:44 EST] started LOAD-TB n2 pid 1996203 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b29-LOAD-TB-n2-1795554642.scope
+[2026-11-24 16:11:00 EST] ready LOAD-TB n2
+[2026-11-24 16:11:01 EST] ring: 2 UN in node 1's view
+f1 ok k=0..95 CL=ALL
+== n1
+		SSTable count: 2
+		Old SSTable count: 0
+		Space used (live): 25314772493
+		Number of partitions (estimate): 106
+		Compacted partition maximum bytes: 268650950
+		Compacted partition mean bytes: 127714620
+== n2
+		SSTable count: 2
+		Old SSTable count: 0
+		Space used (live): 6607808
+		Number of partitions (estimate): 106
+		Compacted partition maximum bytes: 785939
+		Compacted partition mean bytes: 38938
+stat k=0 CL=ONE via 127.0.0.1 rows=1 s=x ms=17 warnings=[]
+  trace /127.0.0.1 +4079us [Native-Transport-Requests-1] reading data from /127.0.0.2:7000
+  trace /127.0.0.1 +4694us [Messaging-EventLoop-3-1] Sending READ_REQ message to /127.0.0.2:7000 message size 92 bytes
+  trace /127.0.0.2 +286us [Messaging-EventLoop-3-5] READ_REQ message received from /127.0.0.1:7000
+  trace /127.0.0.2 +3136us [ReadStage-1] Executing single-partition query on t
+  trace /127.0.0.2 +3311us [ReadStage-1] Acquiring sstable references
+  trace /127.0.0.2 +3911us [ReadStage-1] Partition index found for sstable 48, size = 0
+  trace /127.0.0.2 +4348us [ReadStage-1] Skipped 0/2 non-slice-intersecting sstables, included 0 due to tombstones
+  trace /127.0.0.2 +4993us [ReadStage-1] Merged data from memtables and 1 sstables
+  trace /127.0.0.2 +5215us [ReadStage-1] Read 1 live rows and 0 tombstone cells
+  trace /127.0.0.2 +5362us [ReadStage-1] Enqueuing response to /127.0.0.1:7000
+  trace /127.0.0.2 +5880us [Messaging-EventLoop-3-1] Sending READ_RSP message to /127.0.0.1:7000 message size 72 bytes
+  trace /127.0.0.1 +13247us [Messaging-EventLoop-3-5] READ_RSP message received from /127.0.0.2:7000
+  trace /127.0.0.1 +13606us [RequestResponseStage-2] Processing response from /127.0.0.2:7000
+[2026-11-24 16:11:24 EST] stopped LOAD-TB n1
+[2026-11-24 16:11:33 EST] stopped LOAD-TB n2
+24G	/mydata/s4/b29/template-TB-n1
+8.2M	/mydata/s4/b29/template-TB-n2
+[2026-11-24 16:11:33 EST] END load TB

@@ -1,0 +1,26 @@
+[2026-11-24 15:20:45 EST] ARM CAL-AUTO arm=A heap=AUTO shape=S30 tables=t1,t2,t3,t4 c=8 session=[profileload b26 * 60000] ret= ntheap=default
+[2026-11-24 15:20:46 EST] started CAL-AUTO pid 643696 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b26-CAL-AUTO-1795551645.scope
+[2026-11-24 15:20:54 EST] ready CAL-AUTO
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms31744M -Xmx31744M -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/b26/runs/CAL-AUTO/cassandra-1795551645-pid643696.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-24 15:21:00 EST] GC.run CAL-AUTO
+[2026-11-24 15:21:04 EST] warm-up 20 s
+SUMMARY shape=S30 tables=t1+t2+t3+t4 c=8 secs=20 ok=2198 err=0 reads_s=109.9 p50=69 p99=128 max=261 errs={} lastErr=
+[2026-11-24 15:21:41 EST] client pid 644607
+[2026-11-24 15:21:54 EST] session start: nodetool profileload b26 * 60000
+/mydata/s4/b26/harness/victim-ctl.sh: line 42: 643696 Killed                  env CASSANDRA_CONF=$R/conf CASSANDRA_LOG_DIR=$R/logs $HE CASSANDRA_HEAPDUMP_DIR=$R JVM_EXTRA_OPTS="-XX:NativeMemoryTracking=summary -Xlog:gc*=info,gc+heap=info,safepoint=info:file=$R/gc.log:time,uptime,level,tags:filecount=20,filesize=50m" setsid nohup systemd-run --user --scope --unit="b26-$L-$(date +%s)" -p MemorySwapMax=0 "$BUILD/bin/cassandra" -f < /dev/null > "$R/stdout.log" 2>&1
+[2026-11-24 15:23:52 EST] VICTIM DEAD at session+118s
+[2026-11-24 15:23:56 EST] OOM/GC check
+INFO  [Native-Transport-Requests-7] 2026-11-24T20:21:05,680 QueryProcessor.java:700 - Fully upgraded to at least 5.0.9-SNAPSHOT
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /mydata/s4/b26/runs/CAL-AUTO/cassandra-1795551645-pid643696.hprof ...
+Heap dump file created [27875096171 bytes in 77.247 secs]
+INFO  [Service Thread] 2026-11-24T20:23:49,655 GCInspector.java:286 - G1 Old Generation GC in 315ms.  G1 Old Gen: 31132623144 -> 31048629256; G1 Survivor Space: 16777216 -> 0; 
+#
+# java.lang.OutOfMemoryError: Java heap space
+# -XX:OnOutOfMemoryError="kill -9 %p"
+#   Executing /bin/sh -c "kill -9 643696"...
+-rw-------  1 jason92 misconfiguration 27875096171 Nov 24 13:23 cassandra-1795551645-pid643696.hprof
+pauses=465 full_gcs=15 total_pause=7s max60=11% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=HeapDumper@106.538s,ReportJavaOutOfMemory@184.111s
+[2026-11-24 15:23:59 EST] stopped CAL-AUTO
+OOM type="java.lang.OutOfMemoryError: Java heap space" at session+118s slow=0 cancelled=0 lastS=[S 120,8,2141,OperationTimedOutException:8,0,-1,-1,-1,OperationTimedOutException: [/127.0.0.1:9042] Timed out waiting for server response]
+[2026-11-24 15:23:59 EST] END CAL-AUTO OOM type="java.lang.OutOfMemoryError: Java heap space" at session+118s slow=0 cancelled=0 lastS=[S 120,8,2141,OperationTimedOutException:8,0,-1,-1,-1,OperationTimedOutException: [/127.0.0.1:9042] Timed out waiting for server response]

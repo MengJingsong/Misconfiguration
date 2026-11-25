@@ -7,12 +7,21 @@
 | Phase-1 case file | none |
 | System / pinned source | Cassandra 5.0.9 (`systems/cassandra/source/`, `build.xml` `base.version` 5.0.9); built tree `pc91:/mydata/s4/cassandra-base` (`build/apache-cassandra-5.0.9-SNAPSHOT.jar` 2026-11-17 21:05, sha256 `570b5249…ea90176e`), OpenJDK 11.0.33 **x86_64**, Ubuntu 22.04.2, kernel 5.15.0-203, logback 1.5.18 (`lib/logback-*-1.5.18.jar`) |
 | Stage 1 (design) | OOM-agent stage-1 session (owner-approved batch of 2026-11-24), 2026-11-24 05:50 America/New_York |
-| Stage 2 (verify) | pending (a fresh OOM-agent session) |
-| Verdict | `pending` |
+| Stage 2 (verify) | fresh OOM-agent session (owner-approved batch of 2026-11-24), 2026-11-24 09:16–12:16 America/New_York (series), finished by a resumed session of the same task 15:01–15:15 (T31-2/3 excerpts, cleanup), node **pc72** (deviation from pc91, §3.2) |
+| Verdict | **retry** (`candidate`: V1, V3–V7 met; V2 not met — frozen outcome row O4) |
 
 ## Summary
 
-- **Conclusion:** pending (stage 2).
+- **Conclusion: retry.** The test arm OOMs at shipped defaults at every budget tried — 4 GiB 3/3, 8 GiB 3/3, 15,872 MiB
+  1/1, and 31,744 MiB 3/3 (the heap `cassandra-env.sh` picks on this node) — and the holder is the claimed one: in all six
+  dumps (4 and 8 GiB) the abort renders and the exception messages own 56–78 % of the live large arrays, the OOM thread is
+  in `QueryCancelledException.<init>`, and above 8 GiB the queued 32 MB debug-log events grow by ≈ 1.1–2.8 per second
+  until the heap is gone. The intervention (message names only the table) survives 6/6 at the same,
+  higher abort rate (≈ 6.4 aborts/s). But the **matched control failed**: the frozen control (slow reads under the
+  deadline, k = 2) OOMs 3/3 at 4 GiB and 3/3 at 8 GiB, because under 16 MB-value load some of its reads also cross the
+  5 s deadline and then render; even a faster control (amendment, k = 1) OOMs 1/5. That is frozen row O4 → **retry**: the
+  next design needs a control that stays abort-free (or an owner ruling that the intervention arm serves as the match).
+- **Status (detail):** `candidate` — V1, V3, V4, V5, V6, V7 met; V2 not met.
 - **Claim under test (unprotected accumulation).** When a local read passes its 5 s deadline, `ReadCommand`'s cancellation
   checker throws `new QueryCancelledException(command)`, whose constructor renders the whole command with `toCQLString()` —
   every bound value in full, a 16 MB blob filter value as a ≈ 32 MB hex string, built through ≈ 6–10 × S of transient
@@ -28,6 +37,10 @@
   message names only the table. Budget 4 GiB (2 GiB if the control fits), then 8 GiB, 15,872 MiB, 31,744 MiB.
 - **Root cause as claimed at design time:** the read-abort path renders the full command (values uncut) into an exception
   message and hands it to an unbounded-in-bytes logging queue; nothing bounds bytes per abort or aborts in flight in the log.
+- **Root cause as measured (stage 2):** confirmed in both parts. At 4 GiB the first waves of 32 concurrent renders
+  (R_Q up to 27–31 threads at once, ≈ 6–10 × 16 MB each) end the heap; at 8 GiB and above the async debug appender's queue
+  of whole 32 MB exception messages grows because its single worker writes ≈ 3.2–5.0 events/s against ≈ 6 aborts/s, and
+  nothing bounds it in bytes (1,024 events ≈ 32 GB). What the case could not show is a no-abort control at the same load.
 
 ## 1. Candidate
 
@@ -370,12 +383,200 @@ deleted, trees + seed + kept dumps listed with sizes.
   same abort rate (record A, ok/rf/rt and latency so that a slower or faster abort rate is visible).
 - **Original failure on the unmodified build:** `T` runs on base; iv runs only in `I` and `CAL-b`.
 
-`sha256 of §1–§2 at freeze: 27fbd095cef25e099a6cb6c238ca4edd78f75130ad6ffea3916c70f4a7a4d24f` (computed as `awk '/^## 1\. Candidate/{p=1} /^`sha256 of §1–§2 at freeze/{p=0} p' <this file> | sha256sum`, i.e. from the `## 1. Candidate` line up to, not including, this line; 2026-11-24) · amendments after the freeze: none.
+`sha256 of §1–§2 at freeze: 27fbd095cef25e099a6cb6c238ca4edd78f75130ad6ffea3916c70f4a7a4d24f` (computed as `awk '/^## 1\. Candidate/{p=1} /^`sha256 of §1–§2 at freeze/{p=0} p' <this file> | sha256sum`, i.e. from the `## 1. Candidate` line up to, not including, this line; 2026-11-24) · amendments after the freeze: none at stage 1; stage 2 recorded A-1 to A-3 and the node deviation in §3.2 (2026-11-24; this suffix is outside the hashed range, which stage 2 re-checked: `27fbd095…a4d24f`, match).
 
 ## 3. Runs (stage 2)
 
-pending
+Stage 2 by a fresh OOM-agent session, 2026-11-24 09:16–12:16 America/New_York (the last run, T31-3, ended 12:16 ET; node
+clock MST = ET − 2 h; debug.log timestamps UTC); that session ended before its cleanup, and a resumed session of the same
+task ("try again", no new runs) copied the T31-2/3 excerpts and did the cleanup 15:01–15:15 ET. Freeze hash re-checked before
+anything ran: `27fbd095…a4d24f`, match (re-checked again 15:03 ET, match). Node lock `pc72:/mydata/s4/NODE-LOCK` held for the
+whole series; it was found absent (no process running) at 15:01 ET and re-acquired for the cleanup, then released. Harness: [`harness/`](harness/) (from R12's; changes listed in §3.2);
+small excerpts: [`logs/`](logs/) (`logs/runs/<run>/summary.txt`, `driver.txt`, `debugcounts.txt`, `drains.txt`;
+`logs/dumps/<run>.owners.txt`, `.oome.txt`, `oome-thread-frames.txt`; `logs/series.log`, `logs/calib.txt` with the dated
+decisions). Raw run directories stayed on pc72 under `/mydata/s4/u16/runs/` until cleanup (§3.8).
+
+### 3.1 Environment
+
+- **Node `pc72`** (`node2.jason92-326665`, UMass): x86_64, 2 × Intel Xeon E5-2660 v2 2.2 GHz, 40 hw threads, MemTotal
+  131,943,324 kB, 8 GiB swap present (swappiness 60; every daemon in a `systemd-run --user --scope -p MemorySwapMax=0`),
+  cgroup v2, kernel 5.15.0-203, OpenJDK 11.0.33, Python 3.10.12, logback 1.5.18, `/mydata` 753 G with 707 G free at start.
+  Load 0.00, no Java process, ports free at start; `/mydata/s4/3b-B21`, `/mydata/s4/3b-R22` (other cases) untouched.
+- **Builds.** `/mydata/s4/u16/cassandra-base` = `cp -a /mydata/s4/cassandra-base` (jar sha256 `570b5249…ea90176e`, same as
+  pc91's in §2.3). `/mydata/s4/u16/cassandra-iv` = copy + [`harness/iv.patch`](harness/iv.patch) + `ant jar` (BUILD
+  SUCCESSFUL; jar sha256 `8415bc0d780294586c4c7f5c6e58b68a9bddea08ef7b0a951795829ce73a969b`); `javap … | grep -c toCQLString`
+  = **1** base, **0** iv; `diff -ru` of the two `src/` trees = the patch plus the build-generated `version.properties`
+  timestamp ([`logs/build.log`](logs/build.log)).
+- **Resolved budgets (`CAL-r`, base, `MAX_HEAP_SIZE` unset):** heap **31,744 MiB** (`MaxHeapSize` 33,285,996,544),
+  `MaxDirectMemorySize` **15,872 MiB** (16,642,998,272), `G1HeapRegionSize` 16 MiB — as predicted. With a hand-set heap
+  `cassandra-env.sh` kept the direct limit at 15,872 MiB in every run (`vm-flags.txt`).
+- **Configuration:** shipped `conf/` in every arm; `VM.command_line` of every run has no `-Dcassandra.monitoring*` or other
+  capacity override; the first slow/failed operation logged `Scheduling monitoring task with report interval of 5000 ms, max
+  operations 50` (in the rolled `system.log` archive for the ≥ 15,872 MiB runs, where the monitor's INFO line carries a
+  32 MB name and rolls `system.log`; the line is not in the copied plain file there, `montask.txt` empty, no override on the
+  command line). Resolved in-flight limits as §2.3 (`RequestsSize` peaked at 512,000,864 B = 32 × 16 MB in every N = 32 arm:
+  one request per connection admitted above heap/10 at 4 GiB, paused connections up to 31–32).
+- **Seed (`SEED`, 4 GiB):** `client.py --load --conns 16` wrote **14,299,100 of 14,300,000 rows** in 58 s (6 batches of 150
+  ended in write timeouts and were not retried; < 0.01 %, recorded), flush, compact → one sstable (125 MiB `Data.db`,
+  4 partitions), drain; `seed/data.tar` 165,406,720 B, restored before every run.
+
+### 3.2 Deviations and amendments (dated 2026-11-24, each before the readings it affects)
+
+| # | When | What | Why / effect |
+|---|---|---|---|
+| D-1 | start | Node **pc72** instead of pc91 | assigned by the batch; same class (x86_64, same base jar); 40 instead of 32 hw threads (`concurrent_reads` 32 unchanged) |
+| D-2 | start | No `sudo loginctl enable-linger` (the session's permission check refused it); an ssh session to pc72 was held open for the whole series instead | keeps the user manager (and the `--user` scopes) alive; no run lost a scope |
+| D-3 | build | `iv.patch` regenerated with `diff -u` from the pinned file | same one-line change; the frozen text applied only with fuzz 2 because the file has no trailing newline |
+| A-1 | after `CAL-a`, before `CAL-b` | **Abort count from the server, not the client:** an aborted read reaches the client as **ReadTimeout `0x1200`**, not ReadFailure — the coordinator's wait expires at the same 5 s deadline as the local abort (`CAL-a` k = 4: 5/5 `rt`, 5/5 `StorageProxy.java:2223` events logged). f = server-logged aborts / completions (`qc-events.txt` timestamps), and E(t) inflow = `rf` + `rt` (with ReadStage pending 0 at N = 32, `rt` = aborts) | frozen rule's `rf` would read 0.03–0.15 for k = 4; the rule's intent (aborted fraction) is kept |
+| D-4 | after `CAL-b4` | Debug-log extraction also reads `debug.log.*.tmp` (a roll cut short by the stop) and skips incomplete zips | `CAL-b4`'s server count was lost (k = 4 decided from the client: 375/375 `rt`/`rf`, no queueing) |
+| D-5 | after `T-3` | `threadcount.py` counts renders on **Native-Transport-Requests threads too** (a local read can run inline on the NTR thread, `Stage.maybeExecuteImmediately`; seen in T-3's dump) | R_Q of `T-1..3`, `C-1` counted ReadStage threads only (a lower bound) |
+| A-2 | after `C-2`, before its readings | Extra control **C1: k = 1** (CAL-b1: f = 0, ok median 1,125 ms ≥ 600 ms — the next k meeting the frozen k_c criteria, 4.4× under the deadline) ×3 at H0, mixed-outcome rule applies | the frozen control (k = 2) crossed the deadline under load (below) |
+| A-3 | after `C8-3`, before its readings | **Supplementary** control at the frozen O4 remedy: base, 8 GiB, k = 2, **N = 8**, 150 s ×3 (`CN8`) — declared before readings **not to change the frozen outcome mapping** | evidence for the retry design |
+| D-6 | series | No new run after 13:15 ET (stage-2 wall-clock cap), tighter than the design's 7 h | — |
+
+### 3.3 Calibration
+
+| Run | Build, heap | Readings | Decision |
+|---|---|---|---|
+| `CAL-r` | base, auto, idle 60 s | heap 31,744 MiB, direct 15,872 MiB | top budget step 31,744 MiB |
+| `CAL-a` | base, 4 GiB, 1 connection × 5 | median latency k = 1 **356 ms**, k = 2 **1,060 ms**, k = 3 **2,748 ms**, k = 4 **5,034 ms = abort** (5/5 `rt`, 5 events logged, message `… v = 0x<32,000,000 hex> ALLOW FILTERING`) | — |
+| `CAL-b1..4` | **iv**, 4 GiB, N = 32, 60 s | t = 10–60 s: k = 1 f = 0 (1,372 ok, median 1,125 ms); k = 2 f = 0 (429 ok, median 3,588 ms); k = 3 **f = 0.875** (281 of 321; 0.901 over the run); k = 4 **f = 1.0** (320 of 320 `rt`/`rf`; ReadStage pending 0) | **k_sel = 4** (smallest k with f ≥ 0.90), **k_c = 2** (largest k < k_sel with f ≤ 0.02 and median ≥ 600 ms) |
+| `CAL-c` | base, **2 GiB**, k_c, N = 32, 150 s | heap OOM at 16.8 s (dump: M 54 %, F 35 %, Q 8.5 % — the control load alone does not fit 2 GiB) | **H0 = 4 GiB** |
+
+### 3.4 Runs (all base unless marked iv; N = 32 unless marked; S = 16,000,000 B identical; shipped `conf/`)
+
+Columns: endpoint; time after full N (OOM) or hold length; client completions ok / `rt` / `rf` (plus 32 `io_error` when the
+daemon died); server-logged aborts (`StorageProxy.java:2223` events written to `debug.log*`; events still queued at a kill are
+lost); median ok latency (ms); max R_Q (concurrent renders in one 2 s sample); humongous regions after GC median / max; Pause
+Full count; owners.py on the dump (Q = QR + QL share of live ≥ 1 MiB arrays, frozen V5 test, next-largest owner).
+
+| Run | Arm (k, heap) | Endpoint | Time | ok / rt / rf | Aborts logged | ok median | max R_Q | U_h med/max | Full GC | Dump (V5) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| T-1 | T (4, 4 GiB) | **heap OOM** | 18.8 s | 0 / 45 / 18 | 20 | — | 9 | 163/249 | 7 | Q 56.5 %, YES; M next |
+| T-2 | T (4, 4 GiB) | **heap OOM** | 27.8 s | 0 / 45 / 19 | 13 | — | 27 | 141/242 | 5 | Q 77.4 %, YES |
+| T-3 | T (4, 4 GiB) | **heap OOM** | 27.4 s | 0 / 33 / 26 | 19 | — | 27 | 142/246 | 5 | Q 77.6 %, YES |
+| C-1 | C (2, 4 GiB) | **heap OOM** | 28.8 s | 0 / 75 / 9 | 6 | — | 22 | 204/245 | 16 | Q 73.3 %, YES |
+| C-2 | C (2, 4 GiB) | **heap OOM** | 25.2 s | 66 / 39 / 0 | 0 (lost) | 2,422 | 31 | 219/247 | 24 | Q 55.7 %, YES |
+| C-3 | C (2, 4 GiB) | **heap OOM** | 22.7 s | 32 / 70 / 1 | 4 | 3,280 | 30 | 208/242 | 17 | Q 55.1 %, YES |
+| I-1 | I **iv** (4, 4 GiB) | survived | hold 150 s | 0 / 539 / 95 | 666 | — | 0 | 111/164 | 0 | — |
+| I-2 | I **iv** (4, 4 GiB) | survived | hold 148 s | 0 / 856 / 72 | 960 | — | 0 | 93/166 | 0 | — |
+| I-3 | I **iv** (4, 4 GiB) | survived | hold 147 s | 0 / 854 / 74 | 960 | — | 0 | 115/168 | 0 | — |
+| T8-1 | T (4, **8 GiB**) | **heap OOM** | 61.9 s | 0 / 243 / 32 | 180 | — | 21 | 242/477 | 0 | Q 77.4 %, YES |
+| T8-2 | T (4, 8 GiB) | **heap OOM** | 49.8 s | 0 / 160 / 14 | 68 | — | 27 | 322/483 | 2 | Q 75.2 %, YES |
+| T8-3 | T (4, 8 GiB) | **heap OOM** | 48.9 s | 0 / 125 / 29 | 60 | — | 28 | 226/499 | 1 | Q 75.6 %, YES |
+| C8-1 | C (2, 8 GiB) | **heap OOM** | 44.0 s | 68 / 59 / 0 | 15 | 3,972 | 22 | 186/497 | 0 | Q 54.9 %, YES |
+| C8-2 | C (2, 8 GiB) | **heap OOM** | 113.0 s | 413 / 151 / 1 | 98 | 2,245 | 4 | 251/478 | 4 | Q 50.3 %, YES |
+| C8-3 | C (2, 8 GiB) | **heap OOM** | 123.4 s | 904 / 123 / 0 | 97 | 2,240 | 6 | 222/440 | 1 | not analysed |
+| C1x8-1 | C1 A-2 (1, 8 GiB) | **heap OOM** | 100.1 s | 2,209 / 90 / 2 | 47 | 579 | 4 | 212/485 | 0 | Q 40.8 %, NO (M 44.3 %) |
+| C1x8-2 | C1 A-2 (1, 8 GiB) | survived | hold 151 s | 3,339 / 101 / 2 | 93 | 728 | 0 | 223/435 | 1 | — |
+| C1x8-3 | C1 A-2 (1, 8 GiB) | survived | hold 151 s | 4,106 / 0 / 0 | 0 | 1,083 | 0 | 90/103 | 0 | — |
+| C1x8-4 | C1 A-2 (1, 8 GiB) | survived | hold 151 s | 5,335 / 0 / 0 | 0 | 698 | 0 | 91/101 | 0 | — |
+| C1x8-5 | C1 A-2 (1, 8 GiB) | survived | hold 151 s | 4,346 / 0 / 0 | 0 | 1,204 | 0 | 91/103 | 0 | — |
+| I8-1 | I **iv** (4, 8 GiB) | survived | hold 147 s | 0 / 838 / 90 | 960 | — | 0 | 202/342 | 0 | — |
+| I8-2 | I **iv** (4, 8 GiB) | survived | hold 147 s | 0 / 845 / 83 | 960 | — | 0 | 191/328 | 0 | — |
+| I8-3 | I **iv** (4, 8 GiB) | survived | hold 148 s | 0 / 862 / 66 | 960 | — | 0 | 196/330 | 0 | — |
+| T16-1 | T (4, **15,872 MiB**) | **heap OOM** | 182.5 s | 0 / 1,079 / 31 | 832 | — | 10 | 667/979 | 0 | no dump (design); backlog rule YES |
+| T31-1 | T (4, **31,744 MiB**) | **heap OOM** | 242.8 s | 0 / 1,431 / 34 | 747 | — | 13 | 1,663/1,893 | 0 | no dump (design); backlog rule YES |
+| T31-2 | T (4, 31,744 MiB) | **heap OOM** | 442.8 s | 0 / 2,716 / 23 | 2,137 | — | 13 | 1,644/1,863 | 0 | no dump (design); backlog rule YES (R_Q 9, worker in QCE layout, E 506) |
+| T31-3 | T (4, 31,744 MiB) | **heap OOM** | 423.7 s | 0 / 2,593 / 30 | 1,998 | — | 15 | 1,661/1,889 | 0 | no dump (design); backlog rule YES (R_Q 13, E 565) |
+| CN8-1 | A-3 (2, 8 GiB, **N = 8**) | survived | hold 151 s | 662 / 0 / 0 | 0 | 1,415 | 0 | 51/59 | 0 | — |
+| CN8-2 | A-3 (2, 8 GiB, N = 8) | survived | hold 151 s | 1,171 / 0 / 0 | 0 | 1,004 | 0 | 155/257 | 0 | — |
+| CN8-3 | A-3 (2, 8 GiB, N = 8) | survived | hold 151 s | 1,123 / 0 / 0 | 0 | 1,042 | 0 | 163/267 | 0 | — |
+
+Every OOM is `java.lang.OutOfMemoryError: Java heap space` followed by the shipped `kill -9`; no direct-memory OOM, no
+cgroup event (no container limit), no disk guard (`/mydata` ≥ 626 GiB free throughout). Monitor drains in the CN8 / C1 runs
+that survived: slow queue full in every drain with drops (max queued 398–750), so M was loaded in the controls as designed.
+
+### 3.5 Attribution (V5)
+
+- **OOM thread.** In all 9 dumps checked with 40 frames (T-1..3, T8-1..3, C-1, C8-1, C1x8-1) the OOM-initiating thread is a
+  read worker (`SEPWorker` → `StorageProxy$LocalReadRunnable.runMayThrow:2211` → `ReadCommand$QueryCancellationChecker.maybeCancel`)
+  inside **`QueryCancelledException.<init>` (`QueryCancelledException.java:26`)**, in `Hex.bytesToHex`, `String.format`
+  (`RowFilter$SimpleExpression.toString`) or the `StringBuilder` of `AbstractReadQuery.toCQLString`
+  ([`logs/dumps/oome-thread-frames.txt`](logs/dumps/oome-thread-frames.txt)). (CAL-c's 2 GiB control OOM'd in the appender
+  worker's `ThrowableProxyConverter`.)
+- **Holders, T at 4 GiB** (owners.py, share of live ≥ 1 MiB arrays): Q 56.5 / 77.4 / 77.6 % (QR 23–49 % = renders in progress:
+  `char[32,000,000]`, hex `String`s, values; QL 28–33 % = 40–62 live `QueryCancelledException`s, 27–30 of them in queued
+  `LoggingEvent`s); M 16–21 % (45–52 `FailedOperation`s); F 3–19 %. **At 8 GiB:** Q 75–77 %, now mostly **QL**
+  (50–74 %: 71–135 queued `LoggingEvent`s carrying a QCE, 2.3–4.1 GiB of 32 MB messages); M 13–16 %, F 8–11 %.
+- **Above 8 GiB (no dump, frozen rule):** T16-1 and T31-1..3 all meet it — in the last two thread samples before the OOM
+  R_Q ≥ 8 (T31-1 10, T31-2 9, T31-3 13) or the appender worker is laying out a `QueryCancelledException`
+  (`ThrowableProxyConverter`; T16-1, T31-1, T31-2), with E(t) = 248, 675, 506, 565 (≥ 100), and humongous-after-GC rose with E(t) (T16-1 median 667 of 992 regions; T31-1 median 1,663 of 1,984)
+  ([`logs/runs/large-heap-last-thread-samples.txt`](logs/runs/large-heap-last-thread-samples.txt)).
+- **Backlog numbers (Q_L).** Inflow A ≈ 6.0–6.1 aborts/s (32 per ≈ 5.3 s wave; I arms 960 per 150 s = 6.4/s). Worker output
+  from `wchar`: T16-1 846 events in 183 s (**4.6/s**), T31-1 779 in 243 s (**3.2/s**), T31-2 2,220 in 443 s (**5.0/s**),
+  T31-3 2,040 in 424 s (**4.8/s**), never above 6.1/s in any 10 s; so E grew by ≈ 1.1–2.8/s to 248 (T16-1) and 506–675 events
+  (≈ 16–21 GB; T31-1..3) until the heap ran out — the design's
+  "w < A" branch; the 1,024-event count cap was never reached. `debug.log*` written per run up to ≈ 26 GB (412 rolled
+  zips at 15,872 MiB).
+
+### 3.6 Controls (V2) — what happened
+
+The frozen control at k_c = 2 is not abort-free under this load: its reads take 2.2–4.0 s (median) with 32 concurrent scans,
+and a GC- or drain-induced slowdown pushes a wave past 5 s; the first aborts render (R_Q 22–31 in one sample), which slows
+and fills the heap further, and the control dies the same way as the test — **6/6 OOM (4 GiB 3/3, 8 GiB 3/3), 5 of 5
+analysed control dumps Q-attributed (Q 50–73 %)**. The A-2 control at k = 1 (median 0.6–1.2 s) is 4/5 at 8 GiB: its two
+first runs had waves of aborts (90 and 101 `rt`), one of which OOM'd with a full wave of 32 renders live (QR 40.0 %, M 44.3 %);
+runs 3–5 had no abort at all. The A-3 supplementary control (k = 2, N = 8) had no abort and survived 3/3 with the slow queue
+full in every drain. The CAL-b/I runs show the same load is harmless without the render: the iv build survives 6/6 with
+**every** read aborted (≈ 6.4/s), more aborts than any T run reached.
+
+### 3.7 Budget search
+
+T fails at every budget tried: 4 GiB 3/3, 8 GiB 3/3, 15,872 MiB 1/1, **31,744 MiB 3/3** — the node's own default heap
+(`cassandra-env.sh`). No budget step survived, so `RN` (run only at the first surviving heap) did not apply. Time to OOM grows
+with the heap (≈ 19–28 s, 49–62 s, 183 s, 243–443 s) as the backlog has more room to grow.
+
+### 3.8 Cleanup
+
+Cleanup 2026-11-24 15:01–15:15 ET (resumed session, lock re-acquired): no Java, client, sampler or driver process of the
+user on pc72 (`pgrep`), no `u16-*` user scope, ports 7000/7199/9042 free; linger was never enabled (D-2) and reads `no`.
+Deleted on pc72: the two run trees `/mydata/s4/u16/cassandra-base` (copy) and `cassandra-iv` (with their `data/`, `logs/`;
+the iv jar's sha256 is in §3.1 and the patch in `harness/`), `seed/` (`data.tar`), and every `debug.log*` (by the driver,
+after counting). Compressed (`gzip -1`) every run file > 1 MiB (`stdout.txt`, `system.log`, `gc.log*`, `completions.txt`).
+**Left on pc72:** `/mydata/s4/u16/` 272 MB — `runs/` (200 MB, per-run logs), `harness/`, `series.log`, `calib.txt`,
+`build.log`, and one representative heap dump `dumps/T-2.hprof.gz` (3.9 GB → 73 MB; T at 4 GiB, Q 77.4 %; the other dumps
+were read and deleted during the series, §2.6). `/mydata/s4/cassandra-base` (read only), `/mydata/s4/3b-B21`, `3b-R22`
+(other cases) untouched. `/mydata` 707 G free. Node lock released 15:15 ET.
 
 ## 4. Conclusion (stage 2)
 
-pending
+**Verdict: retry** (protocol status `candidate`: V1, V3–V7 met, **V2 not met**; frozen outcome row **O4**).
+
+**Reason.** The mechanism is shown at shipped defaults and deployment budgets: with 32 connections reading a partition that
+passes the 5 s deadline, each abort renders the whole 16 MB bound value as a 32 MB hex string on the read thread and hands it
+to the async debug appender, and the heap runs out at 4 GiB (3/3, renders in progress dominate), 8 GiB (3/3, queued 32 MB log
+events dominate), 15,872 MiB (1/1) and the node's default 31,744 MiB (3/3; the appender's single worker writes ≈ 3.2–5.0 events/s
+against ≈ 6 aborts/s; nothing bounds the queue in bytes). The one-line intervention (message without the command) removes
+it: 6/6 survive with every read aborted. But the frozen matched control — the same load with reads that finish slow but under
+the deadline — is not achievable at N = 32 with 16 MB values: its reads also cross the deadline under the load and then OOM by
+the same holder (6/6, H0 raised once per the frozen rule). Row O4 maps this to retry. The amendment control at k = 1 OOM'd
+1/5 (abort waves in 2/5); only the supplementary O4-remedy control (N = 8) stayed abort-free (0/3), and by its pre-reading
+declaration it does not change the frozen mapping.
+
+**V1–V7.**
+
+| | Requirement | Evidence | Met? |
+|---|---|---|---|
+| V1 | ≥ 3 runs reach the endpoint | T 3/3 at 4 GiB (T-1..3), 3/3 at 8 GiB (T8-1..3); also 15,872 MiB 1/1, 31,744 MiB 3/3 | yes |
+| V2 | matched control ≥ 3 runs, no endpoint | frozen C (k = 2): 3/3 OOM at 4 GiB, 3/3 at 8 GiB (after the one raise); A-2 C1 (k = 1): 1/5 OOM; A-3 CN8 (N = 8): 0/3 (supplementary) | **no** |
+| V3 | U measured independently of K | heap dumps (owners.py), `Thread.print` R_Q, appender backlog from `wchar` vs inflow, GC log humongous; K = `RequestsSize` (512 MB = 32 values), monitor queue counts | yes |
+| V4 | intervention removes the endpoint ≥ 3 runs | iv build 0/3 at 4 GiB and 0/3 at 8 GiB, 960 aborts per 150 s (≥ T's abort rate) | yes |
+| V5 | initiating failure + holder | OOM thread in `QueryCancelledException.<init>` in 6/6 T dumps; Q 56–78 % of live large arrays (6/6 YES); above 8 GiB the frozen thread/backlog rule (2/2) | yes |
+| V6 | default constraints | shipped `conf/`, no override on any command line; `concurrent_reads` 32, `read_request_timeout` 5 s, appender 1,024 / threshold 0, monitor 50 | yes |
+| V7 | acceptable budget | 4 GiB and 8 GiB (≥ 512 MiB), up to the node's automatic 31,744 MiB; direct 15,872 MiB as resolved; no container limit | yes |
+
+**Interpretation (if V2 is settled):** unprotected accumulation, a suspected implementation defect — an exception message
+built from user-supplied bound values with no cut (the trace path cuts at 1,000 chars, CASSANDRA-11719), queued by an appender
+bounded only in event count. JIRA prior art (§1): `new`.
+
+**What a better design should change (retry row).** Keep T and I as run here (they are decisive at 4 and 8 GiB) and freeze a
+control that stays abort-free at the same budget — e.g. the A-3 shape (base, k = 2, **N = 8**: 0/3 at 8 GiB, no abort, slow
+queue full), or N = 32 at k_c with a short value (S ≤ 64 KiB) so that any abort renders small — and test it ×3 at 4 GiB and
+8 GiB; or ask the owner to rule that the intervention arm (same load, same abort rate, no render) is the matched control here,
+since every failed control run failed through the claimed holder (5/5 analysed control dumps Q-attributed). The budget search
+is done (fails at the node default, 31,744 MiB); `RN` is not needed.
+
+**Limits.** R_Q in T-1..3 / C-1 counted ReadStage threads only (D-5); the k = 4 abort fraction in CAL-b4 is from the client
+(D-4); server-logged abort counts exclude events still queued at a kill; C8-3's dump was not analysed; pc72 instead of pc91
+(D-1).

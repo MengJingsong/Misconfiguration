@@ -1,0 +1,42 @@
+[07:27:57] == series start; D*=100 ms; cutoff 11:30:00
+[07:27:57] T1 A1 1024 100 T
+[07:29:11] [07:29:11] r23slow write delay = 0 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 0
+[07:29:11] C1 A1 1024 100 C
+[07:31:14] [07:31:14] r23slow write delay = 0 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 0
+[07:31:14] I1 A1 1024 100 T -Dcassandra.commitlog_max_outstanding_replay_count=64
+[07:34:27] [07:34:27] r23slow write delay = 0 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 0
+[07:34:27] N1 A1 1024 0 T
+[07:35:13] [07:35:13] r23slow write delay = 0 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 0
+[07:35:15] mk-A2
+[07:37:12] [07:37:12] == RESULT mk-A2 G0=pass
+[07:37:12] T2 A2 1024 100 T
+[07:38:29] [07:38:29] r23slow write delay = 0 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 0
+[07:38:29] C2 A2 1024 100 C
+[07:40:32] [07:40:32] r23slow write delay = 0 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 0
+[07:40:32] I2 A2 1024 100 T -Dcassandra.commitlog_max_outstanding_replay_count=64
+[07:43:59] [07:43:59] r23slow write delay = 0 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 0
+[07:44:00] mk-A3
+[07:45:56] [07:45:56] == RESULT mk-A3 G0=pass
+[07:45:56] T3 A3 1024 100 T
+[07:46:17] [07:46:17] r23slow write delay = 0 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 0
+[07:46:17] C3 A3 1024 100 C
+[07:48:13] [07:48:13] r23slow write delay = 0 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 0
+[07:48:13] I3 A3 1024 100 T -Dcassandra.commitlog_max_outstanding_replay_count=64
+[07:48:32] [07:48:32] r23slow write delay = 0 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 0
+[07:48:32] U1536 A1 1536 100 T
+[07:48:47] [07:48:47] r23slow write delay = 0 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 0
+[07:48:47] U2048a A2 2048 100 T
+[07:49:02] [07:49:02] r23slow write delay = 0 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 0
+[07:49:02] U2048b A3 2048 100 T
+[07:51:44] [07:51:44] r23slow write delay = 0 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 0
+[07:51:44] STOP: STOP file before U3072
+[07:52:22] == rerun start (amendment A2)
+[07:52:22] T3 A3 1024 100 T
+[07:53:51] [07:53:51] == RESULT T3 img=A3 heap=1024 D=100 PIT=T opts='' outcome=died
+[07:53:51] I3 A3 1024 100 T -Dcassandra.commitlog_max_outstanding_replay_count=64
+[07:57:20] [07:57:20] == RESULT I3 img=A3 heap=1024 D=100 PIT=T opts='-Dcassandra.commitlog_max_outstanding_replay_count=64' outcome=started
+[07:57:20] U1536 A1 1536 100 T
+[08:00:25] [08:00:25] == RESULT U1536 img=A1 heap=1536 D=100 PIT=T opts='' outcome=started
+[08:00:25] U1280 A2 1280 100 T
+[08:01:56] [08:01:56] == RESULT U1280 img=A2 heap=1280 D=100 PIT=T opts='' outcome=died
+[08:01:56] == rerun end

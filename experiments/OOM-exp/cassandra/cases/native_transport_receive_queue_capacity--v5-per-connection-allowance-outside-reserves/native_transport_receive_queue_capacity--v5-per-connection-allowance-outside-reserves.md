@@ -7,12 +7,18 @@
 | Phase-1 case file | [`native_transport_max_request_data_in_flight_per_ip-setNativeTransportMaxRequestDataInFlightPerIpInBytes-maxRequestDataInFlightInBytes--autonomous`](../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/native_transport_max_request_data_in_flight_per_ip-setNativeTransportMaxRequestDataInFlightPerIpInBytes-maxRequestDataInFlightInBytes--autonomous.md) (OC-269); OC-50's: [`native_transport_max_concurrent_connections-channelActive-limit--guided`](../../../../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/cases/native_transport_max_concurrent_connections-channelActive-limit--guided.md) |
 | System / pinned source | Cassandra 5.0.9 (`systems/cassandra/source/`, tag `cassandra-5.0.9`); node build `pc72:/mydata/s4/cassandra-base` |
 | Stage 1 (design) | OOM agent, stage 1 (batch 2026-11-24 workflow subagent), 2026-11-24 05:30–06:10 EST |
-| Stage 2 (verify) | pending (a fresh OOM-agent session) |
-| Verdict | `pending` |
+| Stage 2 (verify) | fresh OOM-agent session (batch 2026-11-24 workflow subagent, attempt 3), 2026-11-24 20:10–21:30 EST, node `pc91`; attempts 1–2 earlier that day were interrupted (§3.0) |
+| Verdict | **true positive** — `verified-OOM · deployment` (convergence by multiplicity, unprotected configuration: connection limits −1) |
 
-**Summary:** *(stage 1; the conclusion is filled by stage 2)*
-- **Conclusion:** pending.
-- **Root cause (claimed):** each native-protocol v5 connection admits request bytes against its own exclusive
+**Summary:**
+- **Conclusion:** heap OOM (`java.lang.OutOfMemoryError: Java heap space`) **3/3 at 2 GiB** (46–94 s) with every constraint at
+  its shipped default: 3,500 v5 connections, each keeping 7 requests (≈ 0.88 MB) in flight, never refused, never
+  charged to a reserve (global reserve in use ≤ 44 B). The dumps hold ≈ 16,030 decoded 125,000-byte values = 94 % of the
+  heap (9.3 × the heap/10 global reserve), ≈ 4.6 requests per connection (inside each connection's 1 MiB).
+  1,000 connections 0/3; the same 3,500 attempted with `native_transport_max_concurrent_connections: 1000` 0/3 (useful
+  work continues); every byte charged to the reserves (queue capacity 0 B) holds 427 requests. Larger budgets also fail:
+  4 GiB / 7,000 connections 3/3, **8 GiB / 14,000 connections 3/3** (largest tested).
+- **Root cause:** each native-protocol v5 connection admits request bytes against its own exclusive
   `native_transport_receive_queue_capacity` (1 MiB) before the per-IP (heap/40) or global (heap/10) reserve is charged at
   all, and the number of connections ships unlimited (−1); so N well-behaved connections, each keeping < 1 MiB of
   requests in flight, hold N MiB of decoded requests on the heap while every reserve counter reads 0, and only the heap
@@ -380,8 +386,141 @@ freeze: dated, with reason.
 
 ## 3. Runs (stage 2)
 
-pending
+*Filled 2026-11-24 ≈ 21:30 EST by a fresh OOM-agent session (attempt 3), which did not write the design. Freeze hash
+checked before any run: the §1–§2 sha256 recomputed with the command above is
+`a2aa739298b0cc277749840e31602b0995ba559443fb876852f5a21fc97fb15f` = the frozen value. Node lock
+`pc91:/mydata/s4/NODE-LOCK` held 20:11 EST → end of run; released at the end.*
+
+### 3.0 Deviations and interruptions (dated)
+
+| # | Date (EST) | Deviation | Effect |
+|---|---|---|---|
+| D1 | 2026-11-24 ≈ 12:06–16:25 | **Attempt 1 interrupted (owner stop ≈ 16:25).** A first stage-2 session built the harness in `harness/` (files dated 12:06–16:09) and ran the whole run list on `pc82` (not the design's `pc72`): CAL, T2 ×3, C2 ×3, I2 ×3, X2, I2b, T4 ×3 (invalid: scope `max` > 0, redone as T4-r1b…r3b at +4 GiB headroom), T8-r1, T8-r2; it was stopped during T8-r3, before §3 was written. | **Not used as evidence**; every run was repeated from a clean start on `pc91` (below). For the record only, its summaries agree with this attempt (T2 OOM 3/3 at 28–152 s, C2 0/3, I2 0/3 with 2,500 refused, X2 / I2b no OOM, T4 OOM 3/3 valid, T8 OOM 2/2 with scope `max` > 0). Its raw data (≈ 49 GB incl. 10 hprofs) remain at `pc82:/mydata/s4/b27/`: not touched by this session; left for the owner/filer to delete. |
+| D2 | 2026-11-24 ≈ 18:03 | **Attempt 2 interrupted (API usage limit ≈ 18:03).** | No trace on `pc91` (no `b27` folder, no lock, no Java process at 20:11) and no change to the case file; nothing reused. |
+| D3 | 2026-11-24 20:10 | **Node `pc91`** (coordinator's assignment) instead of the design's `pc72`: same class and site (CloudLab UMass `jason92-326665`, x86_64, 125 GiB, Ubuntu 22.04, kernel 5.15.0-203, cgroup v2, OpenJDK 11.0.33, `/mydata/s4/cassandra-base` = the 5.0.9 build copied from `pc96`); 32 cores (Xeon E5-2667 v2) instead of 40. | Environment only. Victim and clients on `pc91`, one client IP (as designed). Nothing else ran on `pc91` (other cases' folders `3b-B9`, `3b-C10`, `3b-S2`, `b26`, `r23` idle, not touched). |
+| D4 | 2026-11-24 (attempt 1, before any reading; kept) | `NativeFlood` connects on `--connect-threads 64` threads (dated amendment in its header), **same value in every arm**, because a refused connect (I2) costs `SimpleClient`'s 10-s timeout. | Client behaviour only; matched across arms. |
+| D5 | 2026-11-24 20:15, before the T4/T8 readings of this attempt | **Containment headroom** (not a budget, §2.3): T2/C2/I2/X2/I2b at the design's H + D + 6 GiB (10 GiB); T4 and T8 started at the "+ 4 GiB" re-run headroom and above: T4 at 16 GiB (H + D + 10), T8 at 30 GiB (H + D + 18), because in attempt 1 the OOM dump's page cache filled the 12-GiB T4 and the 22-GiB T8 scopes (`memory.events max` > 0 → invalid). | No container limit is part of the claim. Every run of this attempt: scope `oom_kill` 0 and `max` 0 → all valid, no re-runs. Scope peaks: 6.4–6.9 GiB (T2), 14.2–14.5 GiB (T4), 24.3–24.5 GiB (T8). |
+| D6 | run time | At H = 2 GiB the T2 live histogram at *t* = 20 s did not complete (jcmd in GC thrash for 65 s, empty file; also T4-r3 and the second T4/T8 histogram). JMX polls stall in the same thrash, so NTR `PendingTasks` is under-read in T arms. | U for T arms comes from the **OOM hprof** (`hprof-histo.py`) and, where they completed, the 20–21-s histograms of T4/T8. Per-connection QM in T arms = hprof QM / 3,500 (7,000; 14,000) connections, all established (`ss`) at the endpoint. |
+| D7 | harness | `b27-run.py`: host label in the "after stop" note now prints the hostname (cosmetic); new driver `harness/run-pc91.sh` (the whole run list in one detached driver, PID kept in `pc91:/mydata/s4/DRIVER-<agent>.pid`). `run-2g-set.sh`, `run-search-set.sh`, `run-search-redo.sh` are attempt 1's drivers (kept, not used here). | none on the mechanism |
+
+### 3.1 Environment and configuration readback
+
+- Node `pc91` (`node0.jason92-326665`), 32 × Xeon E5-2667 v2, 125 GiB, 8 GiB swap (0 for the scope), cgroup v2, Ubuntu
+  22.04, kernel 5.15.0-203-generic, OpenJDK 11.0.33, G1 (shipped `jvm11-server.options`). Run base
+  `pc91:/mydata/s4/b27/` (`cassandra/` = `cp -a /mydata/s4/cassandra-base`, never rebuilt; `classes/` = `Jmx`,
+  `NativeFlood` compiled per §2.5). Load 0.00 and no Java process before the first run.
+- JVM readback (every run, `/proc/<pid>/cmdline`): `-Xms<H> -Xmx<H> -XX:MaxDirectMemorySize=<D> -XX:+UseG1GC
+  -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=<logs/run> -XX:OnOutOfMemoryError=kill -9 %p`, jamm agent only (no
+  Byteman); scope `memory.swap.max` 0.
+- Resolved from `system.log` (every run; test/control/search arms): `native_transport_receive_queue_capacity` 1MiB;
+  `native_transport_max_request_data_in_flight` / `_per_ip` null (→ heap/10, heap/40); `native_transport_max_concurrent_connections`
+  / `_per_ip` −1; `native_transport_throw_on_overload` false; `native_transport_max_threads` 128; `native_transport_timeout`
+  12s; `native_transport_queue_max_item_age_threshold` 1.797E308; `native_transport_idle_timeout` 0ms;
+  `native_transport_rate_limiting_enabled` false; `native_transport_max_message_size` null (derived); `read_request_timeout`
+  5000ms; `concurrent_reads` 32; `allow_filtering_enabled` true. `make-node-yaml.sh`: "harness adds no §2.3 key" in every
+  T/C/X arm; I2 adds exactly `native_transport_max_concurrent_connections: 1000`, I2b exactly
+  `native_transport_receive_queue_capacity: 0B` (accepted by the node).
+- **Data set** (20:12–20:13 EST): `cqlsh COPY` 200,000 rows in 2.6 s, `count(*)` = 200,000, flush, drain →
+  `data.pristine-200000` (5.7 MB); restored before every run.
+- **Calibration** (CAL, H = 2 GiB, *N* = 500, *W* = 7, 60 s; not a reading): (a) NTR `PendingTasks` 3,372 at 30–60 s ≥
+  2,450 ✓; (b) `RequestsSize` 0 at every poll, no "breached limit" line ✓; (c) connected 500, refused 0 ✓; live QM 3,500 =
+  7 / connection. → *R* = 200,000 and *W* = 7 kept; no amendment.
+- Dose ladder: T2-r1 reached OOM → no escalation; *N* = 3,500 for all T2 and I2 runs.
+
+### 3.2 Runs (all from clean starts, 2026-11-24 20:16–21:23 EST; `logs/<run>/` holds summary, run.json, polls, histogram heads, hprof histogram, OOM excerpt)
+
+*K* = max global reserve in use (`Client.RequestsSize`, B). QM = live `QueryMessage`. U(D1) = byte[125000] in the OOM
+dump (or live QM × *M* from histograms). GC = stop-the-world fraction over the last 60 s before the endpoint.
+
+| Run | *H* / *D* | *N* (conn.) | Endpoint (t from first client start) | QM / connection | U(D1) | *K* | Other readings |
+|---|---|---|---|---|---|---|---|
+| T2-r1 | 2 / 2 GiB | 3,500 / 3,500 | **heap OOM 85.9 s** | 16,023 / 3,500 = **4.58** | 16,028 × 125,000 = **2.004 GB = 94.0 %** of 2.132 GB shallow | 44 | GC 0.90; refused 0; `breached` 0; warned/ovl_bytes 0; discarded 0; direct ≤ 0.193 GB |
+| T2-r2 | 2 / 2 | 3,500 | **heap OOM 46.4 s** | 16,041 → **4.58** | 16,042 × 125,000 = 2.006 GB = 94.0 % | 0 | GC 0.66; same zeros |
+| T2-r3 | 2 / 2 | 3,500 | **heap OOM 94.3 s** | 16,008 → **4.57** | 16,028 → 2.004 GB = 93.7 % | 0 | GC 0.98; same zeros |
+| C2-r1 | 2 / 2 | 1,000 | none in 240 s | 6,902–7,018 → ≤ 7.02 | live total median 1.03 GB (max 1.73) | 0 | GC 0.38; ok 7,561 (31.5/s); 44,785 "timed out before it could start", 88,578 read timeouts; refused 0 |
+| C2-r2 | 2 / 2 | 1,000 | none | ≤ 7.32 | median 0.99 (max 1.54) | 0 | GC 0.41; ok 30.3/s |
+| C2-r3 | 2 / 2 | 1,000 | none | ≤ 7.05 | median 0.99 (max 1.84) | 0 | GC 0.38; ok 28.7/s |
+| I2-r1 | 2 / 2 | 3,500 att. / **1,000** | none | ≤ 7.23 | median 1.00 (max 1.64) | 0 | refused **2,500**; "Exceeded maximum native connection limit of 1000" ×2; ok 28.2/s; GC 0.42 |
+| I2-r2 | 2 / 2 | 3,500 / 1,000 | none | ≤ 7.62 | median 0.99 (max 1.69) | 22 | refused 2,500; ok 19.7/s; GC 0.39 |
+| I2-r3 | 2 / 2 | 3,500 / 1,000 | none | ≤ 7.19 | median 0.99 (max 1.35) | 0 | refused 2,500; ok 19.6/s; GC 0.41; `ss` peak 1,072 (sockets accepted then closed by the limit handler; `connectedNativeClients` max 1,000) |
+| X2-r1 | 2 / 2 | 3,500, *W* = 0 | none | 0 | live heap +15.5 MB over idle (**4.4 KB / connection**) | 0 | no requests; GC 0.00 |
+| I2b-r1 | 2 / 2 | 3,500, queue capacity 0 B, `THROW_ON_OVERLOAD` | none | ≤ 0.12 (QM 422–427) | 427 × *M* = 53 MB | **53,656,746 ≈ E** (heap/40 = 53,687,091) | ovl_bytes 6,382,396 = `RequestDiscarded`; 29 "breached limit" lines; ok 44.1/s |
+| T4-r1 | 4 / 2 | 7,000 | **heap OOM 35.0 s** | 32,839 / 7,000 = **4.69** (21-s histogram 32,844 → 4.69) | 4.108 GB = 95.9 % of 4.283 GB | 0 | GC 0.20; zeros as T2; direct ≤ 0.71 GB |
+| T4-r2 | 4 / 2 | 7,000 | **heap OOM 67.8 s** | 32,839 → 4.69 | 4.110 GB = 95.9 % | 0 | GC 0.68 |
+| T4-r3 | 4 / 2 | 7,000 | **heap OOM 96.6 s** | 32,735 → 4.68 | 4.102 GB = 95.6 % | 0 | GC 0.88 |
+| T8-r1 | 8 / 4 | 14,000 | **heap OOM 82.0 s** | 66,099 / 14,000 = **4.72** (21 s: 54,720 → 3.91) | 8.274 GB = 96.3 % of 8.591 GB | 66 | GC 0.27; 76,605 timed out before start; direct ≤ 1.54 GB; ovl_bytes 0, breached 0 |
+| T8-r2 | 8 / 4 | 14,000 | **heap OOM 64.2 s** | 66,091 → 4.72 | 8.271 GB = 96.3 % | 264 | GC 0.24; direct ≤ 1.61 GB |
+| T8-r3 | 8 / 4 | 14,000 | **heap OOM 85.9 s** | 66,072 → 4.72 | 8.266 GB = 96.2 % | 22 | GC 0.36; direct ≤ 1.57 GB |
+
+**Initiating failure (V5).** Every T run: `stdout.txt` "java.lang.OutOfMemoryError: Java heap space", "Dumping heap to
+…hprof", then the shipped `OnOutOfMemoryError="kill -9 %p"`; the JVM is killed before Cassandra logs the error, so no
+thread/stack is printed (as in B10; T8 also shows `epollEventLoopGroup` "Retried waiting for GCLocker too often
+allocating 92–123 k words" just before). The hprof histogram supplies the holder: `byte[125000]` 93.7–96.3 % of the
+shallow heap in all nine dumps, one per `QueryMessage` / `QueryOptions$DefaultQueryOptions` / `Envelope` /
+`Dispatcher$RequestProcessor` (counts within 0.4 %; T8 `Envelope` +2–5 %).
+
+**Predictions (§2.7).**
+
+| # | Result |
+|---|---|
+| P1 | ✓ *K* ≤ 264 B (≤ 1 × *M*) in T2, C2, X2, T4, T8 (0 in 11 of 16 runs); "breached limit" 0; warned 0; ovl_bytes 0; `RequestDiscarded` +0; refused 0 |
+| P2 | ✓ QM / connection ≤ 7.62 in C2/I2 histograms and 4.57–4.72 at the OOM in T2/T4/T8 (≤ 8 everywhere) |
+| P3 | ✓ in part: QM at the OOM 16,008–16,041 ≥ 14,000; U(D1)/G = 2.004 GB / 214.7 MB = **9.3** ≥ 8; ✗ NTR `PendingTasks` max read 8,371–9,828 < 12,250 (JMX polls stalled in the GC thrash, D6; the dumps hold ≈ 16,000 queued `RequestProcessor`s) |
+| P4 | ✓ heap OOM 3/3 within 180 s (46–94 s); scope `oom_kill` 0, `max` 0 |
+| P5 | ✓ `byte[125000]` 93.7–94.0 % of the shallow heap; one per QM / RequestProcessor (within 0.1 %) |
+| P6 | ✓ in part: QM plateau 6,902–7,324 (7,000 ± 5 %); no OOM 0/3; GC 0.38–0.41 < 0.9; live heap median 0.99–1.03 GB (46–48 % of 2.15 GB) ✓, but single histograms reached 1.54–1.84 GB (C2-r3 at 181 s: 1.55 M `BTreeRow`/`ArrayCell`/iterator objects of in-progress filtering reads, D5's transient read path) ✗ against "≤ 1.35 GB" |
+| P7 | ✓ in part: `connectedNativeClients` ≤ 1,000; refused 2,500 each; no OOM 0/3; ok/s 28.2 / 19.7 / 19.6 ≥ 0.5 × C2's mean 30.2; ✗ QM max 7,189–7,621 slightly above 7,128 (still ≤ 8 per connection, the one-re-send overlap of §2.1 step 2) |
+| P8 | ✓ +15.5 MB over idle (4.4 KB / connection) ≤ 0.2 GB; no OOM |
+| P9 | ✓ QM ≤ 427 ≤ 557; ovl_bytes 6,382,396 > 0; no OOM; the per-IP reserve full (*K* = E) |
+| P10 | ✓ T4 heap OOM 3/3 (QM 32.7–32.9 k ≥ (H − 0.3 GB)/*M* = 31.9 k); T8 heap OOM 3/3 (QM 66.1 k = 99.7 % of (H − 0.3 GB)/*M* = 66.3 k: the baseline is below the assumed 0.3 GB) |
+| P11 | ✓ direct ≤ 0.193 / 0.724 / 1.610 GB vs *N* × 136 KiB + 0.1 GB = 0.59 / 1.08 / 2.05 GB, and < 0.5 × U(D1) |
+
+**Stopping budget.** 17 runs + CAL in 67 min of load; no invalid run, no repeat, no escalation after an OOM; T8 run because
+T4 reached OOM. Wall time of this attempt ≈ 1 h 20 min.
+
+**Clean-up (21:23–21:27 EST).** After each run the driver stopped clients and node and checked none remained; at the end
+no `CassandraDaemon`, `NativeFlood`, `jcmd`, driver or `oom-b27-*` scope on `pc91`. Deleted: 9 hprofs (52 GB),
+`node/data`, `data.pristine-200000`, the rows CSV, the `cassandra/` copy. Kept: `pc91:/mydata/s4/b27/{harness,classes,
+logs}` (508 MB; `debug.log`, `gc.log*`, `system.log` gzipped). Driver PID file removed; node lock released.
 
 ## 4. Conclusion (stage 2)
 
-pending
+**Verdict: true positive.** Status `verified-OOM · deployment` — convergence by multiplicity, **unprotected
+configuration** (the aggregate count control `native_transport_max_concurrent_connections` / `_per_ip` ships −1).
+Interpretation: configuration-sizing gap (a fixed 1 MiB exclusive allowance per connection, not derived from the heap,
+times an unlimited connection count), not an implementation defect. Largest failing budget tested: **heap 8 GiB /
+direct 4 GiB, 3/3** (2 GiB 3/3, 4 GiB 3/3); the search stopped there (design's top), not at a boundary.
+
+**Reason.** On Cassandra 5.0.9 with every §2.3 constraint at its shipped default and a 2 GiB heap, 3,500 protocol-v5
+connections that each keep 7 filtering reads (125 KB bound value) in flight drive the node to `java.lang.OutOfMemoryError:
+Java heap space` in 3/3 runs (46–94 s). At the OOM each connection holds ≈ 4.6 decoded requests (≈ 0.57 MB, inside its own
+1 MiB `native_transport_receive_queue_capacity`), so `acquireCapacity` admits every request on the exclusive queue and
+never charges the global (heap/10) or per-IP (heap/40) reserve: the global reserve in use reads ≤ 44 B while the dumps
+hold 2.0 GB of decoded values (94 % of the heap, 9.3 × heap/10), no request is refused, and no "bytes in flight" warning is
+sent. The convergence shape is attributed by its matched arms: 1,000 connections (same window, payload, data and client)
+plateau at ≈ 7,000 requests and survive 0/3; the same 3,500 attempted connections with the shipped-disabled connection
+limit set to 1,000 survive 0/3 with useful work at 65–93 % of the control's rate; 3,500 idle connections cost 4.4 KB each
+(not the holder); and with the allowance set to 0 B (every byte charged to the reserves) the per-IP reserve fills at
+heap/40 and only 427 requests stay resident. The same shape OOMs at 4 GiB / 7,000 connections and 8 GiB / 14,000
+connections (3/3 each; `byte[125000]` 96 % of the heap; *K* ≤ 264 B), so the endpoint follows heap / (connections × 1
+MiB allowance × the client's window share), not a fixed budget.
+
+| | Requirement | Evidence | Met |
+|---|---|---|---|
+| V1 | ≥ 3 runs reach the endpoint | T2-r1..r3: heap OOM 3/3 at 2 GiB | yes |
+| V2 | matched control does not | C2-r1..r3 (*N* = 1,000): 0/3 in 240 s, GC < 0.42 | yes |
+| V3 | U independent of K | U: hprof `byte[125000]` / QM counts and live histograms; K: `Client.RequestsSize` (≤ 44 B) | yes |
+| V4 | intervention removes the endpoint ≥ 3 runs | I2-r1..r3 (`native_transport_max_concurrent_connections: 1000`): 0/3, 2,500 refused, ok/s ≥ 0.5 × C2 | yes |
+| V5 | initiating failure + holder | `OutOfMemoryError: Java heap space` + 9 hprofs: `byte[125000]` 93.7–96.3 % of the heap, one per queued `QueryMessage` / `RequestProcessor` (thread not printed: shipped `kill -9` first) | yes |
+| V6 | default constraints | every §2.3 constraint at default (readback §3.1); the only constraint changes are in I2 / I2b | yes |
+| V7 | acceptable budget | 2 GiB heap / 2 GiB direct (standing rule; ideal); also 4 / 8 GiB | yes |
+
+**Limits.** Clients ran on the victim node from one IP (recorded in §2.5; the per-IP reserve is never charged, so one or
+many client IPs give the same accounting). The per-connection `queueSize` is not exposed; "within Q" rests on the client
+window (≤ 7 + 1 in flight) and on the dumps (≤ 4.72 per connection at the OOM, ≤ 7.62 in the C2/I2 histograms). The OOM
+thread is not printed (shipped `OnOutOfMemoryError=kill -9`). C2's margin is smaller than §2.4 predicted at its transient
+peaks (single histograms 1.54–1.84 GB, read-path objects), though its median live heap is 46–48 % of the heap and it
+never reached the endpoint. The slow request (filtering read over a 200,000-row partition) only sets how long requests
+stay queued; any workload whose service rate is below the arrival rate of *N* connections holds the same bytes.
+Relation: B10 is the refused path of the same holder; B27 keeps every connection inside its contract (no refusal, no
+drift), so the two mechanisms are distinct.

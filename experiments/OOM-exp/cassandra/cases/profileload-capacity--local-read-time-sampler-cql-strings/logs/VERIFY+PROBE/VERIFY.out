@@ -1,0 +1,73 @@
+[2026-11-24 11:56:15 EST] started VERIFY pid 575945 cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/b26-VERIFY-1795539374.scope
+[2026-11-24 11:56:21 EST] ready VERIFY
+-XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:MaxGCPauseMillis=300 -Xms8G -Xmx8G -XX:MaxDirectMemorySize=15872M -XX:HeapDumpPath=/mydata/s4/b26/runs/VERIFY/cassandra-1795539374-pid575945.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+[2026-11-24 11:56:21 EST] (a)
+ONE shape=S16 table=t1 pk=0 in=2000 rows=10 ms=200 approxRequestBytes=8008004
+ONE shape=S30 table=t1 pk=0 in=3750 rows=10 ms=232 approxRequestBytes=15015004
+[2026-11-24 11:56:28 EST] (b)
+nodetool: Capacity (-s) cannot exceed 1024.
+See 'nodetool help' or 'nodetool help <command>'.
+[2026-11-24 11:56:29 EST] (c) S16 nodetool heap default
+ONE shape=S16 table=t1 pk=0 in=2000 rows=10 ms=221 approxRequestBytes=8008004
+nodetool exit 0
+bytes=32016203
+25	Longest read query times:
+16008087	   Query                                                                                                                                                                                                
+16008087	   SELECT v FROM b26.t1 WHERE pk = 0 AND ck IN (0x00135bf9aac6846d13cabcbe4e8b303e3eff15946353e17b72c4b49c3fabe0dff2ebd94afda7558621a7738412c3f7c73b19392b3c7f2a79fe677036e499d162cd84ee28371733ead7b257
+0	
+[2026-11-24 11:56:36 EST] (c) S30 nodetool heap default
+ONE shape=S30 table=t1 pk=0 in=3750 rows=10 ms=337 approxRequestBytes=15015004
+nodetool exit 2
+bytes=0
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:276)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+
+[2026-11-24 11:56:43 EST] (c) S30 nodetool heap 1g
+ONE shape=S30 table=t1 pk=0 in=3750 rows=10 ms=274 approxRequestBytes=15015004
+nodetool exit 0
+bytes=60030203
+25	Longest read query times:
+30015087	   Query                                                                                                                                                                                                
+30015087	   SELECT v FROM b26.t1 WHERE pk = 0 AND ck IN (0x0002dc45827f57eb2e55bfd168b4f5ceb701a9fd4f614bfca21a6b2f0858ec411f9b1fa778ed8efb5bde194377a05b8d91097b08f018c9b8700972994c0d5b4559ccfc52769f506f02456b
+0	
+[2026-11-24 11:56:50 EST] (d) probe
+SUMMARY shape=S16 tables=t1 c=1 secs=10 ok=306 err=0 reads_s=30.6 p50=31 p99=52 max=68 errs={} lastErr=
+SUMMARY shape=S16 tables=t1 c=4 secs=30 ok=4107 err=0 reads_s=136.9 p50=28 p99=49 max=91 errs={} lastErr=
+SUMMARY shape=S30 tables=t1 c=4 secs=30 ok=2097 err=0 reads_s=69.9 p50=55 p99=91 max=148 errs={} lastErr=
+SUMMARY shape=S30 tables=t1 c=8 secs=30 ok=3267 err=0 reads_s=108.9 p50=70 p99=126 max=289 errs={} lastErr=
+[2026-11-24 11:58:55 EST] (d) S16 c=4 with sampling (LOCAL_READ_TIME, 20 s)
+SUMMARY shape=S16 tables=t1 c=4 secs=30 ok=2587 err=0 reads_s=86.2 p50=27 p99=164 max=310 errs={} lastErr=
+S 1,4,39,,39,85,160,160,
+S 2,4,84,,45,88,110,110,
+S 3,4,126,,42,84,140,140,
+S 4,4,171,,45,84,120,120,
+S 5,4,208,,37,101,184,184,
+S 6,4,245,,37,102,174,174,
+S 7,4,280,,35,107,168,168,
+S 8,4,319,,39,97,183,183,
+S 9,4,357,,38,94,164,164,
+S 10,4,392,,35,102,169,169,
+S 11,4,429,,37,104,188,188,
+S 12,4,470,,41,92,176,176,
+S 13,4,508,,38,95,150,150,
+S 14,4,548,,40,90,162,162,
+S 15,4,579,,31,101,310,310,
+S 16,4,619,,40,94,158,158,
+S 17,4,655,,36,109,177,177,
+S 18,4,804,,149,25,65,134,
+S 19,4,934,,130,28,60,60,
+S 20,4,1090,,156,25,37,40,
+S 21,4,1240,,150,25,48,50,
+S 22,4,1384,,144,25,71,71,
+S 23,4,1533,,149,26,57,58,
+S 24,4,1667,,134,25,124,124,
+S 25,4,1824,,157,25,32,40,
+S 26,4,1979,,155,26,32,34,
+S 27,4,2131,,152,25,50,54,
+S 28,4,2282,,151,24,59,65,
+S 29,4,2430,,148,25,44,47,
+S 30,4,2583,,153,25,50,52,
+nodetool exit 2 bytes=0
+slow-op lines: 0  cancelled: 0
+[2026-11-24 11:59:42 EST] stopped VERIFY
+VERIFY done

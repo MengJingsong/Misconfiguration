@@ -1,0 +1,11 @@
+--- a/src/java/org/apache/cassandra/exceptions/QueryCancelledException.java
++++ b/src/java/org/apache/cassandra/exceptions/QueryCancelledException.java
+@@ -23,6 +23,6 @@
+ {
+     public QueryCancelledException(ReadCommand command)
+     {
+-        super("Query cancelled for taking too long: " + command.toCQLString());
++        super("Query cancelled for taking too long: " + command.metadata().keyspace + '.' + command.metadata().name);
+     }
+ }
+\ No newline at end of file

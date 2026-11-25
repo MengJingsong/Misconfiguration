@@ -1,0 +1,35 @@
+[07:23:47] == restore K100 img=A1 heap=1024M D=100ms PIT=T opts='' arch=x86_64; /mydata free  704G
+[07:23:47] r23slow write delay = 0 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 0
+[07:23:47] refilled from img/A1: data 139 MiB; commitlog 1 files; archive 6 files 170 MiB
+[07:23:47] table restored from snapshot: 4 sstables (14 MiB Data.db)
+[07:23:47] commitlog_archiving.properties: archive_command=/bin/ln %path /mydata/s4/r23/archive/%name restore_command=/bin/cp -f %from %to restore_directories=/mydata/s4/r23/archive restore_point_in_time=2026:11:24 14:23:25.100 snapshot_commitlog_position= precision=MICROSECONDS 
+[07:23:49] r23slow write delay = 100 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 100
+[07:24:00] start: pid=520466 cg=/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/r23-K100-1795530229.scope max=5368709120 swap.max=0 heap=1024M opts=''
+[07:24:00] jvm: -XX:+UseG1GC -Xms1024M -Xmx1024M -XX:MaxDirectMemorySize=15872M 
+[07:24:07] Replaying seen (T_r) at +7s after JVM start
+[07:24:23] histogram +5s: total  live; Mutation n= ArrayCell n= BufferCell n= byte[]=
+[07:24:33] histogram +15s: total  live; Mutation n= ArrayCell n= BufferCell n= byte[]=
+[07:24:45] outcome=died after 45s from JVM start (38s from T_r)
+INFO  [main] 2026-11-24T14:24:07,779 CommitLog.java:206 - Replaying /mydata/s4/r23/cassandra/bin/../data/commitlog/CommitLog-7-1795530104523.log, /mydata/s4/r23/cassandra/bin/../data/commitlog/CommitLog-7-1795530104524.log, /mydata/s4/r23/cassandra/bin/../data/commitlog/CommitLog-7-1795530104525.log
+INFO  [main] 2026-11-24T14:24:07,779 CommitLog.java:206 - Replaying /mydata/s4/r23/cassandra/bin/../data/commitlog/CommitLog-7-1795530104523.log, /mydata/s4/r23/cassandra/bin/../data/commitlog/CommitLog-7-1795530104524.log, /mydata/s4/r23/cassandra/bin/../data/commitlog/CommitLog-7-1795530104525.log
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /mydata/s4/r23/runs/K100/dumps/cassandra-1795530230-pid520466.hprof ...
+java.lang.OutOfMemoryError: Java heap space
+java.lang.OutOfMemoryError: Java heap space
+Heap dump file created [1434777312 bytes in 25.344 secs]
+# java.lang.OutOfMemoryError: Java heap space
+# -XX:OnOutOfMemoryError="kill -9 %p"
+memory.events (last sample): low 0 high 0 max 0 oom 0 oom_kill 0 
+[07:24:48] r23slow write delay = 0 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 0
+[07:24:48] restore gc: pauses=89 full=51 pause_total=24.8s span=42s (59%) worst60s=41% at 3.01s; max_after_full=994M max_after_any=1004M cap=1024M last_at=44s
+[07:24:48] mem.current max: 3715948544 B
+[07:24:48] segments in Replaying list: 7
+[07:24:48] threads +8s: flushwriters=0 flushwriters_in_io=0 mutstage=0 mutstage_in_suballoc=0 main=- G2=no
+[07:24:48] threads +12s: flushwriters=0 flushwriters_in_io=0 mutstage=0 mutstage_in_suballoc=0 main=- G2=no
+[07:24:48] threads +20s: flushwriters=0 flushwriters_in_io=0 mutstage=0 mutstage_in_suballoc=0 main=- G2=no
+[07:24:48] threads +30s: flushwriters=0 flushwriters_in_io=0 mutstage=0 mutstage_in_suballoc=0 main=- G2=no
+[07:24:48] dump 1369 MiB deleted unread
+K100: outcome=died t=45s heapOOM=True oom_thread=- guard_oom_kill=0 replayed=- t_map_flushes=2 t_map_ser=30MiB t_map_charge=175MiB histos=[]
+[07:24:48] left: daemon=0 client=0
+[07:24:48] == RESULT K100 img=A1 heap=1024 D=100 PIT=T opts='' outcome=died
+[07:24:49] r23slow write delay = 0 ms; table: 0 25165824 delay 7:0 0 0 7:0 0 0

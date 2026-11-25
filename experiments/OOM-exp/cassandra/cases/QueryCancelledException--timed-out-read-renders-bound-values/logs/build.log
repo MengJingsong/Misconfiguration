@@ -1,0 +1,132 @@
+patching file src/java/org/apache/cassandra/exceptions/QueryCancelledException.java
+Buildfile: /mydata/s4/u16/cassandra-iv/build.xml
+
+init:
+
+_resolver_download:
+
+resolver-init:
+[resolver:resolve] Resolving artifacts
+[resolver:resolve] Resolving artifacts
+[resolver:resolve] Resolving artifacts
+[resolver:resolve] Resolving artifacts
+[resolver:resolve] Resolving artifacts
+
+write-poms:
+
+resolver-retrieve-build:
+[resolver:resolve] Resolving artifacts
+[resolver:resolve] Resolving artifacts
+    [unzip] Expanding: /users/jason92/.m2/repository/org/jacoco/org.jacoco.agent/0.8.8/org.jacoco.agent-0.8.8.jar into /mydata/s4/u16/cassandra-iv/build/lib/jars
+
+check-gen-cql3-grammar:
+
+gen-cql3-grammar:
+
+generate-cql-html:
+
+generate-jflex-java:
+
+build-project:
+     [echo] apache-cassandra: /mydata/s4/u16/cassandra-iv/build.xml
+
+_build_java:
+     [echo] Compiling for Java 11...
+    [javac] Compiling 1 source file to /mydata/s4/u16/cassandra-iv/build/classes/main
+
+_get-git-sha:
+     [exec] Result: 128
+     [echo] git.is-available=false
+     [echo] git.sha=Unknown
+     [echo] git.worktree.name=${git.worktree.name}
+     [echo] git.branch.name=${git.branch.name}
+
+set-cqlsh-version:
+
+_createVersionPropFile:
+[propertyfile] Updating property file: /mydata/s4/u16/cassandra-iv/src/resources/org/apache/cassandra/config/version.properties
+     [copy] Copying 1 file to /mydata/s4/u16/cassandra-iv/build/classes/main
+
+build:
+
+_main-jar:
+      [jar] Building jar: /mydata/s4/u16/cassandra-iv/build/apache-cassandra-5.0.9-SNAPSHOT.jar
+
+stress-build:
+
+_stress_build:
+
+stress-build-test:
+
+fqltool-build:
+
+_fqltool_build:
+
+resolver-dist-lib:
+[resolver:resolve] Resolving artifacts
+[resolver:resolve] Resolving artifacts
+[resolver:resolve] Resolving artifacts
+
+_resolver-dist-lib_get_files:
+     [copy] Copying 1 file to /mydata/s4/u16/cassandra-iv/lib
+     [copy] Copying 20 files to /mydata/s4/u16/cassandra-iv/lib/sigar-bin
+   [delete] Deleting: /mydata/s4/u16/cassandra-iv/lib/netty-tcnative-boringssl-static-2.0.70.Final-windows-x86_64.jar
+   [delete] Deleting: /mydata/s4/u16/cassandra-iv/build/lib/jars/netty-tcnative-boringssl-static-2.0.70.Final-windows-x86_64.jar
+
+simulator-asm-build:
+
+_simulator-asm_build:
+
+simulator-bootstrap-build:
+
+_simulator-bootstrap_build:
+
+simulator-jars:
+      [jar] Building jar: /mydata/s4/u16/cassandra-iv/build/test/lib/jars/simulator-asm.jar
+      [jar] Building jar: /mydata/s4/u16/cassandra-iv/build/test/lib/jars/simulator-bootstrap.jar
+
+build-test:
+
+_build-test:
+
+_check-test-names:
+[check-test-names] OpenJDK 64-Bit Server VM warning: Option UseConcMarkSweepGC was deprecated in version 9.0 and will likely be removed in a future release.
+[check-test-names] 14:21:16.825 [main] INFO org.reflections.Reflections -- Reflections took 1104 ms to scan 3 urls, producing 1030 keys and 13526 values
+[check-test-names] OpenJDK 64-Bit Server VM warning: Option UseConcMarkSweepGC was deprecated in version 9.0 and will likely be removed in a future release.
+[check-test-names] 14:21:20.887 [main] INFO org.reflections.Reflections -- Reflections took 1117 ms to scan 3 urls, producing 1030 keys and 13526 values
+
+stress-jar:
+      [jar] Building jar: /mydata/s4/u16/cassandra-iv/build/tools/lib/stress.jar
+
+fqltool-jar:
+      [jar] Building jar: /mydata/s4/u16/cassandra-iv/build/tools/lib/fqltool.jar
+
+jar:
+
+BUILD SUCCESSFUL
+Total time: 14 seconds
+iv toCQLString count:   0
+base toCQLString count: 1
+8415bc0d780294586c4c7f5c6e58b68a9bddea08ef7b0a951795829ce73a969b  build/apache-cassandra-5.0.9-SNAPSHOT.jar
+570b5249d9b9a43f6809eb3da562737492192026f974b2edbd20e94bea90176e  /mydata/s4/u16/cassandra-base/build/apache-cassandra-5.0.9-SNAPSHOT.jar
+diff -ru cassandra-base/src/java/org/apache/cassandra/exceptions/QueryCancelledException.java cassandra-iv/src/java/org/apache/cassandra/exceptions/QueryCancelledException.java
+--- cassandra-base/src/java/org/apache/cassandra/exceptions/QueryCancelledException.java	2026-11-04 09:32:02.874064000 -0700
++++ cassandra-iv/src/java/org/apache/cassandra/exceptions/QueryCancelledException.java	2026-11-24 07:21:07.219580007 -0700
+@@ -23,6 +23,6 @@
+ {
+     public QueryCancelledException(ReadCommand command)
+     {
+-        super("Query cancelled for taking too long: " + command.toCQLString());
++        super("Query cancelled for taking too long: " + command.metadata().keyspace + '.' + command.metadata().name);
+     }
+ }
+\ No newline at end of file
+diff -ru cassandra-base/src/resources/org/apache/cassandra/config/version.properties cassandra-iv/src/resources/org/apache/cassandra/config/version.properties
+--- cassandra-base/src/resources/org/apache/cassandra/config/version.properties	2026-11-17 21:05:36.772438473 -0700
++++ cassandra-iv/src/resources/org/apache/cassandra/config/version.properties	2026-11-24 07:21:11.679686498 -0700
+@@ -1,4 +1,4 @@
+-#Tue, 17 Nov 2026 23:05:36 -0500
++#Tue, 24 Nov 2026 14:21:11 +0000
+ 
+ CassandraVersion=5.0.9-SNAPSHOT
+ GitSHA=Unknown
