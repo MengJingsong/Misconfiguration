@@ -73,4 +73,25 @@ Tier 2's 154 entries (mentioned in a case, not its constraint) are not banded ye
 
 ## Step 3 — forward trace
 
-Not started. The 43 A–B entries are the queue (A first); the first batch is 10.
+Queue: [`config-trace-queue.csv`](config-trace-queue.csv) (the 43 A–B entries, A first; status and case files per
+entry). Method: the stage-3 autonomous playbook and template plus
+[`../../source-config-first/playbook-addendum.md`](../../source-config-first/playbook-addendum.md); one fresh agent per
+entry in a source copy outside the repository (`~/cassandra-5.0.9`, output in `~/writeup-cfg/out/<entry>/`), at most 5
+at a time.
+
+**Trace batch 1 (2026-11-26): 10 entries → 15 case files, positive 11 + negative 4**, filed in
+`../stage3-ai-deep-read/cases/` with `_INDEX.md` §1 and §4 rows; stage 4 not yet queued.
+
+| Order | Entry | Band | Case files (estimate) |
+|---|---|---|---|
+| 1 | `DROP_OVERSIZED_READ_REPAIR_MUTATIONS` | A | `createRepairMutation` (negative: decides only what happens to an already-built oversized mutation; `max_mutation_size` is the cap) |
+| 2 | `NIO_DATA_OUTPUT_STREAM_PLUS_BUFFER_SIZE` | A | `BufferedDataOutputStreamPlus` (positive: direct buffer per open file stream) |
+| 3 | `max_top_size_partition_count` | A | `TopHolder.track` (positive, heap), `saveTopPartitions` (positive, disk, up to `max_mutation_size`) |
+| 4 | `max_top_tombstone_partition_count` | A | `track` (positive, heap), `saveTopPartitions` (positive, disk) |
+| 5 | `ALLOW_UNLIMITED_CONCURRENT_VALIDATIONS` | B | `applyConcurrentValidations` (positive: validations ≤ `concurrent_compactors`, Merkle-tree heap), `setConcurrentValidators` (positive; notes a JMX resize path with no check), `applyRepairCommandPoolSize` (negative: the Repair-Task pool limits setup only) |
+| 6 | `SEARCH_CONCURRENCY_FACTOR` | B | `initialValue` (positive, SASI search threads per calling thread; not result heap) |
+| 7 | `partition_keys_in_select_warn_threshold` | B | `guard` (negative: warns only) |
+| 8 | `concurrent_materialized_view_builders` | B | `ViewBuildExecutor` (negative: concurrency only, small working set per task) |
+| 9 | `paxos_repair_parallelism` | B | `scheduleKeyRepairsOrFinish` (positive, per cleanup coordinator; S coordinators hold S × p) |
+| 10 | `repair_command_pool_size` | B | covered by order 5's third file |
+| 11 | `INTERNODE_EVENT_THREADS` | B | `SocketFactory` defaultGroup and outboundStreamingGroup (positive, small: epoll arrays, thread stacks, cached chunks) |

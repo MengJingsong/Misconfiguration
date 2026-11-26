@@ -86,16 +86,16 @@ flowchart TD
   subgraph P1["Phase 1: capacity-enforcement-exp"]
     S1["Stage 1: CodeQL"]
     S2["Stage 2: AI banding"]
-    LSC["Lead source: config-first<br/>left: A–B to trace 43/–, tier 2 to band 154/–"]
+    LSC["Lead source: config-first<br/>left: A–B to trace 32/–, tier 2 to band 154/–"]
     LSU["Lead source: consumer-first"]
     S3A["Stage 3: autonomous agent<br/>left: 8,355/19,624"]
     S3G["Stage 3: guided agent"]
     CF[("Phase-1 case files")]
-    S4["Stage 4: runtime verification<br/>left: not run 66/14"]
+    S4["Stage 4: runtime verification<br/>left: not run 81/14"]
     JR[("JIRA OOM reports")]
     CPAT[("OOM clue patterns")]
-    S5A["Stage 5: autonomous agent<br/>left: 23/15"]
-    S5G["Stage 5: guided agent<br/>left: 23/15"]
+    S5A["Stage 5: autonomous agent<br/>left: 38/15"]
+    S5G["Stage 5: guided agent<br/>left: 38/15"]
     CL[("Phase 1 OOM candidate list")]
   end
 
@@ -117,11 +117,11 @@ flowchart TD
   S2 -->|"units read: 2,860/50"| S3A
   S2 -->|"targets: 29/–"| S3G
   CF -.->|"entries ruled out: 158/– of 645/–"| LSC
-  LSC -->|"no case: 333/–, band A–B 43/–, traced 0/–"| S3A
+  LSC -->|"no case: 333/–, band A–B 43/–, traced 11/–"| S3A
   LSU -->|"leads: –/–"| S3A
-  S3A -->|"case files: 315/46"| CF
+  S3A -->|"case files: 330/46"| CF
   S3G -->|"case files: 29/–"| CF
-  CF -->|"run: 278/32 (of 344/46)"| S4
+  CF -->|"run: 278/32 (of 359/46)"| S4
   S4 -.->|"TP 129/22, TN 103/8, FN 6/0"| CF
   JR -->|"issues kept: 246/368; 16 patterns"| CPAT
   CF -->|"files read: 321/31"| S5A
@@ -203,7 +203,9 @@ rows are one unit each.
     read 201 + read, no unit near 100 + not read in `src/java` 18;
   - no case at all 333 (tiers 3–6) = name-hinted 98 + other 235;
   - banded 333 (`config-bands.csv`, 2026-11-26) = A 4 + B 39 + C 93 + D 197; anchor check passed in 4 of 4 batches;
-  - A–B 43 = traced 0 + left 43; tier 2's 154 = banded 0 + left 154.
+  - A–B 43 = done 11 + left 32; done 11 = traced 10 (trace batch 1 of 2026-11-26: 15 case files, positive 11 + negative 4)
+    + covered 1 (`repair_command_pool_size`, traced in `ALLOW_UNLIMITED_CONCURRENT_VALIDATIONS`'s third file);
+    tier 2's 154 = banded 0 + left 154.
 - **Consumer-first:** not started for either system.
 
 **Stage 3, deep read — units** (Cassandra: `cassandra/stage3-ai-deep-read/` set CSVs, band-D progress CSVs,
@@ -233,16 +235,17 @@ rows are one unit each.
 | Extension, band A batch 1 | 10 | 0 | 10 / 0 / 0 |
 | Extension, batch 1 of 2026-11-24 (orders 54–134) | 20 | 0 | 13 / 7 / 0 |
 | Extension, batch 2 of 2026-11-24 (orders 135–239) | 20 | 0 | 9 / 11 / 0 |
-| **Total** | **344** (autonomous 315 + guided 29) | **29** | **159 / 178 / 7** |
+| Config-first, trace batch 1 of 2026-11-26 (10 entries) | 15 | 0 | 11 / 4 / 0 |
+| **Total** | **359** (autonomous 330 + guided 29) | **29** | **170 / 182 / 7** |
 
 Hadoop: **46** case files = autonomous 46 = positive 36 + negative 10 (Yang 1 negative; Jingsong 45 = batch of 2026-11-06
 3 + 2, batch 1 of 2026-11-24 (orders 6–25) 15 + 5, batch 2 of 2026-11-24 (orders 26–45) 18 + 2).
 
 **Stage 4, runtime verification** (`_INDEX.md` outcome column, `stage4-runtime-verification/results/`).
 
-- **Cassandra: 344 = run 278 + not run 66.**
+- **Cassandra: 359 = run 278 + not run 81.**
   - run 278 = TP 129 + FP 0 + TN 103 + FN 6 + undetermined 18 + weak 22 (TP 9, TN 12, FN 1);
-  - not run 66 = `none`-type cases awaiting the owner's decision 29 + cases with a constraint type but no stage-4 run
+  - not run 81 = config-first trace batch 1 of 2026-11-26, not yet queued 15 + `none`-type cases awaiting the owner's decision 29 + cases with a constraint type but no stage-4 run
     recorded 14 + waiting 23 (extension batch 1 of 2026-11-24 3: 57, 64 and 70 returned no result from the deferred run;
     17 of its 20 finished, 116 and 125 on 2026-11-25 in chunk 1; extension batch 2 of 2026-11-24 20); the 23 are running
     in the 2026-11-25 node session.
@@ -262,8 +265,8 @@ Hadoop: **46** case files = autonomous 46 = positive 36 + negative 10 (Yang 1 ne
 
 **Stage 5, clue find** (`<sys>/stage5-oom-clue-find/coverage.csv`, `phase1-oom-candidates.md`).
 
-- **Cassandra:** case files read 321 of 344 by each agent (coverage.csv has 643 rows = 321 + 321 + 1 placeholder row; the
-  23 waiting for stage 4 are not read yet); files with at least one candidate: autonomous 197, guided 212.
+- **Cassandra:** case files read 321 of 359 by each agent (coverage.csv has 643 rows = 321 + 321 + 1 placeholder row; the
+  23 waiting for stage 4 and the 15 config-first files of 2026-11-26 are not read yet); files with at least one candidate: autonomous 197, guided 212.
 - **Candidates 643** (OC-1–643), agent × Status:
 
 | Agent \ Status | Open | Picked (phase-2 stage 1) | True positive | Covered | Retry | Skipped | Total |
@@ -345,13 +348,13 @@ the chart); **queue** = ordinary work for whoever runs that queue; **node** = a 
 |---|---|---|---|
 | Stage 1 — CodeQL | nothing; optional: numeric `switch` case labels are not matched | — | `stage1-codeql-preprocessing/README.md` |
 | Stage 2 — banding | nothing | — | `bands.csv` |
-| Lead source — config-first | Cassandra: forward-trace the **43** A–B entries (first batch 10, approved 2026-11-26); band tier 2's **154**; Hadoop: step 1 (coverage diff over `*-default.xml`) after its current stage-4 runs | **queue** | `source-config-first/README.md`, `<sys>/source-config-first/` |
+| Lead source — config-first | Cassandra: forward-trace the **32** A–B entries left (trace batch 1 of 2026-11-26 done: 10 entries, 15 case files); stage 4 and 5 for the 15; band tier 2's **154**; Hadoop: step 1 (coverage diff over `*-default.xml`) after its current stage-4 runs | **queue** | `source-config-first/README.md`, `<sys>/source-config-first/` |
 | Lead source — consumer-first | everything: part A (CodeQL allocation-site query) and part B (scaling profile on a node), Cassandra first; its no-constraint cases depend on the `none`-type stage-4 design | **owner**: start it; the `none`-type design | `source-consumer-first/README.md` |
 | Stage 3 — deep read | queued, not read **2,437/10,631** (C: band-D set A 2,164, extension band C 273 from order 240; H: Yang 8,930, Jingsong 1,701 from order 46); not queued **5,918/8,993** (extension band D); judged but not written up 169/– (set B); unresolved unit 1/–; notes backlog (stage-3 notes not applied to filed cases, `undetermined.md` §2 re-audit, `predicted-negative.md` §10 band-D lines); filer's calls of 2026-11-24 open to overrule (Cassandra extension: orders 100, 125 counted new, 70 and 122 typed `not-a-case`, builder/JMX arguments typed `query parameter`; batch 2: 207 (one verdict per place, P2 negative) counted positive, 145 typed `not-a-case`, 236–239 `scaling_parameters` typed `mixed ×2`) | **queue** (Jingsong: band-D set A, extension, Hadoop queue; Yang: set B write-ups, Hadoop queue); **owner**: whether to queue extension band D; the 2026-11-24 filer's calls | set CSVs, `hadoop/<name>/queue.csv`, `HANDOFF.md` "Open follow-ups", `HANDOFF-Jingsong.md` 2026-11-24 |
-| Stage 4 — runtime verification | not run **66/14**: C 29 `none`-type + 14 with no run recorded + **23 waiting** (extension batch 1 of 2026-11-24 3: 57, 64, 70, which returned no result in the deferred run; batch 2 of 2026-11-24 20), H **14 waiting** (Jingsong's orders 32–45); all 37 are running in the 2026-11-25 node session (chunk 1 filed: C 116, 125; H 6, 14, 22, 26–31); 57 carries dated audit amendments of the interrupted 2026-11-24 run; undetermined **18/1** (rerun list in the handoff; C 133 added 2026-11-25: each tier missed one frozen control threshold; C 116 added 2026-11-25: unit Partly confirmed — caps, cluster Not confirmed); owner's calls: H 10's effect (filed `does not cap`, could read `caps only on some paths`, which would make it a false negative); H 14 (filed true positive under B3f's noise allowance; strict reading weak true positive); C 116 (weak true positive if the unit tier's Partly confirmed settles the effect, true positive if the 0.16 MiB heap miss is also accepted); C 115's cluster band miss | **owner**: the `none`-type design (29 cases); the H 10, H 14, C 115, C 116 calls; **queue**: the 37 waiting cases (in progress, 2026-11-25 node session), reruns | `_INDEX.md` §1 (both systems), `HANDOFF-Jingsong.md` 2026-11-24 and 2026-11-25, `HANDOFF.md` |
+| Stage 4 — runtime verification | not run **81/14**: C **15 config-first** (trace batch 1 of 2026-11-26, not yet queued) + 29 `none`-type + 14 with no run recorded + **23 waiting** (extension batch 1 of 2026-11-24 3: 57, 64, 70, which returned no result in the deferred run; batch 2 of 2026-11-24 20), H **14 waiting** (Jingsong's orders 32–45); all 37 are running in the 2026-11-25 node session (chunk 1 filed: C 116, 125; H 6, 14, 22, 26–31); 57 carries dated audit amendments of the interrupted 2026-11-24 run; undetermined **18/1** (rerun list in the handoff; C 133 added 2026-11-25: each tier missed one frozen control threshold; C 116 added 2026-11-25: unit Partly confirmed — caps, cluster Not confirmed); owner's calls: H 10's effect (filed `does not cap`, could read `caps only on some paths`, which would make it a false negative); H 14 (filed true positive under B3f's noise allowance; strict reading weak true positive); C 116 (weak true positive if the unit tier's Partly confirmed settles the effect, true positive if the 0.16 MiB heap miss is also accepted); C 115's cluster band miss | **owner**: the `none`-type design (29 cases); the H 10, H 14, C 115, C 116 calls; **queue**: the 37 waiting cases (in progress, 2026-11-25 node session), reruns | `_INDEX.md` §1 (both systems), `HANDOFF-Jingsong.md` 2026-11-24 and 2026-11-25, `HANDOFF.md` |
 | JIRA OOM report | nothing | — | `jira-oom-report.md` |
 | OOM clue patterns | nothing | — | `oom-clue-patterns.md` |
-| Stage 5 — clue find | case files not yet read **23/15** (C: the 23 waiting for stage 4; H: the 14 waiting + Yang's 1 of 2026-11-06) | **queue** (after stage 4 for the waiting cases) | `coverage.csv` |
+| Stage 5 — clue find | case files not yet read **38/15** (C: the 23 waiting for stage 4 + the 15 config-first of 2026-11-26; H: the 14 waiting + Yang's 1 of 2026-11-06) | **queue** (after stage 4 for the waiting cases) | `coverage.csv` |
 | Candidate list | open **124/123**; picked, at phase-2 stage 1 0/– (wave 7 wrote back all 23 on 2026-11-25); the 2026-11-18 / 2026-11-20 triage lists and B18's rows are closed (2026-11-24) | **queue** (OOM agent picks) | `phase1-oom-candidates.md` |
 
 **Phase 2 — `OOM-exp`** (Cassandra; Hadoop not started)
