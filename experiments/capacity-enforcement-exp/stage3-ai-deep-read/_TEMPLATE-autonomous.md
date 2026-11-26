@@ -4,6 +4,7 @@
 |---|---|
 | Entry pointer | the if statement, as given, **linked**: [`File.java:123`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/path/File.java#L123) |
 | Pinned source | `cassandra-5.0.9` |
+| Lead source | only for a unit from a lead source other than CodeQL: `config-first` or `consumer-first` ([README §3.8](../../../README.md#38-lead-sources-beyond-codeql-2026-11-25-owner)); otherwise omit the row |
 | Session / date | model, CLI version, date (filled by the agent) |
 | Estimate | `positive` (usage follows the constraint) / `negative` (it does not) / `undetermined`, with the reason in one or two sentences |
 | Ground | for a negative estimate, why usage should not follow the constraint; otherwise `—` |

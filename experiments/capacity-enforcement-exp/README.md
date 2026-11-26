@@ -335,6 +335,20 @@ them through feed 3a, as before. **There is no new feed**, and stages 2, 3
 and 4 keep their instructions and playbooks. The extension is piloted on
 Cassandra first; Hadoop follows.
 
+### 3.8 Lead sources beyond CodeQL (2026-11-25, owner)
+
+Stage 1 is no longer the only way into stage 3. Two **lead sources** add stage-3 units from the other ends:
+
+| Lead source | Starts from | Method |
+|---|---|---|
+| CodeQL (stages 1–2, above) | enforcement and capacity-set places | §7.2 |
+| **config-first** | every configuration entry; the entries a case already has as its constraint are ruled out by a coverage diff, and the rest are banded and traced forward from the declaration | [`source-config-first/README.md`](source-config-first/README.md) |
+| **consumer-first** (designed, not started) | memory consumers: data-sized allocation sites with no check on the path (CodeQL), and consumers whose live size grows with a workload dimension (scaling profile) | [`source-consumer-first/README.md`](source-consumer-first/README.md) |
+
+Every source writes ordinary stage-3 case files, and stages 4 and 5 apply unchanged. A case from a new
+source carries the header row `Lead source | config-first` (or `consumer-first`); no row means CodeQL.
+Phase 2's verdicts therefore give a true-positive rate per lead source.
+
 ## 4. Scope: what this folder does NOT cover
 
 - **No bypass analysis, no failure-mode scoring.** Target 3 (bypass potential)

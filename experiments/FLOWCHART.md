@@ -13,7 +13,9 @@ stays in the file each row points to; this page is the map. In prose: [`README.m
 **Phase 1, [`capacity-enforcement-exp/`](capacity-enforcement-exp/README.md)** (Targets 1 + 2; Cassandra
 5.0.9, Hadoop 3.4.2). It finds the **resource constraints** that are supposed to cap a node's memory or
 disk and checks whether usage follows each one (stages 1–4), then reads every filed case for **clues that
-could lead to OOM** and writes them as **OOM candidates** (stage 5).
+could lead to OOM** and writes them as **OOM candidates** (stage 5). Stage 3 reads units from three **lead sources**
+(2026-11-25): CodeQL (stages 1–2), **config-first** (every configuration entry no case covers yet) and
+**consumer-first** (memory consumers, designed only).
 [`entry-restriction-exp/`](entry-restriction-exp/README.md) is a paused phase-1 supplement.
 
 **Phase 2, [`OOM-exp/`](OOM-exp/README.md)** (Target 3; Cassandra so far). An **OOM agent** picks
@@ -29,6 +31,8 @@ Only default constraints are considered (rule 2026-11-23).
 |---|---|---|
 | Stage 1 — CodeQL | Narrows `if` statements structurally to a worklist (no keyword list) | [`stage1-codeql-preprocessing/`](capacity-enforcement-exp/stage1-codeql-preprocessing/README.md) |
 | Stage 2 — AI banding | Ranks rows A/B/C/D by name only; rules nothing out | [`stage2-ai-preprocessing/`](capacity-enforcement-exp/stage2-ai-preprocessing/README.md) |
+| Lead source — config-first (2026-11-25) | Coverage diff of every configuration entry against the case files (script, no agents) → band the entries no case covers → stage-3 agent traces each forward from its declaration; case files carry `Lead source \| config-first` | [`source-config-first/`](capacity-enforcement-exp/source-config-first/README.md), `<sys>/source-config-first/config-coverage.csv` |
+| Lead source — consumer-first (2026-11-25, designed) | Memory consumers as stage-3 units: data-sized allocation sites with no check on the path (CodeQL) and consumers that grow with a workload dimension (scaling profile); case files carry `Lead source \| consumer-first` | [`source-consumer-first/`](capacity-enforcement-exp/source-consumer-first/README.md) |
 | Stage 3 — autonomous agent | Target only, isolated source copy: traces the constraint, estimates, designs unit + cluster tiers (a non-config variant skips config-type constraints) | [`playbook-autonomous.md`](capacity-enforcement-exp/stage3-ai-deep-read/playbook-autonomous.md), [`playbook-non-config-autonomous.md`](capacity-enforcement-exp/stage3-ai-deep-read/playbook-non-config-autonomous.md) |
 | Stage 3 — guided agent | Target + the three rules, enforcement patterns, test-design method | [`playbook-guided.md`](capacity-enforcement-exp/stage3-ai-deep-read/playbook-guided.md) |
 | Stage 3 — verdict files | `_INDEX.md`, `predicted-negative/positive.md`, `undetermined.md` | `capacity-enforcement-exp/<system>/stage3-ai-deep-read/` |
@@ -82,6 +86,8 @@ flowchart TD
   subgraph P1["Phase 1: capacity-enforcement-exp"]
     S1["Stage 1: CodeQL"]
     S2["Stage 2: AI banding"]
+    LSC["Lead source: config-first<br/>left: entries to band 333/–"]
+    LSU["Lead source: consumer-first"]
     S3A["Stage 3: autonomous agent<br/>left: 8,355/19,624"]
     S3G["Stage 3: guided agent"]
     CF[("Phase-1 case files")]
@@ -110,6 +116,9 @@ flowchart TD
   S1 -->|"11,228/19,674 units"| S2
   S2 -->|"units read: 2,860/50"| S3A
   S2 -->|"targets: 29/–"| S3G
+  CF -.->|"entries ruled out: 158/– of 645/–"| LSC
+  LSC -->|"no case: 333/–, traced 0/–"| S3A
+  LSU -->|"leads: –/–"| S3A
   S3A -->|"case files: 315/46"| CF
   S3G -->|"case files: 29/–"| CF
   CF -->|"run: 278/32 (of 344/46)"| S4
@@ -139,7 +148,7 @@ flowchart TD
 
   class CF,JR,CPAT,CL,RL,CASE,JC,CT store
   class S4,O2,O3,O3B owner
-  class S3G hadoopPending
+  class S3G,LSC,LSU hadoopPending
   class TP verdict
 ```
 
@@ -147,6 +156,8 @@ Notes on the chart:
 
 - **Stage 5 never chases a clue** and phase-1 agents never read phase-2 results; the only phase-2 signal
   that reaches phase 1 is a new clue pattern, which only the guided agent reads.
+- **Lead sources** (2026-11-25): config-first has run step 1 (coverage diff) for Cassandra; its banding and forward
+  trace and the whole consumer-first source are not started.
 - **Hadoop** has run phase 1 stages 1–3 (Jingsong's queue orders 1–45, Yang's first 5 rechecks), stage 4 on 32 of its 46
   case files (14 wait), its JIRA OOM report and stage 5 on 31 case files (Jingsong's orders 1–31; 123
   candidates);
@@ -183,6 +194,15 @@ rows are one unit each.
 | **Cassandra** | 224 | 298 | 401 | 10,305 | **11,228** |
 | Hadoop `if` corpus / extension | 90 / 110 | 170 / 272 | 489 / 615 | 8,935 / 8,993 | 9,684 / 9,990 |
 | **Hadoop** | 200 | 442 | 1,104 | 17,928 | **19,674** |
+
+**Lead source, config-first** (`cassandra/source-config-first/config-coverage.csv`; Hadoop not started).
+
+- **Cassandra: entries 735 = in scope 645 + out of scope 90** (JVM properties for tests, the JDK, logging, JMX); in scope
+  645 = yaml 409 + JVM 236.
+  - 645 = constraint of a case 158 + mentioned in a case only 154 + a stage-1 unit names it 27 + a stage-1 unit near a
+    read 192 + read, no unit near 96 + not read in `src/java` 18;
+  - no case at all 333 (tiers 3–6) = name-hinted 98 + other 235; banded 0 + traced 0 + left 333 (then tier 2's 154).
+- **Consumer-first:** not started for either system.
 
 **Stage 3, deep read — units** (Cassandra: `cassandra/stage3-ai-deep-read/` set CSVs, band-D progress CSVs,
 `band-d-noncfg-processed.md`; Hadoop: `hadoop/status.py`, the two `queue.csv`).
@@ -323,6 +343,8 @@ the chart); **queue** = ordinary work for whoever runs that queue; **node** = a 
 |---|---|---|---|
 | Stage 1 — CodeQL | nothing; optional: numeric `switch` case labels are not matched | — | `stage1-codeql-preprocessing/README.md` |
 | Stage 2 — banding | nothing | — | `bands.csv` |
+| Lead source — config-first | Cassandra: band the **333** entries with no case (98 name-hinted first), then the 154 mentioned only; forward-trace the A–B entries (an owner-approved batch); Hadoop: step 1 (coverage diff over `*-default.xml`) | **owner**: approve the banding and the first trace batch; **queue** | `source-config-first/README.md`, `<sys>/source-config-first/` |
+| Lead source — consumer-first | everything: part A (CodeQL allocation-site query) and part B (scaling profile on a node), Cassandra first; its no-constraint cases depend on the `none`-type stage-4 design | **owner**: start it; the `none`-type design | `source-consumer-first/README.md` |
 | Stage 3 — deep read | queued, not read **2,437/10,631** (C: band-D set A 2,164, extension band C 273 from order 240; H: Yang 8,930, Jingsong 1,701 from order 46); not queued **5,918/8,993** (extension band D); judged but not written up 169/– (set B); unresolved unit 1/–; notes backlog (stage-3 notes not applied to filed cases, `undetermined.md` §2 re-audit, `predicted-negative.md` §10 band-D lines); filer's calls of 2026-11-24 open to overrule (Cassandra extension: orders 100, 125 counted new, 70 and 122 typed `not-a-case`, builder/JMX arguments typed `query parameter`; batch 2: 207 (one verdict per place, P2 negative) counted positive, 145 typed `not-a-case`, 236–239 `scaling_parameters` typed `mixed ×2`) | **queue** (Jingsong: band-D set A, extension, Hadoop queue; Yang: set B write-ups, Hadoop queue); **owner**: whether to queue extension band D; the 2026-11-24 filer's calls | set CSVs, `hadoop/<name>/queue.csv`, `HANDOFF.md` "Open follow-ups", `HANDOFF-Jingsong.md` 2026-11-24 |
 | Stage 4 — runtime verification | not run **66/14**: C 29 `none`-type + 14 with no run recorded + **23 waiting** (extension batch 1 of 2026-11-24 3: 57, 64, 70, which returned no result in the deferred run; batch 2 of 2026-11-24 20), H **14 waiting** (Jingsong's orders 32–45); all 37 are running in the 2026-11-25 node session (chunk 1 filed: C 116, 125; H 6, 14, 22, 26–31); 57 carries dated audit amendments of the interrupted 2026-11-24 run; undetermined **18/1** (rerun list in the handoff; C 133 added 2026-11-25: each tier missed one frozen control threshold; C 116 added 2026-11-25: unit Partly confirmed — caps, cluster Not confirmed); owner's calls: H 10's effect (filed `does not cap`, could read `caps only on some paths`, which would make it a false negative); H 14 (filed true positive under B3f's noise allowance; strict reading weak true positive); C 116 (weak true positive if the unit tier's Partly confirmed settles the effect, true positive if the 0.16 MiB heap miss is also accepted); C 115's cluster band miss | **owner**: the `none`-type design (29 cases); the H 10, H 14, C 115, C 116 calls; **queue**: the 37 waiting cases (in progress, 2026-11-25 node session), reruns | `_INDEX.md` §1 (both systems), `HANDOFF-Jingsong.md` 2026-11-24 and 2026-11-25, `HANDOFF.md` |
 | JIRA OOM report | nothing | — | `jira-oom-report.md` |
@@ -357,3 +379,4 @@ the chart); **queue** = ordinary work for whoever runs that queue; **node** = a 
 | 2026-11-23 | §5.1 rewritten as splits that close (owner): each step as in = out + … + left, per system; corrections: phase-2 cases 69, open retries 2, Cassandra units read 2,678, pattern origins 13 + 2 + 1 |
 | 2026-11-24 | Open work shown (owner): new §5.2 (what is left per step, waiting on owner / queue / node) and node markers in the chart (orange border = waits on an owner decision; dashed = not started for Hadoop) |
 | 2026-11-24 | Chart boxes show what is left (owner): step name plus a second line `left: …` (Cassandra/Hadoop) from the 5.1 "+ left" terms; `<br/>` is the only markup allowed in labels; §5.2 node and U4 rows brought up to date |
+| 2026-11-25 | Two **lead sources** for stage 3 (owner): **config-first** (coverage diff of every configuration entry → banding → forward trace; Cassandra step 1 done) and **consumer-first** (allocation-site query + scaling profile; designed). Both write ordinary case files with a `Lead source` header row; new chart nodes LSC, LSU, arrows into stage 3 and a dotted CF → LSC; §2, §5.1, §5.2 rows |
