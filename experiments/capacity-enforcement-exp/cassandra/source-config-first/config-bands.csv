@@ -1,0 +1,334 @@
+kind,name,tier,band,reason,model,date,batch
+jvm,DROP_OVERSIZED_READ_REPAIR_MUTATIONS,5-no-unit,A,switch enforcing max mutation size on read repair mutations,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,NIO_DATA_OUTPUT_STREAM_PLUS_BUFFER_SIZE,4-unit-nearby,A,byte size of output stream buffer,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,max_top_size_partition_count,4-unit-nearby,A,count of top partitions retained in tracker,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,max_top_tombstone_partition_count,4-unit-nearby,A,count of top tombstone partitions retained in tracker,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,ALLOW_UNLIMITED_CONCURRENT_VALIDATIONS,4-unit-nearby,B,lifts cap on concurrent repair validations; each holds merkle trees,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,ALLOW_UNSAFE_AGGRESSIVE_SSTABLE_EXPIRATION,4-unit-nearby,B,lets TWCS drop expired sstables early; affects disk retention,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,AUTO_REPAIR_FREQUENCY_SECONDS,5-no-unit,B,interval of paxos uncommitted-state auto repair cleanup,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,CASSANDRA_MAX_HINT_TTL,4-unit-nearby,B,hint time-to-live; retention of hints on disk,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,INTERNODE_EVENT_THREADS,5-no-unit,B,netty internode event loop threads; each holds buffers,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,IO_NETTY_EVENTLOOP_THREADS,6-not-read,B,netty event loop thread count; buffer-holding concurrency; not read,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,NEVER_PURGE_TOMBSTONES,4-unit-nearby,B,disables tombstone purge; retains deleted data on disk indefinitely,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,REPAIR_CLEANUP_INTERVAL_SECONDS,4-unit-nearby,B,period of cleanup of retained repair session state,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,REPAIR_DELETE_TIMEOUT_SECONDS,4-unit-nearby,B,retention time before finished repair sessions are deleted,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,SAI_MINIMUM_POSTINGS_LEAVES,4-unit-nearby,B,SAI postings layout; count of postings lists written to disk,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,SAI_SORTED_TERMS_CLUSTERING_BLOCK_SHIFT,4-unit-nearby,B,block size of SAI sorted terms,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,SAI_SORTED_TERMS_PARTITION_BLOCK_SHIFT,4-unit-nearby,B,block size of SAI sorted terms,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,SEARCH_CONCURRENCY_FACTOR,5-no-unit,B,range read concurrency; results held in memory,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,SNAPSHOT_CLEANUP_PERIOD_SECONDS,5-no-unit,B,interval of periodic expired-snapshot cleanup on disk,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,VERY_LONG_TIME_MS,4-unit-nearby,B,expiry time of retained gossip endpoint state,claude-opus-5-5,2026-11-26,config-batch-03
+yaml,auto_snapshot_ttl,4-unit-nearby,B,retention time of auto snapshots on disk,claude-opus-5-5,2026-11-26,config-batch-03
+yaml,columns_per_table_warn_threshold,5-no-unit,B,guardrail on column count per table,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,concurrent_materialized_view_builders,3-unit-reads-it,B,concurrent MV build tasks,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,credentials_validity,4-unit-nearby,B,expiry of cached credentials; 0 disables credentials cache,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,fields_per_udt_fail_threshold,5-no-unit,B,guardrail fail on UDT field count,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,fields_per_udt_warn_threshold,5-no-unit,B,guardrail warn on UDT field count,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,materialized_views_per_table_fail_threshold,5-no-unit,B,guardrail fail on MV count per table,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,materialized_views_per_table_warn_threshold,5-no-unit,B,guardrail warn on MV count per table,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,max_concurrent_automatic_sstable_upgrades,3-unit-reads-it,B,concurrent sstable upgrade tasks; temp disk and buffers,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,min_tracked_partition_size,4-unit-nearby,B,size threshold for partitions tracked in memory,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,min_tracked_partition_tombstone_count,4-unit-nearby,B,tombstone threshold for partitions tracked in memory,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,otc_backlog_expiration_interval_ms,6-not-read,B,period expiring outbound message backlog; not read,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,otc_coalescing_enough_coalesced_messages,6-not-read,B,count of messages coalesced before flush; buffered batch size,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,partition_keys_in_select_warn_threshold,5-no-unit,B,guardrail on IN-key count; bounds partitions held per read,claude-opus-5-5,2026-11-26,config-batch-02
+yaml,partition_tombstones_warn_threshold,3-unit-reads-it,B,guardrail on stored tombstone count; only logs at flush/compaction,claude-opus-5-5,2026-11-26,config-batch-02
+yaml,paxos_purge_grace_period,4-unit-nearby,B,retention of paxos state before purge on compaction,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,paxos_repair_parallelism,3-unit-reads-it,B,parallelism of paxos repair work holding state,claude-opus-5-5,2026-11-26,config-batch-02
+yaml,repair_command_pool_size,3-unit-reads-it,B,thread pool size for repair commands; concurrency of memory-holding work,claude-opus-5-5,2026-11-26,config-batch-02
+yaml,sai_frozen_term_size_warn_threshold,5-no-unit,B,guardrail on size of frozen SAI terms written,claude-opus-5-5,2026-11-26,config-batch-02
+yaml,secondary_indexes_per_table_fail_threshold,5-no-unit,B,guardrail on count of secondary indexes per table,claude-opus-5-5,2026-11-26,config-batch-02
+yaml,secondary_indexes_per_table_warn_threshold,5-no-unit,B,guardrail on count of secondary indexes per table,claude-opus-5-5,2026-11-26,config-batch-02
+yaml,snapshot_before_compaction,4-unit-nearby,B,snapshot before each compaction; never cleaned so grows disk,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,trace_type_repair_ttl,4-unit-nearby,B,retention time of repair trace rows on disk,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,use_creation_time_for_hint_ttl,4-unit-nearby,B,changes hint expiry basis; retention of hints on disk,claude-opus-5-5,2026-11-26,config-batch-04
+jvm,ACQUIRE_RETRY_SECONDS,4-unit-nearby,C,retry window for anticompaction sstable acquire,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,ACQUIRE_SLEEP_MS,4-unit-nearby,C,sleep between anticompaction acquire retries,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,AUTH_CACHE_WARMING_MAX_RETRIES,4-unit-nearby,C,retry count for auth cache warming; no size bound,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,AUTH_CACHE_WARMING_RETRY_INTERVAL_MS,4-unit-nearby,C,retry interval for auth cache warming,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,AUTOCOMPACTION_ON_STARTUP_ENABLED,6-not-read,C,disabling compaction may grow disk use; indirect,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,AUTOREPAIR_ENABLE,4-unit-nearby,C,feature switch for auto repair; memory effect unclear,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,BATCHLOG_REPLAY_TIMEOUT_IN_MS,4-unit-nearby,C,age before batchlog entries replay; indirect batchlog retention,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,BATCH_COMMIT_LOG_SYNC_INTERVAL,5-no-unit,C,commitlog sync poll time; pending writes wait in memory,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,BTREE_FAN_FACTOR,6-not-read,C,btree node fan-out; shapes in-memory structures; not read,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,DEFAULT_PROVIDE_OVERLAPPING_TOMBSTONES,5-no-unit,C,tombstone purge option; may affect disk retained,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,DIAGNOSTIC_SNAPSHOT_INTERVAL_NANOS,4-unit-nearby,C,min gap between diagnostic snapshots; snapshots use disk,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,DISABLE_GOSSIP_ENDPOINT_REMOVAL,4-unit-nearby,C,keeps dead endpoint state in gossip; small growth,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,DISABLE_PAXOS_AUTO_REPAIRS,5-no-unit,C,turns off paxos state cleanup repairs,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,DISABLE_PAXOS_STATE_FLUSH,5-no-unit,C,turns off paxos tracker state flush,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,DISABLE_SSTABLE_ACTIVITY_TRACKING,5-no-unit,C,sstable read-rate tracking switch; minor memory,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,DRAIN_EXECUTOR_TIMEOUT_MS,5-no-unit,C,drain wait timeout,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,FAILED_BOOTSTRAP_TIMEOUT,4-unit-nearby,C,retention time of failed-bootstrap gossip state,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,FORCE_PAXOS_STATE_REBUILD,4-unit-nearby,C,rebuild paxos state at startup; memory effect unclear,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,GOSSIPER_QUARANTINE_DELAY,4-unit-nearby,C,retention of quarantined endpoints; small state,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,IO_NETTY_TRANSPORT_ESTIMATE_SIZE_ON_SUBMIT,4-unit-nearby,C,netty pending-bytes estimation; may affect outbound buffer accounting,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,MV_ENABLE_COORDINATOR_BATCHLOG,4-unit-nearby,C,MV writes go through batchlog; stored batch data unclear,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,PAXOS_CLEANUP_SESSION_TIMEOUT_SECONDS,4-unit-nearby,C,timeout for paxos cleanup sessions held in memory,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,PAXOS_REPAIR_ON_TOPOLOGY_CHANGE_RETRIES,4-unit-nearby,C,retry count for paxos repair,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,PAXOS_REPAIR_ON_TOPOLOGY_CHANGE_RETRY_DELAY_SECONDS,4-unit-nearby,C,retry delay for paxos repair,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,PAXOS_REPAIR_RETRY_TIMEOUT_IN_MS,4-unit-nearby,C,retry timeout for paxos repair,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,PAXOS_USE_SELF_EXECUTION,5-no-unit,C,local execution switch; memory effect unclear,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,READS_THRESHOLDS_COORDINATOR_DEFENSIVE_CHECKS_ENABLED,5-no-unit,C,defensive checks on read threshold warnings,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,REPAIR_FAIL_TIMEOUT_SECONDS,4-unit-nearby,C,timeout before repair session auto-fails,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,REPAIR_STATUS_CHECK_TIMEOUT_SECONDS,4-unit-nearby,C,repair status check timeout,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,REQUIRED_BATCHLOG_REPLICA_COUNT,3-unit-reads-it,C,batchlog replica count; copies of stored batches,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,SAI_POSTINGS_SKIP,4-unit-nearby,C,SAI postings layout tuning,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,SIZE_RECORDER_INTERVAL,4-unit-nearby,C,size estimates recorder period,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,SNAPSHOT_CLEANUP_INITIAL_DELAY_SECONDS,5-no-unit,C,initial delay of snapshot TTL cleanup,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,SNAPSHOT_MIN_ALLOWED_TTL_SECONDS,4-unit-nearby,C,minimum allowed snapshot TTL validation,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,SYSTEM_AUTH_DEFAULT_RF,4-unit-nearby,C,replication factor; copies of auth data on disk,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,SYSTEM_DISTRIBUTED_DEFAULT_RF,4-unit-nearby,C,replication factor; copies of system data on disk,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,SYSTEM_TRACES_DEFAULT_RF,4-unit-nearby,C,replication factor; copies of trace data on disk,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,UCS_OVERLAP_INCLUSION_METHOD,4-unit-nearby,C,compaction overlap selection; may change compaction size,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,UDF_EXECUTOR_THREAD_KEEPALIVE_MS,5-no-unit,C,idle UDF thread keepalive,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,auth_cache_warming_enabled,4-unit-nearby,C,auth cache prewarm switch; size unaffected,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,auto_optimise_full_repair_streams,4-unit-nearby,C,repair streaming optimisation; affects data streamed,claude-opus-5-5,2026-11-26,config-batch-03
+yaml,auto_optimise_inc_repair_streams,4-unit-nearby,C,repair streaming optimisation; affects data streamed,claude-opus-5-5,2026-11-26,config-batch-03
+yaml,auto_optimise_preview_repair_streams,4-unit-nearby,C,repair streaming optimisation; affects data streamed,claude-opus-5-5,2026-11-26,config-batch-03
+yaml,automatic_sstable_upgrade,4-unit-nearby,C,background sstable rewrite switch,claude-opus-5-5,2026-11-26,config-batch-03
+yaml,back_pressure_enabled,6-not-read,C,back pressure switch; unread; may bound queued messages,claude-opus-5-5,2026-11-26,config-batch-03
+yaml,cas_contention_timeout,3-unit-reads-it,C,CAS retry timeout; may hold requests in memory,claude-opus-5-5,2026-11-26,config-batch-03
+yaml,consecutive_message_errors_threshold,3-unit-reads-it,C,error count before closing connection,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,counter_write_request_timeout,4-unit-nearby,C,timeout holding counter writes in memory,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,credentials_cache_active_update,4-unit-nearby,C,credentials cache refresh mode,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,credentials_update_interval,4-unit-nearby,C,credentials cache refresh interval; not a size bound,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,denylist_initial_load_retry,4-unit-nearby,C,retry interval for denylist cache load,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,drop_truncate_table_enabled,5-no-unit,C,guardrail on TRUNCATE/DROP; indirectly affects disk reclamation,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,dump_heap_on_uncaught_exception,4-unit-nearby,C,writes heap dump to disk on error,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,dynamic_snitch,4-unit-nearby,C,dynamic snitch keeps latency scores; memory effect unclear,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,dynamic_snitch_reset_interval,3-unit-reads-it,C,period resetting snitch score samples,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,entire_sstable_inter_dc_stream_throughput_outbound,4-unit-nearby,C,streaming rate throttle,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,entire_sstable_stream_throughput_outbound,4-unit-nearby,C,streaming rate throttle,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,force_new_prepared_statement_behaviour,4-unit-nearby,C,prepared statement handling; possible prepared cache effect unclear,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,group_by_enabled,5-no-unit,C,guardrail on GROUP BY; aggregation may hold rows in memory,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,inter_dc_stream_throughput_outbound,4-unit-nearby,C,streaming rate throttle,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,inter_dc_tcp_nodelay,4-unit-nearby,C,TCP nodelay; affects packet batching not capacity,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,internode_streaming_tcp_user_timeout,4-unit-nearby,C,timeout for unacknowledged streaming data; may hold buffers,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,internode_tcp_connect_timeout,4-unit-nearby,C,connect timeout; may hold queued messages briefly,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,internode_timeout,4-unit-nearby,C,cross-node timeout switch; affects dropping expired requests under overload,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,intersect_filtering_query_warned,5-no-unit,C,guardrail warn on intersection filtering queries; memory effect unclear,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,key_cache_invalidate_after_sstable_deletion,4-unit-nearby,C,key cache invalidation switch; affects retained entries,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,max_streaming_retries,6-not-read,C,streaming retry count; not read,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,non_partition_restricted_index_query_enabled,4-unit-nearby,C,guardrail on unrestricted index queries; may scan much data,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,otc_coalescing_strategy,6-not-read,C,outbound coalescing strategy; buffering effect unclear,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,otc_coalescing_window_us,6-not-read,C,outbound coalescing window; messages held briefly; not read,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,paxos_contention_max_wait,4-unit-nearby,C,paxos contention backoff time; may hold requests briefly,claude-opus-5-5,2026-11-26,config-batch-02
+yaml,paxos_contention_min_delta,4-unit-nearby,C,paxos contention backoff timing,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,paxos_contention_min_wait,4-unit-nearby,C,paxos contention backoff wait,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,paxos_contention_wait_randomizer,4-unit-nearby,C,paxos backoff randomizer,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,paxos_repair_race_wait,4-unit-nearby,C,paxos repair wait switch; timing only,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,permissions_cache_active_update,4-unit-nearby,C,cache refresh mode switch; no size effect,claude-opus-5-5,2026-11-26,config-batch-02
+yaml,read_before_write_list_operations_enabled,5-no-unit,C,feature switch for read-before-write list ops; memory effect unclear,claude-opus-5-5,2026-11-26,config-batch-02
+yaml,repair_request_timeout,4-unit-nearby,C,repair RPC timeout; may hold repair state longer,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,repaired_data_tracking_for_partition_reads_enabled,5-no-unit,C,repaired data tracking adds read overhead; memory effect unclear,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,repaired_data_tracking_for_range_reads_enabled,4-unit-nearby,C,repaired data tracking adds range read overhead,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,roles_cache_active_update,4-unit-nearby,C,cache refresh mode switch; no size effect,claude-opus-5-5,2026-11-26,config-batch-02
+yaml,roles_update_interval,4-unit-nearby,C,cache refresh interval; not eviction or size,claude-opus-5-5,2026-11-26,config-batch-02
+yaml,snapshot_on_duplicate_row_detection,4-unit-nearby,C,rare-event snapshot; some disk use,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,snapshot_on_repaired_data_mismatch,4-unit-nearby,C,rare-event snapshot; some disk use,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,sstable_read_rate_persistence_enabled,5-no-unit,C,persists sstable read rates; small state,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,stream_transfer_task_timeout,5-no-unit,C,stream task timeout; may keep stream state held,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,streaming_keep_alive_period,4-unit-nearby,C,streaming keepalive period; detects stalled streams,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,top_partitions_enabled,4-unit-nearby,C,tracks top partitions in memory; size set elsewhere,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,transfer_hints_on_decommission,4-unit-nearby,C,hint transfer on decommission; affects hint disk lifetime,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,truncate_request_timeout,4-unit-nearby,C,truncate RPC timeout,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,uncompressed_tables_enabled,5-no-unit,C,guardrail on uncompressed tables; affects disk footprint,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,validation_preview_purge_head_start,4-unit-nearby,C,preview repair purge offset; timing,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,zero_ttl_on_twcs_enabled,4-unit-nearby,C,guardrail on zero TTL with TWCS; data never expires on disk,claude-opus-5-5,2026-11-26,config-batch-04
+jvm,ALLOCATE_TOKENS_FOR_KEYSPACE,5-no-unit,D,token allocation keyspace name; placement not capacity,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,ALLOW_ALTER_RF_DURING_RANGE_MOVEMENT,5-no-unit,D,safety override flag; correctness,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,ALLOW_NEW_OLD_CONFIG_KEYS,5-no-unit,D,config parsing compat flag,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,ALLOW_UNSAFE_JOIN,4-unit-nearby,D,bootstrap safety override,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,ALLOW_UNSAFE_REPLACE,4-unit-nearby,D,node replace safety override,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,ALLOW_UNSAFE_TRANSIENT_CHANGES,4-unit-nearby,D,transient replication safety override,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,APPROXIMATE_TIME_PRECISION_MS,4-unit-nearby,D,clock update precision,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,AUTH_BCRYPT_GENSALT_LOG2_ROUNDS,4-unit-nearby,D,password hashing cost; auth,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,AUTOREPAIR_CHECK_MIN_VERSION,4-unit-nearby,D,version compat check,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,AUTO_BOOTSTRAP,4-unit-nearby,D,bootstrap behaviour flag,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,BOOTSTRAP_SCHEMA_DELAY_MS,5-no-unit,D,startup schema wait delay,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,BOOTSTRAP_SKIP_SCHEMA_CHECK,4-unit-nearby,D,startup check skip flag,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,BROADCAST_INTERVAL_MS,4-unit-nearby,D,gossip load broadcast period,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,CASSANDRA_ALLOW_SIMPLE_STRATEGY,6-not-read,D,replication strategy permission flag,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,CASSANDRA_FOREGROUND,5-no-unit,D,process foreground mode,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,CASSANDRA_MINIMUM_REPLICATION_FACTOR,6-not-read,D,replication factor floor; not read,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,CASSANDRA_PID_FILE,5-no-unit,D,pid file path,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,CASSANDRA_SKIP_AUTOMATIC_UDT_FIX,6-not-read,D,schema compat fix switch,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,CASSANDRA_STREAMING_DEBUG_STACKTRACE_LIMIT,5-no-unit,D,logging stacktrace limit,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,CASSANDRA_UNSAFE_TIME_UUID_NODE,4-unit-nearby,D,UUID node id override,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,CHECK_DATA_RESURRECTION_HEARTBEAT_PERIOD,4-unit-nearby,D,heartbeat file write period,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,CHRONICLE_ANALYTICS_DISABLE,4-unit-nearby,D,third-party analytics switch,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,CHRONICLE_ANNOUNCER_DISABLE,5-no-unit,D,third-party banner switch,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,CLOCK_GLOBAL,4-unit-nearby,D,clock class name,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,CLOCK_MONOTONIC_APPROX,4-unit-nearby,D,clock class name,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,CLOCK_MONOTONIC_PRECISE,4-unit-nearby,D,clock class name,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,COMMITLOG_ALLOW_IGNORE_SYNC_CRC,4-unit-nearby,D,commitlog replay correctness flag,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,COMMITLOG_IGNORE_REPLAY_ERRORS,4-unit-nearby,D,commitlog replay error handling,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,COMMITLOG_STOP_ON_ERRORS,6-not-read,D,commitlog error handling; not read,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,COMMIT_LOG_REPLAY_LIST,4-unit-nearby,D,table filter for replay,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,CONFIG_ALLOW_SYSTEM_PROPERTIES,5-no-unit,D,config loading flag,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,CONFIG_LOADER,5-no-unit,D,config loader class name,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,CONSISTENT_DIRECTORY_LISTINGS,4-unit-nearby,D,directory listing ordering,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,CONSISTENT_SIMULTANEOUS_MOVES_ALLOW,4-unit-nearby,D,topology safety flag,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,CRYPTO_PROVIDER_CLASS_NAME,5-no-unit,D,crypto provider class name,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,CUSTOM_GUARDRAILS_CONFIG_PROVIDER_CLASS,5-no-unit,D,guardrail provider class name,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,CUSTOM_QUERY_HANDLER_CLASS,5-no-unit,D,query handler class name,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,CUSTOM_TRACING_CLASS,5-no-unit,D,tracing class name,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,DETERMINISM_UNSAFE_UUID_NODE,4-unit-nearby,D,test determinism hook,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,DISABLE_AUTH_CACHES_REMOTE_CONFIGURATION,4-unit-nearby,D,JMX auth cache reconfiguration switch,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,DISABLE_TCACTIVE_OPENSSL,5-no-unit,D,SSL provider switch,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,ENABLE_DC_LOCAL_COMMIT,5-no-unit,D,paxos commit consistency option,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,ENABLE_NODELOCAL_QUERIES,4-unit-nearby,D,query permission flag,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,EXPIRATION_DATE_OVERFLOW_POLICY,4-unit-nearby,D,TTL overflow correctness policy,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,EXPIRATION_OVERFLOW_WARNING_INTERVAL_MINUTES,4-unit-nearby,D,log rate limit interval,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,FAILURE_LOGGING_INTERVAL_SECONDS,4-unit-nearby,D,log rate limit interval,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,FAIL_ON_MISSING_CRYPTO_PROVIDER,5-no-unit,D,crypto startup check,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,FD_INITIAL_VALUE_MS,4-unit-nearby,D,failure detector initial interval,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,FD_MAX_INTERVAL_MS,4-unit-nearby,D,failure detector interval cap,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,FILE_SYSTEM_CHECK_ENABLE,5-no-unit,D,ownership startup check,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,FILE_SYSTEM_CHECK_OWNERSHIP_FILENAME,5-no-unit,D,ownership file name,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,FORCE_LOAD_LOCAL_KEYSPACES,4-unit-nearby,D,schema loading switch for tools,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,GOSSIPER_SKIP_WAITING_TO_SETTLE,4-unit-nearby,D,startup gossip wait,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,GOSSIP_DISABLE_THREAD_VALIDATION,4-unit-nearby,D,thread assertion test hook,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,GOSSIP_SETTLE_MIN_WAIT_MS,4-unit-nearby,D,startup gossip wait,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,GOSSIP_SETTLE_POLL_INTERVAL_MS,4-unit-nearby,D,startup gossip settle poll period,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,GOSSIP_SETTLE_POLL_SUCCESSES_REQUIRED,3-unit-reads-it,D,startup gossip poll count,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,IGNORED_SCHEMA_CHECK_ENDPOINTS,4-unit-nearby,D,schema check endpoint list,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,IGNORED_SCHEMA_CHECK_VERSIONS,4-unit-nearby,D,schema check version list,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,IGNORE_CORRUPTED_SCHEMA_TABLES,4-unit-nearby,D,schema load error handling,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,IGNORE_DC,5-no-unit,D,startup DC check skip,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,IGNORE_DYNAMIC_SNITCH_SEVERITY,4-unit-nearby,D,snitch scoring option,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,IGNORE_KERNEL_BUG_1057843_CHECK,5-no-unit,D,startup kernel check skip,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,IGNORE_MISSING_NATIVE_FILE_HINTS,4-unit-nearby,D,transaction log fd requirement,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,IGNORE_RACK,5-no-unit,D,startup rack check skip,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,INITIAL_TOKEN,5-no-unit,D,token assignment,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,IO_NETTY_TRANSPORT_NONATIVE,6-not-read,D,netty transport selection; not read,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,JOIN_RING,4-unit-nearby,D,ring membership flag,claude-opus-5-5,2026-11-26,config-batch-02
+jvm,LIBJEMALLOC,5-no-unit,D,path to native allocator library; not a size bound,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,LINE_SEPARATOR,4-unit-nearby,D,output formatting string,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,LOAD_RING_STATE,5-no-unit,D,startup switch to load saved ring state,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,LOG_DIR_AUDIT,5-no-unit,D,audit log directory path,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,MAX_LOCAL_PAUSE_IN_MS,4-unit-nearby,D,failure detector pause tolerance,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,MBEAN_REGISTRATION_CLASS,5-no-unit,D,class name for JMX registration,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,MIGRATION_DELAY,4-unit-nearby,D,schema migration delay,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,MV_ALLOW_FILTERING_NONKEY_COLUMNS_UNSAFE,4-unit-nearby,D,materialized view correctness switch,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,NANOTIMETOMILLIS_TIMESTAMP_UPDATE_INTERVAL,4-unit-nearby,D,clock calibration interval,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,NATIVE_EPOLL_ENABLED,5-no-unit,D,transport implementation choice,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,NATIVE_TRANSPORT_PORT,4-unit-nearby,D,port number,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,NON_GRACEFUL_SHUTDOWN,4-unit-nearby,D,test hook for messaging shutdown,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,OS_ARCH,4-unit-nearby,D,platform detection,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,OS_NAME,4-unit-nearby,D,platform detection,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,OTC_INTRADC_TCP_NODELAY,5-no-unit,D,socket option,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,OVERRIDE_DECOMMISSION,4-unit-nearby,D,operational override flag,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,PARTITIONER,4-unit-nearby,D,partitioner class name,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,PAXOS_DISABLE_COORDINATOR_LOCKING,4-unit-nearby,D,correctness/locking option,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,PAXOS_LOG_TTL_LINEARIZABILITY_VIOLATIONS,5-no-unit,D,logging switch,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,PAXOS_MODERN_RELEASE,5-no-unit,D,version compat string,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,PAXOS_REPAIR_ALLOW_MULTIPLE_PENDING_UNSAFE,4-unit-nearby,D,paxos repair correctness switch,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,PRINT_HEAP_HISTOGRAM_ON_OUT_OF_MEMORY_ERROR,5-no-unit,D,OOM diagnostics logging,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,RELEASE_VERSION,4-unit-nearby,D,version string,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,REPLACEMENT_ALLOW_EMPTY,4-unit-nearby,D,node replacement option,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,REPLACE_ADDRESS_FIRST_BOOT,4-unit-nearby,D,address of node to replace,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,REPLACE_NODE,5-no-unit,D,host id of node to replace,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,REPLACE_TOKEN,5-no-unit,D,token to replace,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,RESET_BOOTSTRAP_PROGRESS,4-unit-nearby,D,bootstrap resume behaviour,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,ROLE_PASSWORD_UPDATE_MIN_INTERVAL_MS,4-unit-nearby,D,auth password update rate,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,SAI_LATEST_VERSION,5-no-unit,D,index format version,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,SAI_TEST_BALANCED_TREE_DEBUG_ENABLED,4-unit-nearby,D,test debug switch,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,SAI_TEST_DISABLE_TIMEOUT,4-unit-nearby,D,test hook disabling query timeout,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,SCHEMA_PULL_INTERVAL_MS,4-unit-nearby,D,schema pull period,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,SCHEMA_UPDATE_HANDLER_FACTORY_CLASS,5-no-unit,D,class name,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,SERIALIZATION_EMPTY_TYPE_NONEMPTY_BEHAVIOR,5-no-unit,D,serialization correctness option,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,SET_SEP_THREAD_NAME,4-unit-nearby,D,thread naming,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,SHUTDOWN_ANNOUNCE_DELAY_IN_MS,4-unit-nearby,D,shutdown sleep delay,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,SKIP_OPTIMAL_STREAMING_CANDIDATES_CALCULATION,4-unit-nearby,D,streaming source selection,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,SKIP_PAXOS_REPAIR_ON_TOPOLOGY_CHANGE,4-unit-nearby,D,operational skip flag,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,SKIP_PAXOS_REPAIR_ON_TOPOLOGY_CHANGE_KEYSPACES,4-unit-nearby,D,keyspace list for paxos repair skip,claude-opus-5-5,2026-11-26,config-batch-01
+jvm,SKIP_PAXOS_REPAIR_VERSION_VALIDATION,4-unit-nearby,D,version validation skip,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,SKIP_PAXOS_STATE_REBUILD,4-unit-nearby,D,startup rebuild skip flag,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,SSL_ENABLE,5-no-unit,D,SSL switch,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,SSL_STORAGE_PORT,5-no-unit,D,port number,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,START_GOSSIP,4-unit-nearby,D,startup switch,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,START_NATIVE_TRANSPORT,5-no-unit,D,startup switch,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,STORAGE_HOOK,5-no-unit,D,hook class name,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,STORAGE_PORT,4-unit-nearby,D,port number,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,STREAM_HOOK,5-no-unit,D,hook class name,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,TRIGGERS_DIR,5-no-unit,D,directory path,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,TRUNCATE_BALLOT_METADATA,4-unit-nearby,D,paxos metadata maintenance flag,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,TYPE_UDT_CONFLICT_BEHAVIOR,4-unit-nearby,D,schema correctness option,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,UNSAFE_SYSTEM,4-unit-nearby,D,skip fsync of system tables; durability option,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,USER_HOME,4-unit-nearby,D,home directory path,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,USE_NIX_RECURSIVE_DELETE,4-unit-nearby,D,file deletion implementation,claude-opus-5-5,2026-11-26,config-batch-03
+jvm,VIRTUAL_TABLE_COMPLEX_SETTINGS_FORMAT_JSON,5-no-unit,D,output format switch,claude-opus-5-5,2026-11-26,config-batch-03
+yaml,allocate_tokens_for_keyspace,4-unit-nearby,D,token allocation keyspace name,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,allow_extra_insecure_udfs,4-unit-nearby,D,UDF security option,claude-opus-5-5,2026-11-26,config-batch-03
+yaml,allow_insecure_udfs,4-unit-nearby,D,UDF security option,claude-opus-5-5,2026-11-26,config-batch-03
+yaml,alter_table_enabled,5-no-unit,D,DDL permission guardrail,claude-opus-5-5,2026-11-26,config-batch-03
+yaml,auth_read_consistency_level,4-unit-nearby,D,consistency level,claude-opus-5-5,2026-11-26,config-batch-03
+yaml,auth_write_consistency_level,4-unit-nearby,D,consistency level,claude-opus-5-5,2026-11-26,config-batch-03
+yaml,back_pressure_strategy,6-not-read,D,strategy class name; unread,claude-opus-5-5,2026-11-26,config-batch-03
+yaml,batchlog_endpoint_strategy,4-unit-nearby,D,batchlog replica selection policy,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,block_for_peers_in_remote_dcs,4-unit-nearby,D,startup connectivity option,claude-opus-5-5,2026-11-26,config-batch-03
+yaml,block_for_peers_timeout_in_secs,4-unit-nearby,D,startup wait timeout,claude-opus-5-5,2026-11-26,config-batch-03
+yaml,broadcast_address,5-no-unit,D,network address,claude-opus-5-5,2026-11-26,config-batch-03
+yaml,check_for_duplicate_rows_during_compaction,4-unit-nearby,D,correctness check switch,claude-opus-5-5,2026-11-26,config-batch-03
+yaml,check_for_duplicate_rows_during_reads,4-unit-nearby,D,correctness check switch,claude-opus-5-5,2026-11-26,config-batch-03
+yaml,client_encryption_options,4-unit-nearby,D,client TLS settings; not a resource bound,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,client_request_size_metrics_enabled,4-unit-nearby,D,metrics switch,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,compact_tables_enabled,5-no-unit,D,guardrail allowing COMPACT STORAGE tables; schema feature switch,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,corrupted_tombstone_strategy,4-unit-nearby,D,tombstone validation behaviour; correctness option,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,crypto_provider,4-unit-nearby,D,crypto provider class name,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,drop_compact_storage_enabled,4-unit-nearby,D,allows DROP COMPACT STORAGE; schema feature switch,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,drop_keyspace_enabled,5-no-unit,D,guardrail allowing DROP KEYSPACE,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,dynamic_data_masking_enabled,4-unit-nearby,D,column masking feature; security option,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,dynamic_snitch_badness_threshold,4-unit-nearby,D,replica selection preference,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,dynamic_snitch_update_interval,3-unit-reads-it,D,snitch score recalculation period,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,failure_detector,4-unit-nearby,D,failure detector class name,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,force_optimized_index_status_format,4-unit-nearby,D,gossip index status format; compat flag,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,gc_log_threshold,4-unit-nearby,D,GC pause logging threshold,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,gc_warn_threshold,4-unit-nearby,D,GC pause logging threshold,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,heap_dump_path,4-unit-nearby,D,directory path,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,ideal_consistency_level,5-no-unit,D,metric tracking of ideal CL; observability only,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,internode_authenticator,6-not-read,D,internode auth class,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,internode_error_reporting_exclusions,4-unit-nearby,D,subnets excluded from error logging,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,invalid_legacy_protocol_magic_no_spam_enabled,4-unit-nearby,D,log spam suppression,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,listen_interface,4-unit-nearby,D,network interface name,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,listen_interface_prefer_ipv6,5-no-unit,D,address family preference,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,listen_on_broadcast_address,5-no-unit,D,network listening option,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,log_out_of_token_range_requests,4-unit-nearby,D,logging option,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,maximum_timestamp_fail_threshold,5-no-unit,D,timestamp range guardrail; correctness,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,maximum_timestamp_warn_threshold,5-no-unit,D,timestamp range guardrail; correctness,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,minimum_replication_factor_fail_threshold,3-unit-reads-it,D,replication factor floor guardrail,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,minimum_replication_factor_warn_threshold,4-unit-nearby,D,replication factor floor guardrail,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,minimum_timestamp_fail_threshold,5-no-unit,D,timestamp range guardrail; correctness,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,minimum_timestamp_warn_threshold,5-no-unit,D,timestamp range guardrail; correctness,claude-opus-5-5,2026-11-26,config-batch-01
+yaml,native_transport_port_ssl,3-unit-reads-it,D,port number,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,network_authorizer,6-not-read,D,auth class name,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,paxos_on_linearizability_violations,4-unit-nearby,D,reaction to linearizability violations; correctness option,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,paxos_topology_repair_no_dc_checks,4-unit-nearby,D,paxos topology repair correctness check,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,paxos_topology_repair_strict_each_quorum,4-unit-nearby,D,paxos repair consistency option,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,read_consistency_levels_disallowed,5-no-unit,D,guardrail on consistency levels,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,read_consistency_levels_warned,5-no-unit,D,guardrail on consistency levels,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,reject_out_of_token_range_requests,4-unit-nearby,D,correctness option for token ownership,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,report_unconfirmed_repaired_data_mismatches,4-unit-nearby,D,metric reporting option,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,rpc_interface,5-no-unit,D,network interface name,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,rpc_interface_prefer_ipv6,5-no-unit,D,address family preference,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,rpc_keepalive,5-no-unit,D,TCP keepalive on client connections,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,scripted_user_defined_functions_enabled,4-unit-nearby,D,UDF feature switch; security,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,server_encryption_options,4-unit-nearby,D,internode TLS settings,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,severity_during_decommission,3-unit-reads-it,D,snitch severity score during decommission,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,simplestrategy_enabled,5-no-unit,D,guardrail on replication strategy,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,skip_paxos_repair_on_topology_change_keyspaces,4-unit-nearby,D,keyspace list for skipping repair; correctness option,claude-opus-5-5,2026-11-26,config-batch-02
+yaml,startup_checks,4-unit-nearby,D,startup check configuration,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,streaming_slow_events_log_timeout,4-unit-nearby,D,logging threshold,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,table_properties_disallowed,5-no-unit,D,guardrail on table properties,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,table_properties_ignored,5-no-unit,D,guardrail on table properties,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,table_properties_warned,5-no-unit,D,guardrail on table properties,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,transient_replication_enabled,4-unit-nearby,D,experimental replication feature switch,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,traverse_auth_from_root,5-no-unit,D,auth lookup order,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,use_deterministic_table_id,4-unit-nearby,D,table id generation; correctness,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,use_statements_enabled,4-unit-nearby,D,allows USE statements,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,user_timestamps_enabled,5-no-unit,D,guardrail on user timestamps,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,windows_timer_interval,6-not-read,D,Windows timer resolution; not read,claude-opus-5-5,2026-11-26,config-batch-02
+yaml,write_consistency_levels_disallowed,5-no-unit,D,guardrail on consistency levels,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,write_consistency_levels_warned,5-no-unit,D,guardrail on consistency levels,claude-opus-5-5,2026-11-26,config-batch-04
+yaml,zero_ttl_on_twcs_warned,4-unit-nearby,D,warning only for zero TTL with TWCS,claude-opus-5-5,2026-11-26,config-batch-04

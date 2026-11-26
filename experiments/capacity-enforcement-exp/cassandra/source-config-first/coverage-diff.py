@@ -51,14 +51,17 @@ def yaml_getters():
     """Methods of DatabaseDescriptor and GuardrailsOptions that read conf.<field> / config.<field>:
     field -> {method names}."""
     g = collections.defaultdict(set)
-    meth = re.compile(r"^    public (?:static )?[^=;(]+? (\w+)\(")
+    # any method declaration resets the current method; only public getter-like methods are kept
+    meth = re.compile(r"^    (public |private |protected |static |final |synchronized |abstract )+[^=;(]*? (\w+)\(")
     for fname in ("DatabaseDescriptor.java", "GuardrailsOptions.java"):
         cur = None
         for line in read(os.path.join(CFG, fname)).splitlines():
             m = meth.match(line)
             if m:
-                cur = m.group(1)
-            if cur and len(cur) > 6:
+                name = m.group(2)
+                cur = name if (line.lstrip().startswith("public") and len(name) > 6
+                               and not name.startswith(("set", "apply", "create", "validate", "load"))) else None
+            if cur:
                 for f in re.findall(r"\b(?:conf|config)\.([a-z][a-z0-9_]*)", line):
                     g[f].add(cur)
     return g

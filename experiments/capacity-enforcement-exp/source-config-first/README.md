@@ -64,5 +64,5 @@ gap, and the banding and forward trace settle each entry.
 
 | System | Step 1 | Step 2 | Step 3 |
 |---|---|---|---|
-| Cassandra | done 2026-11-25 ([counts](../cassandra/source-config-first/README.md)) | not started | not started |
+| Cassandra | done 2026-11-25 ([counts](../cassandra/source-config-first/README.md)) | tiers 3–6 done 2026-11-26: A 4, B 39, C 93, D 197; tier 2 not banded | not started (queue: 43 A–B) |
 | Hadoop | not started | – | – |

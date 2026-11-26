@@ -86,7 +86,7 @@ flowchart TD
   subgraph P1["Phase 1: capacity-enforcement-exp"]
     S1["Stage 1: CodeQL"]
     S2["Stage 2: AI banding"]
-    LSC["Lead source: config-first<br/>left: entries to band 333/–"]
+    LSC["Lead source: config-first<br/>left: A–B to trace 43/–, tier 2 to band 154/–"]
     LSU["Lead source: consumer-first"]
     S3A["Stage 3: autonomous agent<br/>left: 8,355/19,624"]
     S3G["Stage 3: guided agent"]
@@ -117,7 +117,7 @@ flowchart TD
   S2 -->|"units read: 2,860/50"| S3A
   S2 -->|"targets: 29/–"| S3G
   CF -.->|"entries ruled out: 158/– of 645/–"| LSC
-  LSC -->|"no case: 333/–, traced 0/–"| S3A
+  LSC -->|"no case: 333/–, band A–B 43/–, traced 0/–"| S3A
   LSU -->|"leads: –/–"| S3A
   S3A -->|"case files: 315/46"| CF
   S3G -->|"case files: 29/–"| CF
@@ -156,8 +156,8 @@ Notes on the chart:
 
 - **Stage 5 never chases a clue** and phase-1 agents never read phase-2 results; the only phase-2 signal
   that reaches phase 1 is a new clue pattern, which only the guided agent reads.
-- **Lead sources** (2026-11-25): config-first has run step 1 (coverage diff) for Cassandra; its banding and forward
-  trace and the whole consumer-first source are not started.
+- **Lead sources** (2026-11-25): config-first has run steps 1 (coverage diff) and 2 (banding of the 333 entries
+  with no case) for Cassandra; its forward trace and the whole consumer-first source are not started.
 - **Hadoop** has run phase 1 stages 1–3 (Jingsong's queue orders 1–45, Yang's first 5 rechecks), stage 4 on 32 of its 46
   case files (14 wait), its JIRA OOM report and stage 5 on 31 case files (Jingsong's orders 1–31; 123
   candidates);
@@ -199,9 +199,11 @@ rows are one unit each.
 
 - **Cassandra: entries 735 = in scope 645 + out of scope 90** (JVM properties for tests, the JDK, logging, JMX); in scope
   645 = yaml 409 + JVM 236.
-  - 645 = constraint of a case 158 + mentioned in a case only 154 + a stage-1 unit names it 27 + a stage-1 unit near a
-    read 192 + read, no unit near 96 + not read in `src/java` 18;
-  - no case at all 333 (tiers 3–6) = name-hinted 98 + other 235; banded 0 + traced 0 + left 333 (then tier 2's 154).
+  - 645 = constraint of a case 158 + mentioned in a case only 154 + a stage-1 unit names it 14 + a stage-1 unit near a
+    read 201 + read, no unit near 100 + not read in `src/java` 18;
+  - no case at all 333 (tiers 3–6) = name-hinted 98 + other 235;
+  - banded 333 (`config-bands.csv`, 2026-11-26) = A 4 + B 39 + C 93 + D 197; anchor check passed in 4 of 4 batches;
+  - A–B 43 = traced 0 + left 43; tier 2's 154 = banded 0 + left 154.
 - **Consumer-first:** not started for either system.
 
 **Stage 3, deep read — units** (Cassandra: `cassandra/stage3-ai-deep-read/` set CSVs, band-D progress CSVs,
@@ -343,7 +345,7 @@ the chart); **queue** = ordinary work for whoever runs that queue; **node** = a 
 |---|---|---|---|
 | Stage 1 — CodeQL | nothing; optional: numeric `switch` case labels are not matched | — | `stage1-codeql-preprocessing/README.md` |
 | Stage 2 — banding | nothing | — | `bands.csv` |
-| Lead source — config-first | Cassandra: band the **333** entries with no case (98 name-hinted first), then the 154 mentioned only; forward-trace the A–B entries (an owner-approved batch); Hadoop: step 1 (coverage diff over `*-default.xml`) | **owner**: approve the banding and the first trace batch; **queue** | `source-config-first/README.md`, `<sys>/source-config-first/` |
+| Lead source — config-first | Cassandra: forward-trace the **43** A–B entries (first batch 10, approved 2026-11-26); band tier 2's **154**; Hadoop: step 1 (coverage diff over `*-default.xml`) after its current stage-4 runs | **queue** | `source-config-first/README.md`, `<sys>/source-config-first/` |
 | Lead source — consumer-first | everything: part A (CodeQL allocation-site query) and part B (scaling profile on a node), Cassandra first; its no-constraint cases depend on the `none`-type stage-4 design | **owner**: start it; the `none`-type design | `source-consumer-first/README.md` |
 | Stage 3 — deep read | queued, not read **2,437/10,631** (C: band-D set A 2,164, extension band C 273 from order 240; H: Yang 8,930, Jingsong 1,701 from order 46); not queued **5,918/8,993** (extension band D); judged but not written up 169/– (set B); unresolved unit 1/–; notes backlog (stage-3 notes not applied to filed cases, `undetermined.md` §2 re-audit, `predicted-negative.md` §10 band-D lines); filer's calls of 2026-11-24 open to overrule (Cassandra extension: orders 100, 125 counted new, 70 and 122 typed `not-a-case`, builder/JMX arguments typed `query parameter`; batch 2: 207 (one verdict per place, P2 negative) counted positive, 145 typed `not-a-case`, 236–239 `scaling_parameters` typed `mixed ×2`) | **queue** (Jingsong: band-D set A, extension, Hadoop queue; Yang: set B write-ups, Hadoop queue); **owner**: whether to queue extension band D; the 2026-11-24 filer's calls | set CSVs, `hadoop/<name>/queue.csv`, `HANDOFF.md` "Open follow-ups", `HANDOFF-Jingsong.md` 2026-11-24 |
 | Stage 4 — runtime verification | not run **66/14**: C 29 `none`-type + 14 with no run recorded + **23 waiting** (extension batch 1 of 2026-11-24 3: 57, 64, 70, which returned no result in the deferred run; batch 2 of 2026-11-24 20), H **14 waiting** (Jingsong's orders 32–45); all 37 are running in the 2026-11-25 node session (chunk 1 filed: C 116, 125; H 6, 14, 22, 26–31); 57 carries dated audit amendments of the interrupted 2026-11-24 run; undetermined **18/1** (rerun list in the handoff; C 133 added 2026-11-25: each tier missed one frozen control threshold; C 116 added 2026-11-25: unit Partly confirmed — caps, cluster Not confirmed); owner's calls: H 10's effect (filed `does not cap`, could read `caps only on some paths`, which would make it a false negative); H 14 (filed true positive under B3f's noise allowance; strict reading weak true positive); C 116 (weak true positive if the unit tier's Partly confirmed settles the effect, true positive if the 0.16 MiB heap miss is also accepted); C 115's cluster band miss | **owner**: the `none`-type design (29 cases); the H 10, H 14, C 115, C 116 calls; **queue**: the 37 waiting cases (in progress, 2026-11-25 node session), reruns | `_INDEX.md` §1 (both systems), `HANDOFF-Jingsong.md` 2026-11-24 and 2026-11-25, `HANDOFF.md` |
